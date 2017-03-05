@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT tableau (problem, tree) >
+    <!ELEMENT problem (premise+, conclusion) >
+        <!ATTLIST problem id CDATA #IMPLIED>
+        <!ATTLIST problem answer CDATA #IMPLIED>
+        <!ELEMENT premise (#PCDATA) >
+            <!ATTLIST premise id CDATA #IMPLIED>
+        <!ELEMENT conclusion (#PCDATA) >
+            <!ATTLIST conclusion id CDATA #IMPLIED>
+    <!ELEMENT tree (node, tree*) >
+        <!ELEMENT node ((closer|model|formula), source?) >
+            <!ATTLIST node absId CDATA #REQUIRED> 
+            <!ATTLIST node id CDATA #REQUIRED>
+			<!ELEMENT closer (#PCDATA)>
+			<!ELEMENT model (#PCDATA)>
+            <!ELEMENT formula (modlist?, llf, argList)>
+                <!ATTLIST formula sign (true|false) #REQUIRED>
+                <!ELEMENT llf (#PCDATA)>
+                <!ELEMENT argList (arg*)>
+                    <!ELEMENT arg (#PCDATA)>
+				<!ELEMENT modList (mod*)>
+                    <!ELEMENT mod (#PCDATA)>
+            <!ELEMENT source (idList, oldConstList?)>
+                <!ATTLIST source rule CDATA #IMPLIED>
+				<!ATTLIST source ruleApp CDATA #IMPLIED>
+                <!ELEMENT idList (id+)>
+                    <!ELEMENT id (#PCDATA)>
+                <!ELEMENT oldConstList (oldConst*)>
+                    <!ELEMENT oldConst (#PCDATA)>

@@ -1,0 +1,87 @@
+\documentclass{article}
+\usepackage{tikz-qtree-compat}
+\usepackage{amssymb}
+\usepackage{environ}
+\usepackage{amsmath}
+\usepackage{forest}
+\makeatletter
+\newsavebox{\measure@tikzpicture}
+\NewEnviron{scaletikzpicturetowidth}[1]{%
+  \def\tikz@width{#1}%
+  \def\tikzscale{1}\begin{lrbox}{\measure@tikzpicture}%
+  \BODY
+  \end{lrbox}%
+  \pgfmathparse{#1/\wd\measure@tikzpicture}%
+  \edef\tikzscale{\pgfmathresult}%
+  \BODY
+}
+\makeatother
+\newcommand{\lab}[1]{\mybox[fill=gray!20]{#1}}
+\newcommand\mybox[2][]{\tikz[overlay]\node[fill=blue!20,inner sep=2pt, anchor=text, rectangle, rounded corners=1mm,#1] {#2};\phantom{#2}}
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\synt}[1]{\textbf{\small{#1}}}
+\newcommand{\semt}[1]{\tt #1}
+\newcommand{\btimes}{\scalebox{1.5}{$\times$}}
+\newcommand{\elist}{\scalebox{.9}{[\,]}}
+\newcommand{\clrule}{$\leq\!$\raisebox{-1pt}{\scalebox{1}{$\btimes$}}}
+\newcommand{\pp}{{\tt pp}}
+\newcommand{\np}{{\tt np}}
+\newcommand{\sen}{{\tt s}}
+\newcommand{\vp}{{\tt vp}}
+\newcommand{\nou}{{\tt n}}
+\newcommand{\qu}{{\tt qu}}
+\newcommand{\rulen}[1]{{\normalfont\textsc{#1}}}
+\newcommand{\ruleApp}[2][]{{\normalfont\textsc{#2}}\scalebox{.6}{[#1]}}
+
+\begin{document}
+
+\begin{scaletikzpicturetowidth}{\textwidth}
+\scalebox{\tikzscale}{
+\begin{forest}
+for tree={align=center, parent anchor=south, child anchor=north, l sep=5mm}
+[{\lab{1}~  
+  $\synt{s} ~ (\synt{who} ~ \synt{dance} ~ \synt{person}) ~ (\lambda x_{1}.\,\synt{no} ~ (\synt{group} ~ (\synt{of} ~ x_{1})) ~ (\lambda x_{2}.\,\synt{be} ~ x_{2} ~ \synt{there})) : [] : \T$}
+ [{\lab{2}~  
+   $\synt{s} ~ \synt{person} ~ (\lambda x_{3}.\,\synt{a} ~ (\synt{group} ~ (\synt{of} ~ x_{3})) ~ (\synt{be} ~ \synt{dance})) : [] : \F$}
+  [{\lab{3}~$^{\ruleApp[1]{tr\_a}}$  
+    $\synt{who} ~ \synt{dance} ~ \synt{person} : [c_{1}] : \T$}
+   [{\lab{4}~$^{\ruleApp[1]{tr\_a}}$  
+     $(\lambda x_{1}.\,\synt{no} ~ (\synt{group} ~ (\synt{of} ~ x_{1})) ~ (\lambda x_{2}.\,\synt{be} ~ x_{2} ~ \synt{there})) : [c_{1}] : \T$}
+    [{\lab{5}~$^{\ruleApp[4]{pull\_arg}}$  
+      $\synt{no} ~ (\synt{group} ~ (\synt{of} ~ c_{1})) ~ (\lambda x_{2}.\,\synt{be} ~ x_{2} ~ \synt{there}) : [] : \T$}
+     [{\lab{6}~$^{\ruleApp[3]{tr\_conj\_who}}$  
+       $\synt{dance} : [c_{1}] : \T$}
+      [{\lab{7}~$^{\ruleApp[3]{tr\_conj\_who}}$  
+        $\synt{person} : [c_{1}] : \T$}
+       [{\lab{8}~$^{\ruleApp[2]{fl\_a~$c_{1}$}}$  
+         $\synt{person} : [c_{1}] : \F$\\[2mm]
+         \lab{\phantom{0}}~$^{\ruleApp[8,7]{cl\_subsumption}}$  $\btimes$}
+       ]
+       [{\lab{7}~$^{\ruleApp[2]{fl\_a~$c_{1}$}}$  
+         $\synt{person} : [c_{1}] : \T$}
+        [{\lab{9}~$^{\ruleApp[2]{fl\_a~$c_{1}$}}$  
+          $(\lambda x_{3}.\,\synt{a} ~ (\synt{group} ~ (\synt{of} ~ x_{3})) ~ (\synt{be} ~ \synt{dance})) : [c_{1}] : \F$}
+         [{\lab{10}~$^{\ruleApp[9]{pull\_arg}}$  
+           $\synt{a} ~ (\synt{group} ~ (\synt{of} ~ c_{1})) ~ (\synt{be} ~ \synt{dance}) : [] : \F$}
+          [{\lab{11}~$^{\ruleApp[10]{a\_group\_of}}$  
+            $\synt{be} ~ \synt{dance} : [c_{1}] : \F$}
+           [{\lab{12}~$^{\ruleApp[11]{aux\_verb}}$  
+             $\synt{dance} : [c_{1}] : \F$\\[2mm]
+             \lab{\phantom{0}}~$^{\ruleApp[12,6]{cl\_subcat}}$  $\btimes$}
+           ]
+          ]
+         ]
+        ]
+       ]
+      ]
+     ]
+    ]
+   ]
+  ]
+ ]
+]
+\end{forest}
+}
+\end{scaletikzpicturetowidth}
+\end{document}
