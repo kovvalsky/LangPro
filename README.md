@@ -2,6 +2,16 @@
 LangPro is a tableau-based theorem prover for natural logic and language.
 See the [online demo](http://naturallogic.pro/langpro).
 
+Given a set of premises and a hypothesis in natural languge, LangPro tries to find out semantic relation between them: `entailment`, `contradiction` or `neutral`.  
+For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicetd below: 
+```
+____________    ________             ___________      ________________________    __________ 
+|Premises &|    | CCG  | derivations |   LLF   | LLFs |Tableau Theorem Prover|    |Semantic|
+|Hypothesis|--->|Parser|------------>|Generator|----->|  for Natural Logic   |--->|relation|
+‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾ 
+```
+
+
 ## Quick Usage
 You will need only [SWI-Prolog](http://www.swi-prolog.org) to run the prover.
 Go to the main directory and run the following command in order to run the prover on the trial portion of the SICK dataset:
@@ -41,14 +51,5 @@ It will take some time. If you want to terminate the run, type `Ctrl+C` and then
 
 ## Detailed Usage
 
-### Architecture
-Given a set of premises and a hypothesis in natural languge, LangPro tries to find out semantic relation between them: `entailment`, `contradiction` or `neutral`.  
-For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicetd below: 
-```
-____________    ________             ___________      ________________________    __________ 
-|Premises &|    | CCG  | derivations |   LLF   | LLFs |Tableau Theorem Prover|    |Semantic|
-|Hypothesis|--->|Parser|------------>|Generator|----->|  for Natural Logic   |--->|relation|
-‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾ 
-```
 
 ### More instructions comming soon
