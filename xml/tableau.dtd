@@ -7,13 +7,14 @@
             <!ATTLIST premise id CDATA #IMPLIED>
         <!ELEMENT conclusion (#PCDATA) >
             <!ATTLIST conclusion id CDATA #IMPLIED>
-    <!ELEMENT tree (node, tree*) >
+    <!ELEMENT tree (node, subTrees?) >
+        <!ELEMENT subTrees (tree*) >
         <!ELEMENT node ((closer|model|formula), source?) >
             <!ATTLIST node absId CDATA #REQUIRED> 
             <!ATTLIST node id CDATA #REQUIRED>
 			<!ELEMENT closer (#PCDATA)>
 			<!ELEMENT model (#PCDATA)>
-            <!ELEMENT formula (modlist?, llf, argList)>
+            <!ELEMENT formula (modList?, llf, argList)>
                 <!ATTLIST formula sign (true|false) #REQUIRED>
                 <!ELEMENT llf (#PCDATA)>
                 <!ELEMENT argList (arg*)>

@@ -454,13 +454,13 @@ gentail(Align, Problem_Id) :-
 	;	% Reason! problem is ok
 	  Answer = 'no' ->
 		append(Prem_TTterms, Hypo_TTterms, TTterms),		
-		greason(KB, TTterms, [], Problem_Id)
+		greason(KB, TTterms, [], [Problem_Id, 'no', Align])
 	; Answer = 'yes' ->
-		greason(KB, Prem_TTterms, Hypo_TTterms, Problem_Id)
-	; greason(KB, Prem_TTterms, Hypo_TTterms, Problem_Id) ->
+		greason(KB, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])
+	; greason(KB, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align]) ->
 		true
 	; append(Prem_TTterms, Hypo_TTterms, TTterms),
-	  greason(KB, TTterms, [], Problem_Id)
+	  greason(KB, TTterms, [], [Problem_Id, 'no', Align])
 	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -489,15 +489,15 @@ gentail_no_answer(Align, Problem_Id) :-
 	;	% Reason! problem is ok
 	  Answer = 'no' ->
 		%append(Prem_TTterms, Hypo_TTterms, TTterms),
-		ignore(greason(KB, Prem_TTterms, Hypo_TTterms, Problem_Id)),		
-		greason(KB, TTterms, [], Problem_Id)
+		ignore(greason(KB, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])),		
+		greason(KB, TTterms, [], [Problem_Id, 'no', Align])
 	; Answer = 'yes' ->
-		ignore(greason(KB, TTterms, [], Problem_Id)),
-		greason(KB, Prem_TTterms, Hypo_TTterms, Problem_Id)
-	; greason(KB, Prem_TTterms, Hypo_TTterms, Problem_Id) ->
+		ignore(greason(KB, TTterms, [], [Problem_Id, 'no', Align])),
+		greason(KB, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])
+	; greason(KB, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align]) ->
 		true
 	; %append(Prem_TTterms, Hypo_TTterms, TTterms),
-	  greason(KB, TTterms, [], Problem_Id)
+	  greason(KB, TTterms, [], [Problem_Id, 'no', Align])
 	).
 	
 

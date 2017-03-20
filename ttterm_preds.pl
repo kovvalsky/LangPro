@@ -273,13 +273,26 @@ print_ttTerms_in_latex(List) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TTterm is a possible collocation, return a collcoation and POS
-maybe_2_collocation(((TTexp1, Ty1)@(TTexp2, Ty2), _Type),  (Lemma, POS)) :-
-	nonvar(TTexp1),
-	nonvar(TTexp2),
-	TTexp1 = tlp(_,Lm1,_Pos1,_,_), %-ing?
-	TTexp2 = tlp(_,Lm2,_Pos2,_,_),
-	memberchk((Ty1, Ty2, POS),  [(n:_~>n:_, n:_, 'NN'), (_, pr, 'VB')]), %!!! adverbs, adjectives?
+% !!! how to extract from "young tall woman" a "young woman"??? all combinations?
+maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), Ty1) @ (tlp(_,Lm2,Pos2,_,_), Ty2), _Type),  (Lemma, POS) ) :-
+	!,	
+	nonvar(Lm1),
+	nonvar(Lm2),
+	( memberchk((Ty1, Ty2, POS),  [(n:_~>n:_, n:_, 'NN'), (_, pr, 'VB')]) %!!! adverbs, adjectives?
+    ; atom_chars(Pos1, ['N','N'| _]), atom_chars(Pos2, ['N','N'| _]), POS = 'NN'
+	; atom_chars(Pos1, ['V','B'| _]), memberchk(Pos2, ['RB', 'RP', 'IN']), POS = 'VB' 
+	),
+	!,
 	atomic_list_concat([Lm1, Lm2], ' ', Lemma).
+
+% TTterm includes a possible collocation on the upper level
+maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), _Ty1) @ ((tlp(_,Lm3,Pos3,_,_), _Ty3) @ _, _Ty2), _Type),  (Lemma, POS) ) :-
+	nonvar(Lm1),
+	nonvar(Lm3),
+	( atom_chars(Pos1, ['V','B'| _]), memberchk(Pos3, ['RB', 'RP', 'IN']), POS = 'VB' 
+	),
+	!,
+	atomic_list_concat([Lm1, Lm3], ' ', Lemma).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -302,9 +315,13 @@ extract_LemPos_ttNNP_ttTerm((TT1@TT2,Type), Old_Lex, New_Lex, Old_NNPs, New_NNPs
 extract_LemPos_ttNNP_ttTerm((Term,Type), Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
 	Term = tlp(_,Lemma,POS,_,_), 
 	!,
-	New_Lex = [(Lemma,POS) | Old_Lex],
-	(Type = np:F, F \= thr ->
-		New_NNPs = [(Term,Type), (Lemma,e) | Old_NNPs]
+	Temp_Lex = [(Lemma,POS) | Old_Lex],
+	( Type = n:_~>n:_, \+atom_chars(POS, ['J','J'|_]) -> % sick-9067: dirty:NN:n->n
+		New_Lex = [(Lemma,'JJ') | Temp_Lex]
+	; New_Lex = Temp_Lex
+	),
+	( ((Type = np:F, F \= thr); Type = e) ->
+		New_NNPs = [(Term,Type), (Lemma,e) | Old_NNPs] % use debmode for avoiding doubling of entities
 	;	New_NNPs = Old_NNPs
 	).
 
@@ -599,7 +616,7 @@ np_const_to_e_const( (TT, Type), (SimTT, Type) ) :-
 % normalize lexicon - a set(!) of (Lemma,POS) pairs
 % normalizing includes Few & few to map to one item
 % fracas-19 Europeans-European, fracas-44 few-Few
-% !!! sich-train 2205? tokkens differ in register
+% !!! sick-train 2205? tokkens differ in register
 
 normalize_lexicon([], []). 
 
@@ -661,8 +678,33 @@ token_norm_ttTerm(Lex, (TT, Type), (SimTT, Type) ) :-
 
 			
 	
-	
-	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pretty variables instead of _G23
+pretty_vars_in_ttterm(A, Z, TT, Pretty) :-
+	copy_term(TT, Pretty),
+	pretty_vars_in_ttterm_(A, Z, Pretty). 
+
+pretty_vars_in_ttterm_(X-P, Z, (Exp, _)) :-
+	var(Exp) 	-> report(['Error: unexpected free variable found in pretty_vars_in_ttterms'])
+	; atom(Exp) -> 
+		Z = X-P
+	; Exp =.. [tlp | _] -> 
+		Z = X-P
+	; Exp = TT1 @ TT2 ->
+		pretty_vars_in_ttterm_(X-P, X1-P1, TT1),
+		pretty_vars_in_ttterm_(X1-P1, Z, TT2)
+	; Exp = abst((Var,Type), TT1) ->
+		((memberchk(Type, [e,np:_]) -> 
+			atomic_list_concat(['x', X], Var), 
+		 	X1 is X + 1, P1 = P
+		 ; atomic_list_concat(['p', P], Var),
+			P1 is P + 1, X1 = X
+		 ),
+		pretty_vars_in_ttterm_(X1-P1, Z, TT1)
+		)
+	; Exp = (E,_) ->
+		pretty_vars_in_ttterm_(X-P, Z, (E,_))
+	; report(['Error: unexpected clause in pretty_vars_in_ttterms']).  	
 	
 	
 	

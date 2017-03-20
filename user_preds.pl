@@ -203,6 +203,10 @@ set_debMode([H | Rest]) :-
 	; H = effCr(_) ->
 		retractall( debMode(effCr(_)) ),
 		assertz( debMode(H) )
+	; H = ss(SS) ->
+		retractall( debMode(ss(_)) ),
+		(is_list(SS) -> List = SS; numlist(1,SS,List)),
+		assertz( debMode(ss(List)) )
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).
@@ -359,7 +363,7 @@ list_of_atoms([]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
-% Maops Arg to Val if it is found in list
+% Maps Arg to Val if it is found in list
 map(Arg, Val, [H | Rest]) :-
 	nonvar(H),
 	nonvar(Arg),
@@ -525,6 +529,17 @@ two_lists_to_pair_list([H1|Rest1], [H2|Rest2], [H1,H2|Rest]) :-
 
 two_lists_to_pair_list([], [], []).
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A1,...,An + B1,...,Bn = A1-B1,...,An-Bn
+two_lists_to_list_of_pairs([H1|Rest1], [H2|Rest2], [H1-H2|Rest]) :-
+	!,
+	two_lists_to_list_of_pairs(Rest1, Rest2, Rest).
+
+two_lists_to_list_of_pairs([], [], []).
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pair elements of two lists
 append_element_to_list(List1, X, List2) :-
@@ -674,6 +689,40 @@ all_pairs_from_set(Set, Pairs) :-
 	  ),
 	  Pairs). 
 		
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% a sequence of fixed number of indexed atoms
+% a, 10 -> a1, a2, a3, ..., a10
+indexed_atom_list(At, N, List) :-
+	indexed_atom_list_(At, N, RevList),
+	reverse(RevList, List).
+
+indexed_atom_list_(_, 0, []) :- !.
+
+indexed_atom_list_(At, N, [At_N | Rest]) :-
+	!,
+	atomic_list_concat([At, N], At_N),
+	M is N - 1,
+	indexed_atom_list_(At, M, Rest).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% rename free variables with indexed atoms
+free_vars_to_indexed_atoms(At, A, B) :-
+	copy_term(A, B),
+	term_variables(B, Vars),
+	length(Vars, N),
+	indexed_atom_list(At, N, Vars).
+	
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Projection of argument
+nth1_projection(N, Term, Proj) :-
+	Term =.. [_|List],
+	nth1(N, List, Proj).
+	
+
+
 
 
 

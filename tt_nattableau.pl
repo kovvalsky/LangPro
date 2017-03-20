@@ -192,16 +192,17 @@ reason(KB, T_TermList, F_TermList, Status) :-
 % TTterms with sign False, generates tableau tree
 % and branch list, and checks the input on closure
 % with GUI	
-greason(KB, T_TermList, F_TermList, Problem_Id) :- % remove problem ID from arg list	
+greason(KB, T_TermList, F_TermList, Info) :- % remove problem ID from arg list	
+	Info = [Problem_Id, Mode, Align], 
 	( debMode('proof_tree') -> true; assertz(debMode('proof_tree')) ),
 	generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status), !,
 	( theUsedrules_in_tree(Tree, [H|T]) -> report([Problem_Id, ': ', [H|T]]); true ), 
 	%length(BrList, BrNumber), write('# Branches: '), write(BrNumber),
-	( F_TermList = [] -> Mode = 'contradiction'; Mode = 'entailment' ),
 	report(['Tableau for "', Mode, '" checking is generated with ', Status, ' ruleapps']),
 	%stats_from_tree(Tree, s(Br_Num, Len, Max_Id)),
 	%report(['NumOfBranches: ', Br_Num, '; NumOfRuleApp: ', Len, '; NumOfNodes: ', Max_Id]),
-	output_XML(Tree, Problem_Id, 'greason'),
+	atomic_list_concat(['tableau_', Problem_Id, '_', Mode, '_', Align], FileName),
+	output_XML(Tree, Problem_Id, FileName),
 	displayTree(Tree, 12, Problem_Id), 
 	!,
 	BrList = [].
