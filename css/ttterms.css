@@ -1,0 +1,159 @@
+.parsed_problem {
+    /*display: inline-block;*/
+    background-color:rgb(250, 220, 150);
+    margin: 10px 0px 0px 0px;
+    padding: 5px;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.parsed_sentence {
+    /*display: inline-block;*/
+    background-color:rgb(250, 230, 180);
+    margin: 5px;
+    padding: 2px;
+    white-space: nowrap;
+    text-align: left;
+}
+
+
+.parsed_problem_title/*.parsed_problem:before*/{
+    content:'For each sentence: CCG derivation > CCG term > corrected CCG term > the first LLF';
+    background-color:rgb(80,160,240);
+    display: block;
+    padding: 2px;
+    color: white;
+    font-weight: bold;
+}
+
+
+.fullttterm, .ccgtree {
+    display:inline-block;
+    background-color:rgb(150,210,250);
+    /*background-color:rgb(175,220,250);*/
+    margin: 5px 5px 10px 10px;
+    /*border: 1px solid gray;*/
+    border-radius: 5px;
+    padding: 0px 7px 7px 7px;
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+
+.fullttterm:nth-child(2):before {
+    content: 'ccg derivation'; 
+    display: block;
+    color: white;
+    font-variant: small-caps;
+}
+
+.fullttterm:nth-child(3):before {
+    content: 'ccg term'; 
+    display: block;
+    color: white;
+    font-variant: small-caps;
+}
+
+.fullttterm:nth-child(4):before {
+    content: 'corrected ccg term'; 
+    display: block;
+    color: white;
+    font-variant: small-caps;
+}
+
+.fullttterm:nth-child(5):before {
+    content: 'first llf'; 
+    display: block;
+    color: white;
+    font-variant: small-caps;
+}
+
+
+.highlight {
+    background-color: rgb(250,180,140);
+}
+
+.id_sent {
+    font-weight: bold; font-size: 110%;
+}
+
+.lem {font-weight: bold; font-size: 100%;}
+.tok {font-size: 75%;}
+.pos {font-size: 60%;}
+.ner {font-size: 50%;}
+
+tyfeat {font-size: 60%;
+      position: relative; 
+      bottom: -0.6ex;
+      margin-left: -0.3ex;
+      margin-right: -0.3ex;
+}
+
+i.fa {margin-right: 5px}
+
+.ttterm, .unary, .binary, .leaf {
+    display:inline-block;
+    vertical-align:top;
+    border-style: dotted;
+    border-width: 0px;
+    border-spacing: 0px; /* Removes the cell spacing via CSS */
+    padding: 0px;
+    margin-right: 0px;
+}
+
+.rule {
+    text-align: right;
+    line-height: 0px; 
+}
+.rule > span {
+    position: relative;
+    bottom: -4px;
+    color: white;
+    font-size: 80%;
+    background-color: gray;
+    padding: 0px 2px 0px 2px;
+    border-radius: 2px;
+}
+
+.leaf {text-align: center;}
+
+/*space between combined constituents*/
+.ttterm~.ttterm, .leaf~.binary, .leaf~.unary, .leaf~.leaf, 
+.unary~.unary, .unary~.leaf, .unary~.binary,
+.binary~.unary, .binary~.leaf, .binary~.binary {margin-left:7px}
+
+/*space for ccg rule name*/
+.unary:nth-last-child(3), 
+.binary:nth-last-child(3),
+.leaf:nth-last-child(3) {
+    margin-right:2ex
+}
+
+.type, .cat {
+    border-top:1px solid gray;
+    text-align: center;
+}
+
+
+.lambda {
+    font-size: 100%;
+    margin-left: 1ex;
+}
+
+.lamx {
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.tlp {
+    text-align:center;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-width: 0px;
+    /*border-style: dotted;
+    border-width: 1px 1px 1px 1px;*/
+    margin: auto;
+    padding: 0px;    
+}
+
+

@@ -1,0 +1,64 @@
+.rte_problems_style td {
+  text-align: left;
+  /*border: solid 1px black;*/
+}
+.rte_problems_style td.prob-id {
+  width: 100px;
+}
+.rte_problems_style .tb_prob{
+  width:100%;
+  table-layout: fixed;
+}
+.rte_problems_style div.comment {
+  background: rgb(250, 220, 150);
+  padding: 0px;
+  margin: 2px 0px 0px 0px;
+}
+
+.rte_problems_style .comment>pre{
+  background: rgb(250, 220, 150);
+  padding: 0px;
+  margin: 2px 0px 0px 0px;  
+}
+
+
+.rte_problems_style .prob-fracas-ans>font{font-weight: bold;}
+.rte_problems_style .prob-ans,
+.rte_problems_style .prob-fracas-ans{color: gray;}
+.rte_problems_style .ans_color_ENTAILMENT{
+  color:green; 
+  text-transform: lowercase;
+  font-weight: bold;
+}
+.rte_problems_style .ans_color_CONTRADICTION{
+  color:red; 
+  text-transform: lowercase;
+  font-weight: bold;
+}
+  .rte_problems_style .ans_color_NEUTRAL{
+  color:black; 
+  text-transform: lowercase;
+  font-weight: bold;
+}
+  
+.rte_problems_style h1, 
+.rte_problems_style h2, 
+.rte_problems_style h3 {
+  background: rgb(140,180,250);
+  padding: 0px;
+  color: white;
+  margin: 2px 0px 0px 0px;
+}
+
+.rte_problems_style h1 {
+  border-top: solid 2px #aaa;
+  font-size: 135%
+}
+.rte_problems_style h2 {font-size: 120%}
+.rte_problems_style h3 {font-size: 100%}
+
+.rte_problems_style div.problem {
+  background: rgb(240,220,250);
+  padding: 2px;
+  margin-top: 5px;
+}
