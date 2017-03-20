@@ -16,7 +16,7 @@ ____________    ________             ___________      ________________________  
 You will need only [SWI-Prolog](http://www.swi-prolog.org) to run the prover.
 Go to the main directory and run the following command in order to run the prover on the trial portion of the SICK dataset:
 ```
-swipl -f main.pl -l ccg_sen/SICK_trial_ccg.pl ccg_sen/SICK_trial_sen.pl
+swipl -f main.pl -l ccg_sen_d/SICK_trial_ccg.pl ccg_sen_d/SICK_trial_sen.pl
 ```
 `FILE_ccg.pl` contains CCG derivations by the C&C CCG parser while `FILE_sen.pl` lists RTE problems. 
 Now already in the Prolog environment, run 
