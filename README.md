@@ -2,8 +2,8 @@
 LangPro is a tableau-based theorem prover for natural logic and language.
 See the [online demo](http://naturallogic.pro/langpro).
 
-Given a set of premises and a hypothesis in natural languge, LangPro tries to find out semantic relation between them: `entailment`, `contradiction` or `neutral`.  
-For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicetd below: 
+Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment`, `contradiction` or `neutral`.  
+For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicted below: 
 ```
 ____________    ________             ___________      ________________________    __________ 
 |Premises &|    | CCG  | derivations |   LLF   | LLFs |Tableau Theorem Prover|    |Semantic|
@@ -14,7 +14,7 @@ ____________    ________             ___________      ________________________  
 
 ## Quick Usage
 
-### Natural Language Theorem Prover
+### Running Natural Language Theorem Prover
 You will need only [SWI-Prolog](http://www.swi-prolog.org) to run the prover.
 Go to the main directory and run the following command in order to run the prover on the trial portion of the SICK dataset:
 ```
@@ -24,7 +24,7 @@ swipl -f main.pl -l ccg_sen_d/SICK_trial_ccg.pl ccg_sen_d/SICK_trial_sen.pl
 Choose `SICK_trial_eccg.pl` for the CCG derivations by EasyCCG (Lewis&Steedman). 
 Now already in the Prolog environment, run 
 ```
-gentail(211).              % gui/grahical entailment check
+gentail(211).              % gui/graphical entailment check
 ```
 This will trigger a tableau for the SICK-211 problem to verify its gold answer in the XPCE GUI. 
 If you prefer an HTML or XML representation of the proof, see `xml/tableau-211-yes-no_align.html` and `xml/tableau-211-yes-no_align.xml`, where the names mean that it is a tableau for the problem 211 to verify entailment (i.e. yes) with no alignment techniques used (you need to have `xsltproc` to get an HTML file from an XML one).
@@ -84,7 +84,7 @@ entail_all.
 It will take some time. If you want to terminate the run, type `Ctrl+C` and then press `a` for abort.
 
 
-### Lambda Logical Forms
+### Obtaining Lambda Logical Forms
 
 In case you are interested in logical forms used by the prover, you can obtain them from CCG derivations.
 After you get into the prolog environment by:
@@ -100,7 +100,7 @@ You can get these quadruples of terms according to the sentence IDs too:
 ```
 xml_senIDs_llfs(1-6, 'My_LLFs').    % or xml_senIDs_llfs([1,2,3,4,5,6], 'My_LLFs') or even omitting the file name 
 ```
-Because the first six sentences coincide the sentences of the first three RTE problems in the RTE dataset (i.e. two sentecnes per problem).
+Because the first six sentences coincide the sentences of the first three RTE problems in the RTE dataset (i.e. two sentences per problem).
 To get CCG trees, CCG terms, corrected CCG terms and 1LLFs for all sentences in the dataset, use:
 ```
 xml_senIDs_llfs(_, 'All_LLFs').
