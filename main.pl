@@ -5,20 +5,6 @@
 				  lambda,
 				  lexicon,
 				  online_demo,
-				  %'ccg_sen/temp_ccg',
-				  %'ccg_sen/ccg', 'ccg_sen/sen',
-				  %'ccg_sen/fracas_ccg', 
-				  %'ccg_sen/fracas_sen',
-				  %'ccg_sen/fracas_odd_ccg', 'ccg_sen/fracas_odd_sen', %train
-				  %'ccg_sen/fracas_even_ccg', 'ccg_sen/fracas_even_sen',
-				  %'ccg_sen/fracas-1-premise_ccg', 'ccg_sen/fracas-1-premise_sen',
-				  %'ccg_sen/rte1-dev_ccg', 'ccg_sen/rte1-dev_sen',	
-				  %'ccg_sen/my_test_ccg', 'ccg_sen/my_test_sen',
-				  %'ccg_sen/tr_rte', 'ccg_sen/rte_tr_spl',	
-				  %'ccg_sen/SICK_trial_ccg', 'ccg_sen/SICK_trial_sen',
-				  %'ccg_sen/SICK_train_ccg', 'ccg_sen/SICK_train_sen',
-				  %'ccg_sen/SICK_test_annotated_ccg', 'ccg_sen/SICK_test_annotated_sen',	
-				  %'ccg_sen/syllogisms_ccg', 'ccg_sen/syllogisms_sen',		
 				  latex_ccgtree,
 				  %term_query,
 				  ttterm_to_term,
@@ -46,61 +32,106 @@
 				  entail				  			
 				 ]).
 
-:- dynamic latex_file_stream/1.
+%:- dynamic latex_file_stream/1.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% generates LambdaLogicalForms (LLF) from CCGtrees
-% and writes in latex file as application trees.
-% gen_llfs_latex(nonvar_List_of_CCG_IDs) - for processing specific CCGtrees
-% gen_llfs_latex(Min_ID, Max_ID) - for processing CCGtrees of ID between Min_ID and Max_ID
-% if Min_ID and Max_ID are unspecified then all CCGtrees are processed
-
-gen_llfs_latex(List) :- 
-	findall(ccg(Id, Tree), (member(Id, List), ccg(Id, Tree)), CCGs),
-	ccgs_to_llfs_latex(CCGs).
-
-gen_llfs_latex(Inf, Sup) :-
-	(nonvar(Inf), nonvar(Sup) -> 
-		findall(ccg(Id, Tree), (between(Inf, Sup, Id), ccg(Id, Tree)) , CCGs);
-	 nonvar(Inf) -> 
-	  	findall(ccg(Id, Tree), (ccg(Id, Tree), Inf =< Id), CCGs);
-	 nonvar(Sup) ->
-		findall(ccg(Id, Tree), (ccg(Id, Tree), Sup >= Id), CCGs);
-	 findall(ccg(Id, Tree), ccg(Id, Tree), CCGs) 
-	),
-	ccgs_to_llfs_latex(CCGs).
-	%maplist(ccg_to_ccg_term, CCGs).
-
-
-probs_to_llfs_latex(Prob_IDs) :-
-	probIds_to_senIds(Prob_IDs, Sen_IDs),
-	gen_llfs_latex(Sen_IDs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % returns sentence id list from problem id list
-probIds_to_senIds([Prob_ID | Prob_Rest], Sen_IDs) :-
+probIDs_to_senIDs([Prob_ID | Prob_Rest], Sen_IDs) :-
 	!, findall(ID, sen_id(ID, Prob_ID,_,_,_), IDs),
-	probIds_to_senIds(Prob_Rest, Sen_Rest),
+	probIDs_to_senIDs(Prob_Rest, Sen_Rest),
 	append(IDs, Sen_Rest, Sen_IDs).
 	
-probIds_to_senIds([], []).
- 
+probIDs_to_senIDs([], []).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ccgs_to_llfs_latex(CCG_IDs)
-% creates tex file and writes well-formed LLFs obtained from CCG_IDs
-% writes percentage of well-formed LLFs on the screen 
-ccgs_to_llfs_latex(CCG_IDs) :-
-	(exists_directory('latex') -> true; make_directory('latex')),
-	( debMode(eccg) -> 
-		open('latex/gen_ellfs.tex', write, S, [encoding(utf8), close_on_abort(true)])
-	  ;	open('latex/gen_llfs.tex',  write, S, [encoding(utf8), close_on_abort(true)])
-	),
-	asserta(latex_file_stream(S)),
+% List_Int of senIDs into a list of (ID, CCG tree)-s
+listInt_to_id_ccgs(List_Int, CCGs) :-
+	( is_list(List_Int) ->
+		findall(ccg(Id, Tree), (member(Id, List_Int), ccg(Id, Tree)), CCGs)
+	; List_Int = Inf-Sup ->
+		( nonvar(Inf), nonvar(Sup) -> findall(ccg(Id, Tree), (between(Inf, Sup, Id), ccg(Id, Tree)) , CCGs);
+	 	  nonvar(Inf) -> findall(ccg(Id, Tree), (ccg(Id, Tree), Inf =< Id), CCGs);
+		  nonvar(Sup) -> findall(ccg(Id, Tree), (ccg(Id, Tree), Sup >= Id), CCGs);
+	 	  findall(ccg(Id, Tree), ccg(Id, Tree), CCGs) 
+		)
+	; report(["Error: Wrong format of the argument: ", List_Int]),
+	  fail	 
+	).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Write CCG trees, CCG terms and LLFs 
+% of RTE Problems in the XML files
+xml_probs_llfs(Prob_IDs) :-
+	xml_probs_llfs(Prob_IDs, 'RTE_to_LLF'). 
+
+xml_probs_llfs(Prob_IDs, XMLFile) :-
+	( exists_directory('xml') -> true; make_directory('xml') ),
+	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName), 
+	open(FullFileName, write, S, [encoding(utf8)]),
+	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
+	write(S, '<?xml-stylesheet type="text/xsl" href="ttterms.xsl"?>\n'),
+	write(S, '<parsed_problems>\n'),
+	maplist( write_parsed_problem_as_xml(S, 'no_align'), Prob_IDs ),
+	write(S, '</parsed_problems>\n'),
+	close(S),
+	atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
+	%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
+	shell(ShellCommand).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given SenIDs, write corresponding CCG trees,
+% CCG terms and LLFs in a XML file
+xml_senIDs_llfs(List_Int) :- 
+	xml_senIDs_llfs(List_Int, 'CCG_to_LLF').
+
+xml_senIDs_llfs(List_Int, XMLFile) :-
+	listInt_to_id_ccgs(List_Int, CCG_IDs),
+	( exists_directory('xml') -> true; make_directory('xml') ),
+	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName), 
+	open(FullFileName, write, S, [encoding(utf8)]),
+	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
+	write(S, '<?xml-stylesheet type="text/xsl" href="ttterms.xsl"?>\n'),
+	write(S, '<parsed_sentences>\n'),
+	xml_ccgIDs_to_llfs(S, CCG_IDs ),
+	write(S, '</parsed_sentences>\n'),
+	close(S),
+	atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
+	%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
+	shell(ShellCommand).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               LaTeX Output
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Print CCG trees, CCG terms and LLFS 
+% of the list of RTE problems into a Latex file
+latex_probs_llfs(Prob_IDs) :-
+	latex_probs_llfs(Prob_IDs, 'RTE_to_LLF'). 
+
+latex_probs_llfs(Prob_IDs, LaTeXFile) :-
+	probIDs_to_senIDs(Prob_IDs, Sen_IDs),
+	latex_senIDs_llfs(Sen_IDs, LaTeXFile).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given SenIDs, write corresponding CCG trees,
+% CCG terms and LLFs in a Latex file
+latex_senIDs_llfs(List_Int) :- 
+	latex_senIDs_llfs(List_Int, 'CCG_to_LLF').
+
+latex_senIDs_llfs(List_Int, LaTeXFile) :-
+	listInt_to_id_ccgs(List_Int, CCG_IDs),
+	( exists_directory('latex') -> true; make_directory('latex') ),
+	atomic_list_concat(['latex/', LaTeXFile, '.tex'], FilePath), 
+	open(FilePath, write, S, [encoding(utf8), close_on_abort(true)]),
+	%asserta(latex_file_stream(S)),
 	latex_ttTerm_preambule(S),
 	write(S, '\\begin{document}\n'),
 	%retractall(event_index), % temporarily here
 	%maplist(ccg_to_lambda_term_latex(S), CCG_IDs, TTterm_IDs), % for ttterms solution 1
-	maplist(ccg_to_abst_acg(S), CCG_IDs, TTterm_IDs), % for acg abstract level
+	maplist(latex_ccgID_llfs(S), CCG_IDs, TTterm_IDs), 
 	!,
 	write(S, '\\end{document}'),
 	close(S),
@@ -112,11 +143,10 @@ ccgs_to_llfs_latex(CCG_IDs) :-
 	atomic_list_concat([Per, '% (', Num, ' from ', Total, ') of LLFs were generated\n'], Message),
 	write(Message).	
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ccg_to_abst_acg(S, CCG_ID, TTterm_ID)
-ccg_to_abst_acg(S, CCG_ID, TTterm_ID) :-
+% writes a CCG tree, a CCG term, a corrected CCG term
+% and LLF(s) in a stream and returns LLF(s)_ID
+latex_ccgID_llfs(S, CCG_ID, TTterm_ID) :-
 	CCG_ID = ccg(Id, CCGTree),
 	TTterm_ID = ccg(Id, GQTT), 
 	( debMode('pr_sen') -> sen_id(Id,_,_,_,Sen), report([Id,': ',Sen]); true ),
@@ -143,12 +173,12 @@ ccg_to_abst_acg(S, CCG_ID, TTterm_ID) :-
 	ttTerm_to_latexTerm(GQTT, LatexTerm), writeln(S, LatexTerm), writeln(S, '\n'), % pronts first LLF as a term
 	latex_ttTerm_print_tree(S, 6, GQTT).				% print the first GQ version
 
-	
-	
 
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ccg_to_abst_acg(S, CCG_ID, TTterm_ID)
 ccg_to_ccg_term(CCG_ID) :-
 	ccgIDTree_to_ccgIDTerm(CCG_ID, ccg(Id, CCGTerm)),
 	ne_ccg(CCGTerm, CCGTerm_1),
@@ -156,15 +186,6 @@ ccg_to_ccg_term(CCG_ID) :-
 	CCGTerm_final = CCGTerm_2,
 	correct_ccgTerm(CCGTerm_final, Corr_CCGTerm_final),
 	print_used_lexical_rules(Id, Corr_CCGTerm_final).
-
-
-
-
-
-
-		
-		
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ccg_to_lambda_term_latex(S, CCG_ID, TTterm_ID)
@@ -209,28 +230,6 @@ latex_norm_term_print(S, Normal_Term) :-
 	lambdaTerm_to_latex(Normal_Term, Latex_Term),
 	write(S, Latex_Term),
 	write(S, '\\\\').
-
-
-
-/*
-assert_list(List, clean) :-
-	List = [Head | _],
-	!,
-	Head =.. [H | _],
-	retractall(H),
-	assert_list(List, noclean).
-	
-assert_list([], clean).
-
-assert_list([H | Rest], noclean) :-
-	!,
-	assert(H),
-	assert_list(Rest, noclean). 	
-
-assert_list([], noclean).
-*/
-	
-
 
 
 

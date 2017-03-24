@@ -729,4 +729,3 @@ nth1_projection(N, Term, Proj) :-
 
 
 
-

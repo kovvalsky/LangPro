@@ -439,12 +439,14 @@ gentail(Align, Problem_Id) :-
 		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB)
 	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB)
 	),
-	findall(ccg(Id, CCGTree), 
-			( sen_id(Id, Problem_Id, _, _, _),
-			  ccg(Id, CCGTree) ), 
-			CCG_IDs
-	),
-	ccgs_to_llfs_latex(CCG_IDs),
+	%findall(ccg(Id, CCGTree), 
+	%		( sen_id(Id, Problem_Id, _, _, _),
+	%		  ccg(Id, CCGTree) ), 
+	%		CCG_IDs
+	%),
+	%ccgs_to_llfs_latex(CCG_IDs),
+	atomic_list_concat(['LLF_Prob_', Problem_Id, '.tex'], FileName), 
+	latex_probs_llfs([Problem_Id], FileName),
 	( Prem_TTterms = [], Hypo_TTterms = [] ->
 		writeln('Problem with this id plausibly does not exist!')
 	; Prem_TTterms = [] ->
@@ -473,12 +475,14 @@ gentail_no_answer(Align, Problem_Id) :-
 		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB)
 	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB)
 	),
-	findall(ccg(Id, CCGTree), 
-			( sen_id(Id, Problem_Id, _, _, _),
-			  ccg(Id, CCGTree) ), 
-			CCG_IDs
-	),
-	ccgs_to_llfs_latex(CCG_IDs),
+	%findall(ccg(Id, CCGTree), 
+	%		( sen_id(Id, Problem_Id, _, _, _),
+	%		  ccg(Id, CCGTree) ), 
+	%		CCG_IDs
+	%),
+	%ccgs_to_llfs_latex(CCG_IDs),
+	atomic_list_concat(['LLF_Prob_', Problem_Id, '.tex'], FileName),
+	latex_probs_llfs([Problem_Id], FileName),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	( Prem_TTterms = [], Hypo_TTterms = [] ->
 		writeln('Problem with this id plausibly does not exist!')
@@ -506,11 +510,13 @@ gentail_no_answer(Align, Problem_Id) :-
 % used for analysis of single sentences
 ganalysis(Sign, Problem_Id) :-
 	problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB),
-	findall(ccg(Id, CCGTree), 
-			( sen_id(Id, Problem_Id, _, _, _),  ccg(Id, CCGTree) ), 
-			CCG_IDs
-	),
-	ccgs_to_llfs_latex(CCG_IDs),
+	%findall(ccg(Id, CCGTree), 
+	%		( sen_id(Id, Problem_Id, _, _, _),  ccg(Id, CCGTree) ), 
+	%		CCG_IDs
+	%),
+	%ccgs_to_llfs_latex(CCG_IDs),
+	atomic_list_concat(['LLF_Prob_', Problem_Id, '.tex'], FileName),
+	latex_probs_llfs([Problem_Id], FileName),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	( Sign = 'true' ->
 		greason(KB, TTterms, [], Problem_Id)

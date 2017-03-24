@@ -242,7 +242,7 @@ write_old_consts(_, []).
 
 write_parsed_problem_as_xml(S, Align, ProbID) :-
 	findall( X, sen_id(X, ProbID, _, _, _), IDs),
-	write(S, '<parsed_problem>\n'),
+	format(S, '<parsed_problem probID="~w">\n', [ProbID]),
 	%free_vars_to_indexed_atoms('x', TTterms, PrettyTTterms),
 	findall(ccg(X, CCG), (member(X, IDs), ccg(X, CCG)), CCG_IDs),
 	maplist(ccgIDTree_to_ccgIDTerm, CCG_IDs, CCGTerms_IDs),
@@ -259,19 +259,28 @@ write_parsed_problem_as_xml(S, Align, ProbID) :-
 	),
 	all_terms_per_sentence(IDs, CCG_IDs, CCGTerms, CCGTerms_corr, FinLLFs, List),
 	maplist(parsed_sen_to_xml_format(S), List),
-	write(S, '</parsed_problem>\n\n'),
-	close(S).
+	write(S, '</parsed_problem>\n\n').
+	%close(S).
+
+xml_ccgIDs_to_llfs(S, CCG_IDs) :-
+	maplist(ccgIDTree_to_ccgIDTerm, CCG_IDs, CCGTerms_IDs),
+	maplist(nth1_projection(1), CCGTerms_IDs, IDs),
+	maplist(nth1_projection(2), CCGTerms_IDs, CCGTerms),
+	maplist(ne_ccg, CCGTerms, CCGTerms_ne),
+	maplist(clean_ccgTerm_once, CCGTerms_ne, CCGTerms_clean),
+	maplist(correct_ccgTerm, CCGTerms_clean, CCGTerms_corr),
+	maplist(once_gen_quant_tt, CCGTerms_corr, LLFs),
+	all_terms_per_sentence(IDs, CCG_IDs, CCGTerms, CCGTerms_corr, LLFs, List),
+	maplist(parsed_sen_to_xml_format(S), List).
 
 
 
 % given IDs, CCG tems, ... LLFs return a list per sentence
 all_terms_per_sentence([ID | Rest], CCG_IDs, CCGTerms, CCGTerms_corr, LLFs, List) :-
 	!, 
-	sen_id(ID, _, PH, _, Sent),
-	( PH = 'p' -> 
-		atomic_concat('P', ID, PHID)
-	; PHID = 'H' 
-	),
+	sen_id(ID, _, PHdw, _, Sent),
+	upcase_atom(PHdw, PH),
+	atomic_list_concat([PH,'<sub>',ID,'</sub>'], PHID),
 	( nth1(I, CCG_IDs, ccg(ID, CCG)) ->
 		nth1(I, CCGTerms, CCGTerm),
 		nth1(I, CCGTerms_corr, CCGTerm_corr),
@@ -295,20 +304,18 @@ parsed_sen_to_xml_format(S, [ID, Sent | Terms ]) :-
 		% print tt terms
 		maplist(pretty_vars_in_ttterm(1-1), _, [CCGTerm, CCGTerm_corr, LLF], [Pr_CCGTerm, Pr_CCGTerm_corr, Pr_LLF]),
 		ccgTree_to_xml_format(S, CCG),
-		ttTerm_to_xml_format(S, Pr_CCGTerm),
-		ttTerm_to_xml_format(S, Pr_CCGTerm_corr),
-		ttTerm_to_xml_format(S, Pr_LLF)
+		write(S, '<ccgterm>\n'),   
+		ttTerm_to_xml(S, Pr_CCGTerm),
+		write(S, '</ccgterm>\n\n<corr_ccgterm>\n'),
+		ttTerm_to_xml(S, Pr_CCGTerm_corr),
+		write(S, '</corr_ccgterm>\n\n<llf>\n'),
+		ttTerm_to_xml(S, Pr_LLF),
+		write(S, '</llf>\n\n')
 	; format(S, '~w~n', ['Warning: Sentence could not be parsed\n'])
 	),
 	write(S, '</parsed_sentence>\n').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% full ttterm into xml
-ttTerm_to_xml_format(S, TT) :-
-	write(S, '<fullttterm>\n'),
-	ttTerm_to_xml(S, TT),
-	write(S, '</fullttterm>\n\n').
-
 % ttTerm to XML
 ttTerm_to_xml(S, (X,Ty)) :-
 	var(X) -> 

@@ -41,7 +41,7 @@ online_demo(ID) :-
 		( memberchk([Al,'closed'|_], [YES,NO]) ->
 			memberchk(Al-Align, ['al'-'align', 'na'-'no_align']),
 			write_parsed_problem_as_xml(S, Align, ID)
-		; write_parsed_problem_as_xml(S, 'no_align', ID) 
+		; write_parsed_problem_as_xml(S, 'no_align', ID)
 		),
 		print_XML(Tree_yes, ID),
 		print_XML(Tree_no,  ID),
