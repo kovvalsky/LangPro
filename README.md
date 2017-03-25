@@ -2,7 +2,7 @@
 LangPro is a tableau-based theorem prover for natural logic and language.
 See the [online demo](http://naturallogic.pro/langpro).
 
-Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment`, `contradiction` or `neutral`.  
+Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment` (i.e. `yes`), `contradiction` (i.e. `no`) or `neutral` (i.e. `unknown`).  
 For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicted below: 
 ```
 ____________    ________             ___________      ________________________    __________ 
@@ -29,9 +29,9 @@ gentail(211).              % gui/graphical entailment check
 This will trigger a tableau in the XPCE GUI for the SICK-211 problem to verify its gold answer. 
 If you prefer an HTML or XML representation of the proof, add the `xml` parameter before `gentail/1`:
 ```
-parList('xml'), gentail(211).
+parList(xml), gentail(211).
 ```
-This creates `xml/tableau-211-yes-no_align.xml` (and `xml/tableau-211-yes-no_align.html` from the latter via `xsltproc`) where the name stands for a tableau for problem-211 to verify entailment (i.e. yes) with no alignment techniques used.
+This creates `xml/tableau-211-yes-no_align.xml` (and `xml/tableau-211-yes-no_align.html` from the latter via `xsltproc`) where the name stands for "a tableau for problem-211 to verify entailment (i.e. yes) with no alignment techniques used".
 If you want to force the alignment of LLFs, run:
 ```
 gentail(align, 211).       % gentail(211) is the same as gentail(no_align, 211)
@@ -44,9 +44,9 @@ Be aware not all IDs have corresponding problems in SICK-trial as it is just a p
 You can try: 4, 24, 105, 116, 119, 185, 197, ... 
 In order to run the prover on several problems without GUI, by listing them or giving an interval, try:
 ```
-entail_some([4, 24, 105, 116, 119, 185, 197, 211]).
+entail_some([4, 24, 105, 116, 119, 185, 197]).
 ```
-or
+or equivalently
 ```
 entail_some(1-200).
 ```
@@ -85,8 +85,21 @@ Run the prover on all the problems of SICK-trial by:
 ```
 entail_all.
 ```
-It will take some time. If you want to terminate the run, type `Ctrl+C` and then press `a` for abort.
-
+The above predcates `entail_some/1` and `entail_all/0` build tableaux both for aligned and non-aligned LLFs.
+If you want to terminate the run, type `Ctrl+C` and then press `a` for abort.
+If you have a multicore CPU, you can use `parallel` in `parList` to prove problems in a concurrent way.
+```
+parList([parallel]), entail_all.    % similalrly: parList([parallel]), entail_some(1-200). 
+```
+You can make theorem prover faster by building tableaux only for aligned LLFS:
+```
+entail_all(align).   % similarly: entail_some(align, 1-200)    
+```
+or even setting the rule application limit (RAL) in order to stop a tableau after the rule application limit is reached.
+The default RAL is 400.  
+```
+parList([ral(100)]), entail_all(align).   % or combine it with parallel provong
+```
 
 ### Obtaining Lambda Logical Forms
 
