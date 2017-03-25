@@ -29,12 +29,13 @@ gentail(211).              % gui/graphical entailment check
 This will trigger a tableau in the XPCE GUI for the SICK-211 problem to verify its gold answer. 
 If you prefer an HTML or XML representation of the proof, add the `xml` parameter before `gentail/1`:
 ```
-parList(xml), gentail(211).
+parList([xml]), gentail(211).
 ```
 This creates `xml/tableau-211-yes-no_align.xml` (and `xml/tableau-211-yes-no_align.html` from the latter via `xsltproc`) where the name stands for "a tableau for problem-211 to verify entailment (i.e. yes) with no alignment techniques used".
+To reset the parameter list for the next run use `parList([])`.
 If you want to force the alignment of LLFs, run:
 ```
-gentail(align, 211).       % gentail(211) is the same as gentail(no_align, 211)
+parList([]), gentail(align, 211).       % gentail(211) is the same as gentail(no_align, 211)
 ```
 If you want to get both tableaux for entailment (yes) and contradiction (no) checks, run 
 ```
@@ -91,9 +92,9 @@ If you have a multicore CPU, you can use `parallel` in `parList` to prove proble
 ```
 parList([parallel]), entail_all.    % similalrly: parList([parallel]), entail_some(1-200). 
 ```
-You can make theorem prover faster by building tableaux only for aligned LLFS:
+You can make theorem prover faster by building tableaux only for aligned LLFS (use `parList([])` to cancel the `parallel` parameter asserted by the previous command):
 ```
-entail_all(align).   % similarly: entail_some(align, 1-200)    
+parList([]), entail_all(align).   % similarly: entail_some(align, 1-200)    
 ```
 or even setting the rule application limit (RAL) in order to stop a tableau after the rule application limit is reached.
 The default RAL is 400.  
