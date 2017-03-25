@@ -79,6 +79,8 @@ parList(Parameters) :-
 % 				List of Parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  debMode
+% 'xml'					write terms or tableaux in XML
+% 'html'				write twrms and tableaux in HTML, outomatically creates XML files too   
 % 'fix': 				prints fixes done on CCG trees
 % 'proof_tree': 		develope a proof tree
 % 'aall':				allows alignment of any NPs

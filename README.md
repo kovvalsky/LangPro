@@ -27,11 +27,12 @@ Now already in the Prolog environment, run
 gentail(211).              % gui/graphical entailment check
 ```
 This will trigger a tableau in the XPCE GUI for the SICK-211 problem to verify its gold answer. 
-If you prefer an HTML or XML representation of the proof, add the `xml` parameter before `gentail/1`:
+If you prefer an HTML representation of the proof, add the `html` parameter before `gentail/1`:
 ```
-parList([xml]), gentail(211).
+parList([html]), gentail(211).
 ```
-This creates `xml/tableau-211-yes-no_align.xml` (and `xml/tableau-211-yes-no_align.html` from the latter via `xsltproc`) where the name stands for "a tableau for problem-211 to verify entailment (i.e. yes) with no alignment techniques used".
+This first creates `xml/tableau-211-yes-no_align.xml` and then `xml/tableau-211-yes-no_align.html` from the latter via `xsltproc`.
+The file names stand for "a tableau for problem-211 to verify entailment (i.e. yes) with no alignment techniques used".
 To reset the parameter list for the next run use `parList([])`.
 If you want to force the alignment of LLFs, run:
 ```
@@ -109,19 +110,21 @@ After you get into the prolog environment by:
 ```
 swipl -f main.pl -l ccg_sen_d/SICK_trial_ccg.pl ccg_sen_d/SICK_trial_sen.pl
 ```
-You can obtain LLFs in XML and HTML formats by running:   
+You can obtain LLFs in XML format by running:   
 ```
-xml_probs_llfs([4,24,211], 'My_LLFs').    % or xml_probs_llfs([4,24,211]) that sets 'RTE_LLF' as a file name 
+xml_probs_llfs([4,24,211], 'My_LLFs').    % or xml_probs_llfs([4,24,211]) where 'RTE_LLF' is a default file name 
 ```
-This will create `xml/My_LLFs.xml` and `xml/My_LLFs.html` files which contain a CCG (derivation) tree, a CCG term, a corrected CCG term and the first LLF (1LLF) for each sentence of the RTE problems [4,24,211].
-You can get these quadruples of terms according to the sentence IDs too:  
+This will create `xml/My_LLFs.xml` which contains a CCG (derivation) tree, a CCG term, a corrected CCG term and the first LLF (1LLF) for each sentence of the RTE problems [4,24,211].
+Use `parList([html])` before `xml_probs_llfs` and you will get an HTML output fopr these terms in `xml/My_LLFs.html`
+You can get exactly these quadruples of terms according to the sentence IDs too:  
 ```
 xml_senIDs_llfs(1-6, 'My_LLFs').    % or xml_senIDs_llfs([1,2,3,4,5,6], 'My_LLFs') or even omitting the file name 
 ```
 Because the first six sentences coincide the sentences of the first three RTE problems in the RTE dataset (i.e. two sentences per problem).
 To get CCG trees, CCG terms, corrected CCG terms and 1LLFs for all sentences in the dataset, use:
 ```
-xml_senIDs_llfs(_, 'All_LLFs').
+xml_senIDs_llfs(_, 'All_LLFs').						% only XML file
+parList([html]), xml_senIDs_llfs(_, 'All_LLFs').	% XML and HTML files
 ```
 
 

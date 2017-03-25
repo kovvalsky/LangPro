@@ -202,7 +202,7 @@ greason(KB, T_TermList, F_TermList, Info) :- % remove problem ID from arg list
 	%stats_from_tree(Tree, s(Br_Num, Len, Max_Id)),
 	%report(['NumOfBranches: ', Br_Num, '; NumOfRuleApp: ', Len, '; NumOfNodes: ', Max_Id]),
 	atomic_list_concat(['tableau', Problem_Id, Mode, Align], '-', FileName),
-	( debMode('xml') -> output_XML(Tree, Problem_Id, FileName); true ),
+	( debMode('xml'); debMode('html') -> output_XML(Tree, Problem_Id, FileName); true ),
 	displayTree(Tree, 12, Problem_Id), 
 	!,
 	BrList = [].

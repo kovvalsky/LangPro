@@ -22,9 +22,12 @@ xml_probs_llfs(Prob_IDs, XMLFile) :-
 	maplist( write_parsed_problem_as_xml(S, 'no_align'), Prob_IDs ),
 	write(S, '</parsed_problems>\n'),
 	close(S),
-	atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
-	%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
-	shell(ShellCommand).
+	( debMode('html') -> 
+		atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
+		%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
+		shell(ShellCommand)
+	;  true
+	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Given SenIDs, write corresponding CCG trees,
@@ -43,20 +46,23 @@ xml_senIDs_llfs(List_Int, XMLFile) :-
 	xml_ccgIDs_to_llfs(S, CCG_IDs ),
 	write(S, '</parsed_sentences>\n'),
 	close(S),
-	atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
-	%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
-	shell(ShellCommand).
+	( debMode('html') -> 
+		atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
+		%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
+		shell(ShellCommand)
+	;  true
+	).
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %      XML output for a tableau proof
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-output_XML(Tree, Problem_Id, FileName) :-
+output_XML(Tree, Problem_Id, XMLFile) :-
 	retract(tree_structure(_)),
 	asserta(tree_structure(Tree)),
 	(exists_directory('xml') -> true; make_directory('xml')),
-	atomic_list_concat(['xml/', FileName, '.xml'], FullFileName), 
+	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName), 
 	open(FullFileName, write, S, [encoding(utf8)]),
 	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
 	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/tableau.xsl"?>\n'),
@@ -70,9 +76,12 @@ output_XML(Tree, Problem_Id, FileName) :-
 	write(S, '</tableau>'),
 	close(S),
 	!,
-	atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', FileName, '.html'], ShellCommand),
-	%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
-	shell(ShellCommand).
+	( debMode('html') -> 
+		atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
+		%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
+		shell(ShellCommand)
+	;  true
+	).
 
 
 print_XML(Tree, Problem_Id) :-
