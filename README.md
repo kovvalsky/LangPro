@@ -99,7 +99,7 @@ parList([]), entail_all(align).   % similarly: entail_some(align, 1-200)
 or even setting the rule application limit (RAL) in order to stop a tableau after the rule application limit is reached.
 The default RAL is 400.  
 ```
-parList([ral(100)]), entail_all(align).   % or combine it with parallel provong
+parList([ral(100)]), entail_all(align).   % or combine it with parallel proving
 ```
 
 ### Obtaining Lambda Logical Forms
