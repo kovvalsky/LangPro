@@ -16,7 +16,7 @@ ____________    ________             ___________      ________________________  
 
 ### Running Natural Language Theorem Prover
 You will need only [SWI-Prolog](http://www.swi-prolog.org) to run the prover.
-Go to the main directory and run the following command in order to run the prover on the trial portion of the SICK dataset:
+Go to the main directory and run the following command in order to run the prover on the trial portion of the SICK dataset (included in `ccg_sen_d`):
 ```
 swipl -f main.pl -l ccg_sen_d/SICK_trial_ccg.pl ccg_sen_d/SICK_trial_sen.pl
 ```
@@ -26,8 +26,12 @@ Now already in the Prolog environment, run
 ```
 gentail(211).              % gui/graphical entailment check
 ```
-This will trigger a tableau for the SICK-211 problem to verify its gold answer in the XPCE GUI. 
-If you prefer an HTML or XML representation of the proof, see `xml/tableau-211-yes-no_align.html` and `xml/tableau-211-yes-no_align.xml`, where the names mean that it is a tableau for the problem 211 to verify entailment (i.e. yes) with no alignment techniques used (you need to have `xsltproc` to get an HTML file from an XML one).
+This will trigger a tableau in the XPCE GUI for the SICK-211 problem to verify its gold answer. 
+If you prefer an HTML or XML representation of the proof, add the `xml` parameter before `gentail/1`:
+```
+parList('xml'), gentail(211).
+```
+This creates `xml/tableau-211-yes-no_align.xml` (and `xml/tableau-211-yes-no_align.html` from the latter via `xsltproc`) where the name stands for a tableau for problem-211 to verify entailment (i.e. yes) with no alignment techniques used.
 If you want to force the alignment of LLFs, run:
 ```
 gentail(align, 211).       % gentail(211) is the same as gentail(no_align, 211)
