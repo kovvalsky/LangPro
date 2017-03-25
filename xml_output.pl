@@ -1,9 +1,57 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Description: XML output for Tableau Tree
-%     Version: 13.12.29
-%      Author: lasha.abzianidze{}gmail.com 
+% Description: XML output for LLFs and Proofs
+% 	   Author: lasha.abzianidze{at}gmail.com 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    XML Output of trees, terms and LLFs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Write CCG trees, CCG terms and LLFs 
+% of RTE Problems in the XML files
+xml_probs_llfs(Prob_IDs) :-
+	xml_probs_llfs(Prob_IDs, 'RTE_to_LLF'). 
+
+xml_probs_llfs(Prob_IDs, XMLFile) :-
+	( exists_directory('xml') -> true; make_directory('xml') ),
+	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName), 
+	open(FullFileName, write, S, [encoding(utf8)]),
+	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
+	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/ttterms.xsl"?>\n'),
+	write(S, '<parsed_problems>\n'),
+	maplist( write_parsed_problem_as_xml(S, 'no_align'), Prob_IDs ),
+	write(S, '</parsed_problems>\n'),
+	close(S),
+	atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
+	%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
+	shell(ShellCommand).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given SenIDs, write corresponding CCG trees,
+% CCG terms and LLFs in a XML file
+xml_senIDs_llfs(List_Int) :- 
+	xml_senIDs_llfs(List_Int, 'CCG_to_LLF').
+
+xml_senIDs_llfs(List_Int, XMLFile) :-
+	listInt_to_id_ccgs(List_Int, CCG_IDs),
+	( exists_directory('xml') -> true; make_directory('xml') ),
+	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName), 
+	open(FullFileName, write, S, [encoding(utf8)]),
+	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
+	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/ttterms.xsl"?>\n'),
+	write(S, '<parsed_sentences>\n'),
+	xml_ccgIDs_to_llfs(S, CCG_IDs ),
+	write(S, '</parsed_sentences>\n'),
+	close(S),
+	atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
+	%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	
+	shell(ShellCommand).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%      XML output for a tableau proof
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 output_XML(Tree, Problem_Id, FileName) :-
 	retract(tree_structure(_)),
 	asserta(tree_structure(Tree)),
@@ -11,8 +59,8 @@ output_XML(Tree, Problem_Id, FileName) :-
 	atomic_list_concat(['xml/', FileName, '.xml'], FullFileName), 
 	open(FullFileName, write, S, [encoding(utf8)]),
 	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
-	write(S, '<?xml-stylesheet type="text/xsl" href="tableau.xsl"?>\n'),
-	write(S, '<!DOCTYPE tableau SYSTEM "tableau.dtd">\n'),
+	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/tableau.xsl"?>\n'),
+	write(S, '<!DOCTYPE tableau SYSTEM "xsl_dtd/tableau.dtd">\n'),
 	write(S, '<tableau>\n'),
 
 	write_XML_problem(S, Problem_Id), !, 
@@ -32,8 +80,8 @@ print_XML(Tree, Problem_Id) :-
 	asserta(tree_structure(Tree)),
 	current_output(S),
 	%write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
-	%write(S, '<?xml-stylesheet type="text/xsl" href="tableau.xsl"?>\n'),
-	%write(S, '<!DOCTYPE tableau SYSTEM "tableau.dtd">\n'),
+	%write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/tableau.xsl"?>\n'),
+	%write(S, '<!DOCTYPE tableau SYSTEM "xsl_dtd/tableau.dtd">\n'),
 	write(S, '<tableau>\n'),
 	write_XML_problem(S, Problem_Id), !, 
 	write_tree_elements(S, [Tree]),	
@@ -236,8 +284,8 @@ write_old_consts(_, []).
 %	atomic_list_concat(['xml/', FileName, '.xml'], FullFileName), 
 %	open(FullFileName, write, S, [encoding(utf8)]),
 %	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
-%	write(S, '<?xml-stylesheet type="text/xsl" href="ttterms.xsl"?>\n'),
-%	write(S, '<!DOCTYPE ttterms SYSTEM "ttterms.dtd">\n'),
+%	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/ttterms.xsl"?>\n'),
+%	write(S, '<!DOCTYPE ttterms SYSTEM "xsl_dtd/ttterms.dtd">\n'),
 
 
 write_parsed_problem_as_xml(S, Align, ProbID) :-
@@ -388,8 +436,8 @@ write_CCGtrees_as_xml(CCGtrees, FileName) :-
 	atomic_list_concat(['xml/', FileName, '.xml'], FullFileName), 
 	open(FullFileName, write, S, [encoding(utf8)]),
 	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
-	write(S, '<?xml-stylesheet type="text/xsl" href="ccgtrees.xsl"?>\n'),
-	write(S, '<!DOCTYPE ccgtrees SYSTEM "ccgtrees.dtd">\n'),
+	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/ccgtrees.xsl"?>\n'),
+	write(S, '<!DOCTYPE ccgtrees SYSTEM "xsl_dtd/ccgtrees.dtd">\n'),
 	write(S, '<ccgtrees>\n'),
 	maplist(ccgTree_to_xml_format(S), CCGtrees),
 	write(S, '</ccgtrees>\n\n'),

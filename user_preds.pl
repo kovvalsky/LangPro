@@ -188,77 +188,7 @@ report(Message, Term) :-
 	write(Message),
 	writeln(Atom).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
-% For reports
-:- dynamic debMode/1.
 
-debMode( 'nil' ).
-debMode( ral(400) ).
-debMode( effCr(['nonProd', 'nonBr', 'equi', 'nonCons']) ).
-
-set_debMode([H | Rest]) :-
-	( H = ral(_) ->
-		retractall( debMode(ral(_)) ),
-		assertz( debMode(H) )
-	; H = effCr(_) ->
-		retractall( debMode(effCr(_)) ),
-		assertz( debMode(H) )
-	; H = ss(SS) ->
-		retractall( debMode(ss(_)) ),
-		(is_list(SS) -> List = SS; numlist(1,SS,List)),
-		assertz( debMode(ss(List)) )
-	; assertz( debMode(H) )
-	),
-	set_debMode(Rest).
-
-set_debMode([]).
-
-reset_debMode :-
-	retractall( debMode(_) ),
-	assertz( debMode('nil') ),
-	assertz( debMode(effCr(['nonProd', 'nonBr', 'equi', 'nonCons'])) ),
-	assertz( debMode(ral(400)) ).
-	
-%  debMode
-% 'fix': 				prints fixes done on CCG trees
-% 'proof_tree': 		develope a proof tree
-% 'aall':				allows alignment of any NPs
-% 'prprb':				prints the problem
-%  waif(filename): 		writes answers in file in SICK style
-% 'ne':					reports MW Named Entity found 												
-% 'mwe':				multiword expression found
-% 'prlim':				prints when rule limit is reached
-% 'ProperNames':		consideres all bare nouns (even plurals) as proper names
-% 'the':				inserts "the" for bare nouns (even plurals) instead of "a"
-%  a2the				replace all a,an with the
-%  s2the				replaces all plurals with definites
-%  thE					allow Existential import for the in false context
-% 'wn_ant':				uses antonym relation of Wordnet
-%  lex:					print extracted Lexicon
-% '2class':				binary classification
-%  ral(N):				rule application limit is N
-%  no_gq_llfs			dont obtain LLFs with generalized quantifiers, i.e. use fixed CCG terms
-% 'gq_report'			report how quantifier raising is going on		
-%  pr_lex_rules			print lexical rules that are not explained
-%  pr_sen				print a sentence when running gen_llfs_latex
-%  disj					use hand-coded disjoint relation
-%  usedRules([rules])	print the rules if they are used
-%  parallel				concurrent_maplist for entail
-%  pr_kb				print knowledge base
-%  singPrem				takes only single premised problems, for fracas
-%  fracFilter			filter Fracas problems that are ill formed
-%  noPl					Treat plural morpheme as a
-%  constchk				allow consistency check
-%  noHOQ				Treating most,many,several,a_few,both as a
-%  noThe				Treat The as a
-%  shallow				using shallow classifier
-%  neg_cont				classifier based on negative vords to identify contradictions
-%  sub_ent				classifier based on subset of set of words to identify entailment	
-%  noAdmissRules		exclude admissible rules 
-%  EffCr([nonBr, equi, nonProd, nonCons])	defining an effciency criterion 
-%  eccg				    latex trees are probted in different tex file
-%  ss([...])			list of frequent sysnsets to choose 
-% allInt				All noun modifeirs are intersective
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
@@ -645,19 +575,6 @@ repetition_list(X, N, List) :-
 	maplist(=(X), List).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Problem IDs to sentence IDs
-probID_to_senID(ProbID, SenIDs) :-
-	findall(ID, sen_id(ID,ProbID,_,_,_), SenIDs).
-
-probIDs_to_senIDs(ProbIDs, SenIDs) :-
-	findall(ID, 
-		(member(PrID, ProbIDs), sen_id(ID,PrID,_,_,_)), 
-		SenIDs).
-
-senID_to_probID(SenID, ProbID) :-
-	sen_id(SenID,ProbID,_,_,_), 
-	!.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % print a list with each element on a new line
@@ -722,8 +639,34 @@ nth1_projection(N, Term, Proj) :-
 	nth1(N, List, Proj).
 	
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% returns sentence id list from problem id list or vice versa
+probIDs_to_senIDs([Prob_ID | Prob_Rest], Sen_IDs) :-
+	!, findall(ID, sen_id(ID, Prob_ID,_,_,_), IDs),
+	probIDs_to_senIDs(Prob_Rest, Sen_Rest),
+	append(IDs, Sen_Rest, Sen_IDs).
+	
+probIDs_to_senIDs([], []).
+
+senID_to_probID(SenID, ProbID) :-
+	sen_id(SenID,ProbID,_,_,_), 
+	!.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% List_Int of senIDs into a list of (ID, CCG tree)-s
+listInt_to_id_ccgs(List_Int, CCGs) :-
+	( is_list(List_Int) ->
+		findall(ccg(Id, Tree), (member(Id, List_Int), ccg(Id, Tree)), CCGs)
+	; List_Int = Inf-Sup ->
+		( nonvar(Inf), nonvar(Sup) -> findall(ccg(Id, Tree), (between(Inf, Sup, Id), ccg(Id, Tree)) , CCGs);
+	 	  nonvar(Inf) -> findall(ccg(Id, Tree), (ccg(Id, Tree), Inf =< Id), CCGs);
+		  nonvar(Sup) -> findall(ccg(Id, Tree), (ccg(Id, Tree), Sup >= Id), CCGs);
+	 	  findall(ccg(Id, Tree), ccg(Id, Tree), CCGs) 
+		)
+	; report(["Error: Wrong format of the argument: ", List_Int]),
+	  fail	 
+	).
 
 
 

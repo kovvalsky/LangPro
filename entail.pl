@@ -445,8 +445,8 @@ gentail(Align, Problem_Id) :-
 	%		CCG_IDs
 	%),
 	%ccgs_to_llfs_latex(CCG_IDs),
-	atomic_list_concat(['LLF_Prob_', Problem_Id, '.tex'], FileName), 
-	latex_probs_llfs([Problem_Id], FileName),
+	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName), 
+	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
 	( Prem_TTterms = [], Hypo_TTterms = [] ->
 		writeln('Problem with this id plausibly does not exist!')
 	; Prem_TTterms = [] ->
@@ -484,8 +484,8 @@ gentail_no_answer(Align, Problem_Id) :-
 	%		CCG_IDs
 	%),
 	%ccgs_to_llfs_latex(CCG_IDs),
-	atomic_list_concat(['LLF_Prob_', Problem_Id, '.tex'], FileName),
-	latex_probs_llfs([Problem_Id], FileName),
+	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
+	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	( Prem_TTterms = [], Hypo_TTterms = [] ->
 		writeln('Problem with this id plausibly does not exist!')
@@ -518,8 +518,8 @@ ganalysis(Sign, Problem_Id) :-
 	%		CCG_IDs
 	%),
 	%ccgs_to_llfs_latex(CCG_IDs),
-	atomic_list_concat(['LLF_Prob_', Problem_Id, '.tex'], FileName),
-	latex_probs_llfs([Problem_Id], FileName),
+	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
+	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	( Sign = 'true' ->
 		greason(KB, TTterms, [], Problem_Id)

@@ -128,7 +128,15 @@ concepts_from_ttTerm( ((TT,Ty), _Type), Set ) :-
 	
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+pr_lex_rules_from_CorrTerm(CCG_ID) :-
+	ccgIDTree_to_ccgIDTerm(CCG_ID, ccg(Id, CCGTerm)),
+	ne_ccg(CCGTerm, CCGTerm_1),
+	clean_ccgTerm_once(CCGTerm_1, CCGTerm_2),
+	CCGTerm_final = CCGTerm_2,
+	correct_ccgTerm(CCGTerm_final, Corr_CCGTerm_final),
+	print_used_lexical_rules(Id, Corr_CCGTerm_final).
 
 
 
