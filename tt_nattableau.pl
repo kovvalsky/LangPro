@@ -201,7 +201,7 @@ greason(KB, T_TermList, F_TermList, Info) :- % remove problem ID from arg list
 	report(['Tableau for "', Mode, '" checking is generated with ', Status, ' ruleapps']),
 	%stats_from_tree(Tree, s(Br_Num, Len, Max_Id)),
 	%report(['NumOfBranches: ', Br_Num, '; NumOfRuleApp: ', Len, '; NumOfNodes: ', Max_Id]),
-	atomic_list_concat(['tableau_', Problem_Id, '_', Mode, '_', Align], FileName),
+	atomic_list_concat(['tableau', Problem_Id, Mode, Align], '-', FileName),
 	output_XML(Tree, Problem_Id, FileName),
 	displayTree(Tree, 12, Problem_Id), 
 	!,

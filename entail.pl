@@ -467,6 +467,9 @@ gentail(Align, Problem_Id) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % doesnt take into account answer of the problem
+gentail_no_answer(Problem_Id) :-
+	gentail_no_answer('no_align', Problem_Id).
+
 gentail_no_answer(Align, Problem_Id) :-	
 	set_rule_eff_order, % defines an effciency order of rules
 	once(sen_id(_, Problem_Id, _, Answer, _)),
