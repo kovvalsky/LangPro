@@ -123,7 +123,7 @@ xml_senIDs_llfs(1-6, 'My_LLFs').    % or xml_senIDs_llfs([1,2,3,4,5,6], 'My_LLFs
 Because the first six sentences coincide the sentences of the first three RTE problems in the RTE dataset (i.e. two sentences per problem).
 To get CCG trees, CCG terms, corrected CCG terms and 1LLFs for all sentences in the dataset, use:
 ```
-xml_senIDs_llfs(_, 'All_LLFs').						% only XML file
+xml_senIDs_llfs(_, 'All_LLFs').						   % only XML file
 parList([html]), xml_senIDs_llfs(_, 'All_LLFs').	% XML and HTML files
 ```
 
