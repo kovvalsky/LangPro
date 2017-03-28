@@ -34,17 +34,18 @@ parList([html]), gentail(211).
 This first creates `xml/tableau-211-yes-no_align.xml` and then `xml/tableau-211-yes-no_align.html` from the latter via `xsltproc`.
 The file names stand for "a tableau for problem-211 to verify entailment (i.e. yes) with no alignment techniques used".
 To reset the parameter list for the next run use `parList([])`.
-If you want to force the alignment of LLFs, run:
+If you want to force the alignment of LLFs, run (because SICK-253 shows the effect of alignment well):
 ```
-parList([]), gentail(align, 211).       % gentail(211) is the same as gentail(no_align, 211)
+parList([]), gentail(align, 253).       % gentail(253) is the same as gentail(no_align, 253)
 ```
+In the example, the phrase `is on top of the mountain` shared by the premise and the hypothesis is treated as an atomic term by the alignment technique.  
 If you want to get both tableaux for entailment (yes) and contradiction (no) checks, run 
 ```
 gentail_no_answer(211).    % or gentail_no_answer(align, 211) to force alignment of LLFs
 ```
 Be aware not all IDs have corresponding problems in SICK-trial as it is just a portion of SICK. 
 You can try: 4, 24, 105, 116, 119, 185, 197, ... 
-In order to run the prover on several problems without GUI, by listing them or giving an interval, try:
+In order to run the prover on several problems without GUI, by listing them or giving an interval, try: 
 ```
 entail_some([4, 24, 105, 116, 119, 185, 197]).
 ```
@@ -100,8 +101,10 @@ parList([]), entail_all(align).   % similarly: entail_some(align, 1-200)
 or even setting the rule application limit (RAL) in order to stop a tableau after the rule application limit is reached.
 The default RAL is 400.  
 ```
-parList([ral(100)]), entail_all(align).   % or combine it with parallel proving
+parList([ral(50)]), entail_all(align).   % or combine it with parallel proving
 ```
+This command takes ca. 30 seconds to judge 500 SICK problems for a 2.7GHz CPU.
+
 
 ### Obtaining Lambda Logical Forms
 
@@ -110,21 +113,22 @@ After you get into the prolog environment by:
 ```
 swipl -f main.pl -l ccg_sen_d/SICK_trial_ccg.pl ccg_sen_d/SICK_trial_sen.pl
 ```
-You can obtain LLFs in XML format by running:   
+You can obtain LLFs in XML and (optional) HTML formats by running:   
 ```
-xml_probs_llfs([4,24,211], 'My_LLFs').    % or xml_probs_llfs([4,24,211]) where 'RTE_LLF' is a default file name 
+parList([html]), xml_probs_llfs([4,24,211], 'My_LLFs').    % or xml_probs_llfs([4,24,211]) where 'RTE_LLF' is a default file name 
 ```
 This will create `xml/My_LLFs.xml` which contains a CCG (derivation) tree, a CCG term, a corrected CCG term and the first LLF (1LLF) for each sentence of the RTE problems [4,24,211].
-Use `parList([html])` before `xml_probs_llfs` and you will get an HTML output fopr these terms in `xml/My_LLFs.html`
+Due to `parList([html])`, you will also get an HTML output for these terms in `xml/My_LLFs.html`.
+In order to get HTML files the script uses `xsltproc`.
 You can get exactly these quadruples of terms according to the sentence IDs too:  
 ```
-xml_senIDs_llfs(1-6, 'My_LLFs').    % or xml_senIDs_llfs([1,2,3,4,5,6], 'My_LLFs') or even omitting the file name 
+parList([html]), xml_senIDs_llfs(1-6, 'My_LLFs').    % or xml_senIDs_llfs([1,2,3,4,5,6], 'My_LLFs') or even omitting the file name 
 ```
 Because the first six sentences coincide the sentences of the first three RTE problems in the RTE dataset (i.e. two sentences per problem).
 To get CCG trees, CCG terms, corrected CCG terms and 1LLFs for all sentences in the dataset, use:
 ```
-xml_senIDs_llfs(_, 'All_LLFs').                    % only XML file
-parList([html]), xml_senIDs_llfs(_, 'All_LLFs').   % XML and HTML files
+parList([]), xml_senIDs_llfs(_, 'All_LLFs').                    % only XML file
+parList([html]), xml_senIDs_llfs(_, 'All_LLFs').   % XML and HTML files, XSL transformation will take some time
 ```
 
 
