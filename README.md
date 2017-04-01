@@ -10,6 +10,9 @@ ____________    ________             ___________      ________________________  
 |Hypothesis|--->|Parser|------------>|Generator|----->|  for Natural Logic   |--->|relation|
 ‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾ 
 ```
+* For research matters see [References](#references)
+* [Quick usage of LangPro](#running-natural-language-theorem-prover)
+* [Quickly get LLFs](#obtaining-lambda-logical-forms)
 
 
 ## Quick Usage
@@ -136,3 +139,31 @@ parList([html]), xml_senIDs_llfs(_, 'All_LLFs').   % XML and HTML files, XSL tra
 
 
 ### More instructions comming soon
+
+## References
+
+5. R. Muskens (2010): [An Analytic Tableau System for Natural Logic](http://link.springer.com/chapter/10.1007/978-3-642-14287-1_11). LNCS, Vol. 6042, Springer.
+
+   `Proposes to use a tableau system for natural logic`
+
+1. L. Abzianidze (2016): [Natural Solution to FraCaS Entailment Problems](https://aclweb.org/anthology/S/S16/S16-2007.pdf). *SEM.
+2. L. Abzianidze (2015): [A Tableau Prover for Natural Logic and Language](http://www.aclweb.org/anthology/D15-1296.pdf). EMNLP.
+
+   `Describes the theprem prover LangPro and reports its performance on the SICK and FraCaS datasets`
+
+4. M. Lewis & M. Steedman (2014): A* CCG Parsing with a Supertag-factored Model. EMNLP.
+6. M. Honnibal, J. R. Curran, and J. Bos (2010): Rebanking CCGbank for Improved NP Interpretation. ACL (48).
+7. S. Clark and J. R. Curran (2007): Wide-Coverage Efficient Statistical Parsing with CCG and Log-Linear Models. Computational Linguistics, 33(4).
+
+   `Describes EasyCCG and C&C parsers and their statistical models` 
+   
+8. Ch. Fellbaum eds. (1998): WordNet: an Electronic Lexical Database. MIT press.
+
+   `WordNet which is used as a lexical knowledge database in the prover`
+
+9. Cooper,  R.,  Crouch,  D.,  Eijck,  J.  V.,  Fox,  C.,  Genabith,  J.  V.,  Jaspars,  J.,  Kamp,  H., Milward, D., Pinkal, M., Poesio, M., Pulman, S., Briscoe, T., Maier, H., and Konrad, K. (1996). FraCaS: A Framework for Computational Semantics. Deliverable D16.
+9. The FraCaS problems converted in [xml](https://nlp.stanford.edu/~wcmac/downloads/fracas.xml) by B. MacCartney.
+9. Marelli,  M.,  Menini,  S.,  Baroni,  M.,  Bentivogli,  L.,  Bernardi,  R.,  and  Zamparelli,  R. (2014b).  A sick cure for the evaluation of compositional distributional semantic models. LREC'14.
+
+   `The FraCaS and SICK textual entailment datasets which are use for evaluating the theorem prover`
+
