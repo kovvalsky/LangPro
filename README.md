@@ -1,6 +1,6 @@
 # LangPro: Natural Language Theorem Prover
 LangPro is a tableau-based theorem prover for natural logic and language.
-See the [online demo](http://naturallogic.pro/langpro).
+See the [online demo](http://naturallogic.pro/langpro) (currently down due to the migration to a new server).
 
 Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment` (i.e. `yes`), `contradiction` (i.e. `no`) or `neutral` (i.e. `unknown`).  
 For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicted below: 
