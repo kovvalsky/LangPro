@@ -1,6 +1,6 @@
 # LangPro: Natural Language Theorem Prover
 LangPro is a tableau-based theorem prover for natural logic and language.
-See the [online demo](http://naturallogic.pro/langpro).
+See the [online demo](http://naturallogic.pro/langpro) (temporarily out of order).
 
 Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment` (i.e. `yes`), `contradiction` (i.e. `no`) or `neutral` (i.e. `unknown`).  
 For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicted below: 
@@ -105,6 +105,19 @@ parList([ral(100)]), entail_all(align).   % or combine it with parallel proving
 
 ### Obtaining Lambda Logical Forms
 
+#### Lambda Logical Forms for a user input
+This procedure assumes that you have the working [C&C](http://www.cl.cam.ac.uk/~sc609/candc-1.00.html) or [easyCCG](https://github.com/mikelewis0/easyccg) parsers.
+The pipeline `LLFgen` that uses one of the CCG parsers and LangPro's LLF generator component is run as:  
+```
+echo "All hell ca n't stop us now" | ./pipeline/LLFgen.perl  --candc "<C&C_command_that_parses_raw_text_and_returns_prolog_format_for_boxer>"
+```
+The LLFgen expects tokenized text. The C&C command can be `candc/bin/candc --models candc/models --candc-printer boxer --candc-parser-noisy_rules=false`, for example. Use `--html` option to get a nice human readable format of LLFs (and other intermediate representations).
+```
+echo "All hell can't stop us now" | ./pipeline/LLFgen.perl  --tok --html LLFs.html --candc "<C&C_command>"
+```
+To use an in-built (very) shallow tokenizer use `--tok` option.
+
+#### Lambda Logical Forms for the SICK or FraCaS datasets
 In case you are interested in logical forms used by the prover, you can obtain them from CCG derivations.
 After you get into the prolog environment by:
 ```
