@@ -9,7 +9,8 @@
 :- multifile disj_/2.
 :- discontiguous disj_/2.
 
-:- ensure_loaded(['my_word_net', 'disjoint']).
+:- ensure_loaded([%'my_word_net', 
+				  'disjoint']).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           	ISA Network
