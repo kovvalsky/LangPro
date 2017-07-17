@@ -115,7 +115,7 @@ The LLFgen expects tokenized text. The C&C command can be `candc/bin/candc --mod
 ```
 echo "All hell can't stop us now" | ./pipeline/LLFgen.perl  --tok --html LLFs.html --candc "<C&C_command>"
 ```
-To use an in-built (very) shallow tokenizer use `--tok` option.
+To use an in-built (very) shallow tokenizer use `--tok` option. For more details about the usage of the pipeline see `--help` option.
 
 #### Lambda Logical Forms for the SICK or FraCaS datasets
 In case you are interested in logical forms used by the prover, you can obtain them from CCG derivations.
