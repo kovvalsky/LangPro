@@ -21,6 +21,7 @@
 				  bag_of_words,	
 				  ling,
 				  %nattableau,
+				  %kb_induction,
 				  tt_nattableau,
 				  ttterm_preds,	
 				  type_hierarchy,		
@@ -119,7 +120,7 @@ parList(Parameters) :-
 %  EffCr([nonBr, equi, nonProd, nonCons])	defining an effciency criterion 
 %  eccg				    latex trees are probted in different tex file
 %  ss([...])			list of frequent sysnsets to choose 
-% allInt				All noun modifeirs are intersective
+%  allInt				All noun modifeirs are intersective
 
 
 

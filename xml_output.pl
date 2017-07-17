@@ -31,21 +31,24 @@ xml_probs_llfs(Prob_IDs, XMLFile) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Given SenIDs, write corresponding CCG trees,
-% CCG terms and LLFs in a XML file
+% CCG terms and LLFs in an XML file
 xml_senIDs_llfs(List_Int) :- 
 	xml_senIDs_llfs(List_Int, 'CCG_to_LLF').
 
 xml_senIDs_llfs(List_Int, XMLFile) :-
 	listInt_to_id_ccgs(List_Int, CCG_IDs),
-	( exists_directory('xml') -> true; make_directory('xml') ),
-	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName), 
-	open(FullFileName, write, S, [encoding(utf8)]),
+	( current_output(XMLFile) ->
+		S = XMLFile
+	; ( exists_directory('xml') -> true; make_directory('xml') ),
+		atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName), 
+		open(FullFileName, write, S, [encoding(utf8)])
+	),
 	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
 	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/ttterms.xsl"?>\n'),
 	write(S, '<parsed_sentences>\n'),
 	xml_ccgIDs_to_llfs(S, CCG_IDs ),
 	write(S, '</parsed_sentences>\n'),
-	close(S),
+	( current_output(XMLFile) -> true; close(S) ), % necessary?
 	( debMode('html') -> 
 		atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', XMLFile, '.html'], ShellCommand),
 		%shell('xsltproc xml/tableau.xml -o xml/tableau.html').	

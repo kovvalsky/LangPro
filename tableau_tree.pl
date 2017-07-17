@@ -7,7 +7,7 @@ stats_from_tree(Tree, Stats) :-
 	stats_from_tree_step(Init_Stats, Tree, St),
 	St = s(Br_Num, RuleApps, Max_Id),
 	list_to_set(RuleApps, RuleApps_Set),
-	remove([], RuleApps_Set, RuleApps_Set_1),
+	discard([], RuleApps_Set, RuleApps_Set_1),
 	length(RuleApps_Set_1, Len),
 	Stats = s(Br_Num, Len, Max_Id). 
 

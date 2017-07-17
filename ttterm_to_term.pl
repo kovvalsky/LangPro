@@ -90,10 +90,9 @@ ttTermList_to_prettyTermList([], []).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TTterm or TCterm expression to lambda term
-%ttTerm_to_prettyTerm(AtomTT, Atom) :-
-%	var(AtomTT),
-%	!,
-%	fail.
+ttTerm_to_prettyTerm(Var, Var) :- %might cause some problems
+	var(Var),
+	!.
 
 ttTerm_to_prettyTerm(AtomTT, Atom) :-
 	AtomTT =.. [_, Atom, _],

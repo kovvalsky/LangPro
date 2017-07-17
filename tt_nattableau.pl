@@ -25,7 +25,7 @@ tree_structure(nil).
 				  gui_tree, % remove for compilation for online		
 				  % swipl -q --goal=main --toplevel=halt --stand_alone=true --foreign=save -o langpro -c llf2.pl
 				  latex, 
-				  test_suite,
+				  %test_suite, 
 				  user_preds,
 				  xml_output,
 				  closure_ids

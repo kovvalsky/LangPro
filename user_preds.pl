@@ -23,16 +23,23 @@ true_member(E, List) :-
 % subsumed_member(Element, List) 
 % succeeds when Element is subsumed by a member of a list
 % use for history update for tableau rule applications
+subsumes_memberchk(E, List) :-
+	nonvar(List), 
+	List = [Head | Rest],
+	( subsumes_term(Head, E);  % member subsumes an element
+	  subsumes_memberchk(E, Rest) ),
+	!.
+
 subsumes_member(E, List) :-
 	nonvar(List), 
 	List = [Head | Rest],
 	( subsumes_term(Head, E);  % member subsumes an element
-	  subsumes_member(E, Rest) ),
-	!.
+	  subsumes_member(E, Rest) 
+	).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
-% uncpecified list member
+% unspecified list member
 ul_member(E, List) :-
 	nonvar(List), 
 	List = [Head | Rest],
@@ -201,19 +208,13 @@ term_list_concat(TermList, Atom) :-
 
 
 
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % remove(E, OldList, NewList); 
-% NewList is a result of removing 
-% all occurences of E from OldList;
-% deterministic;
-% based on matching;
-% can be used delete/3 also but it is deprocated I guess
-
+% NewList is a result of removing all occurences of E from OldList;
+% deterministic; based on matching;
+% it can accidentally match E to some element,
+% used when E is not ground
 remove(E, [H | T], NewList) :- 
-	%\+ E \= H, % just checks for matching but does not match it
 	E = H,
 	!,	
 	remove(E, T, NewList).
@@ -224,8 +225,8 @@ remove(E, [H | T], [H | NewList]) :-
 
 remove(_, [], []).
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% similar to remove/3 but dont match E to elements
 discard(E, [H | T], NewList) :- 
 	\+ E \= H, % just checks for matching but does not match it
 	!,	
@@ -237,8 +238,7 @@ discard(E, [H | T], [H | NewList]) :-
 
 discard(_, [], []).
 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 true_remove(E, [H|T], List) :- 
 	E == H, 
 	!,
@@ -266,7 +266,7 @@ remove_first(_, [], []).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 % adds only new elements of List1 to List2 without matching 
 add_new_elements([H | Rest], List, NewList) :-
-	subsumes_member(H, List) -> %!!! before was. this made H specific and can fail adding info if R1<R2 and R2 was done before R1 
+	subsumes_memberchk(H, List) -> %!!! before was. this made H specific and can fail adding info if R1<R2 and R2 was done before R1 
 	%member(X, List), subsumes_term(X, H) ->    % can cause loops  
 		add_new_elements(Rest, List, NewList);
 		add_new_elements(Rest, [H | List], NewList).
