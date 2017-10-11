@@ -10,6 +10,7 @@ ____________    ________             ___________      ________________________  
 |Hypothesis|--->|Parser|------------>|Generator|----->|  for Natural Logic   |--->|relation|
 ‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾ 
 ```
+If you use the theorem prover please cite [Abzianidze (2017)](#emnlp_demo_paper)
 * For research matters see [References](#references)
 * [Quick usage of LangPro](#running-natural-language-theorem-prover)
 * [Quickly get LLFs](#obtaining-lambda-logical-forms)
@@ -146,8 +147,9 @@ parList([html]), xml_senIDs_llfs(_, 'All_LLFs').   % XML and HTML files, XSL tra
 
    `Proposes to use a tableau system for natural logic`
 
-1. L. Abzianidze (2016): [Natural Solution to FraCaS Entailment Problems](https://aclweb.org/anthology/S/S16/S16-2007.pdf). *SEM.
-2. L. Abzianidze (2015): [A Tableau Prover for Natural Logic and Language](http://www.aclweb.org/anthology/D15-1296.pdf). EMNLP.
+1. L. Abzianidze (2017): [LangPro: Natural Language Theorem Prover](https://aclanthology.info/pdf/D/D17/D17-2020.pdf). EMNLP. <a name="emnlp_demo_paper"></a>
+2. L. Abzianidze (2016): [Natural Solution to FraCaS Entailment Problems](https://aclweb.org/anthology/S/S16/S16-2007.pdf). *SEM.
+3. L. Abzianidze (2015): [A Tableau Prover for Natural Logic and Language](http://www.aclweb.org/anthology/D15-1296.pdf). EMNLP.
 
    `Describes the theprem prover LangPro and reports its performance on the SICK and FraCaS datasets`
 
