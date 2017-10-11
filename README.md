@@ -151,7 +151,7 @@ parList([html]), xml_senIDs_llfs(_, 'All_LLFs').   % XML and HTML files, XSL tra
 2. L. Abzianidze (2016): [Natural Solution to FraCaS Entailment Problems](https://aclweb.org/anthology/S/S16/S16-2007.pdf). *SEM.
 3. L. Abzianidze (2015): [A Tableau Prover for Natural Logic and Language](http://www.aclweb.org/anthology/D15-1296.pdf). EMNLP.
 
-   `Describes the theprem prover LangPro and reports its performance on the SICK and FraCaS datasets`
+   `Describe the theprem prover LangPro and reports its performance on the SICK and FraCaS datasets`
 
 4. M. Lewis & M. Steedman (2014): A* CCG Parsing with a Supertag-factored Model. EMNLP.
 6. M. Honnibal, J. R. Curran, and J. Bos (2010): Rebanking CCGbank for Improved NP Interpretation. ACL (48).
