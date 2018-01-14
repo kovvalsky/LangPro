@@ -227,9 +227,12 @@ generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
 		ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)),
 		% temporal, needs only names		
 		extract_lex_NNPs_ttTerms(Nodes, Lexicon, Names), %term_to_atom(Lexicon, At), writeln(At), 
-		append(Names, Sig, Signature), %!!! John from term, is added to Signature and doesnt have to wait for Arg push application
+		findall( (Name,NameType), member((Name,NameType,_,_), Names), NamesSig ),
+		append(NamesSig, Sig, Signature), %!!! John from term, is added to Signature and doesnt have to wait for Arg push application
 		%append(Names, Sig, Signa), findall(X, (member(X, Signa), \+atomic_list_concat([_,_|_], '@', X)), Signature), % avoids 's@man'
-		nodes_to_SigBranch_tree_id(Nodes, Signature, Br, Tree, Node_Id),
+		( debMode('ne_info') -> ne_info_as_nodes(Names, Ne_nodes); Ne_nodes = [] ),
+		append(Nodes, Ne_nodes, TreeNodes),
+		nodes_to_SigBranch_tree_id(TreeNodes, Signature, Br, Tree, Node_Id),
 		%( debMode('lex') -> report([Lexicon]); true),
 		%( debMode('subWN') -> subWN_from_wn(Lexicon); rels_from_wn(Lexicon) ), 
 		Count = [const_id(Ent_Id, _, Con_Id, _), node_id(Node_Id, _)],
@@ -269,8 +272,26 @@ generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
 	.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% information from named entity tags are used as nodes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ne_info_as_nodes([], []).
 
-
+ne_info_as_nodes([(Name,'e',POS,NE) | Rest], [HeadNode|RestNodes]) :- % should be before normalization
+	!,
+	( POS = 'PRP' ->
+		HeadNode = nd([], (tlp('person','person','I-NP','O','O'), n), [(Name,e)], true);
+	  ( (NE,Lemma) = ('I-PER','person');
+        (NE,Lemma) = ('I-ORG','organization');
+        (NE,Lemma) = ('I-LOC','location') 
+	  ) ->
+		HeadNode = nd([], (tlp(Lemma,Lemma,'I-NP','O','O'), n), [(Name,e)], true)
+	),	
+	ne_info_as_nodes(Rest, RestNodes).
+	
+ne_info_as_nodes([_|Rest], Nodes) :-
+	ne_info_as_nodes(Rest, Nodes).
+	
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

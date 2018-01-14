@@ -60,13 +60,13 @@ latex_ccgID_llfs(S, CCG_ID, TTterm_ID) :-
 	correct_ccgTerm(CCGTerm_final, Corr_CCGTerm_final),
 	print_used_lexical_rules(Id, Corr_CCGTerm_final),	% print
 	latex_ttTerm_print_tree(S, 2, Corr_CCGTerm_final),	% print
-	%% gen_quant_tt(Corr_CCGTerm_final, GQTTs),			% sick-train 7618 loops here
-	%% maplist( latex_ttTerm_print_tree(S, 2), GQTTs ),	% print all GQ versions
-	%% GQTTs = [GQTT|_],
-	%% maplist( ttTerm_to_latexTerm, GQTTs, LatexTerms), maplist( writeln(S), LatexTerms). 
-	once_gen_quant_tt(Corr_CCGTerm_final, GQTT),
-	ttTerm_to_latexTerm(GQTT, LatexTerm), writeln(S, LatexTerm), writeln(S, '\n'), % pronts first LLF as a term
-	latex_ttTerm_print_tree(S, 6, GQTT).				% print the first GQ version
+	gen_quant_tt(Corr_CCGTerm_final, GQTTs),			% sick-train 7618 loops here
+	maplist( latex_ttTerm_print_tree(S, 2), GQTTs ),	% print all GQ versions
+	GQTTs = [GQTT|_],
+	maplist( ttTerm_to_latexTerm, GQTTs, LatexTerms), maplist( writeln(S), LatexTerms). 
+	%once_gen_quant_tt(Corr_CCGTerm_final, GQTT),
+	%ttTerm_to_latexTerm(GQTT, LatexTerm), writeln(S, LatexTerm), writeln(S, '\n'), % pronts first LLF as a term
+	%latex_ttTerm_print_tree(S, 6, GQTT).				% print the first GQ version
 
 
 

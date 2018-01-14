@@ -313,15 +313,16 @@ extract_LemPos_ttNNP_ttTerm((TT1@TT2,Type), Old_Lex, New_Lex, Old_NNPs, New_NNPs
 	%append([NNPs1, NNPs2, Old_NNPs], New_NNPs).
 
 extract_LemPos_ttNNP_ttTerm((Term,Type), Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
-	Term = tlp(_,Lemma,POS,_,_), 
+	Term = tlp(_,Lemma,POS,_,NE), 
 	!,
 	Temp_Lex = [(Lemma,POS) | Old_Lex],
 	( Type = n:_~>n:_, \+atom_chars(POS, ['J','J'|_]) -> % sick-9067: dirty:NN:n->n
 		New_Lex = [(Lemma,'JJ') | Temp_Lex]
 	; New_Lex = Temp_Lex
 	),
-	( ((Type = np:F, F \= thr); Type = e) ->
-		New_NNPs = [(Term,Type), (Lemma,e) | Old_NNPs] % use debmode for avoiding doubling of entities
+	( ((Type = np:F, F \= thr); Type = e) -> %possessives are not capyured
+		%New_NNPs = [(Term,Type,POS,NE), (Lemma,e,POS,NE) | Old_NNPs] % use debmode for avoiding doubling of entities
+		New_NNPs = [(Term,e,POS,NE) | Old_NNPs] % use debmode for avoiding doubling of entities
 	;	New_NNPs = Old_NNPs
 	).
 
