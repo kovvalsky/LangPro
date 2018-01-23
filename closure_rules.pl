@@ -30,15 +30,15 @@ r(cl_subsumption, 	closure, _, _Lexicon, KB,
 	 			atom(Term1),
 				atom(Term2),	 
 				isa(Term1, Term2, KB),
-				\+disjoint(Term1, Term2, KB) % otherwise weird entailments, as wordnet is too vague
+				not_disjoint(Term1, Term2, KB) % otherwise weird entailments, as wordnet is too vague
 				%Term1 =@= Term2 % no background knowledge
 			% for cases when tokens are the same but lemmas are different, % sick-4330
 			;   TT1 = (tlp(Tk1,_,_,_,_),_), 
 				TT2 = (tlp(Tk2,_,_,_,_),_), 
 				isa(Tk1, Tk2, KB),
-				\+disjoint(Tk1, Tk2, KB)
+				not_disjoint(Tk1, Tk2, KB)
 	 		%alpha(Norm1, Norm2)
-			), !. 
+			).
 
 % look at c2 c1 = check c2 c1,  sick-3941, 3938, trot on and ride 5569, 5568
 % drawbacks: hunt for -> follow, sick-1133, sick-3050 jump onto -> jump
@@ -119,7 +119,8 @@ r(cl_subcat, 	closure, _, _Lexicon, KB,
 				  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB), 
 				  %\+memberchk('VBN', [Pos1, Pos2])	
 				  Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_), 
-				  isa(Lm1,Lm2,KB), \+disjoint(Lm1,Lm2,KB), % for sick-4320,4329 but excidental
+				  isa(Lm1,Lm2,KB),
+				  not_disjoint(Lm1, Lm2, KB), % for sick-4320,4329 but excidental
 				  %Lm1 == Lm2,	
 				  F1 \= 'pss', F2 \= 'pss'
 				)
@@ -231,8 +232,7 @@ r(cl_ppConstAtt_tr,  closure,  _, [[ty(pp)]], _KB,
 			%once(( P =.. [tlp|_]; atom(P) )),
 			ttTerm_to_prettyTerm( (PP,_), PrettyP ),
 			member(Mod, [M|R]), 
-			ttTerm_to_prettyTerm( Mod, PrettyP ),
-			!.
+			ttTerm_to_prettyTerm( Mod, PrettyP ).
 
 
 
@@ -283,7 +283,8 @@ r(cl_ant_n_mod, 		closure, _, _Lexicon, KB,  %fracas-204,205
 		  Sig) ) 
 :-
 			F1 \= 'COL', F2 \= 'COL',
-			ant_wn(Lm1, Lm2, KB), !.
+			Lm1 \= Lm2,
+			ant_wn(Lm1, Lm2, KB).
 
 /*
 % body (of X):Y:False && Lake:Y:True  && Water:X:True  % sick-9631, wrong 338 shows it
@@ -327,7 +328,7 @@ r(cl_do_vp, 	closure, _, [['do']], _KB,
              	subset_only_terms(M3, M1) 
 			;	(TF1, TF2, TF3) = (false, true, true), 
 				subset_only_terms(M1, M3) 
-			), !.
+			).
 			
 
 
@@ -381,11 +382,14 @@ r(cl_disjoint, 	closure, _, _Lexicon, KB,
 			%TT1 = (tlp(_,Term1,_,_,_), Type),
 			%TT2 = (tlp(_,Term2,_,_,_), Type),	
 			atom(Term1),
-			atom(Term2),	 
-			once( 	disjoint(Term1, Term2, KB)%; % gives weird results with subWN: disjoint(frog,hold), disjoint(reserve,reserve)
+			atom(Term2),
+			Term1 \= Term2,	 
+			once( (	disjoint(Term1, Term2, KB),%; % gives weird results with subWN: disjoint(frog,hold), disjoint(reserve,reserve)
 					%disjoint_sym(Term1, Term2)	
-					%(\+isa(Term1, Term2), \+isa(Term2, Term1)) % super strict
-					%\+(isa(Term1, Top), isa(Term2, Top) )
+					not_isa(Term1, Term2, KB), % super strict
+					not_isa(Term2, Term1, KB)
+				  )
+			% antonym?	  	 
 			). 
 
 
@@ -445,8 +449,7 @@ r(cl_exact_num, 	closure, _, [['exactly'], ['just']], _KB,
 			TT_CD1 = (tlp(_,Lm1,POS1,_,_), n:_~>(np:_~>s:_)~>s:_), 
 			member(POS1, ['DT', 'CD']), %frac-299
 			member(Lm_RB, ['exactly', 'just']),
-			is_greater(Lm2, Lm1), 
-			!.
+			is_greater(Lm2, Lm1).
 
 
 % closure for  {"c wears a/s white cloth"=F, "d is white"=T, "c is in d"=T}
@@ -468,7 +471,6 @@ r(cl_wear_cloth, 	closure, _, [['wear']], _KB,
 			( (TF_in, M1, TF_wear, M2) = (true, _, false, [])
 			; (TF_in, M1, TF_wear, M2) = (false, [], true, _)
 			), 
-      		!,
 			( TT_Cloth1 = ((tlp(_,Cloth2,_,_,_COL),_) @ (tlp(_,Cloth,_,_,_),n:_), n:_), %sick-218
 			  ( once(member(Cloth, ['cloth', 'clothes']))
 			  ; word_hyp(Cloth, 'clothing', _) %relaxing constraints
@@ -476,7 +478,7 @@ r(cl_wear_cloth, 	closure, _, [['wear']], _KB,
 			; 
 			  TT_Cloth1 = (tlp(_,Cloth2,_,_,_), _), %sick-9136
 			  word_hyp(Cloth2, 'clothing', _)
-			), !.
+			).
 			  
 % euqlity rule for closure
 			  

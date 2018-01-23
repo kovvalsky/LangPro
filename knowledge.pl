@@ -38,7 +38,7 @@ inst(Inst, Concept) :-
 % not instance
 not_instance(Inst, Concept) :-
 	inst(Inst, Inst_Concept),
-	disjoint(Inst_Concept, Concept). 
+	disjoint_(Inst_Concept, Concept). %!! more genral disjoint here
 
 
 
@@ -54,17 +54,22 @@ derive(A, B, KB) :-
 
 % disjoint based on KB
 disjoint(A, B, KB) :-
-	( memberchk( disj(A, B), KB)
-	; memberchk( disj(B, A), KB)
+	( once((memberchk(disj(A, B), KB); memberchk(disj(B, A), KB)))
 	; disjoint_(A, B) % out of Disj debMode
 	; disjoint_(B, A)
+%	; ant_wn(A, B, KB) makes black & white inconsistent
+	; ( debMode('disj') ->  ( disj_(A, B) ; disj_(B, A) ); false )
 	).
+	
+not_disjoint(A, B, KB) :-
+	\+ul_member(disj(A, B), KB),
+	\+ul_member(disj(A, B), KB).	
 
-
+/*
 % disjoint
 disjoint(A, B) :-
 	disjoint_sym(A, B).
-/* allows weird contradictions: e.g. card trick is person, person disj trick therfore disj
+% allows weird contradictions: e.g. card trick is person, person disj trick therfore disj
 disjoint(A, B) :-
 	isa(A, A1),
 	disjoint_sym(A1, B).
@@ -77,12 +82,13 @@ disjoint(A, B) :-
 	isa(A, A1),
 	isa(B, B1),
 	disjoint_sym(A1, B1).
-*/	
+	
 disjoint_sym(A, B) :-
 	( disjoint_(A, B) 
 	; disjoint_(B, A)
-	; (debMode('disj') ->  ( disj_(A, B) ; disj_(B, A) ); false )
+	; ( debMode('disj') ->  ( disj_(A, B) ; disj_(B, A) ); false )
 	), !.
+*/	
 
 % simplification
 /*disjoint(A, B) :-
@@ -103,9 +109,6 @@ disjoint_(contract, chairman).
 disjoint_('physical entity', 'abstract entity').
 %disjoint_(survey, result).
 
-
-disjoint_(A, B, KB) :-
-	memberchk(dis_wn(A, B), KB).
 /*
 disjoint_(A, B) :- 
 	A \= B,
@@ -251,7 +254,7 @@ isa(A, B, _) :-
 
 isa(A, B, _) :-  % variant, not matching
 	A =@= B,
-	A = B.
+	A = B, !.
 
 isa(A, B, _) :-
 	is_(A, B),
@@ -260,9 +263,11 @@ isa(A, B, _) :-
 % KB without assertions
 isa(W1, W2, KB) :- 
 	memberchk(isa_wn(W1, W2), KB)
-	; memberchk(sim_wn(W1, W2), KB). 
+	; 
+	( is_uList(KB) -> false; memberchk(sim_wn(W1, W2), KB) ). 
 
- 
+not_isa(A, B, KB) :-
+	\+ul_member(isa_wn(A, B), KB). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

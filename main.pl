@@ -21,7 +21,7 @@
 				  bag_of_words,	
 				  ling,
 				  %nattableau,
-				  %kb_induction,
+				  kb_induction,
 				  tt_nattableau,
 				  ttterm_preds,	
 				  type_hierarchy,		
@@ -75,6 +75,17 @@ set_debMode([]).
 parList(Parameters) :-
 	reset_debMode,
 	set_debMode(Parameters).
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% show a problem
+show_problem(PID) :-
+	findall(0, (
+		sen_id(SID, PID, PH, Ans, Text),
+		atomic_list_concat([SID, PID, PH, Ans, Text], ', ', Message),
+		writeln(Message)
+		), List),
+	( List = [] -> writeln('No Problem exists with this ID'); true ).
+
 	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 				List of Parameters

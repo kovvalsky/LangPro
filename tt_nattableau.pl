@@ -132,7 +132,7 @@ subtract_nodes(NodeList, CutBrNodes, NewFilteredCutBrNodes, NodeList_pId) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 % set the inventory of rules based on lexicon
-select_relevant_rules(_Lexicon, [], []). 
+select_relevant_rules(_Lexicon, [], []) :- !. 
 
 select_relevant_rules(Lexicon, [R | Rest], NewRules) :-
 	rule_is_relevant(Lexicon, R) ->
@@ -530,15 +530,13 @@ findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB) :-
 	%BrHead = br(Head, Sig),	
 	%!!! no preference to equivalent rules wrt ti impl and gamma rules?
 	member(RuleId, Rules),
-	clause( r(RuleId, RuleType:_, (AppInfo, Cids), _, _, br(Head, Sig) ===> Body),   _Constraints),
+	clause( r(RuleId, RuleType:_, (AppInfo, Cids), _, _, br(Head, Sig) ===> Body),   _Constraints ),
 	%findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig),
 	findHeadNodes(BrNodes, Head, IDs),
 	( RuleType = gamma -> 
 		r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body)
-		%(Constraints)
 	  ; \+memberchk(h(RuleId, IDs, _), Hist),
-		%once(Constraints)
-		once( r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body) )
+		r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body)
 	),
 	%assert(branch_signature(Sig)),
 	%Constraints,
@@ -561,7 +559,7 @@ findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % very first priority order
-
+/*
 findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig) :-
 	member(RuleId, Rules), % searching nonBranching nonFreshConstant
 	  	clause( r(RuleId, RuleType:non, (AppInfo, Cids), _, _, br(Head, Sig) ===> br(N, S)),   _Constraints), 
@@ -577,7 +575,7 @@ findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig) :-
 	; member(RuleId, Rules), % searching Branching FreshConstant	
 	    clause( r(RuleId, RuleType:new, (AppInfo, Cids), _, _, br(Head, Sig) ===> [H|T]),   _Constraints), 
 		Body = [H|T].
-
+*/
 
 
 
@@ -588,7 +586,8 @@ findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig) :-
 findHeadNodes(BrNodes, [Head | Tail], [Id | ID_tail]) :- % also usable in reverse
 	member(ndId(Head, Id), BrNodes),
 	\+cyclic_term(Head), % can be solved by introducing Var(x) for X
-	findHeadNodes(BrNodes, Tail, ID_tail).
+	findHeadNodes(BrNodes, Tail, ID_tail),
+	\+memberchk(Id, ID_tail).
 	
 findHeadNodes(_, [], []). 
 
@@ -776,7 +775,7 @@ apply_closure_rules(IdList, Branch, ClRs, Cl_IDs, ClRule, KB) :-
 	clause( r(ClRule, closure, _, _, _, br(Head, Sig) ===> Body), _Constraints ),
 	find_head_nodes_with_ids(BrNodes, Head, [Id | Rest]),
 	\+memberchk(Id, Rest),
-	r(ClRule, closure, _, _, KB, br(Head, Sig) ===> Body),
+	once(r(ClRule, closure, _, _, KB, br(Head, Sig) ===> Body)),
 	Cl_IDs = [Id | Rest], 
 	!.
 

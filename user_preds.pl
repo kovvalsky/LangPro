@@ -80,7 +80,10 @@ remove_varTail_from_uList(UList, List) :-
 	append(List, Var, UList),
 	var(Var), !.
 
-
+is_uList(UList) :-
+	append(_, Var, UList),
+	var(Var), 
+	!.
 
 
 remove_adjacent_duplicates([H,H|Rest], Rest1) :-
@@ -188,13 +191,11 @@ report(MessageList) :-
 	%atomic_list_concat(AtomList, Message),
 	with_output_to(atom(Message), maplist(write, MessageList)),
 	writeln(Message).
-
-report(Message, Term) :-
-	\+is_list(Message),
-	term_to_atom(Term, Atom),
-	write(Message),
-	writeln(Atom).
-
+	
+report(MessageList, List) :-
+    report(MessageList),
+	with_output_to(atom(Print), maplist(writeln, List)),
+	writeln(Print).
 
 
 
@@ -401,6 +402,7 @@ match_lowerCase(A, B) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % choose element
+% the same as select/2 of swipl?
 
 choose([H|Rest], H, Rest).
 
@@ -427,6 +429,16 @@ shuffle_list([], []).
 shuffle_list(List, [C|Shuff]) :-
 	choose(List, C, Rest),	
 	shuffle_list(Rest, Shuff).
+	
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% get all elements shared by a set of lists
+shared_members(Members, Lists) :-
+    Lists = [] -> 
+      Members = []
+    ; findall(M, (maplist(member(M), Lists)), Members).
+    
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % C1 is replaced by C2 in Nodes and results in NewNodes
@@ -667,8 +679,76 @@ listInt_to_id_ccgs(List_Int, CCGs) :-
 	; report(["Error: Wrong format of the argument: ", List_Int]),
 	  fail	 
 	).
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% List to sorted frequency list. List expected not to have free variables
+% Freq list has count-element as its members
+list_to_freqList(List, Freq) :-
+    %copy_term(List, L), % to avoid accidental bindings in List
+	findall(X_Count-X, (
+	    member(X, List),
+	    findall(1, member(X, List), X_Count_List),
+	    length(X_Count_List, X_Count)  
+	    ), Count_Terms),
+	sort(Count_Terms, Sorted_Count_Terms),
+	keysort(Sorted_Count_Terms, Freq).
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% removes duplicates of symmetric predicates from the ord_list
+% result is again an ord_list
+rm_sym_preds_from_ord([], []).
+
+rm_sym_preds_from_ord([H1|Rest], [H1|List]) :-
+	H1 =.. [Pred, Arg1, Arg2],
+	( memberchk(Pred, [disj]) -> % list of symmetric predicates
+	    H2 =.. [Pred, Arg2, Arg1], 
+		select(H2, Rest, RestRest),
+		!,
+		rm_sym_preds_from_ord(RestRest, List)  
+	  ; List = Rest
+	).
+	
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% only for singleton set of facts
+/*
+rm_redundant_set_of_facts(Set_Of_Facts, Clean) :-
+	findall(X, (
+		member(X, Set_Of_Facts),
+		member(Y, Set_Of_Facts),
+		X \= Y,
+		subsumes_facts(X, Y)	
+		), Del).
+*/
+rm_equi_set_of_facts_([], []).
+
+%subsumes_facts(X, Y)
+
+rm_equi_set_of_facts_([[Fact]|Rest], [[Fact]|List]) :-
+	Fact =.. [Pred, Arg1, Arg2],
+	memberchk(Pred, [disj, ant_wn]), % list of symmetric predicates
+	H2 =.. [Pred, Arg2, Arg1], 
+	select([H2], Rest, RestRest),
+	!,
+	rm_equi_set_of_facts_(RestRest, List).
+	
+rm_equi_set_of_facts_([[Fact]|Rest], [[Fact]|List]) :-
+	findall(X, (
+		member(X, Rest),
+		\+memberchk(Fact, X)
+		), RestRest),
+	rm_equi_set_of_facts_(RestRest, List),
+	!.	
+	
+rm_equi_set_of_facts_([[F1,F2|R]|Rest], [[F1,F2|R]|List]) :-
+	rm_equi_set_of_facts_(Rest, List). 	
+	
+	
 
 
 
 
 
+	
+	
+	

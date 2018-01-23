@@ -133,7 +133,7 @@ list_solve_entailment( (Id, Answer), (Id, Ans, Closed, Status) ) :-
 			write(Id), write('-no, '), writeln(' pass'), Result = (no, false) ).
 */
 
-solve_entailment(Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) :-
+solve_entailment( Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) :-
 	( Answer = 'undef' -> 
 		Ans = 'unknown'
 	  ; Ans = Answer
@@ -218,6 +218,7 @@ problem_id_list_TTterms(ProbId, List_Prem_TTterms, List_Hypo_TTterms) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % checks on entailment a problem with its Id
 % uses a single reading
+% Status can be ('Ter',Num), ('Lim',Num), 1(=immediately_closed)
 check_problem(KB, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans, Closed, Status, Tree) :-
 	!,
 	( generateTableau(KB, Prem_TTterms, Hypo_TTterms, BrList, Tree, Status) ->
@@ -358,7 +359,8 @@ entail(Align, PrId, _Answer, Provers_Answer, Closed, FinalStatus) :-
 		    (Provers_Answer, Closed, FinalStatus) =  (Align_Prov_Ans, Align_Closed, Align_Status)
         ; (Provers_Answer, Closed, FinalStatus)   =  (NoA_Prov_Ans, NoA_Closed, NoA_Status)
 	    )
-      ), !
+      ), !%,
+      %( debMode('learn') -> kb_induction(Answer, KB, Align_Prem_TTs, Align_Hypo_TTs, [_@_, _]); true )
     ; report(['Inconsistency in node types - entail']),
 	  (Provers_Answer, Closed, FinalStatus) = ('unknown', 'NA', 'Defected')
 	). 

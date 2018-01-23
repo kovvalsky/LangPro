@@ -14,7 +14,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 % Extract semantic relations for KB from WordNet
 kb_from_wn(Lex, KB) :-
-	include(lemPos_in_WordNet, Lex, Lexicon), % lave those that are in WN
+	%include(lemPos_in_WordNet, Lex, Lexicon), % lave those that are in WN
+	findall(Lem_Num, (
+		member(Lem_Pos, Lex),
+		lemPos_in_WordNet(Lem_Pos, Lem_Num)
+		), Lem_Nums),
+	sort(Lem_Nums, Lexicon),	
 	findall_pairs(Lexicon, Pairs),
 	findall(Fact, ( member(X, Pairs), represents_wn_rel(X, Fact) ), KB).
 
@@ -36,11 +41,11 @@ kb_from_wn(Lex, KB) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% checks if (Word, POS) is in wordnet
-lemPos_in_WordNet((Lemma, POS)) :-
-	pos_to_cat_num(POS, Num),
+% checks if (Word, POS) is in wordnet and returns (Lemma, WN_Cat)
+lemPos_in_WordNet((Lemma, POS), (Lemma, WNCatNum)) :-
+	pos_to_cat_num(POS, WNCatNum),
 	s(SS, _, Lemma, _, _, _),
-	atom_chars(SS, [Num |_]),
+	atom_chars(SS, [WNCatNum |_]),
 	!.	
 
 % Takes a lexicon and returns all possible pairs of different ellements 
@@ -79,11 +84,9 @@ pos_to_cat_num(POS, Num) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Takes a pair and checks what relation holds on them
-represents_wn_rel( (Lem1,P1)-(Lem2,P2), Fact ) :-
+represents_wn_rel( (Lem1,Num1)-(Lem2,Num2), Fact ) :-
 	substitute_in_atom(Lem1, '_', ' ', L1),
 	substitute_in_atom(Lem2, '_', ' ', L2),	
-	pos_to_cat_num(P1, Num1),
-	pos_to_cat_num(P2, Num2),
 	( Num1 = Num2, word_hyp(L1, L2, Num1) -> 
 	  	Fact = isa_wn(L1, L2)
 	; debMode('wn_ant'), Num1 = Num2, word_ant(L1, L2, Num1) ->
