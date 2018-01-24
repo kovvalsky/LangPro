@@ -612,7 +612,9 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 	%ground_ccgterms_to_lexicon(), 
 	( debMode('lex') -> report([Lexicon]); true),
 	%( debMode('subWN') -> subWN_from_wn(Lexicon); kb_from_wn(Lexicon, KB) ),
-	kb_from_wn(Lexicon, KB), % extract relevant semantic relations from WN
+	kb_from_wn(Lexicon, KB0), % extract relevant semantic relations from WN
+	induced_knowledge('1st loop shortest', KBi), % add induced knowledge
+	append(KB0, KBi, KB),
 	( debMode('pr_kb') -> report(['KB: ', KB]); true ),
 	( debMode('no_gq_llfs') ->
 		(Prems, Hypos) = (PremCCGTerms, HypoCCGTerms)

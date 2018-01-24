@@ -9,21 +9,46 @@
 %	  ; problem_to_ttTerms('no_align', PrID, PrTTs, HyTTs, _, _, KB)
 %	),
 
+:- ensure_loaded([induced_knowledge
+				 ]).
+
 :-op(610, xfx, ===>).
 
-kb_induction_all(Align, Check, Answers, KB0, KB) :-
-	findall( PrId, ( sen_id(_, PrId, 'h', Ans, _), member(Ans, Answers) ), PrIds),
-	findall(KB1, 
+
+induce_prove_loop(Align, Check, Answers, KB0, KB, ToSolve, Uns) :-
+	( var(ToSolve) ->
+		findall( PrId, ( sen_id(_, PrId, 'h', Ans, _), member(Ans, Answers) ), ToSolve )
+	; true
+	),
+	kb_induction_all(Align, Check, Answers, KB0, KB1, ToSolve, Uns1),
+	( ToSolve = Uns1 ->
+		report(['No improvemnet. Stop!'])
+	; length(ToSolve, To),
+		length(Uns1, Un),
+		format('Improvement from ~w to ~w. Continue~n', [To, Un]),
+	  	append(KB0, KB1, KB2),
+		induce_prove_loop(Align, Check, Answers, KB2, KB, Uns1, Uns)
+	). 
+	 
+
+kb_induction_all(Align, Check, Answers, KB0, KB, PrList, Unsolved) :-
+	findall( PrId, ( sen_id(_, PrId, 'h', Ans, _), memberchk(PrId, PrList), member(Ans, Answers) ), PrIds),
+	findall(UnSolve-KB1, 
 	  ( member(PrId, PrIds),
-	    kb_induction_prob(Align, Check, PrId, KB0, KB1)
-	  ), KBs),  
+	    kb_induction_prob(Align, Check, PrId, KB0, List_KB, UnSolve),
+	    ( List_KB = [] -> KB1 = [];  List_KB = [KB1|_] )
+	  ), Uns_KBs),  
+	two_lists_to_list_of_pairs(Uns, KBs, Uns_KBs),
+	include(integer, Uns, Unsolved),
     append(KBs, KB_list),
     list_to_set(KB_list, KB),
     list_to_freqList(KB_list, Freq_KB),
-	report(['%All Knowledge-1'], Freq_KB).
+	report(['%All Knowledge-1:'], Freq_KB),
+	length(Unsolved, N),
+	report(['%Unsolved Problems (', N, '):' | Unsolved]).
 
 %
-kb_induction_prob(Align, ConstCheck, PrId, KB0, KB) :-
+kb_induction_prob(Align, ConstCheck, PrId, KB0, Sorted_KB, NotSolved) :-
     sen_id(_, PrId, _, Ans, _),
     findall(Sen, (
 		sen_id(_, PrId, PH, _, Sent),
@@ -60,15 +85,19 @@ kb_induction_prob(Align, ConstCheck, PrId, KB0, KB) :-
 		), KB)
 	; KB = KB_test
 	),	
+	sort_list_length(KB, Sorted_KB),
 	term_to_atom(KB3, At_KB3),
 	( Branches = [] -> 
-		format('~w (~w): closed [~w]~n', [PrId, Ans, Status])
-	; KB = [] -> 
+		format('~w (~w): closed [~w]~n', [PrId, Ans, Status]),
+		NotSolved = 'closed'
+	; Sorted_KB = [] -> 
 		format('~w (~w): no KB [~w], KB: ~w~n', [PrId, Ans, Status, At_KB3]),
+		NotSolved = PrId, 
 		maplist(writeln, Sentences)
 	;	format('~w (~w): KB found [~w], KB: ~w~n', [PrId, Ans, Status, At_KB3]),
+		NotSolved = 'solved',
 		maplist(writeln, Sentences),
-		report(KB) 
+		report(Sorted_KB) 
 	),
 	format('~`-t~50|~n').
 	

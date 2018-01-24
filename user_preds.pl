@@ -744,9 +744,23 @@ rm_equi_set_of_facts_([[F1,F2|R]|Rest], [[F1,F2|R]|List]) :-
 	rm_equi_set_of_facts_(Rest, List). 	
 	
 	
+% All elements of the first list are elemenst of the second list
+sublist_of_list([], _) :-
+	!.	
 
+sublist_of_list([X|Rest], L) :-
+	!,
+	memberchk(X, L),
+	sublist_of_list(Rest, L).
 
-
+% sort list of lists according to length
+sort_list_length(List, Sorted) :-
+	findall(N-L, (
+		member(L, List),
+		length(L, N)
+		), Length_List),
+	keysort(Length_List, Sorted_Length_List),
+	two_lists_to_list_of_pairs(_Len, Sorted, Sorted_Length_List).
 
 
 	
