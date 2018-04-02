@@ -1,0 +1,15 @@
+symetry!!!!
+hyp(202422663,202423762).
+hyp(202423762,202422663).
+just this connection exists related to these sysnsets
+
+removing hyp(202423762,202422663).
+
+s(202423762,1,'inhibit',v,4,0).
+s(202423762,2,'bottle up',v,1,0).
+s(202423762,3,'suppress',v,3,1).
+
+s(202422663,1,'restrain',v,1,11).
+s(202422663,2,'keep',v,14,2).
+s(202422663,3,'keep back',v,1,0).
+s(202422663,4,'hold back',v,2,1).

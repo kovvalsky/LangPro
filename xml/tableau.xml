@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="tableau.xsl"?>
+<!DOCTYPE tableau SYSTEM "tableau.dtd">
+<tableau>
+<problem id="345" answer="yes" >
+<premise id="379" >Smith saw Jones sign the contract and his secretary make a copy</premise>
+<conclusion id="380" >Smith saw Jones sign the contract</conclusion>
+</problem>
+<tree>
+<node absId="1" id="1" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@copy@(&#955;_G60,make@_G60@ (who@ (see@jones@(&#955;_G243,and@ (his@secretary)@ (the@contract)@(&#955;_G366,sign@_G366@_G243)))@smith))</llf>
+<argList>
+</argList>
+</formula>
+</node>
+<tree>
+<node absId="2" id="2" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>see@jones@(&#955;_G580,the@contract@(&#955;_G643,sign@_G643@_G580))@smith</llf>
+<argList>
+</argList>
+</formula>
+</node>
+<tree>
+<node absId="3" id="3" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>see@jones@(&#955;_G580,the@contract@(&#955;_G643,sign@_G643@_G580))</llf>
+<argList>
+<arg>smith</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>2</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="4" id="4" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>copy</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>1</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="5" id="5" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G60,make@_G60@ (who@ (see@jones@(&#955;_G243,and@ (his@secretary)@ (the@contract)@(&#955;_G366,sign@_G366@_G243)))@smith))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>1</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="6" id="6" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>make@c1@ (who@ (see@jones@(&#955;_G243,and@ (his@secretary)@ (the@contract)@(&#955;_G366,sign@_G366@_G243)))@smith)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>5</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="7" id="7" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>f>or@'the@ (system@failure)'))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>1</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="8" id="8" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>blame@ (for@'the@ (system@failure)')</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="aux_verb" >
+<idList>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="9" id="9" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>for@'the@ (system@failure)'@blame</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="vp_pp" >
+<idList>
+<id>8</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="10" id="10" >
+<formula sign="true" >
+<modList>
+<mod>for@'the@ (system@failure)'</mod>
+</modList>
+<llf>blame</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_mod" >
+<idList>
+<id>9</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="9" id="9" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>for@'the@ (system@failure)'@blame</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="mods_vp" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="11" id="11" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>for@'the@ (system@failure)'@blame</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="mods_vp" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="10" id="10" >
+<formula sign="true" >
+<modList>
+<mod>for@'the@ (system@failure)'</mod>
+</modList>
+<llf>blame</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_mod" >
+<idList>
+<id>11</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="12" id="12" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>or@more@one@'software@fault'</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>5</id>
+</idList>
+<oldConstList>
+<oldConst>c1</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="15" id="15" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>or@ (more@'software@fault')@ (one@'software@fault')</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="arg_dist" >
+<idList>
+<id>12</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="17" id="17" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>more@'software@fault'</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="fl_disj_or" >
+<idList>
+<id>15</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="18" id="18" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>one@'software@fault'</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="fl_disj_or" >
+<idList>
+<id>15</id>
+</idList>
+</source>
+</node>
+<tree>
+<node>
+<model>
+MODEL
+</model>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="13" id="13" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>or@more@one@'software@fault'</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>5</id>
+</idList>
+<oldConstList>
+<oldConst>c1</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="14" id="14" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G365,blame@ (on@_G365)@'the@ (system@failure)')</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>5</id>
+</idList>
+<oldConstList>
+<oldConst>c1</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="16" id="16" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>blame@ (on@c1)@'the@ (system@failure)'</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>14</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="6" id="6" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>'software@fault'</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="mod_n_tr" >
+<idList>
+<id>13</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tableau>

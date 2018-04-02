@@ -1,0 +1,65 @@
+table.nonBranch {
+    display:inline-table;
+    white-space: nowrap;
+    text-align:center;
+}
+
+table.Branch {
+    display:inline-table;
+    white-space: nowrap;
+    text-align:center;
+    border-top:1px solid gray;
+    border-left:1px solid gray;
+    border-right:1px solid gray;
+	border-bottom:1px solid gray;
+}
+
+.parent2 {
+    border-bottom:1px solid gray;
+}
+
+.premise {
+    text-align:center;
+}
+
+.conclusion {
+    text-align:center;
+}
+
+.llf {
+    font-family:courier, fixed, monospace;
+    font-weight:bold;
+}
+
+.closer_node {
+    font-family:courier, fixed, monospace;
+    font-weight:bold;
+	border: 2px solid black;
+	background-color:rgb(50,220,50);
+	padding:5px;
+}
+
+.model {
+    font-family:courier, fixed, monospace;
+    font-weight:bold;
+	border: 2px solid black;
+	background-color:rgb(240,70,70);
+	padding:5px;
+}
+
+.info {
+    font-family:arial, helvetica, sans-serif;
+    font-size:12px;
+}
+
+.true {
+    background-color:rgb(210,250,200);
+    padding:5px;
+    display:inline-block;
+}
+
+.false {
+    background-color:rgb(250,210,200);
+    padding:5px;
+    display:inline-block;
+}

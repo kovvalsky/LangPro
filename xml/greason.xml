@@ -1,0 +1,3971 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="tableau.xsl"?>
+<!DOCTYPE tableau SYSTEM "tableau.dtd">
+<tableau>
+<problem id="141" answer="no" >
+<premise id="123" >A group of friends are riding the current in a raft</premise>
+<conclusion id="124" >A group is not riding the current in a raft</conclusion>
+</problem>
+<tree>
+<node absId="1" id="1" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>s@friend@(&#955;_G60,a@ (group@ (of@_G60))@ (be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))))</llf>
+<argList>
+</argList>
+</formula>
+</node>
+<tree>
+<node absId="2" id="2" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@group@ (not@ (be@(&#955;_G678,a@raft@(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@_G678))))</llf>
+<argList>
+</argList>
+</formula>
+</node>
+<tree>
+<node absId="3" id="3" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>2</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="4" id="4" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>not@ (be@(&#955;_G678,a@raft@(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@_G678)))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>2</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="5" id="5" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>be@(&#955;_G678,a@raft@(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@_G678))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="neg_not" >
+<idList>
+<id>4</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="6" id="6" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G678,a@raft@(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@_G678))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="aux_verb" >
+<idList>
+<id>5</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="7" id="7" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>a@raft@(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>6</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="8" id="8" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>friend</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>1</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="9" id="9" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G60,a@ (group@ (of@_G60))@ (be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))))</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>1</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="10" id="10" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@ (group@ (of@c2))@ (be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201)))</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>9</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="11" id="11" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="14" id="14" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group@ (of@c2)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="15" id="15" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="17" id="17" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="aux_verb" >
+<idList>
+<id>15</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="19" id="19" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c3)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>17</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="20" id="20" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2@group</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="vp_pp" >
+<idList>
+<id>14</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="22" id="22" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="mod_n_tr" >
+<idList>
+<id>20</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="22" id="22" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>20</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="24" id="24" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>20</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="22" id="22" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>14</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="26" id="26" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>14</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="24" id="24" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>26</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="31" id="31" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>of@c2</arg>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>14</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="38" id="38" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="47" id="47" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c3)</llf>
+<argList>
+<arg>c5</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="48" id="48" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c5</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="49" id="49" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c5</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="56" id="56" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c5@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>48</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="61" id="61" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>in@c5@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c3</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>47</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="66" id="66" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c5</arg>
+</argList>
+</formula>
+<source rule="fl_a_c" >
+<idList>
+<id>7</id>
+<id>49</id>
+</idList>
+<oldConstList>
+<oldConst>c5</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="56" id="56" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c5@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>66</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="77" id="77" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c5@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>56</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="83" id="83" >
+<formula sign="false" >
+<modList>
+<mod>in@c5</mod>
+</modList>
+<llf>(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_mod" >
+<idList>
+<id>77</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="89" id="89" >
+<formula sign="false" >
+<modList>
+<mod>in@c5</mod>
+</modList>
+<llf>the@current@(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>83</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="95" id="95" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>in@c5@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>61</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="109" id="109" >
+<formula sign="true" >
+<modList>
+<mod>in@c5</mod>
+</modList>
+<llf>(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="push_mod" >
+<idList>
+<id>95</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="125" id="125" >
+<formula sign="true" >
+<modList>
+<mod>in@c5</mod>
+</modList>
+<llf>the@current@(&#955;_G426,ride@_G426@c3)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>109</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="147" id="147" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c5</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="pp_mod_vp_fl" >
+<idList>
+<id>77</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="162" id="162" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in</llf>
+<argList>
+<arg>c5</arg>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>147</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="179" id="179" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>89</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+</tree>
+<tree>
+<node absId="180" id="180" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>89</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="181" id="181" >
+<formula sign="false" >
+<modList>
+<mod>in@c5</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>89</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="148" id="148" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pp_mod_vp_fl" >
+<idList>
+<id>77</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="163" id="163" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>the@current@(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="beta_red" >
+<idList>
+<id>148</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="182" id="182" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>163</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+</tree>
+<tree>
+<node absId="183" id="183" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>163</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="184" id="184" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>163</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="39" id="39" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="40" id="40" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="50" id="50" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c3@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>40</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="57" id="57" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a_c" >
+<idList>
+<id>7</id>
+<id>39</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="50" id="50" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c3@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>57</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="67" id="67" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c3@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>50</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="71" id="71" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_mod" >
+<idList>
+<id>67</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="78" id="78" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>the@current@(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>71</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="84" id="84" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c3</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="pp_mod_vp_fl" >
+<idList>
+<id>67</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="90" id="90" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in</llf>
+<argList>
+<arg>c3</arg>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>84</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="96" id="96" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="110" id="110" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="126" id="126" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c3)</llf>
+<argList>
+<arg>c8</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="127" id="127" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c8</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="128" id="128" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c8</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="149" id="149" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c8@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>127</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="164" id="164" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>in@c8@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c3</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>126</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="185" id="185" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c8</arg>
+</argList>
+</formula>
+<source rule="fl_a_c" >
+<idList>
+<id>7</id>
+<id>128</id>
+</idList>
+<oldConstList>
+<oldConst>c8</oldConst>
+</oldConstList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="111" id="111" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="112" id="112" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="129" id="129" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c3@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>112</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="150" id="150" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>78</id>
+<id>111</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="129" id="129" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c3@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>150</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="186" id="186" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c3</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>129</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="97" id="97" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="98" id="98" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="113" id="113" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>98</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="130" id="130" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>78</id>
+<id>97</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="113" id="113" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>130</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="165" id="165" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c2</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>113</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="187" id="187" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride</llf>
+<argList>
+<arg>c2</arg>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>165</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="85" id="85" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pp_mod_vp_fl" >
+<idList>
+<id>67</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="91" id="91" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>the@current@(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="beta_red" >
+<idList>
+<id>85</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="99" id="99" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>91</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="99" id="99" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="131" id="131" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>91</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="131" id="131" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="166" id="166" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c3)</llf>
+<argList>
+<arg>c11</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="167" id="167" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c11</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="168" id="168" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c11</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>19</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="188" id="188" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c11@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>167</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="151" id="151" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="152" id="152" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node>
+<closer>
+[151,131]
+</closer>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="132" id="132" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>91</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="133" id="133" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>91</id>
+</idList>
+<oldConstList>
+<oldConst>c3</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="153" id="153" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride@c3@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>133</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="169" id="169" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c3</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>78</id>
+<id>132</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="189" id="189" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c3@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>169</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="114" id="114" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="115" id="115" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>78</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node>
+<closer>
+[114,99]
+</closer>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="100" id="100" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>91</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="101" id="101" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>91</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="116" id="116" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>101</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="134" id="134" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>78</id>
+<id>100</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="154" id="154" >
+<formula sign="false" >
+<modList>
+<mod>in@c3</mod>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>134</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="170" id="170" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>91</id>
+<id>100</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="116" id="116" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>170</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="12" id="12" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="13" id="13" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="16" id="16" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c2@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>13</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="18" id="18" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a_c" >
+<idList>
+<id>7</id>
+<id>12</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="16" id="16" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c2@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>18</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="21" id="21" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c2@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>16</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="23" id="23" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_mod" >
+<idList>
+<id>21</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="25" id="25" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>the@current@(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>23</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="27" id="27" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c2</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="pp_mod_vp_fl" >
+<idList>
+<id>21</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="29" id="29" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in</llf>
+<argList>
+<arg>c2</arg>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>27</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="32" id="32" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="41" id="41" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group@ (of@c2)</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="42" id="42" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="51" id="51" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="aux_verb" >
+<idList>
+<id>42</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="58" id="58" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c4)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>51</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="62" id="62" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2@group</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="vp_pp" >
+<idList>
+<id>41</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="68" id="68" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="mod_n_tr" >
+<idList>
+<id>62</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="68" id="68" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>62</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="72" id="72" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>62</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="68" id="68" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>41</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="79" id="79" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>41</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="72" id="72" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>79</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="92" id="92" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>of@c2</arg>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>41</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="102" id="102" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c4</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="117" id="117" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c4</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="135" id="135" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c4)</llf>
+<argList>
+<arg>c9</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>58</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="136" id="136" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c9</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>58</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="137" id="137" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c9</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>58</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="155" id="155" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c9@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>136</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="171" id="171" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>in@c9@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c4</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>135</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="118" id="118" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c4</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="119" id="119" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c4</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="138" id="138" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c4@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>119</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="156" id="156" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>25</id>
+<id>118</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="138" id="138" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c4@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>156</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="103" id="103" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c4</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="104" id="104" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c4</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="120" id="120" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c4@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>104</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="139" id="139" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c4</arg>
+</argList>
+</formula>
+<source rule="fl_a_c" >
+<idList>
+<id>7</id>
+<id>103</id>
+</idList>
+<oldConstList>
+<oldConst>c4</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="120" id="120" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c4@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>139</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="172" id="172" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c4@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>120</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="33" id="33" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="34" id="34" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="43" id="43" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>34</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="52" id="52" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>25</id>
+<id>33</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="43" id="43" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>52</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="63" id="63" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c2</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>43</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="69" id="69" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride</llf>
+<argList>
+<arg>c2</arg>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>63</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="73" id="73" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group@ (of@c2)</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="74" id="74" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="80" id="80" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="aux_verb" >
+<idList>
+<id>74</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="86" id="86" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c7)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>80</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="93" id="93" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2@group</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="vp_pp" >
+<idList>
+<id>73</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="105" id="105" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="mod_n_tr" >
+<idList>
+<id>93</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="105" id="105" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>93</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="121" id="121" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>93</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="105" id="105" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>73</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="140" id="140" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2</llf>
+<argList>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>73</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="121" id="121" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>140</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="173" id="173" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>of@c2</arg>
+<arg>c7</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>73</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="28" id="28" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pp_mod_vp_fl" >
+<idList>
+<id>21</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="30" id="30" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>the@current@(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="beta_red" >
+<idList>
+<id>28</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="35" id="35" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>30</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="35" id="35" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="53" id="53" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group@ (of@c2)</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="54" id="54" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="59" id="59" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="aux_verb" >
+<idList>
+<id>54</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="64" id="64" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c6)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>59</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="70" id="70" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2@group</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="vp_pp" >
+<idList>
+<id>53</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="75" id="75" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="mod_n_tr" >
+<idList>
+<id>70</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="75" id="75" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>70</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="81" id="81" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="pp_mod_n_tr" >
+<idList>
+<id>70</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="75" id="75" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>53</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="87" id="87" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of@c2</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="n_pp_mod" >
+<idList>
+<id>53</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="81" id="81" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>of</llf>
+<argList>
+<arg>c2</arg>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>87</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="106" id="106" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group</llf>
+<argList>
+<arg>of@c2</arg>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>53</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="122" id="122" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="141" id="141" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>30</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="141" id="141" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="174" id="174" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c6)</llf>
+<argList>
+<arg>c12</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>64</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="175" id="175" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c12</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>64</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="176" id="176" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c12</arg>
+</argList>
+</formula>
+<source rule="up_mon_fun_some" >
+<idList>
+<id>64</id>
+<id>7</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="157" id="157" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="158" id="158" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node>
+<closer>
+[157,141]
+</closer>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="142" id="142" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>30</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="143" id="143" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>30</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="159" id="159" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride@c6@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>143</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="177" id="177" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>25</id>
+<id>142</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="123" id="123" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>raft</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="124" id="124" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>7</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="144" id="144" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c6@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>124</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="160" id="160" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G744,in@_G744@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1)</llf>
+<argList>
+<arg>c6</arg>
+</argList>
+</formula>
+<source rule="fl_a_c" >
+<idList>
+<id>7</id>
+<id>123</id>
+</idList>
+<oldConstList>
+<oldConst>c6</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="144" id="144" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>in@c6@(&#955;_G837,the@current@(&#955;_G903,ride@_G903@_G837))@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>160</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="44" id="44" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="45" id="45" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node>
+<closer>
+[44,35]
+</closer>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+<tree>
+<node absId="36" id="36" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>30</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="37" id="37" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>30</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="46" id="46" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>37</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="55" id="55" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>25</id>
+<id>36</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="60" id="60" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>55</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="65" id="65" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="the_c" >
+<idList>
+<id>30</id>
+<id>36</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="46" id="46" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>65</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="76" id="76" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride@c2</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>46</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="82" id="82" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>ride</llf>
+<argList>
+<arg>c2</arg>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>76</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="88" id="88" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c2</llf>
+<argList>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>60</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="94" id="94" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride</llf>
+<argList>
+<arg>c2</arg>
+<arg>c1</arg>
+</argList>
+</formula>
+<source rule="push_arg" >
+<idList>
+<id>88</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="107" id="107" >
+<formula sign="false" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node>
+<closer>
+[107,36]
+</closer>
+</node>
+</tree>
+</tree>
+<tree>
+<node absId="36" id="36" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>current</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="108" id="108" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>(&#955;_G903,ride@_G903@c1)</llf>
+<argList>
+<arg>c2</arg>
+</argList>
+</formula>
+<source rule="fl_a" >
+<idList>
+<id>25</id>
+</idList>
+<oldConstList>
+<oldConst>c2</oldConst>
+</oldConstList>
+</source>
+</node>
+<tree>
+<node absId="60" id="60" >
+<formula sign="false" >
+<modList>
+<mod>in@c2</mod>
+</modList>
+<llf>ride@c2@c1</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>108</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="145" id="145" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>group@ (of@c2)</llf>
+<argList>
+<arg>c10</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="146" id="146" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>be@(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c10</arg>
+</argList>
+</formula>
+<source rule="tr_a" >
+<idList>
+<id>10</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="161" id="161" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>(&#955;_G201,a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@_G201))</llf>
+<argList>
+<arg>c10</arg>
+</argList>
+</formula>
+<source rule="aux_verb" >
+<idList>
+<id>146</id>
+</idList>
+</source>
+</node>
+<tree>
+<node absId="178" id="178" >
+<formula sign="true" >
+<modList>
+</modList>
+<llf>a@raft@(&#955;_G267,in@_G267@(&#955;_G360,the@current@(&#955;_G426,ride@_G426@_G360))@c10)</llf>
+<argList>
+</argList>
+</formula>
+<source rule="pull_arg" >
+<idList>
+<id>161</id>
+</idList>
+</source>
+</node>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tree>
+</tableau>

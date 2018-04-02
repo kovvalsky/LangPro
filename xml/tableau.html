@@ -1,0 +1,190 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="tableau.css">
+<title>Tableau</title>
+</head>
+<body style="text-align:center;">
+
+<div class="premise">Software faults were blamed for the system failure</div>
+<div class="conclusion">? The system failure was blamed on one or more software faults</div>
+
+<table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">1</div>
+<div class="llf">[]</div>
+<div class="llf">s@'software@fault'@ (be@ (blame@ (for@'the@ (system@failure)')))</div>
+<div class="llf">[]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">2</div>
+<div class="llf">[]</div>
+<div class="llf">be@(λ_G197,s@ (or@more@one@'software@fault')@(λ_G365,blame@ (on@_G365)@_G197))@'the@ (system@failure)'</div>
+<div class="llf">[]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">3 : push_arg([2])</div>
+<div class="llf">[]</div>
+<div class="llf">be@(λ_G197,s@ (or@more@one@'software@fault')@(λ_G365,blame@ (on@_G365)@_G197))</div>
+<div class="llf">['the@ (system@failure)']</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">4 : aux_verb([3])</div>
+<div class="llf">[]</div>
+<div class="llf">(λ_G197,s@ (or@more@one@'software@fault')@(λ_G365,blame@ (on@_G365)@_G197))</div>
+<div class="llf">['the@ (system@failure)']</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">5 : pull_arg([4])</div>
+<div class="llf">[]</div>
+<div class="llf">s@ (or@more@one@'software@fault')@(λ_G365,blame@ (on@_G365)@'the@ (system@failure)')</div>
+<div class="llf">[]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">6 : tr_a([1])</div>
+<div class="llf">[]</div>
+<div class="llf">'software@fault'</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">7 : tr_a([1])</div>
+<div class="llf">[]</div>
+<div class="llf">be@ (blame@ (for@'the@ (system@failure)'))</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">8 : aux_verb([7])</div>
+<div class="llf">[]</div>
+<div class="llf">blame@ (for@'the@ (system@failure)')</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">9 : vp_pp([8])</div>
+<div class="llf">[]</div>
+<div class="llf">for@'the@ (system@failure)'@blame</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">10 : push_mod([9])</div>
+<div class="llf">[for@'the@ (system@failure)']</div>
+<div class="llf">blame</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">9 : mods_vp([10])</div>
+<div class="llf">[]</div>
+<div class="llf">for@'the@ (system@failure)'@blame</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">11 : mods_vp([10])</div>
+<div class="llf">[]</div>
+<div class="llf">for@'the@ (system@failure)'@blame</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td class="parent2"><div class="true">
+<div class="info">10 : push_mod([11])</div>
+<div class="llf">[for@'the@ (system@failure)']</div>
+<div class="llf">blame</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td>
+<table style="margin: auto;" class="Branch">
+<tr><td><div class="false">
+<div class="info">12 : fl_a([5], [c1])</div>
+<div class="llf">[]</div>
+<div class="llf">or@more@one@'software@fault'</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">15 : arg_dist([12])</div>
+<div class="llf">[]</div>
+<div class="llf">or@ (more@'software@fault')@ (one@'software@fault')</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">17 : fl_disj_or([15])</div>
+<div class="llf">[]</div>
+<div class="llf">more@'software@fault'</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">18 : fl_disj_or([15])</div>
+<div class="llf">[]</div>
+<div class="llf">one@'software@fault'</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="model">
+MODEL
+</div></td></tr>
+<tr><td></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table>   <table style="margin: auto;" class="Branch">
+<tr><td><div class="true">
+<div class="info">13 : fl_a([5], [c1])</div>
+<div class="llf">[]</div>
+<div class="llf">or@more@one@'software@fault'</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">14 : fl_a([5], [c1])</div>
+<div class="llf">[]</div>
+<div class="llf">(λ_G365,blame@ (on@_G365)@'the@ (system@failure)')</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="false">
+<div class="info">16 : pull_arg([14])</div>
+<div class="llf">[]</div>
+<div class="llf">blame@ (on@c1)@'the@ (system@failure)'</div>
+<div class="llf">[]</div>
+</div></td></tr>
+<tr><td><table style="margin: auto;" class="nonBranch">
+<tr><td><div class="true">
+<div class="info">6 : mod_n_tr([13])</div>
+<div class="llf">[]</div>
+<div class="llf">'software@fault'</div>
+<div class="llf">[c1]</div>
+</div></td></tr>
+<tr><td></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table>
+</td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table></td></tr>
+</table>
+</body>
+</html>
