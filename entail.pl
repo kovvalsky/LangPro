@@ -613,7 +613,10 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 	( debMode('lex') -> report([Lexicon]); true),
 	%( debMode('subWN') -> subWN_from_wn(Lexicon); kb_from_wn(Lexicon, KB) ),
 	kb_from_wn(Lexicon, KB0), % extract relevant semantic relations from WN
-	induced_knowledge('1st loop shortest', KBi), % add induced knowledge
+	( debMode('no_ind_kb') -> KBi = []; true ),
+	( debMode('2_short') -> induced_knowledge('2_short', KBi); true ),
+	( debMode('2_short_cleaned') -> induced_knowledge('2_short_cleaned', KBi); true ), % add induced knowledge
+	( debMode('2_short_fixed') -> induced_knowledge('2_short_fixed', KBi); true ),
 	append(KB0, KBi, KB),
 	( debMode('pr_kb') -> report(['KB: ', KB]); true ),
 	( debMode('no_gq_llfs') ->

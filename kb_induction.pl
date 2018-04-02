@@ -82,9 +82,17 @@ kb_induction_prob(Align, ConstCheck, PrId, KB0, Sorted_KB, NotSolved) :-
 			member(K, KB_test),
 			maplist(consistency_check(K), TTterms, Checks),
 			\+memberchk('Inconsistent', Checks) 
-		), KB)
-	; KB = KB_test
+		), KB1)
+	; KB1 = KB_test
 	),	
+	findall(X, (
+		member(X, KB1),
+		\+((
+			member(Y, KB1),
+			X \= Y,
+			sublist_of_list(Y, X)
+		))
+		), KB),
 	sort_list_length(KB, Sorted_KB),
 	term_to_atom(KB3, At_KB3),
 	( Branches = [] -> 
