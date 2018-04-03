@@ -25,7 +25,7 @@ entail_all(List_of_Answers) :-
 entail_some(List_Int) :-
 	(is_list(List_Int) ->
 		List = List_Int
-	  ; List_Int = (Inf, Sup),
+	  ; List_Int = Inf-Sup,
 		integer(Inf),
 		integer(Sup),
 		findall(X, between(Inf, Sup, X), List)
