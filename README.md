@@ -109,6 +109,23 @@ parList([ral(50)]), entail_all(align).   % or combine it with parallel proving
 ```
 This command takes ca. 30 seconds to judge 500 SICK problems for a 2.7GHz CPU.
 
+#### Optimal parameters
+The theorem prover has several parameters (see `main.pl`). Part of these parameeters control the actual proof procedure, For example:
+
+* *rule application limit* (`ral/1`), 
+* *wordnet relations* (`wn_ant/0`, `wn_sim/0`, `wn_der/0`), 
+* *treatmnet of bare, plural and definite NPs* (`the/0`, `a2the/0`, `s2the/0`, `thE/0`, `noPl/0`, `noThe/0`, `noHOQ/0`), 
+* *word sesnes filtering* (`ss/1`), 
+* *rule efficiency criterion* (`effCr/1`), 
+* intersectivity of unknown noun modifiers (`allInt/0`),
+* strong alignmnet of LLFs (align all, `aall/0`),
+* check consistency of each sentence `constchck/0`.
+
+To run the theorem prover with the optimal set of parameters (according to [Abzianidze (2016b)](#phd_thesis)), run: 
+```
+parList([aall, wn_ant, wn_sim, wn_der, constchck, allInt, ral(800), waif('file_with_answers_inside.txt')]), entail_all.
+```
+
 
 ### Obtaining Lambda Logical Forms
 
@@ -143,29 +160,30 @@ parList([html]), xml_senIDs_llfs(_, 'All_LLFs').   % XML and HTML files, XSL tra
 
 ## References
 
-1. R. Muskens (2010): [An Analytic Tableau System for Natural Logic](http://link.springer.com/chapter/10.1007/978-3-642-14287-1_11). LNCS, Vol. 6042, Springer.
+* R. Muskens (2010): [An Analytic Tableau System for Natural Logic](http://link.springer.com/chapter/10.1007/978-3-642-14287-1_11). LNCS, Vol. 6042, Springer.
 
    `Proposes to use a tableau system for natural logic`
 
-1. L. Abzianidze (2017): [LangPro: Natural Language Theorem Prover](https://aclanthology.info/pdf/D/D17/D17-2020.pdf). EMNLP. <a name="emnlp_demo_paper"></a>
-2. L. Abzianidze (2016): [Natural Solution to FraCaS Entailment Problems](https://aclweb.org/anthology/S/S16/S16-2007.pdf). *SEM.
-3. L. Abzianidze (2015): [A Tableau Prover for Natural Logic and Language](http://www.aclweb.org/anthology/D15-1296.pdf). EMNLP.
+* L. Abzianidze (2017): [LangPro: Natural Language Theorem Prover](https://aclanthology.info/pdf/D/D17/D17-2020.pdf). EMNLP. <a name="emnlp_demo_paper"></a>
+* L. Abzianidze (2016a): [Natural Solution to FraCaS Entailment Problems](https://aclweb.org/anthology/S/S16/S16-2007.pdf). &ast;SEM.
+* L. Abzianidze (2016b): [A Natural proof System for Natural Language](https://pure.uvt.nl/portal/files/14858339/Abzianidze_Natural_20_01_2017.pdf), PhD thesis, Tilburg University. <a name="phd_thesis"></a>
+* L. Abzianidze (2015): [A Tableau Prover for Natural Logic and Language](http://www.aclweb.org/anthology/D15-1296.pdf). EMNLP.
 
    `Describe the theprem prover LangPro and reports its performance on the SICK and FraCaS datasets`
 
-4. M. Lewis & M. Steedman (2014): A* CCG Parsing with a Supertag-factored Model. EMNLP.
-6. M. Honnibal, J. R. Curran, and J. Bos (2010): Rebanking CCGbank for Improved NP Interpretation. ACL (48).
-7. S. Clark and J. R. Curran (2007): Wide-Coverage Efficient Statistical Parsing with CCG and Log-Linear Models. Computational Linguistics, 33(4).
+* M. Lewis & M. Steedman (2014): A* CCG Parsing with a Supertag-factored Model. EMNLP.
+* M. Honnibal, J. R. Curran, and J. Bos (2010): Rebanking CCGbank for Improved NP Interpretation. ACL (48).
+* S. Clark and J. R. Curran (2007): Wide-Coverage Efficient Statistical Parsing with CCG and Log-Linear Models. Computational Linguistics, 33(4).
 
    `Describes EasyCCG and C&C parsers and their statistical models` 
    
-8. Ch. Fellbaum eds. (1998): WordNet: an Electronic Lexical Database. MIT press.
+* Ch. Fellbaum eds. (1998): WordNet: an Electronic Lexical Database. MIT press.
 
    `WordNet which is used as a lexical knowledge database in the prover`
 
-9. Cooper,  R.,  Crouch,  D.,  Eijck,  J.  V.,  Fox,  C.,  Genabith,  J.  V.,  Jaspars,  J.,  Kamp,  H., Milward, D., Pinkal, M., Poesio, M., Pulman, S., Briscoe, T., Maier, H., and Konrad, K. (1996). FraCaS: A Framework for Computational Semantics. Deliverable D16.
-9. The FraCaS problems converted in [xml](https://nlp.stanford.edu/~wcmac/downloads/fracas.xml) by B. MacCartney.
-9. Marelli,  M.,  Menini,  S.,  Baroni,  M.,  Bentivogli,  L.,  Bernardi,  R.,  and  Zamparelli,  R. (2014b).  A sick cure for the evaluation of compositional distributional semantic models. LREC'14.
+* Cooper,  R.,  Crouch,  D.,  Eijck,  J.  V.,  Fox,  C.,  Genabith,  J.  V.,  Jaspars,  J.,  Kamp,  H., Milward, D., Pinkal, M., Poesio, M., Pulman, S., Briscoe, T., Maier, H., and Konrad, K. (1996). FraCaS: A Framework for Computational Semantics. Deliverable D16.
+* The FraCaS problems converted in [xml](https://nlp.stanford.edu/~wcmac/downloads/fracas.xml) by B. MacCartney.
+* Marelli,  M.,  Menini,  S.,  Baroni,  M.,  Bentivogli,  L.,  Bernardi,  R.,  and  Zamparelli,  R. (2014b).  A sick cure for the evaluation of compositional distributional semantic models. LREC'14.
 
    `The FraCaS and SICK textual entailment datasets which are use for evaluating the theorem prover`
 
