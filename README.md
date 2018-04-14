@@ -16,9 +16,8 @@ If you use the theorem prover please cite [Abzianidze (2017)](#emnlp_demo_paper)
 * [Quickly get LLFs](#obtaining-lambda-logical-forms)
 
 
-## Quick Usage
+## Running the prover
 
-### Running Natural Language Theorem Prover
 You will need only [SWI-Prolog](http://www.swi-prolog.org) to run the prover.
 Go to the main directory and run the following command in order to run the prover on the trial portion of the SICK dataset (included in `ccg_sen_d`):
 ```
@@ -94,11 +93,11 @@ entail_all.
 ```
 The above predcates `entail_some/1` and `entail_all/0` build tableaux both for aligned and non-aligned LLFs.
 If you want to terminate the run, type `Ctrl+C` and then press `a` for abort.
-If you have a multicore CPU, you can use `parallel` in `parList` to prove problems in a concurrent way.
+If you have a multi-core CPU, you can use `parallel` in `parList` to prove problems in a concurrent way.
 ```
-parList([parallel]), entail_all.    % similalrly: parList([parallel]), entail_some(1-200). 
+parList([parallel]), entail_all.    % similarly: parList([parallel]), entail_some(1-200). 
 ```
-You can make theorem prover faster by building tableaux only for aligned LLFS (use `parList([])` to cancel the `parallel` parameter asserted by the previous command):
+You can make theorem prover faster by building tableaux only for aligned LLFs (use `parList([])` to cancel the `parallel` parameter asserted by the previous command):
 ```
 parList([]), entail_all(align).   % similarly: entail_some(align, 1-200)    
 ```
@@ -107,18 +106,18 @@ The default RAL is 400.
 ```
 parList([ral(50)]), entail_all(align).   % or combine it with parallel proving
 ```
-This command takes ca. 30 seconds to judge 500 SICK problems for a 2.7GHz CPU.
 
-#### Optimal parameters
-The theorem prover has several parameters (see `main.pl`). Part of these parameeters control the actual proof procedure, For example:
+
+### Optimal parameters
+The theorem prover has several parameters (see `main.pl`). Part of these parameters control the actual proof procedure, For example:
 
 * *rule application limit* (`ral/1`), 
 * *wordnet relations* (`wn_ant/0`, `wn_sim/0`, `wn_der/0`), 
-* *treatmnet of bare, plural and definite NPs* (`the/0`, `a2the/0`, `s2the/0`, `thE/0`, `noPl/0`, `noThe/0`, `noHOQ/0`), 
-* *word sesnes filtering* (`ss/1`), 
+* *treatment of bare, plural and definite NPs* (`the/0`, `a2the/0`, `s2the/0`, `thE/0`, `noPl/0`, `noThe/0`, `noHOQ/0`), 
+* *word senses filtering* (`ss/1`), 
 * *rule efficiency criterion* (`effCr/1`), 
 * intersectivity of unknown noun modifiers (`allInt/0`),
-* strong alignmnet of LLFs (align all, `aall/0`),
+* strong alignment of LLFs (align all, `aall/0`),
 * check consistency of each sentence `constchck/0`.
 
 To run the theorem prover with the optimal set of parameters (according to [Abzianidze (2016b)](#phd_thesis)), run: 
@@ -126,8 +125,22 @@ To run the theorem prover with the optimal set of parameters (according to [Abzi
 parList([aall, wn_ant, wn_sim, wn_der, constchck, allInt, ral(800), waif('file_with_answers_inside.txt')]), entail_all.
 ```
 
+### Evaluating or combining answers of prover(s)
 
-### Obtaining Lambda Logical Forms
+After the prover generates all the answers in a file passed by the `waif/1` predicate, the evaluation can be done in the following way, depending on the dataset:
+```
+./perl/evaluate.pl  SICK_dataset/SICK_test_annotated.txt   file_with_answers_inside.txt  
+./perl/evaluate.pl  FraCaS_dataset/FraCaS_gold.txt   file_with_answers_inside.txt  
+```
+It is also possible two combine two answer sets of the prover obtained based on different LLFs (e.g., resulted from different CCG parsers).
+```
+./perl/combine_two_classifiers.pl  SICK_dataset/SICK_test_annotated.txt  file_with_answers_inside_1.txt  file_with_answers_inside_2.txt
+```
+The script also creates the `HYBRID_ANSWERS` files that lists the problemID-combinedAnswer pairs.
+
+
+
+## Obtaining Lambda Logical Forms
 
 In case you are interested in logical forms used by the prover, you can obtain them from CCG derivations.
 After you get into the prolog environment by:
@@ -153,10 +166,6 @@ parList([html]), xml_senIDs_llfs(_, 'All_LLFs').   % XML and HTML files, XSL tra
 ```
 
 
-## Detailed Usage
-
-
-### More instructions comming soon
 
 ## References
 
