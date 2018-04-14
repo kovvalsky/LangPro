@@ -143,12 +143,13 @@ After the prover generates all the answers in a file passed by the `waif/1` pred
 ./perl/evaluate.pl  SICK_dataset/SICK_test_annotated.txt   file_with_answers_inside.txt  
 ./perl/evaluate.pl  FraCaS_dataset/FraCaS_gold.txt   file_with_answers_inside.txt  
 ```
+
 It is also possible two combine two answer sets of the prover obtained based on different LLFs (e.g., resulted from different CCG parsers).
 ```
 ./perl/combine_two_classifiers.pl  SICK_dataset/SICK_test_annotated.txt  file_with_answers_inside_1.txt  file_with_answers_inside_2.txt
 ```
 The script also creates the `HYBRID_ANSWERS` files that lists the problemID-combinedAnswer pairs.
-
+Notice that if you have files with the answers for a part of a dataset, e.g., for the FraCaS sections 1 and 2, the evaluation and combining scripts will still work for them.
 
 
 ## Obtaining Lambda Logical Forms
