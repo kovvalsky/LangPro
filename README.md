@@ -120,10 +120,21 @@ The theorem prover has several parameters (see `main.pl`). Part of these paramet
 * strong alignment of LLFs (align all, `aall/0`),
 * check consistency of each sentence `constchck/0`.
 
-To run the theorem prover with the optimal set of parameters (according to [Abzianidze (2016b)](#phd_thesis)), run: 
+To run the theorem prover with the optimal set of parameters for SICK (according to [Abzianidze (2016b)](#phd_thesis)), run: 
 ```
 parList([aall, wn_ant, wn_sim, wn_der, constchck, allInt, ral(800), waif('file_with_answers_inside.txt')]), entail_all.
 ```
+For FraCaS run the command below. `fracFilter` guarantees that the problems with undefined gold answers are excluded.
+```
+parList([fracFilter, aall, wn_ant, ral(400), waif('fr_answers_all_sections.txt')]), entail_all.
+```
+`wn_sim`, `wn_der`, and `constchck` doesn't affect the answers. `ral(800)` is decreased to `ral(400)` as 400 rule applications seem enough for FraCaS problems.
+This decrease also makes the pover faster. `allInt` is omitted as it hurts the performace because FraCaS contains many non-intersective adjectives.  
+If you want to run the prover on certain sections of FraCas, e.g., 1, 2, 5 and 9, run:
+```
+parList([fracFilter, aall, wn_ant, ral(400), waif('fr_answers_sec1259.txt')]), findall(X, (sen_id(_,X,'h',_,_), (between(1,80,X); between(81,113,X);  between(197,219,X); between(334,346,X))), List), entail_some(List).
+```
+The command makes sure that the problem IDs fall in the specific sections, e.g., the Plurals section contains 81,...,113 problems.
 
 ### Evaluating or combining answers of prover(s)
 
