@@ -12,8 +12,8 @@ open my $MYFILE, '<', $file or die "Can't open the file $file, $!\n";
 my $text = join ' ', <$MYFILE>;
 
 #say $text;
-my (@sys) = ($text =~ m&\d+.+?([A-Z]{5,})&sg);
-my (@ids) = ($text =~ m&([0-9]+)\t[A-Z]{5,}\s*\n&sg);
+my (@sys) = ($text =~ m&\d+\t([A-Z]{5,})\s*\n&sg);
+my (@ids) = ($text =~ m&(\d+)\t[A-Z]{5,}\s*\n&sg);
 #foreach (@sys) {say;}
 #say scalar(@sys);
 
@@ -23,8 +23,9 @@ open my $ANS, '<', $gold or die "Can't open the file $gold, $!\n";
 my $target = join ' ', <$ANS>;
 #say $target;
 
-my (@ans) = ($target =~ m&([A-Z]{5,})\s*\n&sg);
-my (@gold_ids) = ($target =~ m&([0-9]+)\t.+?\t[A-Z]{5,}\s*\n&sg);
+# this extraction works for both sick and fracas gold answer files
+my (@ans) = ($target =~ m&\t([A-Z]{5,})\s*\n&sg);
+my (@gold_ids) = ($target =~ m&([0-9]+)\t.*?[A-Z]{5,}\s*\n&sg);
 #my (@ans) = ($target =~ m&[0-9]+\t.+?([A-Z]{5,})\s*\n&sg);
 #foreach (@ans) {say;}
 #say scalar(@ans);

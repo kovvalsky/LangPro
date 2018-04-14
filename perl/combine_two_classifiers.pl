@@ -16,16 +16,16 @@ my $file_2 = shift @ARGV;
 ####### system 1 ######### has high precision
 open my $MYFILE_1, '<', $file_1 or die "Can't open the file $file_1, $!\n";
 my $text_1 = join ' ', <$MYFILE_1>;
-my (@ans_sys1) = ($text_1 =~ m&\d+.+?([A-Z]{5,})&sg);
-my (@ids) = ($text_1 =~ m&([0-9]+)\t[A-Z]{5,}\s*\n&sg);
+my (@ans_sys1) = ($text_1 =~ m&\d+\t([A-Z]{5,})\s*\n&sg);
+my (@ids) = ($text_1 =~ m&(\d+)\t[A-Z]{5,}\s*\n&sg);
 my %system1;
 @system1{@ids} = @ans_sys1;
 
 ####### system 2  
 open my $MYFILE_2, '<', $file_2 or die "Can't open the file $file_2, $!\n";
 my $text_2 = join ' ', <$MYFILE_2>;
-my (@ans_sys2) = ($text_2 =~ m&\d+.+?([A-Z]{5,})&sg);
-my (@ids_sys2) = ($text_2 =~ m&([0-9]+)\t[A-Z]{5,}\s*\n&sg);
+my (@ans_sys2) = ($text_2 =~ m&\d+\t([A-Z]{5,})\s*\n&sg);
+my (@ids_sys2) = ($text_2 =~ m&(\d+)\t[A-Z]{5,}\s*\n&sg);
 my %system2;
 foreach my $i (0..$#ids) { 
 	#say @ids;
@@ -46,13 +46,16 @@ my $target = join ' ', <$ANS>;
 open my $HYBRIDFILE, '>', 'HYBRID_ANSWERS' or die "Can't open the file $file_1, $!\n";
 say $HYBRIDFILE "===== HYBRID =====";
 
-my (@gold_ids) = ($target =~ m&([0-9]+)\t.+?[A-Z]{5,}\s*\n&sg);
-my (@ans_gold) = ($target =~ m&[0-9]+\t([A-Z]{5,})\s*\n&sg);
+# this extraction works for both sick and fracas gold answer files
+my (@gold_ids) = ($target =~ m&([0-9]+)\t.*?[A-Z]{5,}\s*\n&sg);
+my (@ans_gold) = ($target =~ m&\t([A-Z]{5,})\s*\n&sg);
 my %gold;
 @gold{@gold_ids} = @ans_gold;
 
 ######## COMBINE
-say "length: ".scalar(@ans_gold)." ".scalar(@ans_sys1)." ".scalar(@ans_sys2)." ".scalar(@ids);
+say "Gold: ids(".scalar(@gold_ids)."), answers(".scalar(@ans_gold).")";
+say "sys1: ids(".scalar(@ids)."), answers(".scalar(@ans_sys1).")";
+say "sys2: ids(".scalar(@ids_sys2)."), answers(".scalar(@ans_sys2).")";
 
 
 my $num = scalar(@ids);
