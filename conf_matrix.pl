@@ -45,9 +45,9 @@ draw_extended_matrix_3(Results) :-
 		maplist(print_result, Results)
 	; true
 	),
-	% rule application caount
+	% rule application count
 	( debMode('shallow') -> true;
-	  findall( Step,	member((_, _, _, 'closed', Step), Results),  Steps ), 
+	  findall( Step,	member((_, _, _, 'closed', (_Ter, Step)), Results),  Steps ), 
 	  sum_list(Steps, TotalSteps),
 	  length(Steps, NumClosed), 
 	  ( NumClosed \=0 -> AvStep = TotalSteps / NumClosed; AvStep = 0 ) 

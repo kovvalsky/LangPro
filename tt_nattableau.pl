@@ -254,7 +254,7 @@ generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
 		numlist(1, Node_Id, IdList),
 		debMode(ral(Limit)),
 		( apply_closure_rules(IdList, Br, RelClRules, Cl_IDs, Cl_Rule, KB) ->
-			(BrList, Status) = ([], 1),
+			(BrList, Status) = ([], ('Ter', 1)),
 			findSubTree(Tree, Node_Id, tree(_, closer([Cl_IDs, Cl_Rule])))
 		; once(expand([Br], BrList, Tree, _Closing_IDs, KB, Count, (RelRules, RelClRules), 0, Status, Limit)) %, % ClosingIDs is unspecified
 		    %,( debMode(usedRules(UR)), list_of_used_rules(Tree, ListR), list_to_set(ListR, SetR), intersection(UR, SetR, [H|T]) -> term_to_atom([H|T], At), report(['Used rules: ', At]); true )
@@ -390,7 +390,7 @@ nodes_to_branch_tree_id([], [], _, node_id(Old_Id, Old_Id)).
 */
 %expand(BranchList, NewBranchList, Tree, Closing_IDs, Count, Rules, RuleAppNum, Steps) :-
 	
-expand([], [], _Tree, _Closing_IDs, _, [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, Steps, _Limit) :-
+expand([], [], _Tree, _Closing_IDs, _, [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, ('Ter', Steps), _Limit) :-
 	!.
 /*
 expand([Branch | RestBranches], RestBranches, Tree, UL_Closing_IDs, [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, Steps) :-
@@ -467,9 +467,9 @@ dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB, Count, 
 		append(TempBrNodes, RevRemoved, CutBrNodes)   
 	),  
 	CutBranch = br(CutBrNodes, NewHistory, _),
-	BrNodes = [ndId(_, BrId) | _], % when new nodes are added in the begining of the branch
-	%append(_, [ndId(_, BrId)], BrNodes), % when new nodes are added in the end of the branch
 	( debMode('proof_tree') ->
+        BrNodes = [ndId(_, BrId) | _], % when new nodes are added in the begining of the branch
+	    %append(_, [ndId(_, BrId)], BrNodes), % when new nodes are added in the end of the branch
 		findSubTree(Tree, BrId, SubTree),
 		SubTree = tree(_Root, ChildList),
 		var(ChildList)
@@ -481,7 +481,7 @@ dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB, Count, 
 	%  ;	RuleApp =.. [RuleId, IDs, AppInfo]
 	%),
 	growBranches(Body, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRules, UL_New_Closing_IDs, New_Node_IDs),
-	RuleApp = h(_RuleId,_,_,New_Node_IDs),	
+	RuleApp = h(_RuleId, _, _, New_Node_IDs),	
 	%report('rule: ', RuleId),
 	%append(RuleAppPart, [New_Node_IDs], RuleAppAsList),
 	%RuleApp =.. [h | RuleAppAsList], 
@@ -513,23 +513,16 @@ findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB) :-
 	%findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig),
 	findHeadNodes(BrNodes, Head, IDs),
 	( RuleType = gamma -> 
-		r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body)
-		%(Constraints)
-	  ; \+memberchk(h(RuleId, IDs, _), Hist),
-		%once(Constraints)
-		once( r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body) )
-	),
-	%assert(branch_signature(Sig)),
-	%Constraints,
-	%retract(branch_signature(_)),
-	%splitOldFresh(Constants, ListOld, ListFresh, ListConst),
-	%genAllOldArgs(ListOld, Sig, AllOldConst),
-	( RuleType = gamma -> 
+		r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body),
 		RuleApp = h(RuleId, AppInfo, IDs, _),
-		\+memberchk(h(RuleId, AppInfo, IDs, _), Hist)
-	; var(AppInfo) -> 
-		RuleApp = h(RuleId, [], IDs, _)
-	; RuleApp = h(RuleId, AppInfo, IDs, _)
+		\+memberchk(RuleApp, Hist)
+	  ; \+memberchk(h(RuleId, [], IDs, _), Hist),
+		once( r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body) ),
+		( var(AppInfo) ->
+		    RuleApp = h(RuleId, [], IDs, _)
+		  ; RuleApp = h(RuleId, AppInfo, IDs, _)
+		),
+		\+memberchk(RuleApp, Hist)
 	),
 	updateHistory(RuleApp, Hist, NewHist),
 	ignore(Cids = const_id(Eid, Eid, Cid, Cid)),
@@ -647,7 +640,7 @@ growBranches(Brs, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRs,  C
 %growBranches(br([], _), CutBranch, [CutBranch], _SubTree, _RuleApp, node_id(Nid, Nid)) :- % when there are no nodes for addition
 %	!.
 
-growBranches(Br, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRs, Closing_IDs, New_Node_IDs) :-
+growBranches(Br, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRs, Closing_IDs, [New_Node_IDs]) :-
 	Br = br(NewNodes, _), 	
 	is_list(NewNodes), !,
 	SubTree = tree(_, [LeftTree]),
@@ -660,7 +653,7 @@ growBranch_list([Br|Rest], CutBranch, [NewBr|NewRest], [Tree|RestTrees], RuleApp
 	NodeId = node_id(Nid1, Nid),
 	growBranch(Br, CutBranch, NewBr, Tree, RuleApp, node_id(Nid1, Nid2), KB, ClRs, Closing_IDs, New_Node_IDs_1),
 	growBranch_list(Rest, CutBranch, NewRest, RestTrees, RuleApp, node_id(Nid2, Nid), KB, ClRs, Closing_IDs, New_Node_IDs_2),
-	append(New_Node_IDs_1, New_Node_IDs_2, New_Node_IDs).
+	append([New_Node_IDs_1], New_Node_IDs_2, New_Node_IDs).
 
 growBranch_list([], _CutBranch, [], [], _RuleApp, node_id(Nid, Nid), _KB, _ClRs, _Closing_IDs, []).
 
@@ -706,7 +699,7 @@ growBranch(Br, CutBranch, NewBranch, SubTree, RuleApp, NodeId, KB, ClRs, Closing
 growLeftistTree( [ndId(Nd, Id) | Tail], RuleApp, ClRuleApp, SubTree) :-
 	RuleApp = h(RuleId, Args, IDs, _),
 	( Args \= [] ->
-		Rule_App =.. [RuleId, IDs, Args]
+		Rule_App =.. [RuleId, Args, IDs]
 	  ; Rule_App =.. [RuleId, IDs] 	 
 	),
 	SubTree = tree(trnd(Nd, Id, Rule_App,_), ChildList),
