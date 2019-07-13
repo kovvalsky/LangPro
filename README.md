@@ -13,7 +13,7 @@ ____________    ________             ___________      ________________________  
 ```
 If you use the theorem prover please cite [Abzianidze (2017)](#emnlp_demo_paper)
 * For research matters see [References](#references)
-* [Quick usage of LangPro](#running-natural-language-theorem-prover)
+* [Quick usage of LangPro](#running-the-prover)
 * [Quickly get LLFs](#obtaining-lambda-logical-forms)
 
 
