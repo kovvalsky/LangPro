@@ -11,7 +11,7 @@ ____________    ________             ___________      ________________________  
 |Hypothesis|--->|Parser|------------>|Generator|----->|  for Natural Logic   |--->|relation|
 ‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾ 
 ```
-If you use the theorem prover please cite Abzianidze (2017):
+If you use the theorem prover please cite [Abzianidze (2017)](https://www.aclweb.org/anthology/D17-2020):
 ```
 @inproceedings{abzianidze-2017-langpro,
     title = "{L}ang{P}ro: Natural Language Theorem Prover",
