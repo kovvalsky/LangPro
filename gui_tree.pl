@@ -7,6 +7,8 @@
 %:- dynamic current_problem_id/1.
 %current_problem_id(nil).
 
+:- use_module(library(pce)).
+
 :- dynamic font_size/1.
 font_size(nil).
 
@@ -193,7 +195,7 @@ drawMotherNode(Pic, Node, FontSize, NodeRef) :-
 	atomic_list_concat(ListAtomArgs, '', AtomArgs),
 	(Sign == true -> AtomSign = 'TRUE'; AtomSign = 'FALSE'),
 	term_to_atom(Id, AtomId),
-	rule_app_to_atom(RuleApp, AtomRuleApp1),
+	term_to_atom(RuleApp, AtomRuleApp1),
 	atomic_list_concat(AtomRuleApp2, '\'', AtomRuleApp1),
 	atomic_list_concat(AtomRuleApp2, '', AtomRuleApp),
 	concat_atom([AtomId, ':', AtomRuleApp, '\n', AtomMods, '\n', AtomLLF, '\n', AtomArgs, '\n', AtomSign], Label),
@@ -238,21 +240,6 @@ drawClosureIDs(Pic, [ClIDs, RuleId], FontSize, NodeRef) :-
 	send(NodeRef, recogniser, new(move_gesture(left))),
 	send(NodeRef, handle, handle(w/2, h, in)),
 	send(NodeRef, handle, handle(w/2, 0, out)).	
-
-
-
-
-
-rule_app_to_atom(RuleApp, Atom) :-
-	RuleApp = [] ->
-		Atom = non;
-	RuleApp =.. [_RuleId, _IDs] ->
-		term_to_atom(RuleApp, Atom)
-	  ; RuleApp =.. [RuleId, IDs, Olds],
-		ttTermList_to_prettyTermList(Olds, OldsAtom),
-		RuleApp1 =.. [RuleId, IDs, OldsAtom],
-		term_to_atom(RuleApp1, Atom).
-	
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	

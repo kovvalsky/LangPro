@@ -1,5 +1,7 @@
 :- op(601, xfx, (/)).
 :- op(601, xfx, (\)).
+:- multifile ccg/2, id/2.
+:- discontiguous ccg/2, id/2.
 
 :- ensure_loaded([lambda_tt,
 				  lambda,

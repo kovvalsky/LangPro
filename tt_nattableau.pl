@@ -27,8 +27,8 @@ tree_structure(nil).
 				  latex, 
 				  test_suite,
 				  user_preds,
-				  xml_output,
-				  closure_ids
+				  % closure_ids
+				  xml_output
 				 ]).
 				 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -481,13 +481,14 @@ dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB, Count, 
 	%  ;	RuleApp =.. [RuleId, IDs, AppInfo]
 	%),
 	growBranches(Body, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRules, UL_New_Closing_IDs, New_Node_IDs),
-	RuleApp = h(_RuleId, _, _, New_Node_IDs),	
+	RuleApp = h(_RuleId, _, _, _, New_Node_IDs),	
 	%report('rule: ', RuleId),
 	%append(RuleAppPart, [New_Node_IDs], RuleAppAsList),
 	%RuleApp =.. [h | RuleAppAsList], 
 	%updateHistory(RuleApp, Hist, NewHistory),
 	remove_varTail_from_uList(UL_New_Closing_IDs, New_Closing_IDs),
-	expand_closing_ids(New_Closing_IDs, NewHistory, Ext_New_Closing_IDs), 
+	%expand_closure_ids(New_Closing_IDs, NewHistory, Ext_New_Closing_IDs), 
+	Ext_New_Closing_IDs = New_Closing_IDs, % temporally 
 	ul_append(Closing_IDs, Ext_New_Closing_IDs), 
 	%append(NewBranches, RestBranches, NewBranchList).% procesed branch is put at the beginning, may loop
 	%remove(br([],_,_), NewBranches, Clean_NewBranches),
@@ -509,21 +510,19 @@ findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB) :-
 	%BrHead = br(Head, Sig),	
 	%!!! no preference to equivalent rules wrt ti impl and gamma rules?
 	member(RuleId, Rules),
-	clause( r(RuleId, RuleType:_, (AppInfo, Cids), _, _, br(Head, Sig) ===> Body),   _Constraints),
+	clause( r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, _, br(Head, Sig) ===> Body),   _Constraints),
 	%findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig),
 	findHeadNodes(BrNodes, Head, IDs),
-	( RuleType = gamma -> 
-		r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body),
-		RuleApp = h(RuleId, AppInfo, IDs, _),
-		\+memberchk(RuleApp, Hist)
-	  ; \+memberchk(h(RuleId, [], IDs, _), Hist),
-		once( r(RuleId, RuleType:_, (AppInfo, Cids), _, KB, br(Head, Sig) ===> Body) ),
-		( var(AppInfo) ->
-		    RuleApp = h(RuleId, [], IDs, _)
-		  ; RuleApp = h(RuleId, AppInfo, IDs, _)
-		),
-		\+memberchk(RuleApp, Hist)
-	),
+	% gamma rule conditions might need backtracking and trying other old constants
+	% while non-gamma rules doesn't need backtracking
+	( RuleType = gamma ->
+	    r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, KB, br(Head, Sig) ===> Body)
+	; %\+memberchk(h(RuleId, [], IDs, _, _), Hist), % weak pre-check for efficiency (not really) 
+	  % newArgs are _ to avoid a formula introducing fresh constants several times
+	  once( r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, KB, br(Head, Sig) ===> Body) )    
+    ),          
+	\+memberchk(h(RuleId, OldArgs, IDs, _NewArgs, _), Hist),
+	RuleApp = h(RuleId, OldArgs, IDs, NewArgs, _),
 	updateHistory(RuleApp, Hist, NewHist),
 	ignore(Cids = const_id(Eid, Eid, Cid, Cid)),
 	!.
@@ -697,10 +696,16 @@ growBranch(Br, CutBranch, NewBranch, SubTree, RuleApp, NodeId, KB, ClRs, Closing
 % grows SubTree in leftist fashion by NodeList, annotates nodes by SourceIDs
 % and annotates the branch by ClosureIDs if it is closed 
 growLeftistTree( [ndId(Nd, Id) | Tail], RuleApp, ClRuleApp, SubTree) :-
-	RuleApp = h(RuleId, Args, IDs, _),
-	( Args \= [] ->
-		Rule_App =.. [RuleId, Args, IDs]
-	  ; Rule_App =.. [RuleId, IDs] 	 
+	RuleApp = h(RuleId, OldArgs, IDs, NewArgs, _),
+	( OldArgs = [] ->
+	    ( NewArgs = [] ->
+	        Rule_App =.. [RuleId, IDs]
+	      ; Rule_App =.. [RuleId, IDs, NewArgs] 
+	    )
+	  ; ( NewArgs = [] ->
+	        Rule_App =.. [RuleId, OldArgs, IDs]
+	      ; Rule_App =.. [RuleId, OldArgs, IDs, NewArgs] 
+	    ) 
 	),
 	SubTree = tree(trnd(Nd, Id, Rule_App,_), ChildList),
 	growLeftistTree(Tail, RuleApp, ClRuleApp, Child),
