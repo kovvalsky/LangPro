@@ -4,6 +4,8 @@
 %      Author: lasha.abzianidze{at}gmail.com 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+:- use_module(library(pce)).
+
 %:- dynamic current_problem_id/1.
 %current_problem_id(nil).
 
