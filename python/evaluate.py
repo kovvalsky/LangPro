@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+# usage: python3 python/evaluate.py train_aall_wnads_allInt.txt SICK_dataset/SICK_train.txt
 import argparse
 import re
 from collections import Counter
