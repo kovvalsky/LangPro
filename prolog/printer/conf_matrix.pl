@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- module('conf_matrix', 
+:- module('conf_matrix',
 	[
 		draw_matrix/1,
 		draw_extended_matrix/1
@@ -11,7 +11,7 @@
 % Draws confusion matrix
 draw_matrix(Results) :-
 	findall(_, member((yes, true), Results), Yes_True),
-	findall(_, member((yes, false),Results), Yes_False), 
+	findall(_, member((yes, false),Results), Yes_False),
 	findall(_, member((no, true), 	Results), No_True),
 	findall(_, member((no, false), Results), No_False),
 	length(Yes_True, YesTrue),
@@ -38,25 +38,25 @@ draw_extended_matrix(Results) :-
 
 
 draw_extended_matrix_3(Results) :-
-	( debMode(waif(FileName)) -> 
+	( debMode(waif(FileName)) ->
 		open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
 		write(S, '=== LangPro ===\n'),
 		ignore(write_id_answer(S, Results)),
 		close(S)
 	; true
 	),
-	( debMode('parallel') ->
+	( debMode(parallel(_)) ->
 		write('------------ SORTED ANSWERS-------------\n'),
 		maplist(print_result, Results)
 	; true
 	),
 	% rule application count
 	( debMode('shallow') -> true;
-	  findall( Step,	member((_, _, _, 'closed', (_Ter, Step)), Results),  Steps ), 
+	  findall( Step,	member((_, _, _, 'closed', (_Ter, Step)), Results),  Steps ),
 	  sum_list(Steps, TotalSteps),
-	  length(Steps, NumClosed), 
-	  ( NumClosed \=0 -> AvStep = TotalSteps / NumClosed; AvStep = 0 ) 
-	),	
+	  length(Steps, NumClosed),
+	  ( NumClosed \=0 -> AvStep = TotalSteps / NumClosed; AvStep = 0 )
+	),
 	% Numbers for matrix
 	findall( _,	member((_, 'yes',	'yes', 		'closed',	_), 			Results),	Y_Y), 	length(Y_Y, YY),
 	findall( _,	member((_, 'yes',	'no', 		'closed', 	_), 			Results),	Y_N), 	length(Y_N, YN),
@@ -82,15 +82,15 @@ draw_extended_matrix_3(Results) :-
 
 	sum_list([YY_NN, YN, NY, YU, NU], 	YN_YNU),
 	sum_list([YN_YNU, YD, ND],			YN_YNUD),
-	( YN_YNUD \= 0 ->  	Rec = YY_NN / YN_YNUD; 		Rec = 2 ),   
-	( YN_YNU \= 0 ->  	TrRec = YY_NN / YN_YNU; 	TrRec = 2 ),   
+	( YN_YNUD \= 0 ->  	Rec = YY_NN / YN_YNUD; 		Rec = 2 ),
+	( YN_YNU \= 0 ->  	TrRec = YY_NN / YN_YNU; 	TrRec = 2 ),
 
 	sum_list([YY_NN, UU], 			YY_NN_UU),
-	sum_list([YN_YNU, UY, UN, UU],	YNU_YNU),	
+	sum_list([YN_YNU, UY, UN, UU],	YNU_YNU),
 	sum_list([YNU_YNU, YD, ND, UD],	YNU_YNUD),
 	sum_list([YY_NN_UU, UD],		YY_NN_UU_UD),
-	( YNU_YNUD \= 0 ->  Acc = YY_NN_UU_UD / YNU_YNUD; 	Acc = 2 ),   
-	( YNU_YNU \= 0 ->  	TrAcc = YY_NN_UU / YNU_YNU; 	TrAcc = 2 ), 
+	( YNU_YNUD \= 0 ->  Acc = YY_NN_UU_UD / YNU_YNUD; 	Acc = 2 ),
+	( YNU_YNU \= 0 ->  	TrAcc = YY_NN_UU / YNU_YNU; 	TrAcc = 2 ),
 	% checking on correctness
 	length(Results, Total),
 	(YNU_YNUD is Total -> 	true; 	report(['Warnning: Matrix calculation']) ),
@@ -129,7 +129,7 @@ draw_extended_matrix_3(Results) :-
 
 
 draw_extended_matrix_2(Results) :-
-	( debMode(waif(FileName)) -> 
+	( debMode(waif(FileName)) ->
 		open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
 		write(S, '=== LangPro ===\n'),
 		ignore(write_id_answer(S, Results)),
@@ -152,15 +152,15 @@ draw_extended_matrix_2(Results) :-
 
 	sum_list([YY, YU], 	YxYU),
 	sum_list([YxYU, YD], YxYUD),
-	( YxYUD \= 0 ->  	Rec = YY / YxYUD; 	Rec = 2 ),   
-	( YxYU \= 0  ->  	TrRec = YY / YxYU; 	TrRec = 2 ),   
+	( YxYUD \= 0 ->  	Rec = YY / YxYUD; 	Rec = 2 ),
+	( YxYU \= 0  ->  	TrRec = YY / YxYU; 	TrRec = 2 ),
 
 	sum_list([YY, UU], YY_UU),
-	sum_list([YY_UU, UY, YU],	YUxYU),	
+	sum_list([YY_UU, UY, YU],	YUxYU),
 	sum_list([YUxYU, YD, UD],	YUxYUD),
 	sum_list([YY_UU, UD],		YY_UU_UD),
-	( YUxYUD \= 0 ->  Acc = YY_UU_UD / YUxYUD; 	Acc = 2 ),   
-	( YUxYU \= 0 ->  	TrAcc = YY_UU / YUxYU; 	TrAcc = 2 ), 
+	( YUxYUD \= 0 ->  Acc = YY_UU_UD / YUxYUD; 	Acc = 2 ),
+	( YUxYU \= 0 ->  	TrAcc = YY_UU / YUxYU; 	TrAcc = 2 ),
 	% checking on correctness
 	length(Results, Total),
 	(YUxYUD is Total -> 	true; 	report(['Warnning: Matrix calculation']) ),
@@ -178,5 +178,3 @@ draw_extended_matrix_2(Results) :-
 		format('Precision:        ~5f~n', 		  	[Prec]),
 		format('Recall (pure):    ~5f    (~5f)~n', 	[Rec, TrRec])
 	).
-
-

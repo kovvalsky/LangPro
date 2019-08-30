@@ -3,16 +3,16 @@
 :- ensure_loaded([
 	'task/online_demo',
 	'printer/extract',
-	'task/sent_sim',	
-	'task/bag_of_words',	
+	'task/sent_sim',
+	'task/bag_of_words',
 	'prover/tt_nattableau',
-	'task/entail'			  			
+	'task/entail'
 	]).
 
 :- multifile ccg/2, id/2.
 :- discontiguous ccg/2, id/2.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initially debMode/1 was for bebugging
 % now it serves as parameter input
 :- dynamic debMode/1.
@@ -50,19 +50,19 @@ set_debMode([]).
 parList(Parameters) :-
 	reset_debMode,
 	set_debMode(Parameters).
-	
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 				List of Parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  debMode
 % 'xml'					write terms or tableaux in XML
-% 'html'				write twrms and tableaux in HTML, outomatically creates XML files too   
+% 'html'				write twrms and tableaux in HTML, outomatically creates XML files too
 % 'fix': 				prints fixes done on CCG trees
 % 'proof_tree': 		develope a proof tree
 % 'aall':				allows alignment of any NPs
 % 'prprb':				prints the problem
 %  waif(filename): 		writes answers in file in SICK style
-% 'ne':					reports MW Named Entity found 												
+% 'ne':					reports MW Named Entity found
 % 'mwe':				multiword expression found
 % 'prlim':				prints when rule limit is reached
 % 'ProperNames':		consideres all bare nouns (even plurals) as proper names
@@ -75,12 +75,12 @@ parList(Parameters) :-
 % '2class':				binary classification
 %  ral(N):				rule application limit is N
 %  no_gq_llfs			dont obtain LLFs with generalized quantifiers, i.e. use fixed CCG terms
-% 'gq_report'			report how quantifier raising is going on		
+% 'gq_report'			report how quantifier raising is going on
 %  pr_lex_rules			print lexical rules that are not explained
 %  pr_sen				print a sentence when running gen_llfs_latex
 %  disj					use hand-coded disjoint relation
 %  usedRules([rules])	print the rules if they are used
-%  parallel				concurrent_maplist for entail
+%  parallel(CPUs)				concurrent_maplist for entail
 %  pr_kb				print knowledge base
 %  singPrem				takes only single premised problems, for fracas
 %  fracFilter			filter Fracas problems that are ill formed
@@ -90,15 +90,9 @@ parList(Parameters) :-
 %  noThe				Treat The as a
 %  shallow				using shallow classifier
 %  neg_cont				classifier based on negative vords to identify contradictions
-%  sub_ent				classifier based on subset of set of words to identify entailment	
-%  noAdmissRules		exclude admissible rules 
-%  EffCr([nonBr, equi, nonProd, nonCons])	defining an effciency criterion 
+%  sub_ent				classifier based on subset of set of words to identify entailment
+%  noAdmissRules		exclude admissible rules
+%  EffCr([nonBr, equi, nonProd, nonCons])	defining an effciency criterion
 %  eccg				    latex trees are probted in different tex file
-%  ss([...])			list of frequent sysnsets to choose 
+%  ss([...])			list of frequent sysnsets to choose
 % allInt				All noun modifeirs are intersective
-
-
-
-
-
-
