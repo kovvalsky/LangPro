@@ -37,6 +37,7 @@
 		true_member/2,
 		two_lists_to_pair_list/3,
 		ul_append/2,
+		ul_member/2,
 		is_uList/1,
 		writeln_list/1
 	]).

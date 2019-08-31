@@ -11,7 +11,9 @@
 		ant_wn/3,
 		derive/3,
 		instance/2,
-		not_instance/2
+		not_instance/2,
+		not_disjoint/3,
+		not_isa/3
 	]).
 
 :- multifile is_/2.
@@ -22,7 +24,7 @@
 	]).
 
 :- use_module('disjoint', [disj_/2]).
-:- use_module('../utils/user_preds', [match_lowerCase/2, is_uList/1]).
+:- use_module('../utils/user_preds', [match_lowerCase/2, is_uList/1, ul_member/2]).
 :- use_module('../printer/reporting', [report/1]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           	ISA Network
@@ -74,7 +76,9 @@ disjoint(A, B, KB) :-
 
 not_disjoint(A, B, KB) :-
 	\+ul_member(disj(A, B), KB),
-	\+ul_member(disj(A, B), KB).
+	\+ul_member(disj(A, B), KB),
+	\+disjoint_(A, B),
+	\+disjoint_(B, A).
 
 % disjoint
 disjoint(A, B) :-
