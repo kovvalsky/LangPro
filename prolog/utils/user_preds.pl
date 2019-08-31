@@ -27,6 +27,7 @@
 		remove_adjacent_duplicates/2,
 		remove_varTail_from_uList/2,
 		substitute_in_atom/4,
+		shared_members/2,
 		term_list_concat/2,
 		ttExp_to_ttTerm/2,
 		ttExp_to_ttTerm_info/3,
@@ -36,6 +37,7 @@
 		true_member/2,
 		two_lists_to_pair_list/3,
 		ul_append/2,
+		is_uList/1,
 		writeln_list/1
 	]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,20 +71,21 @@ subsumes_member(E, List) :-
 	nonvar(List),
 	List = [Head | Rest],
 	( subsumes_term(Head, E)  % member subsumes an element
-	; subsumes_member(E, Rest) 
+	; subsumes_member(E, Rest)
 	), !.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% uncpecified list member
-ul_member(E, List) :-
-	nonvar(List),
-	List = [Head | Rest],
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Predicates for unspecified lists = list with an unbound final tail
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% unspecified list member
+ul_member(E, [Head | Rest]) :-
+	nonvar(Head),
 	( Head = E
 	; ul_member(E, Rest)
 	).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % append list to unspecified list
 ul_append(MainList, List) :-
 	nonvar(MainList),
@@ -101,9 +104,6 @@ add_new_to_ul(New, UL) :-
 	\+ul_member(New, UL),
 	ul_append(UL, [New]).
 
-
-
-
 append_uList(MainUList, UList) :-
 	remove_varTail_from_uList(MainUList, MainList),
 	remove_varTail_from_uList(UList, List),
@@ -115,9 +115,12 @@ remove_varTail_from_uList(UList, List) :-
 	append(List, Var, UList),
 	var(Var), !.
 
+is_uList(UList) :-
+	append(_, Var, UList),
+	var(Var),
+	!.
 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 remove_adjacent_duplicates([H,H|Rest], Rest1) :-
 	!, remove_adjacent_duplicates([H|Rest], Rest1).
 
@@ -454,6 +457,13 @@ shuffle_list(List, [C|Shuff]) :-
 	shuffle_list(Rest, Shuff).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% get all elements shared by a set of lists
+shared_members(Members, Lists) :-
+    Lists = [] ->
+      Members = []
+    ; findall(M, (maplist(member(M), Lists)), Members).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % C1 is replaced by C2 in Nodes and results in NewNodes
 list_substitution([H|T], C1, C2, [New_H|New_T]) :-
 	substitution(H, C1, C2, New_H),
@@ -692,3 +702,85 @@ listInt_to_id_ccgs(List_Int, CCGs) :-
 	; report(["Error: Wrong format of the argument: ", List_Int]),
 	  fail
 	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% List to sorted frequency list. List expected not to have free variables
+% Freq list has count-element as its members
+list_to_freqList(List, Freq) :-
+    %copy_term(List, L), % to avoid accidental bindings in List
+	findall(X_Count-X, (
+	    member(X, List),
+	    findall(1, member(X, List), X_Count_List),
+	    length(X_Count_List, X_Count)
+	    ), Count_Terms),
+	sort(Count_Terms, Sorted_Count_Terms),
+	keysort(Sorted_Count_Terms, Freq).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% removes duplicates of symmetric predicates from the ord_list
+% result is again an ord_list
+rm_sym_preds_from_ord([], []).
+
+rm_sym_preds_from_ord([H1|Rest], [H1|List]) :-
+	H1 =.. [Pred, Arg1, Arg2],
+	( memberchk(Pred, [disj]) -> % list of symmetric predicates
+	    H2 =.. [Pred, Arg2, Arg1],
+		select(H2, Rest, RestRest),
+		!,
+		rm_sym_preds_from_ord(RestRest, List)
+	  ; List = Rest
+	).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% only for singleton set of facts
+/*
+rm_redundant_set_of_facts(Set_Of_Facts, Clean) :-
+	findall(X, (
+		member(X, Set_Of_Facts),
+		member(Y, Set_Of_Facts),
+		X \= Y,
+		subsumes_facts(X, Y)
+		), Del).
+*/
+rm_equi_set_of_facts_([], []).
+
+%subsumes_facts(X, Y)
+
+rm_equi_set_of_facts_([[Fact]|Rest], [[Fact]|List]) :-
+	Fact =.. [Pred, Arg1, Arg2],
+	memberchk(Pred, [disj, ant_wn]), % list of symmetric predicates
+	H2 =.. [Pred, Arg2, Arg1],
+	select([H2], Rest, RestRest),
+	!,
+	rm_equi_set_of_facts_(RestRest, List).
+
+rm_equi_set_of_facts_([[Fact]|Rest], [[Fact]|List]) :-
+	findall(X, (
+		member(X, Rest),
+		\+memberchk(Fact, X)
+		), RestRest),
+	rm_equi_set_of_facts_(RestRest, List),
+	!.
+
+rm_equi_set_of_facts_([[F1,F2|R]|Rest], [[F1,F2|R]|List]) :-
+	rm_equi_set_of_facts_(Rest, List).
+
+
+% All elements of the first list are elemenst of the second list
+sublist_of_list([], _) :-
+	!.
+
+sublist_of_list([X|Rest], L) :-
+	!,
+	memberchk(X, L),
+	sublist_of_list(Rest, L).
+
+% sort list of lists according to length
+sort_list_length(List, Sorted) :-
+	findall(N-L, (
+		member(L, List),
+		length(L, N)
+		), Length_List),
+	keysort(Length_List, Sorted_Length_List),
+	two_lists_to_list_of_pairs(_Len, Sorted, Sorted_Length_List).

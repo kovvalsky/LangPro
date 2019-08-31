@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Description: Knowledge Base
 %     Version: 12.06.12
-%      Author: lasha.abzianidze{at}gmail.com 
+%      Author: lasha.abzianidze{at}gmail.com
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- module(knowledge, 
+:- module(knowledge,
 	[
 		disjoint/3,
 		word_synonyms/3,
@@ -22,7 +22,7 @@
 	]).
 
 :- use_module('disjoint', [disj_/2]).
-:- use_module('../utils/user_preds', [match_lowerCase/2]).	
+:- use_module('../utils/user_preds', [match_lowerCase/2, is_uList/1]).
 :- use_module('../printer/reporting', [report/1]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           	ISA Network
@@ -31,15 +31,15 @@ ext( man,
 	[['john'],['sam']] ).
 ext( woman,
 	[['mary'],['kate'], ['emily'], ['ann']] ).
-	
+
 % instance
 instance(Instance, Concept) :-
 	inst(Instance, Concept),
-	!.	
-	
+	!.
+
 instance(Instance, Concept) :-
 	inst(Instance, SpecificConcept),
-	isa(SpecificConcept, Concept, []). %!!! cheating	
+	isa(SpecificConcept, Concept, []). %!!! cheating
 
 inst(Inst, Concept) :-
 	is_list(Inst), % Concept may be Variable (for transitive serach), but nor Inst
@@ -50,7 +50,7 @@ inst(Inst, Concept) :-
 % not instance
 not_instance(Inst, Concept) :-
 	inst(Inst, Inst_Concept),
-	disjoint(Inst_Concept, Concept). 
+	disjoint(Inst_Concept, Concept).
 
 
 
@@ -72,6 +72,9 @@ disjoint(A, B, KB) :-
 	; disjoint_(B, A)
 	).
 
+not_disjoint(A, B, KB) :-
+	\+ul_member(disj(A, B), KB),
+	\+ul_member(disj(A, B), KB).
 
 % disjoint
 disjoint(A, B) :-
@@ -89,9 +92,9 @@ disjoint(A, B) :-
 	isa(A, A1),
 	isa(B, B1),
 	disjoint_sym(A1, B1).
-*/	
+*/
 disjoint_sym(A, B) :-
-	( disjoint_(A, B) 
+	( disjoint_(A, B)
 	; disjoint_(B, A)
 	; (debMode('disj') ->  ( disj_(A, B) ; disj_(B, A) ); false )
 	), !.
@@ -119,15 +122,15 @@ disjoint_('physical entity', 'abstract entity').
 disjoint_(A, B, KB) :-
 	memberchk(dis_wn(A, B), KB).
 /*
-disjoint_(A, B) :- 
+disjoint_(A, B) :-
 	A \= B,
 	disjoint_list(List),
 	memberchk(A, List),
-	memberchk(B, List), 
+	memberchk(B, List),
 	!,
 	%\+isa(A, B),
 	%\+isa(B, A).
-	( (isa(A, B); isa(B,A)) -> report(['Error: ', A, ' and ', B, ' are in isa and disjoint rels']); true ). 
+	( (isa(A, B); isa(B,A)) -> report(['Error: ', A, ' and ', B, ' are in isa and disjoint rels']); true ).
 */
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -178,7 +181,7 @@ is_(snore, sleep).
 is_('girl', 'young woman'). %
 is_('young woman', 'girl'). % sick-7606, 303, 1988,
 is_('boy', 'young man'). %sick-5781
-is_('young man', 'boy'). 
+is_('young man', 'boy').
 is_('polish', 'clean'). %sick-1909
 %is_('trek', 'hike'). %sick-3182 slow trek->hike, but not 3181
 %is_('dash', 'jump'). %sick-3728 actually neutral
@@ -204,7 +207,7 @@ is_(vegetable, ingredient). %sick-5938
 is_(lunge, jump). %sick-7795
 %is_(lady, girl). %sick-8163, sick-1643 but sick-2027
 is_(big, huge). %sick-9359
-is_(huge, big). 
+is_(huge, big).
 is_(elder, elderly). %sick-9571
 is_(elderly, elder).
 is_(woman, lady). %sick-9584
@@ -250,7 +253,7 @@ is_(car, vehicle).
 is_(whisk, wire).
 is_(fountain, water).
 %is_(cyclist, person). % sick-8606
-is_(sheet, paper).  %sick-5264 deosnt like 
+is_(sheet, paper).  %sick-5264 deosnt like
 %is_(paper, sheet). %sick-4363 doesnt like
 
 
@@ -262,58 +265,58 @@ isa(A, B, _) :-
 	), !.
 
 isa(A, B, _) :-  % variant, not matching
-	A =@= B,
-	A = B.
+	A =@= B, !.
 
 isa(A, B, _) :-
 	is_(A, B),
 	!.
 
 % KB without assertions
-isa(W1, W2, KB) :- 
-	memberchk(isa_wn(W1, W2), KB)
-	; memberchk(sim_wn(W1, W2), KB). 
+isa(W1, W2, KB) :-
+	\+is_uList(KB), !,
+	( memberchk(isa_wn(W1, W2), KB)
+	; memberchk(sim_wn(W1, W2), KB)
+	).
 
- 
+isa(W1, W2, KB_) :-
+	is_uList(KB_),
+	memberchk(isa_wn(W1, W2), KB_).
+
+not_isa(A, B, KB) :-
+	\+ul_member(isa_wn(A, B), KB).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % checks if two words can have synonymous senses
 % based on a KB
 word_synonyms(W1, W2, KB) :-
-	nonvar(W1), 
+	nonvar(W1),
 	nonvar(W2),
-	%s(SS, _, W1, _, _, _), 	s(SS, _, W2, _, _, _), 
+	%s(SS, _, W1, _, _, _), 	s(SS, _, W2, _, _, _),
 	isa(W1, W2, KB), isa(W2, W1, KB), % more efficient
 	!.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Transitivity feature of isa/2 relation
 /*
 isa(A, B, KB) :-
-	nonvar(A) -> 
+	nonvar(A) ->
 		is_(A, X),
 		isa_(X, B);
 	nonvar(B) ->
 		is_(X, B),
 		isa_(A, X).
-	
+
 isa_(X, Y) :-
 	( X = Y
-    ; X=@=Y ), !. 	
-	
+    ; X=@=Y ), !.
+
 isa_(X, Y) :-
-	nonvar(X) -> 
+	nonvar(X) ->
 		is_(X, Z),
 		isa_(Z, Y);
 	nonvar(Y) ->
 		is_(Z, Y),
-		isa_(X, Z).	
+		isa_(X, Z).
 */
-
-
-
-
-
-
