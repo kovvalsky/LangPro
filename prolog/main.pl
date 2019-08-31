@@ -6,7 +6,8 @@
 	'task/sent_sim',
 	'task/bag_of_words',
 	'prover/tt_nattableau',
-	'task/entail'
+	'task/entail',
+	'xml/xml_output'
 	]).
 
 :- multifile ccg/2, id/2.
