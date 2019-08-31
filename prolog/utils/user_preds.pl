@@ -68,9 +68,9 @@ true_member(E, List) :-
 subsumes_member(E, List) :-
 	nonvar(List),
 	List = [Head | Rest],
-	( subsumes_term(Head, E);  % member subsumes an element
-	  subsumes_member(E, Rest) ),
-	!.
+	( subsumes_term(Head, E)  % member subsumes an element
+	; subsumes_member(E, Rest) 
+	), !.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -293,9 +293,8 @@ remove_first(_, [], []).
 % adds only new elements of List1 to List2 without matching
 add_new_elements([H | Rest], List, NewList) :-
 	subsumes_member(H, List) -> %!!! before was. this made H specific and can fail adding info if R1<R2 and R2 was done before R1
-	%member(X, List), subsumes_term(X, H) ->    % can cause loops
-		add_new_elements(Rest, List, NewList);
-		add_new_elements(Rest, [H | List], NewList).
+		add_new_elements(Rest, List, NewList)
+	; 	add_new_elements(Rest, [H | List], NewList).
 
 add_new_elements([], List, List).
 
