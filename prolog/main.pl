@@ -7,6 +7,7 @@
 	'task/bag_of_words',
 	'prover/tt_nattableau',
 	'task/entail',
+	'task/kb_induction',
 	'xml/xml_output'
 	]).
 
