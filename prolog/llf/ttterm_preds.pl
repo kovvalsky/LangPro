@@ -34,7 +34,7 @@
 	]).
 
 
-:- use_module('../latex/latex_ttterm').
+:- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/3, latex_ttTerm_preambule/1]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).

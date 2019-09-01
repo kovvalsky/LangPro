@@ -17,23 +17,23 @@
 	npTTterm_unlike_constant/1, modTTterm_with_conj_sent_head/1
 	]).
 :- use_module('../utils/user_preds', [
-	ul_append/2, two_lists_to_pair_list/3, remove_varTail_from_uList/2 
+	ul_append/2, two_lists_to_pairList/3, remove_varTail_from_uList/2
 	]).
-	
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % For testing purposes
 test_align(Prob_Id) :-
 	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, _, _, _), Sen_Ids),
-	findall(CCGTree, 
+	findall(CCGTree,
 			( member(Id, Sen_Ids), ccg(Id, CCGTree) ),
 			CCGTrees),
 	maplist(ccgTree_to_correct_ccgTerm, CCGTrees, CCGTerms),
 	align_ttTerms(CCGTerms, NewTTterms, CommonTTterms),
-	( CommonTTterms = [] -> 
+	( CommonTTterms = [] ->
 	  	report([Prob_Id, ': '])
-	  ; report([Prob_Id, ': ' | CommonTTterms]) 
+	  ; report([Prob_Id, ': ' | CommonTTterms])
 	),
-	two_lists_to_pair_list(CCGTerms, NewTTterms, PairList),
+	two_lists_to_pairList(CCGTerms, NewTTterms, PairList),
 	%once_gen_quant_tt(CCGTerm4, TTterm),
 	print_ttTerms_in_latex(PairList).
 
@@ -50,7 +50,7 @@ align_ttTerms(TTterms, NewTTterms, CommonTTterms) :-
 align_ttTerms([], [], []).
 
 %%%%%%%%%%%%%%%%%%%%%%%
-% picks a ttTerm TT1 and a list of ttTerms and 
+% picks a ttTerm TT1 and a list of ttTerms and
 % searches non-atomic subterms of TT1 that are shared by list member ttTerms too
 find_alignment((Exp,_Ty), List_TTterms, List_TTterms, _CommonTTterms) :-
 	( \+compound(Exp)
@@ -60,7 +60,7 @@ find_alignment((Exp,_Ty), List_TTterms, List_TTterms, _CommonTTterms) :-
 find_alignment(TTterm, List_TTterms, New_List_TTterms, CommonTTterms) :-
 	TTterm = (_TTExp, Type),
 	% avoids alignment of 'a man', 'no car' etc they dont behave like constants
-	( Type = np:_ -> 
+	( Type = np:_ ->
 		( debMode('aall') -> \+npTTterm_unlike_constant(TTterm); npTTterm_as_constant(TTterm) ) %solves fracas-22
 	; true ), % add that not mon downward
 	\+modTTterm_with_conj_sent_head(TTterm), % avoids alignment of 'and X' where X: ...~>s
@@ -88,7 +88,7 @@ find_alignment((abst(_X,TT),_Ty), List_TTterms, New_List_TTterms, CommonTTterms)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% replaces subTTterm1 with subTTterm2 in TTterm1, 
+% replaces subTTterm1 with subTTterm2 in TTterm1,
 % TTterm2 is a result of a substitution
 % equivalent to searching if subTTterm1 = subTTterm2
 replace_subttTerm_in_ttTerm(_, _, (Var,_Ty), _) :-
@@ -114,19 +114,10 @@ replace_subttTerm_in_ttTerm(SubTTterm1, SubTTterm2, (TT1@TT2, Type), (NewTT1@New
 		)
 	  ;	( replace_subttTerm_in_ttTerm(SubTTterm1, SubTTterm2, TT2, NewTT2) ->
 			NewTT1 = TT1
-		  ; fail 
-		) 
-	).  
+		  ; fail
+		)
+	).
 
 replace_subttTerm_in_ttTerm(SubTTterm1, SubTTterm2, (abst(X,TT1), Type), (abst(X,TT2), Type)) :-
 	!,
 	replace_subttTerm_in_ttTerm(SubTTterm1, SubTTterm2, TT1, TT2). % be carefull of matching like@X to like@y
-
-
-
-
-
-
-
-
-

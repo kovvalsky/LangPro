@@ -14,6 +14,7 @@
 		listInt_to_id_ccgs/2,
 		list_of_tuples_to_list_of_positions/2,
 		list_substitution/4,
+		list_to_freqList/2,
 		list_to_set_using_match/2,
 		match_lowerCase/2,
 		neg/2,
@@ -26,8 +27,11 @@
 		true_remove/3,
 		remove_adjacent_duplicates/2,
 		remove_varTail_from_uList/2,
+		rm_equi_set_of_facts_/2,
 		substitute_in_atom/4,
 		shared_members/2,
+		sort_list_length/2,
+		sublist_of_list/2,
 		term_list_concat/2,
 		ttExp_to_ttTerm/2,
 		ttExp_to_ttTerm_info/3,
@@ -36,11 +40,14 @@
 		tt_atomList_to_atomList/2,
 		true_member/2,
 		two_lists_to_pair_list/3,
+		two_lists_to_pairList/3,
 		ul_append/2,
 		ul_member/2,
 		is_uList/1,
 		writeln_list/1
 	]).
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %    Generic User Defined Predicates
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -489,20 +496,19 @@ substitute_in_atom(Atom, Old, New, Result) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pair elements of two lists
-two_lists_to_pair_list([H1|Rest1], [H2|Rest2], [H1,H2|Rest]) :-
+two_lists_to_pairList([H1|Rest1], [H2|Rest2], [H1,H2|Rest]) :-
+	!,
+	two_lists_to_pairList(Rest1, Rest2, Rest).
+
+two_lists_to_pairList([], [], []).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A1,...,An + B1,...,Bn = A1-B1,...,An-Bn
+two_lists_to_pair_list([H1|Rest1], [H2|Rest2], [H1-H2|Rest]) :-
 	!,
 	two_lists_to_pair_list(Rest1, Rest2, Rest).
 
 two_lists_to_pair_list([], [], []).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% A1,...,An + B1,...,Bn = A1-B1,...,An-Bn
-two_lists_to_list_of_pairs([H1|Rest1], [H2|Rest2], [H1-H2|Rest]) :-
-	!,
-	two_lists_to_list_of_pairs(Rest1, Rest2, Rest).
-
-two_lists_to_list_of_pairs([], [], []).
 
 
 
@@ -784,4 +790,4 @@ sort_list_length(List, Sorted) :-
 		length(L, N)
 		), Length_List),
 	keysort(Length_List, Sorted_Length_List),
-	two_lists_to_list_of_pairs(_Len, Sorted, Sorted_Length_List).
+	two_lists_to_pair_list(_Len, Sorted, Sorted_Length_List).
