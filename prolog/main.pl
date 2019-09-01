@@ -73,7 +73,7 @@ parList(Parameters) :-
 %  s2the				replaces all plurals with definites
 %  thE					allow Existential import for the in false context
 % 'wn_ant':				uses antonym relation of Wordnet
-%  lex:					print extracted Lexicon
+%  prlex:				print extracted Lexicon
 % '2class':				binary classification
 %  ral(N):				rule application limit is N
 %  no_gq_llfs			dont obtain LLFs with generalized quantifiers, i.e. use fixed CCG terms
@@ -82,8 +82,9 @@ parList(Parameters) :-
 %  pr_sen				print a sentence when running gen_llfs_latex
 %  disj					use hand-coded disjoint relation
 %  usedRules([rules])	print the rules if they are used
-%  parallel(CPUs)				concurrent_maplist for entail
+%  parallel(CPUs)		concurrent_maplist for entail
 %  pr_kb				print knowledge base
+%  no_kb				no lexical knowledge base will be used
 %  singPrem				takes only single premised problems, for fracas
 %  fracFilter			filter Fracas problems that are ill formed
 %  noPl					Treat plural morpheme as a

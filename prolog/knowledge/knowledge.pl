@@ -45,7 +45,7 @@ instance(Instance, Concept) :-
 
 inst(Inst, Concept) :-
 	is_list(Inst), % Concept may be Variable (for transitive serach), but nor Inst
-	ext(Concept, Extension),
+	( debMode('no_kb') -> fail; ext(Concept, Extension) ),
 	member(El, Extension),
 	match_lowerCase(El, Inst).
 
@@ -70,19 +70,17 @@ derive(A, B, KB) :-
 disjoint(A, B, KB) :-
 	( memberchk( disj(A, B), KB)
 	; memberchk( disj(B, A), KB)
-	; disjoint_(A, B) % out of Disj debMode
-	; disjoint_(B, A)
+	; disjoint(A, B)
 	).
 
 not_disjoint(A, B, KB) :-
 	\+ul_member(disj(A, B), KB),
 	\+ul_member(disj(A, B), KB),
-	\+disjoint_(A, B),
-	\+disjoint_(B, A).
+	\+disjoint(A, B).
 
 % disjoint
 disjoint(A, B) :-
-	disjoint_sym(A, B).
+	( debMode('no_kb') -> false; disjoint_sym(A, B) ).
 /* allows weird contradictions: e.g. card trick is person, person disj trick therfore disj
 disjoint(A, B) :-
 	isa(A, A1),
@@ -272,7 +270,7 @@ isa(A, B, _) :-  % variant, not matching
 	A =@= B, !.
 
 isa(A, B, _) :-
-	is_(A, B),
+	( debMode('no_kb') -> fail; is_(A, B) ),
 	!.
 
 % KB without assertions
