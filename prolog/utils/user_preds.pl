@@ -11,6 +11,7 @@
 		choose/3,
 		const_ttTerm/1,
 		is_greater/2,
+		jobsList_into_N_jobs_rest/3,
 		listInt_to_id_ccgs/2,
 		list_of_tuples_to_list_of_positions/2,
 		list_substitution/4,
@@ -810,3 +811,19 @@ sort_list_length(List_of_lists, Sorted) :-
 		), Length_List),
 	keysort(Length_List, Sorted_Length_List),
 	two_lists_to_pair_list(_Len, Sorted, Sorted_Length_List).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% chop list into N parts of the same length + Reminder
+% used for creating jobs for concurrent computing
+% choping into N parts (<= Cores) allows choosing less than max cores
+jobsList_into_N_jobs_rest(List, N, JobList) :-
+	length(List, Total),
+	PerCore is Total // N,
+	Reminder is Total mod N,
+	length(N_Jobs, N),
+	length(CoreJob, PerCore),
+	maplist(copy_term(CoreJob), N_Jobs),
+	length(Reminder_Job, Reminder),
+	append(N_Jobs, AllCoreJobs),
+	append(AllCoreJobs, Reminder_Job, List),
+	append(N_Jobs, [Reminder_Job], JobList).

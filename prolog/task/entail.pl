@@ -3,7 +3,7 @@
 :- use_module('../knowledge/wn_preds').
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
 :- use_module('../utils/user_preds', [
-	remove_adjacent_duplicates/2, prob_input_to_list/2,
+	remove_adjacent_duplicates/2, prob_input_to_list/2, jobsList_into_N_jobs_rest/3,
 	at_most_n_random_members_from_list/3,  print_prob/1
 	]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/1, draw_matrix/1]).
@@ -57,18 +57,9 @@ entail_all(Align, List_of_Answers) :-
 % parallel version of solve_entailment
 parallel_solve_entailment(Align, ProblemIds_Answers, Results) :-
 	debMode(parallel(Cores)),
-	( var(Cores) -> current_prolog_flag(cpu_count, Cores); true ),
-	length(ProblemIds_Answers, ProbNum),
-	PerCore is ProbNum // Cores,
-	RemCore is ProbNum mod Cores,
-	length(Jobs, Cores),
-	length(CoreJob, PerCore),
-	maplist(copy_term(CoreJob), Jobs),
-	length(RemJob, RemCore),
-	append(Jobs, AllCoreJobs),
-	append(AllCoreJobs, RemJob, ProblemIds_Answers),
-	append(Jobs, [RemJob], JobList),
-	length(JobList, JobNumber), report(['Number of jobs: ', JobNumber]),
+	jobsList_into_N_jobs_rest(ProblemIds_Answers, Cores, JobList),
+	length(JobList, JobNumber),
+	report(['Number of jobs: ', JobNumber]),
 	concurrent_maplist(solve_accu_job(Align), JobList, ResultList),
 	append(ResultList, Results).
 
