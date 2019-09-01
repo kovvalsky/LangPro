@@ -273,9 +273,9 @@ isa(A, B, _) :-  % variant, not matching
 	A =@= B, !.
 
 isa(A, B, _) :-
-	( debMode('no_kb') -> false; is_(A, B) ),
-	( debMode('no_qk') -> false; isq_(A, B) ),
-	!.
+	( ( debMode('no_kb') -> false; is_(A, B) )
+	; ( debMode('no_qk') -> false; isq_(A, B) )
+	), !.
 
 % KB without assertions
 isa(W1, W2, KB) :-
