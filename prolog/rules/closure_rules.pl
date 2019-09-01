@@ -412,7 +412,6 @@ r(cl_adj_noun_1, 	closure, _, _Lexicon,  _KB,
 		br([nd( [], (true, t), [], false )],
 		  Sig) )
 :-
-
 			TLP_adj1 = tlp(_,Adj,_,_,_),
 			TLP_adj2 = tlp(_,Adj,_,_,_).
 

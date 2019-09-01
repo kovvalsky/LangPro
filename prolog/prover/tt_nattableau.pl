@@ -165,7 +165,7 @@ generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
 		append(Names, Sig, Signature), %!!! John from term, is added to Signature and doesnt have to wait for Arg push application
 		%append(Names, Sig, Signa), findall(X, (member(X, Signa), \+atomic_list_concat([_,_|_], '@', X)), Signature), % avoids 's@man'
 		nodes_to_SigBranch_tree_id(Nodes, Signature, Br, Tree, Node_Id),
-		%( debMode('lex') -> report([Lexicon]); true),
+		%( debMode('prlex') -> report([Lexicon]); true),
 		%( debMode('subWN') -> subWN_from_wn(Lexicon); rels_from_wn(Lexicon) ),
 		Count = [const_id(Ent_Id, _, Con_Id, _), node_id(Node_Id, _)],
 		%catch( call_with_time_limit(5, once(expand([Br], BrList, Tree, Count))), _, (writeln('time_limit_exceeded'), fail) ).
@@ -696,6 +696,7 @@ find_head_nodes_with_ids(_, [], []).
 
 find_head_nodes_with_ids(BrNodes, Head, [Id | ID_tail]) :- % also usable in reverse
 	member(ndId(Node, Id), BrNodes),
-	once(choose(Head, Node, Rest)),
+	%once(choose(Head, Node, Rest)), %sick train-4063 not proved due to this
+	choose(Head, Node, Rest),
 	\+cyclic_term(Node), % can be solved by introducing Var(x) for X
 	find_head_nodes_with_ids(BrNodes, Rest, ID_tail).
