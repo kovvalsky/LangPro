@@ -157,24 +157,6 @@ is_(obtain, receive).
 is_(receive, obtain).
 is_(build, finish).
 
-is_(every, most). %!!!
-is_(most, a).
-is_(both, a).
-is_(s, most). %fracas 100
-is_(several, a).
-is_(many, a).
-is_(s, a).
-is_(the, a).
-is_(a, the).
-is_(s, a_few). %!!! wrong
-is_(a_few, s).
-is_(s, both). %!!! due to generic reading, 13, wrong
-is_('CD', a). %!!!
-is_(one, a).
-is_(a, one). %!!! no arithemtic still
-%is_(two, one). % wrong for fracas 287
-is_(two, a).
-is_(three, two).
 is_(win, won). %fracas-49 for eccg
 is_(won, win).
 
@@ -258,6 +240,27 @@ is_(fountain, water).
 is_(sheet, paper).  %sick-5264 deosnt like
 %is_(paper, sheet). %sick-4363 doesnt like
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Knowledge about quantifiers
+isq_(every, most). %!!!
+isq_(most, a).
+isq_(both, a).
+isq_(s, most). %fracas 100
+isq_(several, a).
+isq_(many, a).
+isq_(s, a).
+isq_(the, a).
+isq_(a, the).
+isq_(s, a_few). %!!! wrong
+isq_(a_few, s).
+isq_(s, both). %!!! due to generic reading, 13, wrong
+isq_('CD', a). %!!!
+isq_(one, a).
+isq_(a, one). %!!! no arithemtic still
+%is_(two, one). % wrong for fracas 287
+isq_(two, a).
+isq_(three, two).
+
 
 % for player vs play, Sick-107
 isa(A, B, _) :-
@@ -270,7 +273,8 @@ isa(A, B, _) :-  % variant, not matching
 	A =@= B, !.
 
 isa(A, B, _) :-
-	( debMode('no_kb') -> fail; is_(A, B) ),
+	( debMode('no_kb') -> false; is_(A, B) ),
+	( debMode('no_qk') -> false; isq_(A, B) ),
 	!.
 
 % KB without assertions

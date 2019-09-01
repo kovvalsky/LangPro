@@ -85,6 +85,7 @@ parList(Parameters) :-
 %  parallel(CPUs)		concurrent_maplist for entail
 %  pr_kb				print knowledge base
 %  no_kb				no lexical knowledge base will be used
+%  no_qk				no quantifier knowledge will be used
 %  singPrem				takes only single premised problems, for fracas
 %  fracFilter			filter Fracas problems that are ill formed
 %  noPl					Treat plural morpheme as a
