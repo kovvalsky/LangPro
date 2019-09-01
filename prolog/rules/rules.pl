@@ -19,12 +19,12 @@
 	cat_eq/2, final_value_of_type/2, sub_type/2, set_final_value_of_type/3
 	]).
 :- use_module('../utils/user_preds',
-	[choose/3, const_ttTerm/1, no_isa_rel_const_ttTerms/3, tt_mon/2, neg/2]
+	[choose/3, const_ttTerm/1, no_isa_rel_const_ttTerms/3, tt_mon/2, tt_mon_up/1, neg/2]
 	).
 :- use_module('../llf/ttterm_preds', [
 	adjuncted_ttTerm/1, modList_node_to_modNode_list/2,
 	tt_constant_to_tt_entity/2, modList_be_args_to_nodeList/3,
-	match_ttTerms/3, proper_tt_isa/3, extract_const_ttTerm/2,
+	match_ttTerms/3, match_list_ttTerms/3, proper_tt_isa/3, extract_const_ttTerm/2,
 	set_type_for_tt/3
 	]).
 

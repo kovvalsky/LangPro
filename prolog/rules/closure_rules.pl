@@ -12,7 +12,7 @@
 	subset_only_terms/2, ttTerm_to_informative_tt/2
 	]).
 :- use_module('../knowledge/knowledge', [
-	disjoint/3, isa/3, ant_wn/3, instance/2, not_instance/2, not_disjoint/3, not_isa/3
+	disjoint/3, isa/3, ant_wn/3, derive/3, instance/2, not_instance/2, not_disjoint/3, not_isa/3
 	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
