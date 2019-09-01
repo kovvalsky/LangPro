@@ -8,8 +8,11 @@
 	'prover/tt_nattableau',
 	'task/entail',
 	'task/kb_induction',
-	'xml/xml_output'
+	'xml/xml_output',
+	'printer/reporting'
 	]).
+
+
 
 :- multifile ccg/2, id/2.
 :- discontiguous ccg/2, id/2.
@@ -39,8 +42,11 @@ set_debMode([H | Rest]) :-
 		assertz( debMode(H) )
 	; H = ss(SS) ->
 		retractall( debMode(ss(_)) ),
-		(is_list(SS) -> List = SS; numlist(1,SS,List)),
+		( is_list(SS) -> List = SS; numlist(1,SS,List) ),
 		assertz( debMode(ss(List)) )
+	; H = parallel(Cores) ->
+		( var(Cores) -> current_prolog_flag(cpu_count, Cores); true ),
+		assertz( debMode(parallel(Cores)) )
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).
@@ -50,8 +56,10 @@ set_debMode([]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set parameters from the scratch
 parList(Parameters) :-
-	reset_debMode,
-	set_debMode(Parameters).
+	is_list(Parameters) ->
+		reset_debMode,
+		set_debMode(Parameters)
+	; throw_error('No list argument given to parList!', []).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 				List of Parameters
