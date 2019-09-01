@@ -3,7 +3,7 @@
 :- use_module('../knowledge/wn_preds').
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
 :- use_module('../utils/user_preds', [
-	remove_adjacent_duplicates/2,
+	remove_adjacent_duplicates/2, prob_input_to_list/2,
 	at_most_n_random_members_from_list/3,  print_prob/1
 	]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/1, draw_matrix/1]).
@@ -16,7 +16,7 @@
 :- use_module('../llf/correct_term', [correct_ccgTerm/2]).
 :- use_module('../llf/ner', [ne_ccg/2]).
 :- use_module('../llf/ttterm_preds', [
-	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2, prob_input_to_list/2,
+	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2,
 	normalize_lexicon/2, token_norm_ttTerm/3
 	]).
 

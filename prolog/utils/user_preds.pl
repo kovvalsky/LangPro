@@ -804,10 +804,9 @@ sublist_of_list([X|Rest], L) :-
 	sublist_of_list(Rest, L).
 
 % sort list of lists according to length
-sort_list_length(List, Sorted) :-
-	findall(N-L, (
-		member(L, List),
-		length(L, N)
+sort_list_length(List_of_lists, Sorted) :-
+	findall(Len-List, (
+		member(List,List_of_lists), length(List, Len)
 		), Length_List),
 	keysort(Length_List, Sorted_Length_List),
 	two_lists_to_pair_list(_Len, Sorted, Sorted_Length_List).
