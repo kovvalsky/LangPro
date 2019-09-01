@@ -10,60 +10,87 @@
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
 	list_to_freqList/2, rm_equi_set_of_facts_/2, shared_members/2, sort_list_length/2,
-	sublist_of_list/2, two_lists_to_pair_list/3
+	sublist_of_list/2, two_lists_to_pair_list/3, prob_input_to_list/2
 	]).
 :- use_module('../printer/reporting', [report/2]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
+:- use_module(library(pairs)).
 
 
-%abduce_KB_from_prob(PrID, Align, ABD) :-
-%	( Align == 'align' ->
-%		problem_to_ttTerms(Align, PrID, _, _, PrTTs, HyTTs, KB)
-%	  ; problem_to_ttTerms('no_align', PrID, PrTTs, HyTTs, _, _, KB)
-%	),
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Given a list of problems with possibly specified answers,
+% loop over the problems and induce KB untill it is not possible
+induce_knowledge(ToSolve, Answers, UnSolved, Align, Check, KB) :-
+	prob_input_to_list(ToSolve, ToSolve1),
+	findall( PrId, (
+		member(PrId,ToSolve1), sen_id(_,PrId,'h',Ans,_), memberchk(Ans,Answers)
+		), ToSolve2),
+	induce_prove_loop(ToSolve2, UnSolved, Align, Check, [], List_of_KB_cnt),
+	print_kb_learning_stages(List_of_KB_cnt, KB).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Print learned knowledge according to the stages
+print_kb_learning_stages(List_of_KB_cnt, KB) :-
+	length(List_of_KB_cnt, Stages),
+	format('~`=t All Learned Knowledge (~w stages) ~`=t~100|~n', [Stages]),
+	print_learning_stages(1, List_of_KB_cnt),
+	append(List_of_KB_cnt, KB_cnt),
+	keysort(KB_cnt, KB_cnt_srt),
+	two_lists_to_pair_list(_, KB, KB_cnt_srt),
+	length(KB_cnt_srt, Len),
+	format('~`=t All together (~w rels) ~`=t~100|~n', [Len]),
+	maplist(writeln, KB_cnt_srt).
+
+print_learning_stages(N, [H|Rest]) :-
+	!, format('~`-t Stage ~w ~`-t~100|~n', [N]),
+	maplist(writeln, H),
+	N1 is N + 1,
+	print_learning_stages(N1, Rest).
+
+print_learning_stages(_, []).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % loop over the problems: prove problems and induce kb from proved ones,
 % then reuse the kb for proving & inducing new kb from the rest of the unproved problems
-induce_prove_loop(Align, Check, Answers, KB0, KB, ToSolve, UnSolved) :-
-	( var(ToSolve) ->
-		findall( PrId, ( sen_id(_, PrId, 'h', Ans, _), member(Ans, Answers) ), ToSolve )
-	; true
-	),
-	kb_induction_all(Align, Check, Answers, KB0, KB1, ToSolve, UnSol),
+induce_prove_loop(ToSolve, UnSolved, Align, Check, Init_KB, List_of_KB_cnt) :-
+	kb_induction_all(ToSolve, UnSol, Align, Check, Init_KB, KB_cnt),
 	( ToSolve == UnSol ->
-		report(['No improvemnet. Stop!'])
+		report(['No improvemnet. Stop!']),
+		List_of_KB_cnt = []
 	; length(ToSolve, ToLen), length(UnSol, UnLen),
 		format('Improvement from ~w to ~w. Continue~n', [ToLen, UnLen]),
-	  	append(KB0, KB1, KB2),
-		induce_prove_loop(Align, Check, Answers, KB2, KB, UnSol, UnSolved)
-	).
+		two_lists_to_pair_list(_, KB, KB_cnt),
+	  	append(Init_KB, KB, Init_KB1),
+		induce_prove_loop(UnSol, UnSolved, Align, Check, Init_KB1, List_of_KB_cnt1),
+		List_of_KB_cnt = [KB_cnt|List_of_KB_cnt1]
+	), !.
 
-
-kb_induction_all(Align, Check, Answers, KB0, KB, PrList, Unsolved) :-
-	findall( PrId, ( sen_id(_, PrId, 'h', Ans, _), memberchk(PrId, PrList), member(Ans, Answers) ), PrIds),
-	findall(UnSolve-KB1,
-	  ( member(PrId, PrIds),
-	    kb_induction_prob(Align, Check, PrId, KB0, List_KB, UnSolve),
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Induce knowledge
+kb_induction_all(PrList, Unsolved, Align, Check, KB0, KB_cnt) :-
+	findall(UnSolve-KB1, (
+		member(PrId, PrList),
+	    kb_induction_prob(PrId, Align, Check, KB0, List_KB, UnSolve),
 	    ( List_KB = [] -> KB1 = [];  List_KB = [KB1|_] )
 	  ), Uns_KBs),
 	two_lists_to_pair_list(Uns, KBs, Uns_KBs),
 	include(integer, Uns, Unsolved),
     append(KBs, KB_list),
-    list_to_set(KB_list, KB),
-    list_to_freqList(KB_list, Freq_KB),
-	report(['%All Knowledge-1:'], Freq_KB),
+    list_to_freqList(KB_list, KB_cnt),
+	format('~`*t Learned knowledge ~`*t~100|~n'),
+	maplist(writeln, KB_cnt),
 	length(Unsolved, N),
-	report(['%Unsolved Problems (', N, '):' | Unsolved]).
+	format('Unsolved Problems (~w):~n~w~n~`*t~100|~n', [N, Unsolved]).
+
 
 %
-kb_induction_prob(Align, ConstCheck, PrId, KB0, Sorted_KB, NotSolved) :-
+kb_induction_prob(PrId, Align, ConstCheck, KB0, Sorted_KB, NotSolved) :-
     sen_id(_, PrId, _, Ans, _),
     findall(Sen, (
-		sen_id(_, PrId, PH, _, Sent),
-		atomic_list_concat([PH, Sent], ': ', Sen)
-		), Sentences),
-    Ans \= 'unknown',
+		sen_id(_,PrId,PH,_,Sent), atomic_list_concat([PH,Sent],': ',Sen)
+	  ), Sentences),
+    % Ans \= 'unknown',
     % Get branches
     get_branches(PrId, Ans, Align, KB0, KB3, TTterms, Branches, Status),
     !, %!!! stop if Brnach =[]
