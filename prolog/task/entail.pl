@@ -16,7 +16,7 @@
 :- use_module('../llf/correct_term', [correct_ccgTerm/2]).
 :- use_module('../llf/ner', [ne_ccg/2]).
 :- use_module('../llf/ttterm_preds', [
-	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2,
+	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2, prob_input_to_list/2,
 	normalize_lexicon/2, token_norm_ttTerm/3
 	]).
 
@@ -80,13 +80,7 @@ solve_accu_job(Align, ProblemIds_Answers, Results) :-
 entail_some(List_Int) :- entail_some('both', List_Int).
 
 entail_some(Align, List_Int) :-
-	(is_list(List_Int) ->
-		L1 = List_Int
-	  ; List_Int = Inf-Sup,
-		integer(Inf),
-		integer(Sup),
-		findall(X, between(Inf, Sup, X), L1)
-	),
+	prob_input_to_list(List_Int, L1),
 	( debMode('singPrem') ->
 		findall(X, (member(X,L1), \+findall(_, sen_id(_,X,'p',_,_),[_,_|_])), L2 )
 	; L2 = L1

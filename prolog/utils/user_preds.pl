@@ -24,6 +24,7 @@
 		print_prob/1,
 		match_remove/3,
 		patt_remove/3,
+		prob_input_to_list/2,
 		true_remove/3,
 		remove_adjacent_duplicates/2,
 		remove_varTail_from_uList/2,
@@ -708,6 +709,25 @@ listInt_to_id_ccgs(List_Int, CCGs) :-
 		)
 	; report(["Error: Wrong format of the argument: ", List_Int]),
 	  fail
+	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Various input for problem IDs to list of problem _IDs
+prob_input_to_list(Input, List) :-
+	( var(Input) ->
+		findall(X, sen_id(_,X,'h',_,_), List)
+	; is_list(Input) ->
+		List = Input
+	; integer(Input) ->
+		List = [Input]
+	; Input = Inf-Sup ->
+		( integer(Inf), integer(Sup) ->
+			findall(X, (sen_id(_,X,'h',_,_), between(Inf,Sup,X)), List)
+		; var(Inf), integer(Sup) ->
+			findall(X, (sen_id(_,X,'h',_,_), X =< Sup), List)
+		; integer(Inf), var(Sup) ->
+				findall(X, (sen_id(_,X,'h',_,_), Inf =< X), List)
+		)
 	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
