@@ -70,6 +70,8 @@ parList(Parameters) :-
 % 'fix': 				prints fixes done on CCG trees
 % 'proof_tree': 		develope a proof tree
 % 'aall':				allows alignment of any NPs
+% cpu_count				the number of threads to use for concurrent run
+% complete_tree			Proof stopped when the RAL is reached, not when an open branch is found
 % 'prprb':				prints the problem
 %  waif(filename): 		writes answers in file in SICK style
 % 'ne':					reports MW Named Entity found
@@ -92,7 +94,8 @@ parList(Parameters) :-
 %  usedRules([rules])	print the rules if they are used
 %  parallel(CPUs)		concurrent_maplist for entail
 %  pr_kb				print knowledge base
-%  no_kb				no lexical knowledge base will be used
+%  no_kb				no hand crafted lexical knowledge base will be used
+%  no_wn				no wn knowledge will be used
 %  no_qk				no quantifier knowledge will be used
 %  singPrem				takes only single premised problems, for fracas
 %  fracFilter			filter Fracas problems that are ill formed

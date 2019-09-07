@@ -187,7 +187,8 @@ generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
 		%report(['Relevant Rules: ', RelRules]),
 		% check if tableau closes initially
 		numlist(1, Node_Id, IdList),
-		debMode(ral(Limit)),
+		debMode(ral(RAL)),
+		( debMode('complete_tree') -> Limit = RAL-'comp'; Limit = RAL-'part' ),
 		( apply_closure_rules(IdList, Br, RelClRules, Cl_IDs, Cl_Rule, KB) ->
 			(BrList, Status) = ([], ('Ter', 1)),
 			findSubTree(Tree, Node_Id, tree(_, closer([Cl_IDs, Cl_Rule])))
@@ -344,15 +345,17 @@ expand([Branch | RestBranches], RestBranches, Tree, UL_Closing_IDs, [const_id(E,
 */
 
 expand(BranchList, NewBranchList, Tree, Closing_IDs, KB, Count, Rules, RuleAppNum, Steps, Limit) :-
-	%length(BranchList, N),
+	Limit = AppLimit-Mode,
 	%(0 is N mod 100 -> display(N), nl; true),
 	Count = [const_id(Eid1, Eid, Cid1, Cid), node_id(Nid1, Nid)],
 	Count1 = [const_id(Eid1, Eid2, Cid1, Cid2), node_id(Nid1, Nid2)],
-	dirExpand(BranchList, TempBranchList, Tree, Closing_IDs, KB, Count1, Rules, NewRules, RAppNum),
-	!,
+	( dirExpand(BranchList, TempBranchList, Tree, Closing_IDs, KB, Count1, Rules, NewRules, RAppNum)
+	; Mode == 'comp',
+		select(Br, BranchList, Rest), append(Rest, [Br], RotatedBranchList),
+		dirExpand(RotatedBranchList, TempBranchList, Tree, Closing_IDs, KB, Count1, Rules, NewRules, RAppNum)
+	), !,
 	Count2 = [const_id(Eid2, Eid, Cid2, Cid), node_id(Nid2, Nid)],
 	NewRuleAppNum is RuleAppNum + RAppNum,
-	AppLimit is Limit,  % ruleapp limit
 	%report('Rule app: ', NewRuleAppNum),
 	( (NewRuleAppNum < AppLimit; TempBranchList = []) ->
 		expand(TempBranchList, NewBranchList, Tree, Closing_IDs, KB, Count2, NewRules, NewRuleAppNum, Steps, Limit)
@@ -360,11 +363,7 @@ expand(BranchList, NewBranchList, Tree, Closing_IDs, KB, Count, Rules, RuleAppNu
 		( debMode('prlim') -> report(['Rule application limit reached: ', AppLimit]); true),
 		Steps = ('Lim', NewRuleAppNum) %'Limited'
 	).
-	%length(TempBranchList, L),
-	%(L < 100 ->
-		%expand(TempBranchList, NewBranchList, Tree, Count2, NewRules);
-		%NewBranchList = TempBranchList, writeln('Limit reached')).
-	%expand(TempBranchList, NewBranchList, Tree, Count2).
+
 
 % if no more rule applications is possivbel then this clause assigns Model
 expand(BranchList, BranchList, Tree, _Closing_IDs, _KB,  [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, ('Ter', Steps), _Limit) :-

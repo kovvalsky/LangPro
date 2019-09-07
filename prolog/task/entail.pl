@@ -19,6 +19,7 @@
 	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2,
 	normalize_lexicon/2, token_norm_ttTerm/3
 	]).
+:- use_module('../knowledge/ind_kb', [add_ind_kb/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % entailment with the first GQTT
@@ -593,7 +594,6 @@ ccgTree_to_TTterms(CCGTree, TTterms) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%
 problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :-
 	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'p', _, _), Prem_Sen_Ids),
 	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'h', _, _), Hypo_Sen_Ids),
@@ -613,7 +613,8 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 	%ground_ccgterms_to_lexicon(),
 	( debMode('prlex') -> report([Lexicon]); true),
 	%( debMode('subWN') -> subWN_from_wn(Lexicon); kb_from_wn(Lexicon, KB) ),
-	( debMode('no_kb') -> KB = []; kb_from_wn(Lexicon, KB) ), % extract relevant semantic relations from WN
+	( debMode('no_wn') -> KB0 = []; kb_from_wn(Lexicon, KB0) ), % extract relevant semantic relations from WN
+	( debMode('ind_kb') -> add_ind_kb(KB0,KB); KB = KB0 ),
 	( debMode('pr_kb') -> report(['KB: ', KB]); true ),
 	( debMode('no_gq_llfs') ->
 		(Prems, Hypos) = (PremCCGTerms, HypoCCGTerms)

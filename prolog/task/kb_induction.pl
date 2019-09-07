@@ -10,7 +10,7 @@
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
 	list_to_freqList/2, rm_equi_set_of_facts_/2, shared_members/2, sort_list_length/2,
-	sublist_of_list/2, two_lists_to_pair_list/3, prob_input_to_list/2
+	sublist_of_list/2, two_lists_to_pair_list/3, prob_input_to_list/2, jobsList_into_N_jobs_rest/3
 	]).
 :- use_module('../printer/reporting', [report/2]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
@@ -20,13 +20,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Given a list of problems with possibly specified answers,
 % loop over the problems and induce KB untill it is not possible
-induce_knowledge(ToSolve, Answers, UnSolved, Align, Check, KB) :-
+induce_knowledge(ToSolve, Answers, UnsolvedProbIDs, Align, Check, KB) :-
 	prob_input_to_list(ToSolve, ToSolve1),
-	findall( PrId, (
+	findall( PrId-Ans, (
 		member(PrId,ToSolve1), sen_id(_,PrId,'h',Ans,_), memberchk(Ans,Answers)
-		), ToSolve2),
-	induce_prove_loop(ToSolve2, UnSolved, Align, Check, [], List_of_KB_cnt),
+		), ToSolve_Ans),
+	induce_prove_loop(ToSolve_Ans, UnSolved_Ans, Align, Check, [], List_of_KB_cnt),
+	two_lists_to_pair_list(UnsolvedProbIDs, _, UnSolved_Ans),
 	print_kb_learning_stages(List_of_KB_cnt, KB).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Print learned knowledge according to the stages
@@ -39,7 +41,8 @@ print_kb_learning_stages(List_of_KB_cnt, KB) :-
 	two_lists_to_pair_list(_, KB, KB_cnt_srt),
 	length(KB_cnt_srt, Len),
 	format('~`=t All together (~w rels) ~`=t~100|~n', [Len]),
-	maplist(writeln, KB_cnt_srt).
+	maplist(writeln, KB_cnt_srt),
+	( debMode(waif(FileName)) -> write_induced_kb_in_file(KB_cnt_srt, FileName); true ).
 
 print_learning_stages(N, [H|Rest]) :-
 	!, format('~`-t Stage ~w ~`-t~100|~n', [N]),
@@ -49,101 +52,131 @@ print_learning_stages(N, [H|Rest]) :-
 
 print_learning_stages(_, []).
 
+% write induced knowledge in file that is readable by prolog
+write_induced_kb_in_file(KB_cnt_srt, FileName) :-
+	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
+	format(S, '~`%t Induced Knowledge ~`%t~50|~n', []),
+	maplist(write_kb_as_term(S, 'ind_rel'), KB_cnt_srt),
+	close(S).
+
+write_kb_as_term(S, Func, Term) :-
+	format(S, '~w(', Func),
+	write_term(S, Term, [quoted(true)]),
+	writeln(S, ').').
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % loop over the problems: prove problems and induce kb from proved ones,
 % then reuse the kb for proving & inducing new kb from the rest of the unproved problems
-induce_prove_loop(ToSolve, UnSolved, Align, Check, Init_KB, List_of_KB_cnt) :-
-	kb_induction_all(ToSolve, UnSol, Align, Check, Init_KB, KB_cnt),
-	( ToSolve == UnSol ->
+induce_prove_loop(ToSolve_Ans, UnSolved_Ans, Align, Check, Init_KB, List_of_KB_cnt) :-
+	kb_induction_all(ToSolve_Ans, UnSol_Ans, Align, Check, Init_KB, KB_cnt),
+	( ToSolve_Ans == UnSol_Ans ->
 		report(['No improvemnet. Stop!']),
-		List_of_KB_cnt = []
-	; length(ToSolve, ToLen), length(UnSol, UnLen),
+		List_of_KB_cnt = [],
+		UnSolved_Ans = UnSol_Ans
+	; length(ToSolve_Ans, ToLen), length(UnSol_Ans, UnLen),
 		format('Improvement from ~w to ~w. Continue~n', [ToLen, UnLen]),
 		two_lists_to_pair_list(_, KB, KB_cnt),
 	  	append(Init_KB, KB, Init_KB1),
-		induce_prove_loop(UnSol, UnSolved, Align, Check, Init_KB1, List_of_KB_cnt1),
+		induce_prove_loop(UnSol_Ans, UnSolved_Ans, Align, Check, Init_KB1, List_of_KB_cnt1),
 		List_of_KB_cnt = [KB_cnt|List_of_KB_cnt1]
 	), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge
-kb_induction_all(PrList, Unsolved, Align, Check, KB0, KB_cnt) :-
-	findall(UnSolve-KB1, (
-		member(PrId, PrList),
-	    kb_induction_prob(PrId, Align, Check, KB0, List_KB, UnSolve),
-	    ( List_KB = [] -> KB1 = [];  List_KB = [KB1|_] )
-	  ), Uns_KBs),
-	two_lists_to_pair_list(Uns, KBs, Uns_KBs),
-	include(integer, Uns, Unsolved),
+kb_induction_all(ToSolve_Ans, Unsolved_Ans, Align, Check, KB0, KB_cnt) :-
+	( debMode(parallel(Cores)) ->
+		jobsList_into_N_jobs_rest(ToSolve_Ans, Cores, JobList),
+		concurrent_maplist(kb_induction_some(Align,Check,KB0), JobList, List_of_KBs, List_of_Stats_Ans),
+		append(List_of_KBs, KBs),
+		append(List_of_Stats_Ans, Stats_Ans)
+	; kb_induction_some(Align, Check, KB0, ToSolve_Ans, KBs, Stats_Ans)
+	),
+	%findall(Stat_Ans-KB1, (
+	%	member(PrId_Ans, ToSolve_Ans),
+	%    kb_induction_prob(PrId_Ans, Align, Check, KB0, List_KB, Stat_Ans),
+	%    ( List_KB = [] -> KB1 = [];  List_KB = [KB1|_] )
+	%  ), UnsAns_KBs),
+	%two_lists_to_pair_list(Uns_Ans, KBs, UnsAns_KBs),
+	findall(U-A, (member(U-A,Stats_Ans), integer(U)), Unsolved_Ans),
     append(KBs, KB_list),
     list_to_freqList(KB_list, KB_cnt),
 	format('~`*t Learned knowledge ~`*t~100|~n'),
 	maplist(writeln, KB_cnt),
-	length(Unsolved, N),
-	format('Unsolved Problems (~w):~n~w~n~`*t~100|~n', [N, Unsolved]).
+	length(Unsolved_Ans, N),
+	format('Unsolved Problems (~w):~n~w~n~`*t~100|~n', [N, Unsolved_Ans]).
 
+% predicate tailored for concurrent_maplist
+kb_induction_some(Align, Check, KB0, PrIds_Answers, KBs, Stats_Answers) :-
+	maplist(kb_induction_prob(Align,Check,KB0), PrIds_Answers, List_of_list_of_KBs, Stats_Answers),
+	findall(KB, (
+		member(List_of_KBs, List_of_list_of_KBs),
+		(List_of_KBs=[] -> KB=[]; List_of_KBs=[KB|_])
+		), KBs).
 
-%
-kb_induction_prob(PrId, Align, ConstCheck, KB0, Sorted_KB, NotSolved) :-
-    sen_id(_, PrId, _, Ans, _),
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Induce knowledge from a single problem
+kb_induction_prob(Align, ConstCheck, KB0, PrId-Ans, Learned_KBs, Stat_Ans) :-
     findall(Sen, (
 		sen_id(_,PrId,PH,_,Sent), atomic_list_concat([PH,Sent],': ',Sen)
-	  ), Sentences),
-    % Ans \= 'unknown',
+		), Sentences),
+    Patterns = [_, _@_, (_@_)@_, _@(_@_)],
     % Get branches
     get_branches(PrId, Ans, Align, KB0, KB3, TTterms, Branches, Status),
-    !, %!!! stop if Brnach =[]
+    !,
+	( Branches = [] ->
+		format('~w (~w): closed [~w]~n', [PrId, Ans, Status]),
+		Stat_Ans = 'closed'-Ans
+	; discover_knowledge(ConstCheck, TTterms, Branches, KB3, Patterns, Learned_KBs)
+	),
+	( Branches = [] ->
+		format('~w (~w): closed [~w]~n', [PrId, Ans, Status]),
+		Stat_Ans = 'closed'-Ans
+	; Learned_KBs = [] ->
+		format('~w (~w): no KB [~w]~n', [PrId, Ans, Status]),
+		Stat_Ans = PrId-Ans,
+		maplist(writeln, Sentences)
+	; format('~w (~w): !! KB [~w], KB: ~w~n', [PrId, Ans, Status, Learned_KBs]),
+		Stat_Ans = 'solved'-Ans,
+		maplist(writeln, Sentences),
+		report(Learned_KBs)
+	),
+	format('~`-t~50|~n').
+
+% if get_branches fails the produces demmy output
+kb_induction_prob(_Align, _ConstCheck, _KB0, PrId-Ans, [], PrId-Ans).
+
+%
+discover_knowledge(ConstCheck, TTterms, Branches, KB3, Patterns, Learned_KBs) :-
     % Get relevant closure rules based on the lexicon extacted from Terms
     extract_lex_NNPs_ttTerms(TTterms, Lexicon, _Names),
     findall(RuleN, clause(r(RuleN,closure,_,_,_,_),_), ListClRules), % automatic retival of closure rules
     list_to_ord_set(ListClRules, ClRules),
     select_relevant_rules(Lexicon, ClRules, RelClRules),
     % Find closing knowledge
-    Patterns = [_, _@_],
     maplist( pattern_filtered_nodes(Patterns), Branches, FilteredBranches ),
 	findall(K, ( % a list of sets of facts, that can close Branch
-	    member(Br, FilteredBranches),
-		closing_knowledge(RelClRules, Br, KB3, K) % K is a list of lists
+	    member(Br,FilteredBranches), closing_knowledge(RelClRules,Br,KB3,K) % K is a list of lists
 	    ), PossKB), % a list of lists of lists
 	shared_members(KB_list, PossKB),
 	findall(Know, (
-		member(Know, KB_list),
-		\+includes_bad_fact(Know, Lexicon, KB3)
+		member(Know,KB_list), \+includes_bad_fact(Know,Lexicon,KB3)
 		), Good_KB_list),
 	sort(Good_KB_list, KB_ord),
 	rm_equi_set_of_facts_(KB_ord, KB_test),
 	( ConstCheck ->
 	  	findall(K, (
-			member(K, KB_test),
-			maplist(consistency_check(K), TTterms, Checks),
-			\+memberchk('Inconsistent', Checks)
+			member(K,KB_test), maplist(consistency_check(K),TTterms,Checks),
+			\+memberchk('Inconsistent',Checks)
 		), KB1)
 	; KB1 = KB_test
 	),
 	findall(X, (
-		member(X, KB1),
-		\+((
-			member(Y, KB1),
-			X \= Y,
-			sublist_of_list(Y, X)
-		))
+		member(X, KB1), \+((member(Y,KB1), X\=Y, sublist_of_list(Y,X)))
 		), KB),
-	sort_list_length(KB, Sorted_KB),
-	term_to_atom(KB3, At_KB3),
-	( Branches = [] ->
-		format('~w (~w): closed [~w]~n', [PrId, Ans, Status]),
-		NotSolved = 'closed'
-	; Sorted_KB = [] ->
-		format('~w (~w): no KB [~w], KB: ~w~n', [PrId, Ans, Status, At_KB3]),
-		NotSolved = PrId,
-		maplist(writeln, Sentences)
-	;	format('~w (~w): KB found [~w], KB: ~w~n', [PrId, Ans, Status, At_KB3]),
-		NotSolved = 'solved',
-		maplist(writeln, Sentences),
-		report(Sorted_KB)
-	),
-	format('~`-t~50|~n').
+	sort_list_length(KB, Learned_KBs).
+	%term_to_atom(KB3, At_KB3),
+
 
 %	n_group_branches(N, BranchList, GrBranches),
 %	Patterns = [ (A,_), (A@B,_) ],
@@ -244,7 +277,7 @@ includes_bad_fact(List, Lex, KB) :-
 	bad_fact(X, Lex, KB),
 	!.
 
-% identifies bad/insensible facts
+% identifies bad/nonsensical facts
 bad_fact(ant_wn(A, B), _Lex, KB) :-
 	memberchk(isa_wn(A, B), KB);
 	memberchk(isa_wn(B, A), KB).
@@ -305,7 +338,7 @@ comparable_pos_tags(A, B) :-
 pattern_filtered_nodes([], BrNodes, BrNodes).
 
 pattern_filtered_nodes([P|Atterns], BrNodes, Filtered) :-
-	% detecting wether BrNodes are Branch or Nodes
+	% detecting whether BrNodes are Branch or Nodes
 	( BrNodes = br(Nodes, Hist, Sig) ->
 	    Filtered = br(FilteredNodes, Hist, Sig)
 	  ; BrNodes = Nodes,
