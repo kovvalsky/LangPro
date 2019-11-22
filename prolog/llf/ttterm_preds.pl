@@ -472,11 +472,12 @@ ttTerms_same_type([], Type, Type) :-
 	!.
 
 ttTerms_same_type([(_,Type1) | Rest], Type2, Type) :-
-	var(Type2) ->
-		ttTerms_same_type(Rest, Type1, Type2)
-	; nonvar(Type1),
-	  luc(Type1, Type2, Type3),
-	  ttTerms_same_type(Rest, Type3, Type).
+	( var(Type2)
+	->	ttTerms_same_type(Rest, Type1, Type)
+	; 	nonvar(Type1),
+	  	luc(Type1, Type2, Type3),
+	  	ttTerms_same_type(Rest, Type3, Type)
+	).
 
 
 

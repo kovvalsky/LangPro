@@ -19,7 +19,7 @@
 	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2,
 	normalize_lexicon/2, token_norm_ttTerm/3
 	]).
-:- use_module('../knowledge/ind_kb', [add_ind_kb/2]).
+%:- use_module('../knowledge/ind_kb', [add_ind_kb/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % entailment with the first GQTT
