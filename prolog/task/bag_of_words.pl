@@ -3,15 +3,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-shallow_reasoning(PrId, Answer, Closed, Status) :-
-	debMode('lexical') -> 
+shallow_reasoning(PrId, Answer, [], Closed, Status) :-
+	debMode('lexical') ->
 		lexical_reasoning(PrId, Answer, Closed, Status)
 	; debMode('neg_cont') ->
 		contradiction_negation_based(PrId, Answer, Closed, Status)
 	; debMode('sub_ent') ->
 		entailment_similarity_based(PrId, Answer, Closed, Status)
 	; lexical_reasoning(PrId, Answer, Closed, Status).
-		
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,11 +21,11 @@ lexical_reasoning(PrId, Answer, Closed, 'Terminated') :-
 	contradiction_negation_based(PrId, Ans1, Cl1, _Stat1),
 	entailment_similarity_based(PrId, Ans2, Cl2, _Stat2),
 	( Ans1 = 'no' ->
-		Answer = Ans1,	
-		Closed = Cl1 
+		Answer = Ans1,
+		Closed = Cl1
 	  ; Answer = Ans2,
 		Closed = Cl2
-	). 
+	).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,8 +34,8 @@ lexical_reasoning(PrId, Answer, Closed, 'Terminated') :-
 contradiction_negation_based(PrId, Answer, Closed, _Term) :-
 	( probID_to_lemma_list(PrId, PrL, CoL, _) -> true
 	  ; probID_to_token_list(PrId, PrL, CoL)
-	), 
-	subtract(PrL, CoL, List1),  
+	),
+	subtract(PrL, CoL, List1),
 	subtract(CoL, PrL, List2),
 	append(PrL, CoL, AllL),
 	length(AllL, AB),
@@ -54,7 +54,7 @@ contradiction_negation_based(PrId, Answer, Closed, _Term) :-
 entailment_similarity_based(PrId, Answer, Closed, _Term) :-
 	( probID_to_lemma_list(PrId, PrL, CoL, _) -> true
 	  ; probID_to_token_list(PrId, PrL, CoL)
-	), 
+	),
 	subtract(CoL, PrL, DiffL_C_P),
 	length(DiffL_C_P, C_P),
 	( subtract(DiffL_C_P, ['a', 'the', 'an'], []) ->
@@ -74,7 +74,7 @@ entailment_similarity_based(PrId, Answer, Closed, _Term) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % problem id to tokens of premises and copnclusion
 probID_to_token_list(PrID, PrTok, CoTok) :-
-	sen_id(_, PrID, 'p', _, Premise), 
+	sen_id(_, PrID, 'p', _, Premise),
 	sen_id(_, PrID, 'h', _, Conclusion),
 	!,
 	atomic_list_concat(PrTokens, ' ', Premise),

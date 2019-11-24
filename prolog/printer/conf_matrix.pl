@@ -5,7 +5,9 @@
 		draw_extended_matrix/1
 	]).
 
-:- use_module('../printer/reporting', [report/1]).
+:- use_module('../printer/reporting', [
+	report/1, write_predictions_in_file/1
+	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Draws confusion matrix
@@ -38,18 +40,7 @@ draw_extended_matrix(Results) :-
 
 
 draw_extended_matrix_3(Results) :-
-	( debMode(waif(FileName)) ->
-		open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
-		write(S, '=== LangPro ===\n'),
-		ignore(write_id_answer(S, Results)),
-		close(S)
-	; true
-	),
-	( debMode(parallel(_)) ->
-		write('------------ SORTED ANSWERS-------------\n'),
-		maplist(print_result, Results)
-	; true
-	),
+	write_predictions_in_file(Results),
 	% rule application count
 	( debMode('shallow') -> true;
 	  findall( Step,	member((_, _, _, 'closed', (_Ter, Step)), Results),  Steps ),
@@ -129,13 +120,7 @@ draw_extended_matrix_3(Results) :-
 
 
 draw_extended_matrix_2(Results) :-
-	( debMode(waif(FileName)) ->
-		open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
-		write(S, '=== LangPro ===\n'),
-		ignore(write_id_answer(S, Results)),
-		close(S)
-	; true
-	),
+	write_predictions_in_file(Results),
 	% Numbers for matrix
 	findall( _,	member((_, 'yes',	'yes', 		'closed',	'Terminated'), 	Results),	Y_Y), 	length(Y_Y, YY),
 	findall( _,	member((_, 'yes',	'no_unk', 	'open', 	_),				Results),	Y_U), 	length(Y_U, YU),
@@ -178,3 +163,8 @@ draw_extended_matrix_2(Results) :-
 		format('Precision:        ~5f~n', 		  	[Prec]),
 		format('Recall (pure):    ~5f    (~5f)~n', 	[Rec, TrRec])
 	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% print prediction results and details in one line
+print_result((Id, Ans, Provers_Ans, Closed, Status, XP)) :-
+	format('~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~t~12+ XP: ~w~n', [Id, Ans, Provers_Ans, Closed, Status, XP]).

@@ -18,87 +18,15 @@
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../rules/rules', [op(610, xfx, ===>), r/6, admissible_rules/1]).
 :- use_module('../utils/user_preds', [
-	ttExp_to_ttTerm/2, remove_varTail_from_uList/2, choose/3, match_remove/3,
+	ttExp_to_ttTerm/2, uList2List/2, choose/3, match_remove/3,
 	ul_append/2, patt_remove/3, add_new_elements/3, list_substitution/4
 	]).
 :- use_module('../llf/ttterm_preds', [
 	ttTerms_same_type/2, extract_lex_NNPs_ttTerms/3, apply_ttFun_to_ttArgs/3
 	]).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%           Auxiliary Predicates
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% assignIds(ListOfNodes, ID_ListOfNodes)
-% ID_ListOfNodes is a ListOfNodes with IDs
-assignIds([Nd | NdRest], [Nd | NdIdRest], IdList, NodeId) :-
-	Nd = ndId(_,_),
-	assignIds(NdRest, NdIdRest, IdList, NodeId).
-
-assignIds([Nd | NdRest], [NdId | NdIdRest], [Id | IdList], node_id(Nid1, Nid)) :-
-	nonvar(Nd),
-	Nd = nd(_,_,_,_),
-	Id is Nid1 + 1,
-	NdId = ndId(Nd, Id),
-	assignIds(NdRest, NdIdRest, IdList, node_id(Id, Nid)).
-
-assignIds([], [], [], node_id(Nid, Nid)).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Nodes, Branch, Branch\Nodes, Nodes with ids taken from Branch
-subtract_nodes([], X, X, []).
-
-subtract_nodes(NodeList, [], [], NodeList).
-
-subtract_nodes(NodeList, CutBrNodes, NewFilteredCutBrNodes, NodeList_pId) :-
-	NodeList = [Formula | Rest],
-	( memberchk(ndId(Formula, Id), CutBrNodes),
-	  acyclic_term(Formula), %!!! checking on cycles, sick-3275 eccg
-	  delete(CutBrNodes, ndId(Formula, Id), FilteredCutBrNodes) ->   %!!! [A]:B:T doesnt take id from []:B:T
-		NodeList_pId = [ndId(Formula, Id) | RestNodeList_pid],
-		  subtract_nodes(Rest, FilteredCutBrNodes, NewFilteredCutBrNodes, RestNodeList_pid);
-		NodeList_pId = [Formula | RestNodeList_pId],
-		  subtract_nodes(Rest, CutBrNodes, NewFilteredCutBrNodes, RestNodeList_pId)).
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% set the inventory of rules based on lexicon
-select_relevant_rules(_Lexicon, [], []).
-
-select_relevant_rules(Lexicon, [R | Rest], NewRules) :-
-	rule_is_relevant(Lexicon, R) ->
-		NewRules = [R | NewRest],
-		select_relevant_rules(Lexicon, Rest, NewRest)
-	; select_relevant_rules(Lexicon, Rest, NewRules).
-
-
-
-
-rule_is_relevant(_, R) :-
-	clause( r(R,_,_,Lex,_,_), _),
-	var(Lex),
-	!.
-
-rule_is_relevant(Lexicon, R) :-
-	clause( r(R,_,_,DNF,_,_), _),
-	member(Conditions, DNF),
-	maplist(rule_condition_is_sat(Lexicon), Conditions), !.
-
-rule_condition_is_sat(Lexicon, A) :-
-	( A = pos(P) ->
-		L = (_,P)
-	; atom(A) ->
-		L = (A,_)
-	; A = ty(pp) ->
-	  ( L = (_,'IN'); L = (_,'RP'); L = (_,'TO') )
-	; report('Unknown Rule lex item!!!'), fail ),
-	memberchk(L, Lexicon),
-	!.
-
+:- use_module('tableau_utils', [
+	assignIds/4, subtract_nodes/4, select_relevant_rules/3, ttTerms_to_nodes_sig/6
+	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %				Tableau Proof
@@ -111,11 +39,11 @@ rule_condition_is_sat(Lexicon, A) :-
 % TTterms with sign False, generates tableau tree
 % and branch list, and checks the input on closure
 % without GUI
-reason(KB, T_TermList, F_TermList) :-
-	reason(KB, T_TermList, F_TermList, _Status).
+reason(KB_XP, T_TermList, F_TermList) :-
+	reason(KB_XP, T_TermList, F_TermList, _Status).
 
-reason(KB, T_TermList, F_TermList, Status) :-
-	generateTableau(KB, T_TermList, F_TermList, BrList, _Tree, Status), !,
+reason(KB_XP, T_TermList, F_TermList, Status) :-
+	generateTableau(KB_XP, T_TermList, F_TermList, BrList, _Tree, Status), !,
 	%( theUsedrules_in_tree(Tree, [H|T]) -> report([[H|T]]); true ),
 	%length(BrList, BrNumber), write('# Branches: '), write(BrNumber),
 	%closed(BrList).
@@ -127,10 +55,10 @@ reason(KB, T_TermList, F_TermList, Status) :-
 % TTterms with sign False, generates tableau tree
 % and branch list, and checks the input on closure
 % with GUI
-greason(KB, T_TermList, F_TermList, Info) :- % remove problem ID from arg list
+greason(KB_XP, T_TermList, F_TermList, Info) :- % remove problem ID from arg list
 	Info = [Problem_Id, Mode, Align],
 	( debMode('proof_tree') -> true; assertz(debMode('proof_tree')) ),
-	generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status), !,
+	generateTableau(KB_XP, T_TermList, F_TermList, BrList, Tree, Status), !,
 	( theUsedrules_in_tree(Tree, [H|T]) -> report([Problem_Id, ': ', [H|T]]); true ),
 	%length(BrList, BrNumber), write('# Branches: '), write(BrNumber),
 	report(['Tableau for "', Mode, '" checking is generated with ', Status, ' ruleapps']),
@@ -148,7 +76,7 @@ greason(KB, T_TermList, F_TermList, Info) :- % remove problem ID from arg list
 % generateTableau(Prem, Concl, BrList, Tree)
 % generates tableau proof in styles of
 % a list of branches and a tree
-generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
+generateTableau(KB-XP, T_TermList, F_TermList, BrList, Tree, Status) :-
 	/*F_TermList = [], T_TermList = [] ->
 		writeln('No premise & hypothesis'), fail;
 	F_TermList = [] ->
@@ -189,12 +117,12 @@ generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
 		numlist(1, Node_Id, IdList),
 		debMode(ral(RAL)),
 		( debMode('complete_tree') -> Limit = RAL-'comp'; Limit = RAL-'part' ),
-		( apply_closure_rules(IdList, Br, RelClRules, Cl_IDs, Cl_Rule, KB) ->
+		( apply_closure_rules(IdList, Br, RelClRules, Cl_IDs, Cl_Rule, KB-XP) ->
 			(BrList, Status) = ([], ('Ter', 1)),
 			findSubTree(Tree, Node_Id, tree(_, closer([Cl_IDs, Cl_Rule])))
-		; once(expand([Br], BrList, Tree, _Closing_IDs, KB, Count, (RelRules, RelClRules), 0, Status, Limit)) %, % ClosingIDs is unspecified
+		; once(expand([Br], BrList, Tree, _Closing_IDs, KB-XP, Count, (RelRules, RelClRules), 0, Status, Limit)) %, % ClosingIDs is unspecified
 		    %,( debMode(usedRules(UR)), list_of_used_rules(Tree, ListR), list_to_set(ListR, SetR), intersection(UR, SetR, [H|T]) -> term_to_atom([H|T], At), report(['Used rules: ', At]); true )
-			%remove_varTail_from_uList(Closing_IDs, Cl_IDs),
+			%uList2List(Closing_IDs, Cl_IDs),
 		    %report(['Closing ids: ', Cl_IDs])
 		)
 	;	writeln('Inconsistency in node types - generateTableau'),
@@ -203,86 +131,6 @@ generateTableau(KB, T_TermList, F_TermList, BrList, Tree, Status) :-
 	%stats_from_tree(Tree, s(Br_Num, Len, Max_Id)),
 	%report(['NumOfBranches: ', Br_Num, '; NumOfRuleApp: ', Len, '; NumOfNodes: ', Max_Id])
 	.
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% converts list of true and false TTterms into list of nodes
-% and creates a signature for the branch, assumes that types of TTs are the same
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
-	genFreshArgs(Type, Args, [], Sig, const_id(0, Ent_Id, 0, Con_Id)), %!!! John from term, must be added to Signature and mustnt wait for Arg push application
-	( 	(Type = n:_; Type = pp) ->
-			T_List = T_TTlist,
-			F_List = F_TTlist,
-			ArgList = Args
-		;	maplist(apply_ttFun_to_ttArgs(Args), T_TTlist, T_List),
-			maplist(apply_ttFun_to_ttArgs(Args), F_TTlist, F_List),
-			ArgList = [] ),
-	maplist(ttTerm_to_node(true, ArgList), T_List, T_Nodes),
-	maplist(ttTerm_to_node(false, ArgList), F_List, F_Nodes),
-	append(T_Nodes, F_Nodes, Nodes).
-	%list_to_ord_set(Sig, Signature), not necessary
-
-ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
-	genFreshArgs(Type, Args, [], Sig, const_id(0, Ent_Id, 0, Con_Id)), %!!! John from term, must be added to Signature and mustnt wait for Arg push application
-	maplist(apply_ttFun_to_ttArgs(Args), T_TTlist, T_List),
-	maplist(apply_ttFun_to_ttArgs(Args), F_TTlist, F_List),
-	maplist(ttTerm_to_node(true, []), T_List, T_Nodes),
-	maplist(ttTerm_to_node(false, []), F_List, F_Nodes),
-	append(T_Nodes, F_Nodes, Nodes).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Converts a sign TF and TTexpression into a Node
-ttTerm_to_node(TF, Args, TTExp, Node) :- % to be changed
-	ttExp_to_ttTerm(TTExp, TTterm), % not necessary
-	Node = nd([], TTterm, Args, TF).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% picks a list of old arguments from Signature, which feeds Type
-genOldArgs(Type, [], _) :-
-	sub_type(Type, t).
-
-genOldArgs(Type, Args, Sig) :-
-	nonvar(Type),
-	sub_type(Type, Type1~>Type2),
-	member((Term, Type1), Sig),
-	Args = [ (Term, Type1) | RestArgs],
-	genOldArgs(Type2, RestArgs, Sig).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% creates a list of constant arguments feeding Type
-% and adds these constant::its_type to Signature
-genFreshArgs(Type, [], Sig, Sig, const_id(Eid, Eid, Cid, Cid)) :-
-	sub_type(Type, t), !.
-
-genFreshArgs(Type, Args, Sig, NewSig, const_id(Eid1, Eid2, Cid1, Cid2)) :-
-	nonvar(Type),
-	sub_type(Type, Type1~>Type2),
-	( 	sub_type(Type1, np:_) ->  % np:_ since np:_ subsumes e type
-		I is Eid1 + 1,
-			atomic_list_concat([c, I], X),
-			TT = (X, e),
-	  		ConstId = const_id(I, Eid2, Cid1, Cid2);
-	  	I is Cid1 + 1,
-	  		atomic_list_concat(['P', I], X),
-			TT = (X, Type1),
-	  		ConstId = const_id(Eid1, Eid2, I, Cid2) ),
-	Args = [TT | RestArgs],
-	%TempSig = [TT | Sig],
-	append(Sig, [TT], TempSig), % motivates using old constant than new ones
-	genFreshArgs(Type2, RestArgs, TempSig, NewSig, ConstId).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% feed_nodes_with_args(+Nodes, +Args); deterministic
-% matches arglist of Nodes to Args
-feed_nodes_with_args([nd(_, _, Args, _) | Rest], Args) :-
-	feed_nodes_with_args(Rest, Args), !.
-
-feed_nodes_with_args([], _).
 
 
 
@@ -331,7 +179,7 @@ expand([], [], _Tree, _Closing_IDs, _, [const_id(E,E,C,C), node_id(N,N)], _Rules
 /*
 expand([Branch | RestBranches], RestBranches, Tree, UL_Closing_IDs, [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, Steps) :-
 	Branch = br(BrNodes, _Hist, _Sig),
-	remove_varTail_from_uList(UL_Closing_IDs, Closing_IDs),
+	uList2List(UL_Closing_IDs, Closing_IDs),
 	member(ClIDs, Closing_IDs),
 	findHeadNodes(BrNodes, _ClosureNodes, ClIDs),
 	!, report(['Closure IDs: ', ClIDs, 'are closing a branch without rule application']),
@@ -344,21 +192,21 @@ expand([Branch | RestBranches], RestBranches, Tree, UL_Closing_IDs, [const_id(E,
 	ChildList = closer(ClIDs).
 */
 
-expand(BranchList, NewBranchList, Tree, Closing_IDs, KB, Count, Rules, RuleAppNum, Steps, Limit) :-
+expand(BranchList, NewBranchList, Tree, Closing_IDs, KB_XP, Count, Rules, RuleAppNum, Steps, Limit) :-
 	Limit = AppLimit-Mode,
 	%(0 is N mod 100 -> display(N), nl; true),
 	Count = [const_id(Eid1, Eid, Cid1, Cid), node_id(Nid1, Nid)],
 	Count1 = [const_id(Eid1, Eid2, Cid1, Cid2), node_id(Nid1, Nid2)],
-	( dirExpand(BranchList, TempBranchList, Tree, Closing_IDs, KB, Count1, Rules, NewRules, RAppNum)
+	( dirExpand(BranchList, TempBranchList, Tree, Closing_IDs, KB_XP, Count1, Rules, NewRules, RAppNum)
 	; Mode == 'comp',
 		select(Br, BranchList, Rest), append(Rest, [Br], RotatedBranchList),
-		dirExpand(RotatedBranchList, TempBranchList, Tree, Closing_IDs, KB, Count1, Rules, NewRules, RAppNum)
+		dirExpand(RotatedBranchList, TempBranchList, Tree, Closing_IDs, KB_XP, Count1, Rules, NewRules, RAppNum)
 	), !,
 	Count2 = [const_id(Eid2, Eid, Cid2, Cid), node_id(Nid2, Nid)],
 	NewRuleAppNum is RuleAppNum + RAppNum,
 	%report('Rule app: ', NewRuleAppNum),
 	( (NewRuleAppNum < AppLimit; TempBranchList = []) ->
-		expand(TempBranchList, NewBranchList, Tree, Closing_IDs, KB, Count2, NewRules, NewRuleAppNum, Steps, Limit)
+		expand(TempBranchList, NewBranchList, Tree, Closing_IDs, KB_XP, Count2, NewRules, NewRuleAppNum, Steps, Limit)
 	;	NewBranchList = TempBranchList,
 		( debMode('prlim') -> report(['Rule application limit reached: ', AppLimit]); true),
 		Steps = ('Lim', NewRuleAppNum) %'Limited'
@@ -366,7 +214,7 @@ expand(BranchList, NewBranchList, Tree, Closing_IDs, KB, Count, Rules, RuleAppNu
 
 
 % if no more rule applications is possivbel then this clause assigns Model
-expand(BranchList, BranchList, Tree, _Closing_IDs, _KB,  [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, ('Ter', Steps), _Limit) :-
+expand(BranchList, BranchList, Tree, _Closing_IDs, _KB_XP,  [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, ('Ter', Steps), _Limit) :-
 	BranchList = [br([ndId(_,Id)|_], _, _) | _],
 	%writeln('Model found'),
 	( debMode('proof_tree') ->
@@ -377,15 +225,15 @@ expand(BranchList, BranchList, Tree, _Closing_IDs, _KB,  [const_id(E,E,C,C), nod
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % dirExpand(BranchList, NewBranchList, Tree)
 % expands BranchList to NewBranchList by single step
-dirExpand([ br([],_,_) | Tail], Tail, _, _Closing_IDs, _KB, [const_id(E,E,C,C), node_id(N,N)], Rules, Rules, 0) :-
+dirExpand([ br([],_,_) | Tail], Tail, _, _Closing_IDs, _KB_XP, [const_id(E,E,C,C), node_id(N,N)], Rules, Rules, 0) :-
 	writeln('Should not happene but happened!').
 
 
 
-dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB, Count, (Rules,ClRules), (NewRules,ClRules), RAppNum) :-
+dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB_XP, Count, (Rules,ClRules), (NewRules,ClRules), RAppNum) :-
 	Branch = br(BrNodes, _Hist, _Sig),
 	Count = [ConstId, NodeId],
-	findRule(Branch, RuleType, IDs, Body, ConstId, Rules, RuleApp, NewHistory, KB), %!!! _RuleId
+	findRule(Branch, RuleType, IDs, Body, ConstId, Rules, RuleApp, NewHistory, KB_XP), %!!! _RuleId
 	%(member(RuleId, [abst_dist, arg_dist]) -> report('New rule used: ', RuleId); true),
 	%remove_first(RuleId, Rules, SubtrRules), append(SubtrRules, [RuleId], NewRules), % priority of rules change
 	NewRules = Rules, % priority of rules doent change
@@ -414,13 +262,13 @@ dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB, Count, 
 	%	RuleApp =.. [RuleId, IDs]
 	%  ;	RuleApp =.. [RuleId, IDs, AppInfo]
 	%),
-	growBranches(Body, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRules, UL_New_Closing_IDs, New_Node_IDs),
+	growBranches(Body, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB_XP, ClRules, UL_New_Closing_IDs, New_Node_IDs),
 	RuleApp = h(_RuleId, _, _, _, New_Node_IDs),
 	%report('rule: ', RuleId),
 	%append(RuleAppPart, [New_Node_IDs], RuleAppAsList),
 	%RuleApp =.. [h | RuleAppAsList],
 	%updateHistory(RuleApp, Hist, NewHistory),
-	remove_varTail_from_uList(UL_New_Closing_IDs, New_Closing_IDs),
+	uList2List(UL_New_Closing_IDs, New_Closing_IDs),
 	%expand_closure_ids(New_Closing_IDs, NewHistory, Ext_New_Closing_IDs),
 	Ext_New_Closing_IDs = New_Closing_IDs, % temporally
 	ul_append(Closing_IDs, Ext_New_Closing_IDs),
@@ -437,11 +285,11 @@ dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB, Count, 
 %dirExpand([Branch | Tail], [Branch | NewTail], Tree) :-
 %	dirExpand(Tail, NewTail, Tree).
 
-findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB) :-
+findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB_XP) :-
 	Branch = br(BrNodes, Hist, Sig),
 	%Cids = const_id(_,Eid,_,_),
 	%BrHead = br(Head, Sig),
-	%!!! no preference to equivalent rules wrt ti impl and gamma rules?
+	%!!! no preference to equivalent rules wrt impl and gamma rules?
 	member(RuleId, Rules),
 	clause( r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, _, br(Head, Sig) ===> Body),   _Constraints),
 	%findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig),
@@ -449,12 +297,12 @@ findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB) :-
 	% gamma rule conditions might need backtracking and trying other old constants
 	% while non-gamma rules doesn't need backtracking
 	( RuleType = gamma ->
-	    r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, KB, br(Head, Sig) ===> Body)
+	    r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, KB_XP, br(Head, Sig) ===> Body)
 	; %\+memberchk(h(RuleId, [], IDs, _, _), Hist), % weak pre-check for efficiency (not really)
 	  % newArgs are _ to avoid a formula introducing fresh constants several times
-	  once( r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, KB, br(Head, Sig) ===> Body) )
+	  once( r(RuleId, RuleType:_, (OldArgs, NewArgs, Cids), _, KB_XP, br(Head, Sig) ===> Body) )
     ),
-	\+memberchk(h(RuleId, OldArgs, IDs, _NewArgs, _), Hist),
+	\+memberchk(h(RuleId, OldArgs, IDs, _NewArgs, _), Hist), %CHECK moving before testing constraints?
 	RuleApp = h(RuleId, OldArgs, IDs, NewArgs, _),
 	updateHistory(RuleApp, Hist, NewHist),
 	ignore(Cids = const_id(Eid, Eid, Cid, Cid)),
@@ -564,37 +412,37 @@ findSubTree(Tree, Id, SubTree) :-
 % growBranches(NewNodes, CutBranch, NewBranches, SubTree, SourceIDs)
 % NewBranches are produced from CutBranch by adding NewNodes,
 % SubTree is updated and new nodes are notated by SourceIDs
-growBranches(Brs, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRs,  Closing_IDs, New_Node_IDs) :-
+growBranches(Brs, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB_XP, ClRs,  Closing_IDs, New_Node_IDs) :-
 	is_list(Brs), !,
 	SubTree = tree(_, ChildList),
-	growBranch_list(Brs, CutBranch, NewBranches, ChildList, RuleApp, NodeId, KB, ClRs, Closing_IDs, New_Node_IDs).
+	growBranch_list(Brs, CutBranch, NewBranches, ChildList, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs).
 
 %growBranches(br([], _), CutBranch, [CutBranch], _SubTree, _RuleApp, node_id(Nid, Nid)) :- % when there are no nodes for addition
 %	!.
 
-growBranches(Br, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB, ClRs, Closing_IDs, [New_Node_IDs]) :-
+growBranches(Br, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, [New_Node_IDs]) :-
 	Br = br(NewNodes, _),
 	is_list(NewNodes), !,
 	SubTree = tree(_, [LeftTree]),
-	growBranch(Br, CutBranch, NewBranch, LeftTree, RuleApp, NodeId, KB, ClRs, Closing_IDs, New_Node_IDs),
+	growBranch(Br, CutBranch, NewBranch, LeftTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs),
 	NewBranches = [NewBranch].
 
 
 
-growBranch_list([Br|Rest], CutBranch, [NewBr|NewRest], [Tree|RestTrees], RuleApp, NodeId, KB, ClRs, Closing_IDs, New_Node_IDs) :-
+growBranch_list([Br|Rest], CutBranch, [NewBr|NewRest], [Tree|RestTrees], RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs) :-
 	NodeId = node_id(Nid1, Nid),
-	growBranch(Br, CutBranch, NewBr, Tree, RuleApp, node_id(Nid1, Nid2), KB, ClRs, Closing_IDs, New_Node_IDs_1),
-	growBranch_list(Rest, CutBranch, NewRest, RestTrees, RuleApp, node_id(Nid2, Nid), KB, ClRs, Closing_IDs, New_Node_IDs_2),
+	growBranch(Br, CutBranch, NewBr, Tree, RuleApp, node_id(Nid1, Nid2), KB_XP, ClRs, Closing_IDs, New_Node_IDs_1),
+	growBranch_list(Rest, CutBranch, NewRest, RestTrees, RuleApp, node_id(Nid2, Nid), KB_XP, ClRs, Closing_IDs, New_Node_IDs_2),
 	append([New_Node_IDs_1], New_Node_IDs_2, New_Node_IDs).
 
-growBranch_list([], _CutBranch, [], [], _RuleApp, node_id(Nid, Nid), _KB, _ClRs, _Closing_IDs, []).
+growBranch_list([], _CutBranch, [], [], _RuleApp, node_id(Nid, Nid), _KB_XP, _ClRs, _Closing_IDs, []).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % growBranch(NodeList, CutBranch, NewBranch, SubTree, SourceIDs)
 % NewBranch is produced from CutBranch by adding NodeList,
 % SubTree is updated and new nodes are notated by SourceIDs
-growBranch(Br, CutBranch, NewBranch, SubTree, RuleApp, NodeId, KB, ClRs, Closing_IDs, New_Node_IDs) :-
+growBranch(Br, CutBranch, NewBranch, SubTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs) :-
 	Br = br(NodeList, Sig),
 	CutBranch = br(CutBrNodes, History, _),
 	is_list(NodeList),
@@ -608,7 +456,7 @@ growBranch(Br, CutBranch, NewBranch, SubTree, RuleApp, NodeId, KB, ClRs, Closing
 % adding new nodes in the end of the branch
 	%append(FilteredCutBrNodes, NodeList_id, NewTableauNodes),
 	( findall(	[Cl_IDs, Cl_Rule],
-				apply_closure_rules(IdList, br(NewTabNodes,_,_), ClRs, Cl_IDs, Cl_Rule, KB),
+				apply_closure_rules(IdList, br(NewTabNodes,_,_), ClRs, Cl_IDs, Cl_Rule, KB_XP),
 				List_of_ClRuleApps  ), % find one and stop!fix it
 	  List_of_ClRuleApps = [ClRuleApp | _]  ->
 		TableauNodes = [],
@@ -679,14 +527,14 @@ remove_be_node_from_branch(Branch, Branch).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checks if Branch is closed and returns IDs of closing nodes
 
-apply_closure_rules(IdList, Branch, ClRs, Cl_IDs, ClRule, KB) :-
+apply_closure_rules(IdList, Branch, ClRs, Cl_IDs, ClRule, KB_XP) :-
 	Branch = br(BrNodes, _Hist, Sig),
 	member(Id, IdList),
 	member(ClRule, ClRs),
-	clause( r(ClRule, closure, _, _, _, br(Head, Sig) ===> Body), _Constraints ),
+	clause( r(ClRule, closure, _, _Lex, _KB_XP, br(Head, Sig) ===> Body), _Constraints ),
 	find_head_nodes_with_ids(BrNodes, Head, [Id | Rest]),
 	\+memberchk(Id, Rest),
-	r(ClRule, closure, _, _, KB, br(Head, Sig) ===> Body),
+	r(ClRule, closure, _, _, KB_XP, br(Head, Sig) ===> Body),
 	Cl_IDs = [Id | Rest],
 	!.
 

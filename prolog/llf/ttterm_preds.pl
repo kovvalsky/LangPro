@@ -220,7 +220,7 @@ match_ttTerms(X, Y, _) :-  % variants, only matching Abst(X,X@const) = Abst(Y,co
 	(var(X); var(Y)),  % added later
 	!, fail.
 
-match_ttTerms(X, Y, _) :-  % variants, only matching Abst(X,X@const) = Abst(Y,const@Y) causes error
+match_ttTerms(X, Y, _KB_XP) :-  % variants, only matching Abst(X,X@const) = Abst(Y,const@Y) causes error
 	( X =@= Y, X = Y  % avoids matching var to term
 	; X = (_,Ty),
 	  Y = (_,Ty),
@@ -230,56 +230,54 @@ match_ttTerms(X, Y, _) :-  % variants, only matching Abst(X,X@const) = Abst(Y,co
 	  PrX = PrY
 	), !.
 
-match_ttTerms((TTexp1, Type1, _), (TTexp2, Type2, _), KB) :- % are we using it?
+match_ttTerms((TTexp1, Type1, _), (TTexp2, Type2, _), KB_XP) :- % are we using it?
 	%cat_eq(Type1, Type2), %ignoring features
 	luc(Type1, Type2, _), % sick-2722
-	match_ttExp(TTexp1, TTexp2, KB), !.
+	match_ttExp(TTexp1, TTexp2, KB_XP), !.
 
-match_ttTerms((TTexp1, Type1), (TTexp2, Type2), KB) :- % ignoring types?
+match_ttTerms((TTexp1, Type1), (TTexp2, Type2), KB_XP) :- % ignoring types?
 	%cat_eq(Type1, Type2), %ignoring features
 	luc(Type1, Type2, _), % sick-2722
-	match_ttExp(TTexp1, TTexp2, KB), !.
+	match_ttExp(TTexp1, TTexp2, KB_XP), !.
 
 % Matching of ttExpressions in the tableau
-match_ttExp(X, Y, _) :-  % variants, only matching Abst(X,X@const) = Abst(Y,const@Y) causes error
+match_ttExp(X, Y, _KB_XP) :-  % variants, only matching Abst(X,X@const) = Abst(Y,const@Y) causes error
 	X =@= Y, % avoids matching var to term
 	X = Y,
 	!.
 
+%-------------------------------------------------------
 match_ttExp(X, Y, _) :-
 	(var(X); var(Y)),
 	!, fail.
 
-match_ttExp(FunTT1 @ ArgTT1, FunTT2 @ ArgTT2, KB) :-
-	match_ttTerms(FunTT1, FunTT2, KB),
-	match_ttTerms(ArgTT1, ArgTT2, KB).
+match_ttExp(FunTT1 @ ArgTT1, FunTT2 @ ArgTT2, KB-XP) :-
+	match_ttTerms(FunTT1, FunTT2, KB-XP),
+	match_ttTerms(ArgTT1, ArgTT2, KB-XP).
 
-match_ttExp(abst(_,TT1), abst(_,TT2), KB) :-
-	match_ttTerms(TT1, TT2, KB).
+match_ttExp(abst(_,TT1), abst(_,TT2), KB_XP) :-
+	match_ttTerms(TT1, TT2, KB_XP).
 
-match_ttExp((TTexp1, Type1), (TTexp2, Type2), KB) :-
+match_ttExp((TTexp1, Type1), (TTexp2, Type2), KB_XP) :-
 	%cat_eq(Type1, Type2), %ignoring features
 	luc(Type1, Type2, _), % sick-2722
-	match_ttExp(TTexp1, TTexp2, KB).
+	match_ttExp(TTexp1, TTexp2, KB_XP).
 
-match_ttExp(TT1, TT2, KB) :- % ignoring everything except lemmas
+match_ttExp(TT1, TT2, KB_XP) :- % ignoring everything except lemmas
 	TT1 = tlp(_Tk1, Lemma1, _Pos1, _F11, _F12),
 	TT2 = tlp(_Tk2, Lemma2, _Pos2, _F21, _F22),
 	( Lemma1 = Lemma2
-	; word_synonyms(Lemma1, Lemma2, KB) % Slows down the mathcing process
+	; word_synonyms(Lemma1, Lemma2, KB_XP) % Slows the mathcing process
 	), !.
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Matching of list of ttTerms in the tableau
-match_list_ttTerms([Head1 | Rest1], [Head2 | Rest2], KB) :-
-	match_ttTerms(Head1, Head2, KB),
-	match_list_ttTerms(Rest1, Rest2, KB).
+match_list_ttTerms([], [], _KB_XP) :- !.
 
-match_list_ttTerms([], [], _).
-
+match_list_ttTerms([Head1 | Rest1], [Head2 | Rest2], KB-XP) :-
+	match_ttTerms(Head1, Head2, KB-XP),
+	match_list_ttTerms(Rest1, Rest2, KB-XP).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% !!! no KB?
 % Matching only terms ignoring types
@@ -472,11 +470,12 @@ ttTerms_same_type([], Type, Type) :-
 	!.
 
 ttTerms_same_type([(_,Type1) | Rest], Type2, Type) :-
-	var(Type2) ->
-		ttTerms_same_type(Rest, Type1, Type2)
-	; nonvar(Type1),
-	  luc(Type1, Type2, Type3),
-	  ttTerms_same_type(Rest, Type3, Type).
+	( var(Type2)
+	->	ttTerms_same_type(Rest, Type1, Type)
+	; 	nonvar(Type1),
+		luc(Type1, Type2, Type3),
+		ttTerms_same_type(Rest, Type3, Type)
+	).
 
 
 
@@ -548,12 +547,12 @@ apply_ttFun_to_ttArgs([(H,Ty1) | TTRest], (Fun,Ty1~>Ty2), TTApp) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true when TT1 is properly subsumed by TT2
-proper_tt_isa((tlp(_,Lem1,_,_,_), _),  (tlp(_,Lem2,_,_,_), _), KB) :-
+proper_tt_isa((tlp(_,Lem1,_,_,_), _),  (tlp(_,Lem2,_,_,_), _), KB_xp) :-
 	Lem1 \= Lem2,
-	isa(Lem1, Lem2, KB).
+	isa(Lem1, Lem2, KB_xp).
 
-proper_tt_isa((TT1_fun @ _, _),  (TT2_fun @ _, _), KB) :-
-	proper_tt_isa(TT1_fun, TT2_fun, KB). % not sufficeint condition but necessary
+proper_tt_isa((TT1_fun @ _, _),  (TT2_fun @ _, _), KB_xp) :- % FIXME args should be shared
+	proper_tt_isa(TT1_fun, TT2_fun, KB_xp). % not sufficeint condition but necessary
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

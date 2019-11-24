@@ -10,8 +10,8 @@
 		isa/3,
 		ant_wn/3,
 		derive/3,
-		instance/2,
-		not_instance/2,
+		instance/3,
+		not_instance/3,
 		not_disjoint/3,
 		not_isa/3
 	]).
@@ -35,52 +35,64 @@ ext( woman,
 	[['mary'],['kate'], ['emily'], ['ann']] ).
 
 % instance
-instance(Instance, Concept) :-
+instance(Instance, Concept, _KB-XP) :-
 	inst(Instance, Concept),
-	!.
+	!,
+	ul_append(XP, [ins(Instance, Concept)]).
 
-instance(Instance, Concept) :-
+instance(Instance, Concept, KB-XP) :-
 	inst(Instance, SpecificConcept),
-	isa(SpecificConcept, Concept, []). %!!! cheating
+	isa(SpecificConcept, Concept, KB-XP), %CHECK
+	ul_append(XP, [ins(Instance, Concept)]).
+
+inst(_Inst, _Concept) :-
+	debMode('no_kb'),
+	!, fail.
 
 inst(Inst, Concept) :-
 	is_list(Inst), % Concept may be Variable (for transitive serach), but nor Inst
-	( debMode('no_kb') -> fail; ext(Concept, Extension) ),
+	ext(Concept, Extension),
 	member(El, Extension),
 	match_lowerCase(El, Inst).
 
 % not instance
-not_instance(Inst, Concept) :-
+not_instance(Inst, Concept, KB-XP) :-
 	inst(Inst, Inst_Concept),
-	disjoint(Inst_Concept, Concept).
+	disjoint(Inst_Concept, Concept, KB-XP),
+	ul_append(XP, [ins(Inst, Inst_Concept)]).
 
 
-
-
-ant_wn(Lm1, Lm2, KB) :-
-	memberchk(ant_wn(Lm1, Lm2), KB).
+ant_wn(A, B, KB-XP) :-
+	memberchk(ant_wn(A, B), KB),
+	ul_append(XP, [ant(A, B)]).
 
 
 % capyures deriavtional morphology
-derive(A, B, KB) :-
-	memberchk(der_wn(A, B), KB).
+derive(A, B, KB-XP) :-
+	memberchk(der_wn(A, B), KB),
+	ul_append(XP, [der(A,B)]).
 
 
 % disjoint based on KB
-disjoint(A, B, KB) :-
-	( memberchk( disj(A, B), KB)
-	; memberchk( disj(B, A), KB)
-	; disjoint(A, B)
-	).
+disjoint(A, B, KB-XP) :-
+	once(( 	memberchk(disj(A, B), KB)
+		;	memberchk(disj(B, A), KB)
+		; 	disjoint(A, B)
+		)),
+	ul_append(XP, [dis(A,B)]).
 
-not_disjoint(A, B, KB) :-
+not_disjoint(A, B, KB-_XP) :- %FIXME specify non disjointness
 	\+ul_member(disj(A, B), KB),
 	\+ul_member(disj(A, B), KB),
 	\+disjoint(A, B).
 
 % disjoint
+disjoint(_, _) :-
+	debMode('no_kb'),
+	!, fail.
+
 disjoint(A, B) :-
-	( debMode('no_kb') -> false; disjoint_sym(A, B) ).
+	disjoint_sym(A, B).
 /* allows weird contradictions: e.g. card trick is person, person disj trick therfore disj
 disjoint(A, B) :-
 	isa(A, A1),
@@ -263,43 +275,50 @@ isq_(three, two).
 
 
 % for player vs play, Sick-107
-isa(A, B, _) :-
+isa(A, B, _KB-XP) :-
 	atom(A), atom(B),
-	( atom_concat(A, 'er', B);
- 	  atom_concat(B, 'er', A)
-	), !.
+	( 	atom_concat(A, 'er', B),
+		R = der(A, B)
+ 	;  	atom_concat(B, 'er', A),
+		R = der(B, A)
+	), !,
+	ul_append(XP, [R]).
 
-isa(A, B, _) :-  % variant, not matching
+isa(A, B, _KB_XP) :-  % variant, not matching
 	A =@= B, !.
 
-isa(A, B, _) :-
+isa(A, B, _KB_XP) :-
 	( ( debMode('no_kb') -> false; is_(A, B) )
 	; ( debMode('no_qk') -> false; isq_(A, B) )
 	), !.
 
 % KB without assertions
-isa(W1, W2, KB) :-
+isa(W1, W2, KB-XP) :- % CHECK
 	\+is_uList(KB), !,
-	( memberchk(isa_wn(W1, W2), KB)
-	; memberchk(sim_wn(W1, W2), KB)
-	).
+	( 	memberchk(isa_wn(W1, W2), KB),
+	  	ul_append(XP, [isa(W1, W2)])
+	; 	memberchk(sim_wn(W1, W2), KB),
+		ul_append(XP, [sim(W1, W2)])
+	), !.
 
-isa(W1, W2, KB_) :-
+isa(W1, W2, KB_-XP) :-
 	is_uList(KB_),
-	memberchk(isa_wn(W1, W2), KB_).
+	memberchk(isa_wn(W1, W2), KB_),
+	ul_append(XP, [isa(W1, W2)]).
 
-not_isa(A, B, KB) :-
+not_isa(A, B, KB-_XP) :- %FIXME specify negative info
 	\+ul_member(isa_wn(A, B), KB).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % checks if two words can have synonymous senses
 % based on a KB
-word_synonyms(W1, W2, KB) :-
+word_synonyms(W1, W2, KB-XP) :-
 	nonvar(W1),
 	nonvar(W2),
 	%s(SS, _, W1, _, _, _), 	s(SS, _, W2, _, _, _),
-	isa(W1, W2, KB), isa(W2, W1, KB), % more efficient
+	isa(W1, W2, KB-XP),
+	isa(W2, W1, KB-XP), % more efficient
 	!.
 
 

@@ -12,7 +12,7 @@
 	subset_only_terms/2, ttTerm_to_informative_tt/2
 	]).
 :- use_module('../knowledge/knowledge', [
-	disjoint/3, isa/3, ant_wn/3, derive/3, instance/2, not_instance/2, not_disjoint/3, not_isa/3
+	disjoint/3, isa/3, ant_wn/3, derive/3, instance/3, not_instance/3, not_disjoint/3, not_isa/3
 	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,7 +20,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % closure related to concept subsumption
-r(cl_subsumption, closure, _, _Lexicon, KB,
+r(cl_subsumption, closure, _, _Lexicon, KB_xp,
 		br([nd( M1, TT1, Args1, true ),
 			nd( M2, TT2, Args2, false )
 		   ],
@@ -29,12 +29,12 @@ r(cl_subsumption, closure, _, _Lexicon, KB,
 		br([nd( [], (true, t), [], false )],
 		  Sig) )
 :-
-			match_list_ttTerms(Args1, Args2, KB), %!!! why not Args1=Args2?
+			match_list_ttTerms(Args1, Args2, KB_xp), %!!! why not Args1=Args2?
 			once( ( M2 = []
 				  %; match_list_only_terms(M1, M2) ) ),
 				  ; subset_only_terms(M2, M1) ) ), % why not subset?
 			(%TT1 = TT2; %because features in types
-	 			match_ttTerms(TT1, TT2, KB) % ignoring tokens and heads
+	 			match_ttTerms(TT1, TT2, KB_xp) % ignoring tokens and heads
 	 		; 	ttTerm_to_informative_tt(TT1, (Term1, _Type1)),
 				ttTerm_to_informative_tt(TT2, (Term2, _Type2)),
 				% not necessary, context defines them of the same time
@@ -43,20 +43,20 @@ r(cl_subsumption, closure, _, _Lexicon, KB,
 	 			%TT2 = (tlp(_,Term2,_,_,_), Type),
 	 			atom(Term1),
 				atom(Term2),
-				isa(Term1, Term2, KB),
-				not_disjoint(Term1, Term2, KB) % suitable for KB induction
+				isa(Term1, Term2, KB_xp),
+				not_disjoint(Term1, Term2, KB_xp) % suitable for KB induction
 				%Term1 =@= Term2 % no background knowledge
 			% for cases when tokens are the same but lemmas are different, % sick-4330
 			;   TT1 = (tlp(Tk1,_,_,_,_),_),
 				TT2 = (tlp(Tk2,_,_,_,_),_),
-				isa(Tk1, Tk2, KB),
-				not_disjoint(Tk1, Tk2, KB)
+				isa(Tk1, Tk2, KB_xp),
+				not_disjoint(Tk1, Tk2, KB_xp)
 	 		%alpha(Norm1, Norm2)
 			).
 
 % look at c2 c1 = check c2 c1,  sick-3941, 3938, trot on and ride 5569, 5568
 % drawbacks: hunt for -> follow, sick-1133, sick-3050 jump onto -> jump
-r(vp_pp_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], KB,
+r(vp_pp_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], KB_xp,
 		br([nd( M1, ( (tlp(_,VP1,_,_,_),_) @ ((tlp(_,_,'IN',_,_),np:_~>pp) @ C, _), Type1 ),   Args1,   true ),
 			nd( M2, ( (tlp(_,VP2,_,_,_),_) @ C, Type2 ),   Args2,   false )
 		   ],
@@ -66,16 +66,16 @@ r(vp_pp_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]]
 		  Sig) )
 :-
 			cat_eq(Type1, Type2), % because sick-2388: slice of y: x & slice y: x
-			match_list_ttTerms(Args1, Args2, KB),
+			match_list_ttTerms(Args1, Args2, KB_xp),
 			once( ( M2 = []
 				  ; match_list_only_terms(M1, M2) )
 				),
 	 		atom(VP1), atom(VP2),
-			isa(VP1, VP2, KB).
+			isa(VP1, VP2, KB_xp).
 
 
 % closure related to comlex concept subsumption (dirty addition to cl_subsumption)
-r(cl_subsumption_complex, 	closure, _, _Lexicon, KB,  %!!! is this rule worthy to have? check
+r(cl_subsumption_complex, 	closure, _, _Lexicon, KB_xp,  %!!! is this rule worthy to have? check
 		br([nd( M1, (TTmod1@TT1, Ty1), Args1, true ),
 			nd( M2, (TTmod2@TT2, Ty2), Args2, false )
 		   ],
@@ -85,21 +85,21 @@ r(cl_subsumption_complex, 	closure, _, _Lexicon, KB,  %!!! is this rule worthy t
 		  Sig) )
 :-
 			luc(Ty1, Ty2, _Type),
-			match_list_ttTerms(Args1, Args2, KB),
+			match_list_ttTerms(Args1, Args2, KB_xp),
 			once( ( M2 = []
 				  ; match_list_only_terms(M1, M2) )
 				),
-			match_ttTerms(TTmod1, TTmod2, KB), % ignoring tokens and heads  !!! no downward monotone e.g. fracas-210
+			match_ttTerms(TTmod1, TTmod2, KB_xp), % ignoring tokens and heads  !!! no downward monotone e.g. fracas-210
 			tt_mon_up(TTmod1), %!!! fracas-211, 210, large mouse-/->large animal
 	 		ttTerm_to_informative_tt(TT1, (Term1, _Type1)),
 			ttTerm_to_informative_tt(TT2, (Term2, _Type2)),
 	 		atom(Term1),
 			atom(Term2),
-			isa(Term1, Term2, KB).
+			isa(Term1, Term2, KB_xp).
 
 
 % closure related to "There is"
-r(contra_there, 	closure, _, [['there']], _KB,
+r(contra_there, 	closure, _, [['there']], _,
 		br([nd( [], (((tlp(_,'be',_,_,_),_) @ TT, _) @ (tlp(_,'there',_,_,_),np:thr), s:_) ,
 				[], false )],
 		  Sig)
@@ -115,7 +115,7 @@ r(contra_there, 	closure, _, [['there']], _KB,
 
 % closure related to verb subcategorization
 %sick-trial-1881, sick-train-1358, 1417, 1878, 1884, 3571, 4090, 4094, 4246, 4320, 4329, 6288
-r(cl_subcat, 	closure, _, _Lexicon, KB,
+r(cl_subcat, 	closure, _, _Lexicon, KB_xp,
 		br([nd( M1, (Tr1, np:_~>TyS1), Args1, true ),  % why not subsumption over Modifiers?
 			nd( M2, (Tr2, np:_~>TyS2), Args2, false )
 		   ],
@@ -130,17 +130,17 @@ r(cl_subcat, 	closure, _, _Lexicon, KB,
 			( append(_, Args2, Args1) -> % subcategorization
 				( Tr1 =@= Tr2 % avoids matching variable to term, var(X) for variables can slove the global problem
 				; %Tr1 = tlp(_,Lm1,Pos1,_,_), Tr2 = tlp(_,Lm2,Pos2,_,_),
-				  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB),
+				  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp),
 				  %\+memberchk('VBN', [Pos1, Pos2])
 				  Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_),
-				  isa(Lm1,Lm2,KB), not_disjoint(Lm1,Lm2,KB), % for sick-4320,4329 but excidental
+				  isa(Lm1,Lm2,KB_xp), not_disjoint(Lm1,Lm2,KB_xp), % for sick-4320,4329 but excidental
 				  %Lm1 == Lm2,
 				  F1 \= 'pss', F2 \= 'pss'
 				)
 			; append(Args2, _, Args1), % passivization, maybe constratin S:F=S:pss %sick-3626
 			  %Tr1 = tlp(_,Lm1,_,_,_),  % saves sick-4322, 4328
 			  %Tr2 = tlp(_,Lm2,'VBN',_,_),
-			  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB) % fails-1756
+			  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp) % fails-1756
 			  F2 == 'pss',
 			  ( Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_),
 				Lm1 == Lm2
@@ -173,7 +173,7 @@ r(cl_pp_attach,  closure,  _, _Lexicon,  _KB, % sick-3626, 3657
 */
 
 
-r(cl_ppAtt_fl,  closure,  _, [[ty(pp)]], KB,
+r(cl_ppAtt_fl,  closure,  _, [[ty(pp)]], KB_xp,
 		br([nd( _,   (P, np:_~>pp), [C2,C3], true ),
 			nd( _M1, (VP1, np:_~>TyS1), Args1, true ),
 			nd(	[M], (VP2, np:_~>TyS2), Args2, false )],
@@ -183,7 +183,7 @@ r(cl_ppAtt_fl,  closure,  _, [[ty(pp)]], KB,
 		br([nd( [], (true, t), [], false )],
 		  Sig) )
 :-
-			( VP1 =@= VP2;   VP1 = tlp(_,Lm1,_,_,_), VP2 = tlp(_,Lm2,_,_,_), isa(Lm1,Lm2,KB) ),  % because tokens can be different, why not isa?
+			( VP1 =@= VP2;   VP1 = tlp(_,Lm1,_,_,_), VP2 = tlp(_,Lm2,_,_,_), isa(Lm1,Lm2,KB_xp) ),  % because tokens can be different, why not isa?
 			final_value_of_type(TyS1, s:_),	final_value_of_type(TyS2, s:_),
 			( append(_, Args2, Args1) % subcategorization,
 			; append(Args2, _, Args1) % passivization, maybe constratin S:F=S:pss %sick-3626
@@ -194,7 +194,7 @@ r(cl_ppAtt_fl,  closure,  _, [[ty(pp)]], KB,
 			ttTerm_to_prettyTerm( M, PrettyP ). % simplified, actually M2 should be subset of M1+PrP
 
 
-r(cl_ppConstAtt_fl,  closure,  _, [[ty(pp)]], KB,
+r(cl_ppConstAtt_fl,  closure,  _, [[ty(pp)]], KB_xp,
 		br([nd( _,   (PP, pp), 			[C3], true ),
 			nd( _M1, (VP1, np:_~>TyS1), Args1, true ),
 			nd(	[M], (VP2, np:_~>TyS2), Args2, false )],
@@ -204,7 +204,7 @@ r(cl_ppConstAtt_fl,  closure,  _, [[ty(pp)]], KB,
 		br([nd( [], (true, t), [], false )],
 		  Sig) )
 :-
-			( VP1 =@= VP2;   VP1 = tlp(_,Lm1,_,_,_), VP2 = tlp(_,Lm2,_,_,_), isa(Lm1,Lm2,KB) ),  % because tokens can be different, why not isa?
+			( VP1 =@= VP2;   VP1 = tlp(_,Lm1,_,_,_), VP2 = tlp(_,Lm2,_,_,_), isa(Lm1,Lm2,KB_xp) ),  % because tokens can be different, why not isa?
 			final_value_of_type(TyS1, s:_),	final_value_of_type(TyS2, s:_),
 			( append(_, Args2, Args1) % subcategorization,
 			; append(Args2, _, Args1) % passivization, maybe constratin S:F=S:pss %sick-3626
@@ -215,7 +215,7 @@ r(cl_ppConstAtt_fl,  closure,  _, [[ty(pp)]], KB,
 			ttTerm_to_prettyTerm( M, PrettyP ). % simplified, actually M2 should be subset of M1+PrP
 
 % sick-200
-r(cl_ppAtt_tr,  closure,  _, [[ty(pp)]], _KB,
+r(cl_ppAtt_tr,  closure,  _, [[ty(pp)]], _,
 		br([nd( [],    (P, np:_~>pp),    [C,C1], false ),
 			nd(	[M|R], (_V, np:_~>TyS),  Args,    true )],
 		  Sig)
@@ -231,7 +231,7 @@ r(cl_ppAtt_tr,  closure,  _, [[ty(pp)]], _KB,
 			ttTerm_to_prettyTerm( Mod, PrettyP ).
 
 % sick-9293 aligned
-r(cl_ppConstAtt_tr,  closure,  _, [[ty(pp)]], _KB,
+r(cl_ppConstAtt_tr,  closure,  _, [[ty(pp)]], _,
 		br([nd( [],    (PP, pp),    	 [C1], false ),
 			nd(	[M|R], (_V, np:_~>TyS),  Args,    true )],
 		  Sig)
@@ -285,7 +285,7 @@ r(cl_vp_pr_arg_pp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB
 			cat_eq(Ty1, Ty2),
 			ant_wn(Lm1, Lm2), !.*/
 
-r(cl_ant_n_mod, 		closure, _, _Lexicon, KB,  %fracas-204,205
+r(cl_ant_n_mod, 		closure, _, _Lexicon, KB_xp,  %fracas-204,205
 		br([nd( _, ((tlp(_,Lm1,_,_,F1), n:_~>n:_) @ N, n:_), Args, true ),
 			nd( _, ((tlp(_,Lm2,_,_,F2), n:_~>n:_) @ N, n:_), Args, true )
 		   ],
@@ -296,7 +296,7 @@ r(cl_ant_n_mod, 		closure, _, _Lexicon, KB,  %fracas-204,205
 :-
 			F1 \= 'COL', F2 \= 'COL',
 			Lm1 \= Lm2,
-			ant_wn(Lm1, Lm2, KB).
+			ant_wn(Lm1, Lm2, KB_xp).
 
 /*
 % body (of X):Y:False && Lake:Y:True  && Water:X:True  % sick-9631, wrong 338 shows it
@@ -325,7 +325,7 @@ r(cl_group_of, 		closure, _,  [['of','group'], ['of','body'], ['of','piece'], ['
 % puting seasoning vs seasoning SICK-5340?? accomodate this too
 % make this as a normal rule!
 
-r(cl_do_vp, 	closure, _, [['do']], _KB,
+r(cl_do_vp, 	closure, _, [['do']], _,
 		br([nd( M1, (tlp(_,'do',_,_,_), np:_~>np:_~>s:_), 	[C2, C1], 	TF1 ),
 		    nd( _, (tlp(_,Dance,_NN,_,_), n:_),				[C2],		TF2 ),
 		    nd( M3, (tlp(_,Dance,_,_,_), np:_~>s:_),		[C1],		TF3 )
@@ -345,7 +345,7 @@ r(cl_do_vp, 	closure, _, [['do']], _KB,
 
 % bottle of beer = beer bottle ? protective gear vs gear for protection?
 % sick-3275, sick-7477, sick-3373, sick-7755
-r(cl_noun_adj_comp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], KB,
+r(cl_noun_adj_comp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], KB_xp,
 		br([nd( M1, ((tlp(_,Bottle,_,_,_), pp~>n:_) @ (OF @ C2, pp), n:_), 				[C1], 	TF1 ),
 		    nd( _,  (tlp(_,Beer,_,_,_), n:_),											[C2],	TF2 ),
 			nd( M3, ((tlp(_,Beerly,_,_,_), n:_~>n:_) @ (tlp(_,Bottle,_,_,_), n:_), n:_), 	[C1],	TF3 )
@@ -356,14 +356,14 @@ r(cl_noun_adj_comp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('R
 		  Sig) )
 :-
 			OF = (tlp(_,_Of,'IN',_,_), np:_~>pp),
-			once( (Beerly = Beer; derive(Beer, Beerly, KB)) ),
+			once( (Beerly = Beer; derive(Beer, Beerly, KB_xp)) ),
 			(	(TF1, TF2, TF3) = (true,  true, false), M3 = []
 			;	(TF1, TF2, TF3) = (false, true, true),  M1 = []
 			).
 
 
 % closure related to an instance of a predicate
-r(cl_instance, 	closure, _,  [[pos('NNP')], [pos('NNPS')]], _KB,
+r(cl_instance, 	closure, _,  [[pos('NNP')], [pos('NNPS')]], KB_xp,
 		br([nd( [], (tlp(_,Term,_,_,_),_), Args, TF )],
 		  Sig)
 		===>
@@ -371,13 +371,13 @@ r(cl_instance, 	closure, _,  [[pos('NNP')], [pos('NNPS')]], _KB,
 		  Sig) )
 :-
 			tt_atomList_to_atomList(Args, AtomArgs),
-			( TF = false -> instance(AtomArgs, Term)
-			; TF = true, not_instance(AtomArgs, Term)
+			( TF = false -> instance(AtomArgs, Term, KB_xp)
+			; TF = true, not_instance(AtomArgs, Term, KB_xp)
 			).
 
 
 % closure related to concept disjoint
-r(cl_disjoint, 	closure, _, _Lexicon, KB,
+r(cl_disjoint, 	closure, _, _Lexicon, KB_xp,
 		br([nd( _, TT1, Args, true ),
 			nd( _, TT2, Args, true )
 		   ],
@@ -393,16 +393,16 @@ r(cl_disjoint, 	closure, _, _Lexicon, KB,
 			atom(Term1),
 			atom(Term2),
 			Term1 \= Term2,
-			disjoint(Term1, Term2, KB),%; % gives weird results with subWN: disjoint(frog,hold), disjoint(reserve,reserve)
-			not_isa(Term1, Term2, KB),
-			not_isa(Term2, Term1, KB).
+			disjoint(Term1, Term2, KB_xp),%; % gives weird results with subWN: disjoint(frog,hold), disjoint(reserve,reserve)
+			not_isa(Term1, Term2, KB_xp),
+			not_isa(Term2, Term1, KB_xp).
 
 
 % closure by adjective+noun construction, when compund noun is false
 % small animal: c: F, small: c: T, animal: c: T
 % small animal: c: T, small: c: F, animal: c: T, sich-7466
 % sick-2791
-r(cl_adj_noun_1, 	closure, _, _Lexicon,  _KB,
+r(cl_adj_noun_1, 	closure, _, _Lexicon,  _,
 		br([nd( [], ((TLP_adj1, n:_~>n:_) @ TTn, n:_), Args, false ),
 			nd( _, TTn, Args, true ),
 			nd( _, (TLP_adj2, np:_~>s:_), Args, true ) %non-empty modlist
@@ -439,7 +439,7 @@ r(cl_adj_noun_2, 	closure, _, _Lexicon, _KB,
 % closure rule about exactly_N, why not as an lexical knowledge?
 % fracas-85
 
-r(cl_exact_num, 	closure, _, [['exactly'], ['just']], _KB,
+r(cl_exact_num, 	closure, _, [['exactly'], ['just']], _,
 		br([nd( _, ((((TLP_RB, (n:_~>(np:_~>s:_)~>s:_)~>n:_~>(np:_~>s:_)~>s:_) @ TT_CD1, _) @ TTn, _) @ TTvp, s:_),  Args, true ),
 			nd( _, (((tlp(_,Lm2,POS2,_,_), n:_~>(np:_~>s:_)~>s:_) @ TTn, _) @ TTvp, s:_), Args, true )
 		   ],
@@ -460,7 +460,7 @@ r(cl_exact_num, 	closure, _, [['exactly'], ['just']], _KB,
 % not true     {"c wears a/s white cloth"=T, "d is white"=T, "c is in d"=F}
 %!!!but we allow both cases and it is interesting what type of unsoundness it will evoke
 % sick-218, sick-9136
-r(cl_wear_cloth, 	closure, _, [['wear']], _KB,
+r(cl_wear_cloth, 	closure, _, [['wear']], _,
 		br([ nd( M1, (tlp(_,'in','IN',_,_),_), [C1, C2], TF_in ),
 			 nd( M2, ((Det_TT @ TT_Cloth1, (np:_~>s:_)~>s:_) @ (abst(X, (( (tlp(_,'wear',_,_,_),_) @ X, _) @ C2, _)), _), s:_),  [], TF_wear),
 			 nd( _, (tlp(_,Cloth2,_,_,_), n:_), [C1],  true )
@@ -487,7 +487,7 @@ r(cl_wear_cloth, 	closure, _, [['wear']], _KB,
 
 % euqlity rule for closure
 
-r(cl_equal, 	closure, _, [['be']], _KB,
+r(cl_equal, 	closure, _, [['be']], _,
 		br([nd( [], (tlp(_,'be',_,_,_), np:_~>np:_~>s:_),  [A, A], false )],
 		  Sig)
 		===>

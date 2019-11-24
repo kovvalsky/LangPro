@@ -11,7 +11,7 @@
 		choose/3,
 		const_ttTerm/1,
 		is_greater/2,
-		jobsList_into_N_jobs_rest/3,
+		partition_list_into_N_even_lists/3,
 		listInt_to_id_ccgs/2,
 		list_of_tuples_to_list_of_positions/2,
 		list_substitution/4,
@@ -28,7 +28,7 @@
 		prob_input_to_list/2,
 		true_remove/3,
 		remove_adjacent_duplicates/2,
-		remove_varTail_from_uList/2,
+		uList2List/2,
 		rm_equi_set_of_facts_/2,
 		substitute_in_atom/4,
 		shared_members/2,
@@ -44,6 +44,7 @@
 		two_lists_to_pair_list/3,
 		two_lists_to_pairList/3,
 		ul_append/2,
+		ul_append_ul/2,
 		ul_member/2,
 		is_uList/1,
 		writeln_list/1
@@ -97,16 +98,16 @@ ul_member(E, [Head | Rest]) :-
 	).
 
 % append list to unspecified list
-ul_append(MainList, List) :-
-	nonvar(MainList),
+ul_append(UList, List) :-
+	nonvar(UList),
 	!,
-	MainList = [_ | Rest],
+	UList = [_ | Rest],
 	ul_append(Rest, List).
 
-ul_append(MainList, List) :-
-	var(MainList),
+ul_append(UList, List) :-
+	var(UList),
 	!,
-	append(List, _, MainList).
+	once(append(List, _, UList)).
 
 % adds a new element to UL if the element is not there
 % if element is there fail
@@ -114,14 +115,11 @@ add_new_to_ul(New, UL) :-
 	\+ul_member(New, UL),
 	ul_append(UL, [New]).
 
-append_uList(MainUList, UList) :-
-	remove_varTail_from_uList(MainUList, MainList),
-	remove_varTail_from_uList(UList, List),
-	append(MainList, List, SumList),
-	list_to_set(SumList, Set),
-	append(Set, _, MainUList).
+ul_append_ul(MainUList, UList) :-
+	uList2List(UList, List),
+	ul_append(MainUList, List).
 
-remove_varTail_from_uList(UList, List) :-
+uList2List(UList, List) :-
 	append(List, Var, UList),
 	var(Var), !.
 
@@ -571,15 +569,15 @@ const_ttTerm((TTexp, _Type)) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % unrelated lexical ttTerms
-no_isa_rel_const_ttTerms(TT1, TT2, KB) :-
+no_isa_rel_const_ttTerms(TT1, TT2, KB_xp) :-
 	TT1 = (tlp(_,Lm1,_,_,_),Ty1),
 	TT2 = (tlp(_,Lm2,_,_,_),Ty2),
 	sub_type(Ty1, Type),
 	sub_type(Ty2, Type),
 	nonvar(Lm1),
 	nonvar(Lm2),
-	\+isa(Lm1, Lm2, KB),
-	\+isa(Lm2, Lm1, KB).
+	\+isa(Lm1, Lm2, KB_xp),
+	\+isa(Lm2, Lm1, KB_xp).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -813,17 +811,22 @@ sort_list_length(List_of_lists, Sorted) :-
 	two_lists_to_pair_list(_Len, Sorted, Sorted_Length_List).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% chop list into N parts of the same length + Reminder
-% used for creating jobs for concurrent computing
-% choping into N parts (<= Cores) allows choosing less than max cores
-jobsList_into_N_jobs_rest(List, N, JobList) :-
-	length(List, Total),
-	PerCore is Total // N,
-	Reminder is Total mod N,
-	length(N_Jobs, N),
-	length(CoreJob, PerCore),
-	maplist(copy_term(CoreJob), N_Jobs),
-	length(Reminder_Job, Reminder),
-	append(N_Jobs, AllCoreJobs),
-	append(AllCoreJobs, Reminder_Job, List),
-	append(N_Jobs, [Reminder_Job], JobList).
+% chop list into N comparable parts
+% used for creating jobs for concurrent computing, where N is the number of cores
+% chopping keeps the order of elements: [1,2,3,4,5,6,7] -> [1,4.7], [2,5], [3,6]
+% Predicate works in the reversed order too: get list from partitions
+partition_list_into_N_even_lists(List, N, Partition) :-
+	length(Partition, N),
+	distribute_list_in_bins(List, Partition).
+
+distribute_list_in_bins(EmptyList, EmptyBins) :-
+	( var(EmptyList)
+	; EmptyList == []
+	),
+	maplist(=([]), EmptyBins),
+	!,
+	EmptyList = [].
+
+distribute_list_in_bins([E | List], [[E|B] | Bins]) :-
+	append(Bins, [B], Bins_B),
+	distribute_list_in_bins(List, Bins_B).

@@ -21,11 +21,15 @@
 :- use_module('../utils/user_preds',
 	[choose/3, const_ttTerm/1, no_isa_rel_const_ttTerms/3, tt_mon/2, tt_mon_up/1, neg/2]
 	).
+:- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../llf/ttterm_preds', [
 	adjuncted_ttTerm/1, modList_node_to_modNode_list/2,
 	tt_constant_to_tt_entity/2, modList_be_args_to_nodeList/3,
 	match_ttTerms/3, match_list_ttTerms/3, proper_tt_isa/3, extract_const_ttTerm/2,
 	set_type_for_tt/3
+	]).
+:- use_module('../prover/tableau_utils', [
+	genOldArgs/3, genFreshArgs/5
 	]).
 
 :- ensure_loaded([
@@ -83,7 +87,7 @@ admissible_rules(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % remove "do", "will" modifying verb phrase
-r(aux_verb,  equi:non,  ([], [], _), [['do'], ['will'], ['be'], ['become'], ['to'], ['that'], ['have']], _KB,
+r(aux_verb,  equi:non,  ([], [], _), [['do'], ['will'], ['be'], ['become'], ['to'], ['that'], ['have']], _,
 		br([nd( M, ( (tlp(_,Aux,_,_,_), Type1~>Type2) @ TT1, _ ),
 				Args, TF )],
 		  Sig)
@@ -102,20 +106,21 @@ r(aux_verb,  equi:non,  ([], [], _), [['do'], ['will'], ['be'], ['become'], ['to
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % possessive determiner in true context
 % sick-5003, %!!! what about 1781?
-r(poss_tr, impl:new, ([], Args, Cids), [['\'s']], _KB,
-		br([nd( M, (((( TLP_poss, np:_~>n:_~>(np:_~>s:_)~>s:_) @ TTnp, _) @ TTn, _) @ TTnp_s, _),
+r(poss_tr, impl:new, ([], Args, Cids), [['\'s']], _,
+		br([nd( M, (((( TLP_poss, np:_~>n:_~>(np:_~>s:_)~>s:_) @ TTnp, _) @ TTn, _) @ TTvp, _),
 				[], true )],
 		  Sig)
 		===>
 		br([nd( [], TTn, Args, true ),
-			nd( M, TTnp_s, Args, true ),
-			nd( [], (TLP_poss, np:_~>pp), [(NP,e)| Args], true )], % only semnatic terms % why not "of"?
+			nd( M, TTvp, Args, true ),
+			nd( [], (TLP_poss, np:_~>pp), [(NP,e)| Args], true )], % only semnatic terms
+			%TODO use more general 'of' relation
 		  Sig1) )
 :-
 		TLP_poss = tlp(_,'\'s','POS',_,_),
-		TTnp_s = (_, Type1),
+		TTvp = (_, Type1),
 		TTn = (_, Type2),
-		TTnp = (NP,_), % NP is tlp?
+		TTnp = (NP,_), %FIXME NP is tlp?
 		sub_type(Type1, Type),
 		sub_type(Type2, Type),
 		genFreshArgs(Type, Args, Sig, Sig1, Cids), !.
@@ -123,7 +128,7 @@ r(poss_tr, impl:new, ([], Args, Cids), [['\'s']], _KB,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % remove quantifier modifier not: not all A B :X -> all A B: -X
-r(not_quant,  equi:non,  ([], [], _), [['not']], _KB,
+r(not_quant,  equi:non,  ([], [], _), [['not']], _,
 		br([nd( M, ( (((tlp(_,'not',_,_,_), Type~>Type) @ Quant, Type) @ TTn, Ty1) @ TTv, Ty2 ),
 				Args, TF1 )],
 		  Sig)
@@ -138,7 +143,7 @@ r(not_quant,  equi:non,  ([], [], _), [['not']], _KB,
 % noun modifier in true context
 
 % intersective noun modifier in true context
-r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB, % equi
+r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB-XP, % equi
 		br([nd( M,  ((TLP, n:_~>n:_) @ TTn, n:_),
 				[(C,e)], true )],
 		  Sig)
@@ -147,14 +152,15 @@ r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB, % equi
 			nd( [], (TLP, Type), [(C,e)], true )],
 		  Sig) )
 :-
-		TLP = tlp(_,Lemma,POS,_,_),
+		TLP = tlp(_,Lem,POS,_,_),
 		( debMode('allInt')%, \+atom_chars(POS, ['N','N'|_])   % train-4020 baby kangaroo
-		; intersective(Lemma) % what happens if all are intersective?
-		%; (POS = 'JJ', \+privative(Lemma)) % relaxing constraints
+		; intersective(Lem) % what happens if all are intersective?
+		%; (POS = 'JJ', \+privative(Lem)) % relaxing constraints
 		; atom_chars(POS, ['V','B'|_]) % verbs are as intersective adjectives
 		; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
 		  privative(Priv)
-		), !,
+		),
+		!, % detect a type
 		( atom_chars(POS, ['V','B'|_]) ->
 			Type = np:_~>s:_
 		; atom_chars(POS, ['N','N'|_]) ->
@@ -162,11 +168,12 @@ r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB, % equi
 		; atom_chars(POS, ['J','J'|_]) ->
 			Type = np:_~>s:_
 		; Type = e~>t
-		).
+		),
+		ul_append(XP, [int(Lem)]).
 
 % intersective noun modifier in false context
 %branching could be in different way too
-r(int_mod_fl, impl:non, ([], [], _), _Lexicon, _KB,
+r(int_mod_fl, impl:non, ([], [], _), _Lexicon, _KB-XP,
 		br([nd( M, ((TLP, n:_~>n:_) @ TTn, n:_),
 				[(C,e)], false )],
 		  Sig)
@@ -179,19 +186,19 @@ r(int_mod_fl, impl:non, ([], [], _), _Lexicon, _KB,
 		] )
 :-
 
-		TLP = tlp(_,Lemma,POS,_,_),
+		TLP = tlp(_,Lem,POS,_,_),
 		%!!! what about allInt here?
-		( intersective(Lemma)
+		( intersective(Lem)
 		%; POS = 'JJ' % relaxing constraints sick-2791
 		; atom_chars(POS, ['V','B'|_]) % verbs are as intersective adjectives sick-2722
 		; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
 		  privative(Priv)
-		), !.
-
+		), !,
+		ul_append(XP, [int(Lem)]).
 
 
 % non-intersective noun modifier in true context
-r(mod_n_tr, impl:non, ([], [], _), _Lexicon, _KB,
+r(mod_n_tr, impl:non, ([], [], _), _Lexicon, _KB-XP,
 		br([nd( M, ((TTexp,n:F1~>n:F2) @ TT, n:_),    Args,    true )],    Sig)
 		===>
 		br([nd( M1, TT,    Args,    TF)],    Sig)
@@ -208,14 +215,16 @@ r(mod_n_tr, impl:non, ([], [], _), _Lexicon, _KB,
 		   	  ;	M1 = []
 			),
 			TF = true
-		).
-
+		),
+		ttTerm_to_prettyTerm(((TTexp,_)@TT,_), PrMN),
+		ttTerm_to_prettyTerm(TT, PrN),
+		ul_append(XP, [isa(PrMN, PrN)]).
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % removes any modifier, except negeation
-r(push_mod,  impl:non,  ([], [], _), _Lexicon, _KB, % why not equivalent?
+r(push_mod,  impl:non,  ([], [], _), _Lexicon, _, % why not equivalent?
 		br([nd( M, ((TTexp,Ty1~>Ty1) @ TT, Ty),    Args,    TF )],    Sig)
 		===>
 		br([nd( M1, TT, Args, TF)],  %!!! increase M list
@@ -238,7 +247,7 @@ r(push_mod,  impl:non,  ([], [], _), _Lexicon, _KB, % why not equivalent?
 
 
 % removes vacuous modifiers in any context: e.g. now
-r(mod_vac,  impl:non,  ([], [], _), [['either'], ['now'], ['at_least'], ['currently']], _KB, %!!! yet the same as push_mod, why not equivalent?
+r(mod_vac,  impl:non,  ([], [], _), [['either'], ['now'], ['at_least'], ['currently']], _, %!!! yet the same as push_mod, why not equivalent?
 		br([nd( M, ((TTexp,Ty1~>Ty2) @ TT, Ty2),  %!!! memory added
 				Args, TF )],
 		  Sig)
@@ -254,7 +263,7 @@ r(mod_vac,  impl:non,  ([], [], _), [['either'], ['now'], ['at_least'], ['curren
 % treats pp complement as an intersective modifier
 % e.g. nobel: (prize (for c1)): c2: T ---> nobel: prize: c2: T,  0: for c1: c2: T
 % sick-5003
-r(pp_com_n_tr,  impl:non,  ([], [], _), [[ty(pp)]], _KB, % equi?
+r(pp_com_n_tr,  impl:non,  ([], [], _), [[ty(pp)]], _KB-_XP, % equi?
 		br([nd( Mods, ((tlp(Tk,Lm,POS,F1,F2),pp~>n:F) @ (PP,pp), n:_),	 Args, true )],
 		  Sig)
 		===>
@@ -263,8 +272,9 @@ r(pp_com_n_tr,  impl:non,  ([], [], _), [[ty(pp)]], _KB, % equi?
 		  Sig) )
 :-
 			true.
+			%ul_append(XP, ['AforY(X)>A(X)&XforY']).
 
-r(pp_com_n_fl,  impl:non,  ([], [], _), [[ty(pp)]], _KB, % equi?
+r(pp_com_n_fl,  impl:non,  ([], [], _), [[ty(pp)]], _KB-_XP, % equi?
 		br([nd( Mods, ((tlp(Tk,Lm,POS,F1,F2),pp~>n:F) @ (PP,pp), n:_),	 Args, false )],
 		  Sig)
 		===>
@@ -277,7 +287,7 @@ r(pp_com_n_fl,  impl:non,  ([], [], _), [[ty(pp)]], _KB, % equi?
 			true.
 
 % in @ NP @ man: c: T ===> in @ NP: c: T  AND   man: c: T
-r(pp_mod_n_tr,  impl:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB, % equi?
+r(pp_mod_n_tr,  impl:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB-_XP, % equi?
 		br([nd( Mods, (( (tlp(Tk,Lm,'IN',F1,F2),np:_~>n:_~>n:_) @ NP, n:_~>n:_) @ Noun, n:_),  % relax by removing Pos=IN?
 				Args, true )],
 		  Sig)
@@ -293,7 +303,7 @@ r(pp_mod_n_tr,  impl:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], 
 			%( NP = (TLP_NP, np:_) -> C = (TLP_NP, e) ; C = NP).  % redundant
 
 % in @ NP @ man: c: F ===> in @ NP: c: F  OR   man: c: F
-r(pp_mod_n_fl,  impl:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB, % equi?
+r(pp_mod_n_fl,  impl:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB-_XP, % equi?
 		br([nd( Mods, (( (tlp(Tk,Lm,'IN',F1,F2),np:_~>n:_~>n:_) @ NP, n:_~>n:_) @ Noun, n:_), 	Args, false )],  %relax by removing Pos=IN?
 		  Sig)
 		===>
@@ -312,7 +322,7 @@ r(pp_mod_n_fl,  impl:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], 
 
 % use the modifier list
 % e.g. [M1,M2]: N: c1: T ---> 0: M1 N: c1: T,  0: M2 N: c1: T
-r(mods_noun,  impl:non,  ([], [], _), _Lexicon, _KB,
+r(mods_noun,  impl:non,  ([], [], _), _Lexicon, _KB-_XP,
 		br([nd( [M | Rest], (tlp(Tk,Lm,POS,F1,F2), n:F),  Args, true )],  % Args = [c]
 		  Sig)
 		===>
@@ -326,7 +336,7 @@ r(mods_noun,  impl:non,  ([], [], _), _Lexicon, _KB,
 			.
 
 %!!! sick-train 2205?   Mod @ Sentence
-r(mods_vp,  impl:non,  ([], [], _), _Lexicon, _KB, % sick 1754, 8714, 4054, 3222, 2284=2286 uses it
+r(mods_vp,  impl:non,  ([], [], _), _Lexicon, _KB-_XP, % sick 1754, 8714, 4054, 3222, 2284=2286 uses it
 		br([nd( [M | Rest], (VP, np:F~>TyVP), 	Args, true )],  % Args = [c] %! only for trues
 		  Sig)
 		===>
@@ -341,7 +351,7 @@ r(mods_vp,  impl:non,  ([], [], _), _Lexicon, _KB, % sick 1754, 8714, 4054, 3222
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Prep@NP@VP:NP:F ---> Prep@NP@NP:F  OR  VP@NP:F, sick-254
 % maybe not really sound rule, for amboguity with PPs
-r(pp_mod_vp_fl,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB,
+r(pp_mod_vp_fl,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, (((tlp(Tk,Lm,'IN',F1,F2), np:_~>_) @ NP, (np:_~>s:_)~>np:_~>s:_) @ TTvp, _), 	[(C,Ty)], false )],
 		  Sig)
 		===>
@@ -353,7 +363,7 @@ r(pp_mod_vp_fl,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')],
 
 % Prep@NP@VP:NP:T ---> Prep@NP@NP:T  AND  VP@NP:T,
 % maybe not really sound rule, for amboguity with PPs
-r(pp_mod_vp_tr,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB,
+r(pp_mod_vp_tr,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, (((tlp(Tk,Lm,'IN',F1,F2), np:_~>_) @ NP, (np:_~>s:_)~>np:_~>s:_) @ TTvp, _), 	[(C,Ty)], true )],
 		  Sig)
 		===>
@@ -367,7 +377,7 @@ r(pp_mod_vp_tr,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')],
 % move pp-attachment from noun to verb, to fix wrong pp-attachments by parsers
 % into:[c2,c3]:T & drop:[c3,c1]:T -> [into c2]:drop:[c3,c1]:T
 % note that introduced node subsumes one of the antecednets, so better subtract_nodes/4 is needed
-r(pp_attach,  impl:non,  ([], [], _), [[ty(pp)]], _KB, % sick-3626
+r(pp_attach,  impl:non,  ([], [], _), [[ty(pp)]], _, % sick-3626
 		br([nd( _,   (TLP, pp), [C3], true ),
 			nd( Mod, (TLP_VP, TyVP), Args_C3, true ) ], % TLP because M:VP[args] -> M@VP[args] via mods_vp and the rule is applable to M@VP[args]
 		  Sig)
@@ -381,7 +391,7 @@ r(pp_attach,  impl:non,  ([], [], _), [[ty(pp)]], _KB, % sick-3626
 			final_value_of_type(TyVP, s:_),
 			M =  (TLP, TyVP~>TyVP).
 
-r(pp_attach,  impl:non,  ([], [], _), [[ty(pp)]], _KB,
+r(pp_attach,  impl:non,  ([], [], _), [[ty(pp)]], _,
 		br([nd( _, (TLP, np:_~>pp), [C2,C3], true ),
 			nd( Mod, (TLP_VP, TyVP), Args_C3, true ) ],
 		  Sig)
@@ -398,7 +408,7 @@ r(pp_attach,  impl:non,  ([], [], _), [[ty(pp)]], _KB,
 
 % pull a by-phrase from a modifier list and apply first
 % when is this used interesting
-r(by_mod,  equi:non,  ([], [], _), [['by']], _KB, % sick 2704
+r(by_mod,  equi:non,  ([], [], _), [['by']], _, % sick 2704
 		br([nd( [M|R], (tlp(Tk,Lm,Pos,F1,F2), np:E~>s:F),   Args, TF )],  % Args = [c]
 		  Sig)
 		===>
@@ -431,7 +441,7 @@ r(mods_be,  impl:non,  _, [['be']], _KB, % this rule is not used! I guess mods_n
 %		Rules for Boolean operators
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-r(tr_conj_and,	equi:non,  ([], [], _), [['and']], _KB,
+r(tr_conj_and,	equi:non,  ([], [], _), [['and']], _,
 		br([nd( [], ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, true )],
 		  Sig)
@@ -443,7 +453,7 @@ r(tr_conj_and,	equi:non,  ([], [], _), [['and']], _KB,
 			cat_eq(Ty1, Ty2),
 			cat_eq(Ty1, Ty).
 
-r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], _KB,
+r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], _,
 		br([nd( [], ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
 		  Sig)
@@ -456,7 +466,7 @@ r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], _KB,
 			cat_eq(Ty1, Ty).
 
 
-r(tr_conj_who,	equi:non,  ([], [], _), [['who']], _KB,
+r(tr_conj_who,	equi:non,  ([], [], _), [['who']], _,
 		br([nd( [], ( ( (tlp(_,'who',_,_,_), (np:_~>s:_)~>n:_~>n:_) @ TT1, _ ) @ TT2, _ ),
 				Args, true )],
 		  Sig)
@@ -468,7 +478,7 @@ r(tr_conj_who,	equi:non,  ([], [], _), [['who']], _KB,
 		true.
 
 
-r(fl_conj_who, 	equi:non,  ([], [], _), [['who']], _KB,
+r(fl_conj_who, 	equi:non,  ([], [], _), [['who']], _,
 		br([nd( [], ( ( (tlp(_,'who',_,_,_), (np:_~>s:_)~>n:_~>n:_) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
 		  Sig)
@@ -480,7 +490,7 @@ r(fl_conj_who, 	equi:non,  ([], [], _), [['who']], _KB,
 		true.
 
 
-r(fl_disj_or,	equi:non, ([], [], _), [['or']], _KB,
+r(fl_disj_or,	equi:non, ([], [], _), [['or']], _,
 		br([nd( [], ( ( (tlp(_,'or',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
 		  Sig)
@@ -493,7 +503,7 @@ r(fl_disj_or,	equi:non, ([], [], _), [['or']], _KB,
 			cat_eq(Ty1, Ty).
 
 
-r(tr_disj_or,	equi:non, ([], [], _), [['or']], _KB,
+r(tr_disj_or,	equi:non, ([], [], _), [['or']], _,
 		br([nd( [], ( ( (tlp(_,'or',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, true )],
 		  Sig)
@@ -507,7 +517,7 @@ r(tr_disj_or,	equi:non, ([], [], _), [['or']], _KB,
 
 
 
-r(neg_not,  equi:non,  ([], [], _), [['not']], _KB,
+r(neg_not,  equi:non,  ([], [], _), [['not']], _,
 		br([nd( M,  ( (tlp(_,'not',_,_,_), Ty1~>Ty2) @ TT, _ ),  %!!! added nonempty modifier
 				Args, X )],
 		  Sig)
@@ -519,7 +529,7 @@ r(neg_not,  equi:non,  ([], [], _), [['not']], _KB,
 
 
 
-r(fl_if,  equi:non,  ([], [], _), [['if']], _KB,
+r(fl_if,  equi:non,  ([], [], _), [['if']], _,
 		br([nd( [], ( ( (tlp(_,'if',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
 		  Sig)
@@ -532,7 +542,7 @@ r(fl_if,  equi:non,  ([], [], _), [['if']], _KB,
 			cat_eq(Ty1, Ty).
 
 
-r(tr_if,  equi:non,  ([], [], _), [['if']], _KB,
+r(tr_if,  equi:non,  ([], [], _), [['if']], _,
 		br([nd( [], ( ( (tlp(_,'if',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, true )],
 		  Sig)
@@ -551,7 +561,7 @@ r(tr_if,  equi:non,  ([], [], _), [['if']], _KB,
 %		Rules for Shifting Arguments
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-r(pull_arg,	 equi:non,  ([], [], _), _Lexicon, _KB,
+r(pull_arg,	 equi:non,  ([], [], _), _Lexicon, _,
 		br([nd( M, ( abst(TT_X, TT), Type ),
 				[TT_Arg | Args], TF)],
 		  Sig)
@@ -563,7 +573,7 @@ r(pull_arg,	 equi:non,  ([], [], _), _Lexicon, _KB,
 			TT_X = (X, _), var(X),
 			norm_tt( ( (abst(TT_X, TT), Type) @ TT_Arg, Ty2 ), TT_Red ), !.
 
-r(beta_red,	 equi:non,  ([], [], _), _Lexicon, _KB, % fixes case when term is type rised nad has dummy P1 as an argument !!!
+r(beta_red,	 equi:non,  ([], [], _), _Lexicon, _, % fixes case when term is type rised nad has dummy P1 as an argument !!!
 		br([nd( M, ((abst(TT_X, TT), Type) @ TT1, Ty2),
 				Args, TF)],
 		  Sig)
@@ -577,7 +587,7 @@ r(beta_red,	 equi:non,  ([], [], _), _Lexicon, _KB, % fixes case when term is ty
 
 %r(eta_red,	 equi:non,  _,
 
-r(push_arg, impl:non, ([], [], _), _Lexicon, _KB,  % should not intyroduce
+r(push_arg, impl:non, ([], [], _), _Lexicon, _,  % should not intyroduce
 		br([nd( M, (TT1 @ TT2, _),
 				Args, TF )],
 		  Sig)
@@ -604,7 +614,7 @@ r(push_arg, impl:non, ([], [], _), _Lexicon, _KB,  % should not intyroduce
 			).
 % const(B), not necesary. B is never unbound var, it is typed later, accepts only atoms
 
-r(push_arg, equi:non, ([], [], _), [['who']], _KB,
+r(push_arg, equi:non, ([], [], _), [['who']], _,
 		br([nd( M, (TT1 @ (Wh_VP @ NP, np:_), _),
 				Args, TF )],
 		  Sig)
@@ -625,7 +635,7 @@ r(push_arg, equi:non, ([], [], _), [['who']], _KB,
 
 
 % John:NNP:(np~>s)~>s @ VP:np~>s ---> VP @ John,np
-r(type_drop, equi:non, ([], [], _), [[pos('NNP')]], _KB, % doesnt work this info
+r(type_drop, equi:non, ([], [], _), [[pos('NNP')]], _, % doesnt work this info
 		br([nd( M, ((tlp(Tk,Lm,'NNP',F1,F2), (np:_~>s:_)~>s:_) @ (VP, np:_~>s:_), s:_), [], TF )],
 		  Sig)
 		===>
@@ -643,7 +653,7 @@ r(type_drop, equi:non, ([], [], _), [[pos('NNP')]], _KB, % doesnt work this info
 %%%%%%%%%%%%%%%%%%%%%%
 % simpler aligner rule that is more general than up and dw arg rules
 % what about same_mods rule?
-r(same_args,  impl:non,  ([], [], _), _Lexicon, KB,  % non-symetric
+r(same_args,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % non-symetric
 		br([nd( M1, (G @ A, _), Args, true ),
 			nd( M2, (H @ B, _), Args, false ) ],
 		  Sig)
@@ -652,8 +662,8 @@ r(same_args,  impl:non,  ([], [], _), _Lexicon, KB,  % non-symetric
 			nd( M2, H, [Y | Args], false )],
 		  Sig) )
 :-
-			match_ttTerms(A, B, KB),
-			%match_list_ttTerms(M1, M2, KB), %why not?
+			match_ttTerms(A, B, KB_xp),
+			%match_list_ttTerms(M1, M2, KB_xp), %why not?
 			Y = A,
 			A = (_, Type1),
 			B = (_, Type2),
@@ -681,7 +691,7 @@ r(same_args,  impl:non,  _, _Lexicon, KB,  % symetric
 
 % Monotone rules when arguments are in ISA relation
 % Non-branching rule
-r(up_mon_args,  impl:non,  ([], [], _), _Lexicon, KB,
+r(up_mon_args,  impl:non,  ([], [], _), _Lexicon, KB_xp,
 		br([nd( [],  (G @ A, _), Args, true ),
 			nd( [], (H @ B, _), Args, false ) ],
 		  Sig)
@@ -696,16 +706,16 @@ r(up_mon_args,  impl:non,  ([], [], _), _Lexicon, KB,
 			  %\+tt_mon(H, dw), Y = A;
 			  %tt_mon_up(G), Y = B; % waht about a, the, several etc
 			  %tt_mon_up(H), Y = A;
-			  match_ttTerms(A, B, KB), Y = A
+			  match_ttTerms(A, B, KB_xp), Y = A
 			),
-			\+proper_tt_isa(H, G, KB), % makes rule more specific
+			\+proper_tt_isa(H, G, KB_xp), % makes rule more specific
 			A = (_, Type1),
 			B = (_, Type2),
 			sub_type(Type1, Type),
 			sub_type(Type2, Type),
-			( isa(A, B, KB); match_ttTerms(A, B, KB) ), !.
+			( isa(A, B, KB_xp); match_ttTerms(A, B, KB_xp) ), !.
 
-r(dw_mon_args,  impl:non,  ([], [], _), _Lexicon, KB,
+r(dw_mon_args,  impl:non,  ([], [], _), _Lexicon, KB_xp,
 		br([nd( [], (G @ A, _), Args, true),
 			nd( [], (H @ B, _), Args, false) ],
 		  Sig)
@@ -717,12 +727,12 @@ r(dw_mon_args,  impl:non,  ([], [], _), _Lexicon, KB,
 			( tt_mon(G, dw), Y = B;
 			  tt_mon(H, dw), Y = A
 			),
-			\+proper_tt_isa(H, G, KB), % makes rule more specific
+			\+proper_tt_isa(H, G, KB_xp), % makes rule more specific
 			A = (_, Type1),
 			B = (_, Type2),
 			sub_type(Type1, Type),
 			sub_type(Type2, Type),
-			( isa(A, B, KB); match_ttTerms(A, B, KB) ), !.
+			( isa(A, B, KB_xp); match_ttTerms(A, B, KB_xp) ), !.
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -730,7 +740,7 @@ r(dw_mon_args,  impl:non,  ([], [], _), _Lexicon, KB,
 % Non-branching rule
 
 
-r(up_mon_fun_some,  impl:new,  ([], ArgList, Cids), [['a'], ['several'], ['many'], ['every'], ['most'], ['a_few'], ['both'], ['s']], KB,
+r(up_mon_fun_some,  impl:new,  ([], ArgList, Cids), [['a'], ['several'], ['many'], ['every'], ['most'], ['a_few'], ['both'], ['s']], KB_xp,
 		br([nd( [], ((Some @ X, _TyX) @ A, _), Args, true),
 			nd( [], ((Some @ Y, _TyY) @ B, _), Args, false) ],
 		  Sig)
@@ -742,7 +752,7 @@ r(up_mon_fun_some,  impl:new,  ([], ArgList, Cids), [['a'], ['several'], ['many'
 :-
 			Some = (tlp(_,Lemma,_,_,_), n:_~>(np:_~>s:_)~>s:_),
 			member(Lemma, ['a', 'several', 'many', 'most', 'a_few', 'both', 's', 'every']), % "the" is not ok since we claim about N, the&the_c rules do this for 'the' POS = CD?
-			match_ttTerms(X, Y, KB),
+			match_ttTerms(X, Y, KB_xp),
 			%tt_mon((Some @ X, TyX), _Up2),  %not necessary since lemma is set
 			%tt_mon((Some @ Y, TyY), _Up1),  %not necessary since lemma is set
 			A = (_, Type1),
@@ -752,7 +762,7 @@ r(up_mon_fun_some,  impl:new,  ([], ArgList, Cids), [['a'], ['several'], ['many'
 			genFreshArgs(Type, ArgList, Sig, Sig1, Cids), !.
 
 
-r(dw_mon_fun_few,  impl:new,  ([], ArgList, Cids), [['few'], ['no']], KB,  % not really necesary and sound
+r(dw_mon_fun_few,  impl:new,  ([], ArgList, Cids), [['few'], ['no']], KB_xp,  % not really necesary and sound
 		br([nd( [], ((Few @ X, _TyX) @ A, _), Args, true),
 			nd( [], ((Few @ Y, _TyY) @ B, _), Args, false) ],
 		  Sig)
@@ -764,7 +774,7 @@ r(dw_mon_fun_few,  impl:new,  ([], ArgList, Cids), [['few'], ['no']], KB,  % not
 :-
 			Few = (tlp(_,Lemma,_,_,_), n:_~>(np:_~>s:_)~>s:_),
 			member(Lemma, ['few', 'no', 'neither']), % "the" is not ok since we claim about N, the&the_c rules do this for 'the' POS = CD?
-			match_ttTerms(X, Y, KB),
+			match_ttTerms(X, Y, KB_xp),
 			%tt_mon((Some @ X, TyX), _Up2),  %not necessary since lemma is set
 			%tt_mon((Some @ Y, TyY), _Up1),  %not necessary since lemma is set
 			A = (_, Type1),
@@ -774,7 +784,7 @@ r(dw_mon_fun_few,  impl:new,  ([], ArgList, Cids), [['few'], ['no']], KB,  % not
 			genFreshArgs(Type, ArgList, Sig, Sig1, Cids), !.
 
 
-r(up_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
+r(up_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB_xp,
 		br([nd([], (G @ A, _), Args, true),
 			nd([], (H @ B, _), Args, false) ],
 		  Sig)
@@ -783,14 +793,14 @@ r(up_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 			nd([], B, ArgList, false)],
 		  Sig1) )
 :-
-			match_ttTerms(G, H, KB),
+			match_ttTerms(G, H, KB_xp),
 			tt_mon_up(G),
 			tt_mon_up(H),
 		    %%tt_mon(G, up),
 			%%tt_mon(H, up),
 			%\+tt_mon(G, dw),
 			%\+tt_mon(H, dw),
-			\+no_isa_rel_const_ttTerms(A, B, KB), %!!! added recently avoids introduction of fresh constants
+			\+no_isa_rel_const_ttTerms(A, B, KB_xp), %!!! added recently avoids introduction of fresh constants
 			A = (_, Type1),
 			B = (_, Type2),
 			sub_type(Type1, Type),
@@ -798,7 +808,7 @@ r(up_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 			genFreshArgs(Type, ArgList, Sig, Sig1, Cids), !.  % these arguments can be ignored for gamma rules?
 
 
-r(dw_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
+r(dw_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB_xp,
 		br([nd([], (G @ A, _), Args, true),
 			nd([], (H @ B, _), Args, false) ],
 		  Sig)
@@ -807,10 +817,10 @@ r(dw_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 			nd([], B, ArgList, true)],
 		  Sig1) )
 :-
-			match_ttTerms(G, H, KB),
+			match_ttTerms(G, H, KB_xp),
 			tt_mon(G, dw),
 			tt_mon(H, dw),
-			\+no_isa_rel_const_ttTerms(A, B, KB), %!!! added recently avoids introduction of fresh constants
+			\+no_isa_rel_const_ttTerms(A, B, KB_xp), %!!! added recently avoids introduction of fresh constants
 			A = (_, Type1),
 			B = (_, Type2),
 			sub_type(Type1, Type),
@@ -820,7 +830,7 @@ r(dw_mon_fun,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 
 %%%%%%%%%%%%%%%%%%%%%%
 % Ordinary branching monotone rules
-r(up_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
+r(up_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB_xp,
 		br([nd([], (G @ A, _), Args, true),
 			nd([], (H @ B, _), Args, false) ],
 		  Sig)
@@ -838,8 +848,8 @@ r(up_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 			  %\+tt_mon(G, dw), Y = B;
 			  %\+tt_mon(H, dw), Y = A
 			),
-			\+proper_tt_isa(H, G, KB), % makes rule more specific
-			\+no_isa_rel_const_ttTerms(A, B, KB), %!!! avoids unnecsaary branching
+			\+proper_tt_isa(H, G, KB_xp), % makes rule more specific
+			\+no_isa_rel_const_ttTerms(A, B, KB_xp), %!!! avoids unnecsaary branching
 			G = (_, Type_G),
 			H = (_, Type_H),
 			sub_type(Type_G, Type_Fun),
@@ -851,7 +861,7 @@ r(up_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 			genFreshArgs(Type, ArgList, Sig, Sig1, Cids), !.
 
 
-r(dw_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
+r(dw_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB_xp,
 		br([nd([], (G @ A, _), Args, true),
 			nd([], (H @ B, _), Args, false) ],
 		  Sig)
@@ -867,8 +877,8 @@ r(dw_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 			( tt_mon(G, dw), Y = B;
 			  tt_mon(H, dw), Y = A
 			),
-			\+proper_tt_isa(H, G, KB), % makes rule more specific
-			\+no_isa_rel_const_ttTerms(A, B, KB), %!!! avoids unnecsaary branching
+			\+proper_tt_isa(H, G, KB_xp), % makes rule more specific
+			\+no_isa_rel_const_ttTerms(A, B, KB_xp), %!!! avoids unnecsaary branching
 			G = (_, Type_G),
 			H = (_, Type_H),
 			sub_type(Type_G, Type_Fun),
@@ -887,7 +897,7 @@ r(dw_mon,  impl:new,  ([], ArgList, Cids), _Lexicon, KB,
 %	Gamma and Delta rules for every and some
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-r(tr_a,	 impl:new,  ([], Args, Cids),  [[pos('CD')], ['a'], ['many'], ['several'], ['most'], ['a_few'], ['both'], ['s']], _KB,
+r(tr_a,	 impl:new,  ([], Args, Cids),  [[pos('CD')], ['a'], ['many'], ['several'], ['most'], ['a_few'], ['both'], ['s']], _,
 		br([nd( M, ( ( (tlp(_,A,POS,_,_), n:_~>(np:_~>s:_)~>s:_) @ TT1, _) @ TT2, _ ),  %!!! uses Mod
 				[], true )],
 		  Sig)
@@ -906,7 +916,7 @@ r(tr_a,	 impl:new,  ([], Args, Cids),  [[pos('CD')], ['a'], ['many'], ['several'
 			genFreshArgs(Type, Args, Sig, Sig1, Cids), !.
 
 
-r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the']], _KB,  %old
+r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the']], _,  %old
 		br([nd( M, ( ( (tlp(_,Lemma,_,_,_),_) @ TT1, _ ) @ TT2, _ ),  % inro of M due to sick-4650
 				[], false )],
 		  [H|T])
@@ -934,7 +944,7 @@ r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the
 
 % !!! sc-train 1661 peel@c@c
 % a A B : F and  A:c : T  ---> B:c : F % fracas-107
-r(fl_a_c,	 impl:non, ([C], [], _), [['a'], ['a_few']], KB,  %!!! ['s']  This is not a gamma rule but shoul rule out applocation of gamma rule, we need C as info
+r(fl_a_c,	 impl:non, ([C], [], _), [['a'], ['a_few']], KB_xp,  %!!! ['s']  This is not a gamma rule but shoul rule out applocation of gamma rule, we need C as info
 		br([ nd(M, ( ( (tlp(_,Lemma,_,_,_), n:_~>(np:_~>s:_)~>s:_) @ TT1, _ ) @ TT2, _ ),    [],    false ),
 			 nd(_, TT,    [C],    true ) %non_empty modlist
 		   ],
@@ -948,9 +958,9 @@ r(fl_a_c,	 impl:non, ([C], [], _), [['a'], ['a_few']], KB,  %!!! ['s']  This is 
 			TT2 = (_, Type2),
 			sub_type(Type1, Type),
 			sub_type(Type2, Type),
-			( 	match_ttTerms(TT, TT1, KB),
+			( 	match_ttTerms(TT, TT1, KB_xp),
 				Other_TT = TT2
-			  ; match_ttTerms(TT, TT2, KB),
+			  ; match_ttTerms(TT, TT2, KB_xp),
 				Other_TT = TT1
 			), !.
 
@@ -958,7 +968,7 @@ r(fl_a_c,	 impl:non, ([C], [], _), [['a'], ['a_few']], KB,  %!!! ['s']  This is 
 
 
 % EVERY A B : T, gamma rule
-r(tr_every,	 gamma:non,  (Args, [], _), [['every'], ['both']], _KB,  %old
+r(tr_every,	 gamma:non,  (Args, [], _), [['every'], ['both']], _,  %old
 		br([nd(M, ( ( (tlp(_,Every,_,_,_), n:_~>(np:_~>s:_)~>s:_) @ TT1, _ ) @ TT2, _ ),
 				[], true )],
 		  [H|T])
@@ -984,7 +994,7 @@ r(tr_every,	 gamma:non,  (Args, [], _), [['every'], ['both']], _KB,  %old
 
 % EVERY A B : T  and  A:c : T ---> B:c : T
 % EVERY A B : T  and  B:c : F ---> A:c : F
-r(tr_every_c,	 impl:non,  ([C], [], _), [['every']], KB,  %old This is not a gamma rule
+r(tr_every_c,	 impl:non,  ([C], [], _), [['every']], KB_xp,  %old This is not a gamma rule
 		br([ nd(M, ( ( (tlp(_,'every',_,_,_), n:_~>(np:_~>s:_)~>s:_) @ TT1, _ ) @ TT2, _ ),    [],    true ),
 			 nd(M1, TT,    [C],    TF ) % if C_e than allow
 		   ],
@@ -998,20 +1008,20 @@ r(tr_every_c,	 impl:non,  ([C], [], _), [['every']], KB,  %old This is not a gam
 			TT2 = (_, Type2),
 			sub_type(Type1, Type),
 			sub_type(Type2, Type),
-			( 	match_ttTerms(TT, TT1, KB), % saves fracas-49 rule app, swede,nnp vs swede nn
+			( 	match_ttTerms(TT, TT1, KB_xp), % saves fracas-49 rule app, swede,nnp vs swede nn
 				Other_TT = TT2,
 				M1 = [], M2 = M,
 				TF = true
-			  ; match_ttTerms(TT, TT2, KB),
+			  ; match_ttTerms(TT, TT2, KB_xp),
 				Other_TT = TT1,
-				match_list_ttTerms(M1, M, KB), M2 = [],
+				match_list_ttTerms(M1, M, KB_xp), M2 = [],
 				TF = false
 			), !.
 
 
 
 % every false
-r(fl_every,	 impl:new,  ([], Args, Cids), [['every']], _KB,
+r(fl_every,	 impl:new,  ([], Args, Cids), [['every']], _,
 		br([nd( M, ( ( (tlp(_,'every',_,_,_),_) @ TT1, _ ) @ TT2, _ ),
 				[], false )],
 		  Sig)
@@ -1028,7 +1038,7 @@ r(fl_every,	 impl:new,  ([], Args, Cids), [['every']], _KB,
 
 
 % no true
-r(tr_no,  gamma:non,  (Args, [], _), [['no']], _KB,
+r(tr_no,  gamma:non,  (Args, [], _), [['no']], _,
 		br([nd(  M, ( ( (tlp(_,'no',_,_,_),_) @ TT1, _ ) @ TT2, _ ),
 				[], true )],
 		  [H|T])
@@ -1047,7 +1057,7 @@ r(tr_no,  gamma:non,  (Args, [], _), [['no']], _KB,
 			genOldArgs(Type, Args, [H|T]). % no cut here, oldArg selection needs backtrack
 
 
-r(tr_no_c,	 impl:non,  ([C], [], _), [['no']], KB,  %old this is not a gamma rule
+r(tr_no_c,	 impl:non,  ([C], [], _), [['no']], KB_xp,  %old this is not a gamma rule
 		br([ nd( M, ( ( (tlp(_,'no',_,_,_), n:_~>(np:_~>s:_)~>s:_) @ TT1, _ ) @ TT2, _ ),    [],    true ),
 			 nd(M1, TT,    [C],    true )
 		   ],
@@ -1060,17 +1070,17 @@ r(tr_no_c,	 impl:non,  ([C], [], _), [['no']], KB,  %old this is not a gamma rul
 			TT2 = (_, Type2),
 			sub_type(Type1, Type),
 			sub_type(Type2, Type),
-			( 	match_ttTerms(TT, TT1, KB),
+			( 	match_ttTerms(TT, TT1, KB_xp),
 				M = M2, M1 = [],
 				Other_TT = TT2
-			  ; match_ttTerms(TT, TT2, KB),
-				match_list_ttTerms(M, M1, KB), M2 = [],
+			  ; match_ttTerms(TT, TT2, KB_xp),
+				match_list_ttTerms(M, M1, KB_xp), M2 = [],
 				Other_TT = TT1
 			), !.
 
 
 % no false
-r(fl_no,  impl:new,  ([], Args, Cids), [['no']], _KB,
+r(fl_no,  impl:new,  ([], Args, Cids), [['no']], _,
 		br([nd(M, ( ( (tlp(_,'no',_,_,_),_) @ TT1, _ ) @ TT2, _ ),
 				[], false )],
 		  Sig)
@@ -1092,7 +1102,7 @@ r(fl_no,  impl:new,  ([], Args, Cids), [['no']], _KB,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Simplification rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-r(be_a_obj,  equi:non, ([], [], _), [['be','a'], ['be','s']], _KB,    % obj_be
+r(be_a_obj,  equi:non, ([], [], _), [['be','a'], ['be','s']], _,    % obj_be
 		br([nd( M, ( ( (TLP, _TLP_ty) @ TT_N, _Ty ) @ (abst((X,XType), (Is_X_C,_)), np:_~>s:_), s:_ ),
 				[], TF )],
 		  Sig)
@@ -1115,7 +1125,7 @@ r(be_a_obj,  equi:non, ([], [], _), [['be','a'], ['be','s']], _KB,    % obj_be
 			),  %writeln('be_a_obj used!!!'),
 			!.
 
-r(a_subj_be,  equi:non, ([], [], _), [['be','a']], _KB,   % there is no need for it, never used % it is duplicate of be_obj
+r(a_subj_be,  equi:non, ([], [], _), [['be','a']], _,   % there is no need for it, never used % it is duplicate of be_obj
 		br([nd( M, ( ( (TLP, _TLP_ty) @ TT_N, _Ty ) @ (((tlp(_,'be',_,_,_),_) @ TT_NP), np:_~>s:_), s:_ ),
 				[], TF )],
 		  Sig)
@@ -1156,7 +1166,7 @@ r(be_obj,  equi:non,  _, _Lexicon,
 			!.
 */
 
-r(be_pp,  equi:non,  ([], [], _),  [['be',pos('IN')]], _KB,
+r(be_pp,  equi:non,  ([], [], _),  [['be',pos('IN')]], _,
 		br([nd( Mods, ( (tlp(_,'be',_,_,_),pp~>np:_~>s:_) @ (TT_PP @ TT_C, pp), np:_~>s:_ ),
 				Args, TF )], % singleton e-type!!!
 		  Sig)
@@ -1173,7 +1183,7 @@ r(be_pp,  equi:non,  ([], [], _),  [['be',pos('IN')]], _KB,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % rule for the A B when there is a constant of A
-r(the_c,  impl:non,  ([(Term, e)], [], _), [['the']], KB,
+r(the_c,  impl:non,  ([(Term, e)], [], _), [['the']], KB_xp,
 		br([nd( M, ( ( (tlp(_,'the',_,_,_),_) @ TT_N, _) @ TT_VP, s:_ ),	[], 	TF ),
 			nd( _, (Noun, n:F1), 	[(Term, e)], 	true )   ], % mod is allowed
 		  Sig)
@@ -1181,14 +1191,14 @@ r(the_c,  impl:non,  ([(Term, e)], [], _), [['the']], KB,
 		br([nd( M, TT_VP,	[(Term, e)], 	TF )], %added memory
 		  Sig) )
 :-
-			( match_ttTerms(TT_N, (Noun, n:F1), KB)
-			; Noun = tlp(_,N2,_,_,_), TT_N = (tlp(_,N1,_,_,_), _), isa(N2, N1, KB)
+			( match_ttTerms(TT_N, (Noun, n:F1), KB_xp)
+			; Noun = tlp(_,N2,_,_,_), TT_N = (tlp(_,N1,_,_,_), _), isa(N2, N1, KB_xp)
 			).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % rule for the A B when there is NO constant of A
 % considers mod list
-r(the,  impl:new,  ([], Args, Cids), [['the']], _KB,
+r(the,  impl:new,  ([], Args, Cids), [['the']], _,
 		br([nd( M, ( ( (tlp(Tk,'the',POS,F1,F2),Type_The) @ TT_N, _) @ TT_VP, s:_ ),	[], 	TF )],	% fracas 92, 93?
 		  Sig)
 		===>
@@ -1206,7 +1216,7 @@ r(the,  impl:new,  ([], Args, Cids), [['the']], _KB,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % conjunction rules
-r(arg_dist,	equi:non,  ([], [], _), _Lexicon, _KB,  %maybe impl?  this rule needed by sick-7889
+r(arg_dist,	equi:non,  ([], [], _), _Lexicon, _,  %maybe impl?  this rule needed by sick-7889
 		br([nd( M, ( ( ( (tlp(Tk,Conj,Pos,F1,F2), Ty~>Ty~>Ty) @ TT1, _ ) @ TT2, _ ) @ TTArg, Type),
 				Args, TF )],
 		  Sig)
@@ -1219,7 +1229,7 @@ r(arg_dist,	equi:non,  ([], [], _), _Lexicon, _KB,  %maybe impl?  this rule need
 			%TT1 = (_, _Ty1~>Ty2).
 
 % distribute function only over entity arguments, sleep (and John Sam) -> (sleep John) and (sleep Sam)
-r(fun_dist,	equi:non,  ([], [], _), [[pos('CC')]], _KB,  %!!! equi
+r(fun_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %!!! equi
 		br([nd( M, (Fun @ (((tlp(Tk,Conj,'CC',F1,F2), Ty~>Ty~>Ty) @ Arg1, _Ty1) @ Arg2, _Ty2), Type),
 				Args, TF )],
 		  Sig)
@@ -1231,7 +1241,7 @@ r(fun_dist,	equi:non,  ([], [], _), [[pos('CC')]], _KB,  %!!! equi
 			nonvar(Conj),
 			memberchk(Ty, [np:_, e]).
 
-r(det_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB,  %!!! equi
+r(det_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB_xp,  %!!! equi
 		br([nd( M,
                 ((Det @ (((TLPconj,n:_~>n:_~>n:_) @ A, _) @ B, _), Ty) @ VP, Type),
 				[], TF )],
@@ -1244,7 +1254,7 @@ r(det_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB,  %!!! equi
 :-
 			A = (tlp(_,Lm_A,_,_,_),_),
 			B = (tlp(_,Lm_B,_,_,_),_),
-			disjoint(Lm_A, Lm_B, KB), !,
+			disjoint(Lm_A, Lm_B, KB_xp), !,
 			Det = (tlp(_,Lm_Det,_,_,_),_),
 			memberchk(Lm_Det, ['a','the','s','a_few','many']),
 			nonvar(TLPconj),
@@ -1252,7 +1262,7 @@ r(det_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB,  %!!! equi
 
 %but not with disjunction! every A (C or D) =/=> every A C or every A D !!!
 
-r(fun_dist,	impl:non,  ([], [], _), [[pos('CC')]], _KB,  %impl!!! every A and B =/always/= every A and Every B,  some man sleep and eat =/= some man eat and some man sleep
+r(fun_dist,	impl:non,  ([], [], _), [[pos('CC')]], _,  %impl!!! every A and B =/always/= every A and Every B,  some man sleep and eat =/= some man eat and some man sleep
 		br([nd( M, (Fun @ (((tlp(Tk,Conj,'CC',F1,F2), Ty~>Ty~>Ty) @ Arg1, _Ty1) @ Arg2, _Ty2), Type),
 				Args, TF )],
 		  Sig)
@@ -1267,7 +1277,7 @@ r(fun_dist,	impl:non,  ([], [], _), [[pos('CC')]], _KB,  %impl!!! every A and B 
 
 
 
-r(abst_dist, 	equi:non,  ([], [], _), _Lexicon, _KB,  %maybe impl?
+r(abst_dist, 	equi:non,  ([], [], _), _Lexicon, _,  %maybe impl?
 		br([nd( M, (abst(TTx, (((tlp(Tk,Conj,Pos,F1,F2), Ty1~>Ty1~>Ty1) @ TT1, _) @ TT2, _)), _),
 				Args, TF )],
 		  Sig)
@@ -1287,7 +1297,7 @@ r(abst_dist, 	equi:non,  ([], [], _), _Lexicon, _KB,  %maybe impl?
 % verb phrase modifier and pp complement
 
 % pp complement as modifier: kick@(near@John) ~> (near@John)@kick, sick-1469,44 needs it
-r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _KB,
+r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _,
 		br([nd( M, ((VP,Ty) @ (PP, pp), Type), %!!! before was only np:_~>s:_
 				Args, TF )],
 		  Sig)
@@ -1305,7 +1315,7 @@ r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _KB,
 % Verb @ PR @ NP <=> Verb (PR @ NP)
 % jump over c1 <=> jump (over c1)
 % sick-150, 1480, 1483, 7755, wrong-1481
-r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB,   %sick-150
+r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,   %sick-150
 		br([nd( M, ( VP @ (tlp(Tk,Over,_,F1,F2), pr), TyS), [C, D | Rest], TF )],
 			Sig)
 		===>
@@ -1318,7 +1328,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-8091 accidentally
-/*r(v_pr_v_pp, 	impl:non, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB,
+/*r(v_pr_v_pp, 	impl:non, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,_POS,F1,F2), (np:_~>_)~>np:_~>_) @ VP, TyS ),  [C, D | Rest], TF )],
 			Sig)
 		===>
@@ -1331,7 +1341,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).*/
 
 % sick-3561, 4117
-r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _KB,
+r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), (np:_~>s:_)~>np:_~>s:_) @ VP, TyVP),  [C], TF )],
 			Sig)
 		===>
@@ -1349,7 +1359,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 % mainly introduced to fix parse errors
 % along@c3@(ride@c1)@c2 vs along@c3@c1, sick-200
 /* replaced by cl_pp_attach2 closure rule
-r(vpMod_to_argMod, 	impl:non, _, _Lexicon, _KB,   % VpMod_ArgMod rule for false sign, branching?
+r(vpMod_to_argMod, 	impl:non, _, _Lexicon, _,   % VpMod_ArgMod rule for false sign, branching?
 		br([nd( _M1, ( ((PP,np:_~>_)@NP, (np:_~>Ty1)~>np:_~>Ty2) @ (tlp(_,_,_,_,_),_), _), %!!! dont get
 				[C|_], true )], % not for both signs
 		  Sig)
@@ -1367,7 +1377,7 @@ r(vpMod_to_argMod, 	impl:non, _, _Lexicon, _KB,   % VpMod_ArgMod rule for false 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Verb in passive % IN necessary?
-r(vp_pass1, 	impl:non,  ([], [], _), [['by']], _KB,
+r(vp_pass1, 	impl:non,  ([], [], _), [['by']], _,
 		br([nd( M, ((VPpss, pp~>TypePss) @ ((tlp(_,'by','IN',_,_), np:_~>pp) @ NP, pp), _), % sick-1745 s:dcl "is beng played"
 				Args, TF )],
 		  Sig)
@@ -1386,7 +1396,7 @@ r(vp_pass1, 	impl:non,  ([], [], _), [['by']], _KB,
 		set_type_for_tt((VPpss, pp~>TypePss), np:_~>TypeDcl, Verb).	% change s:pss to s:dcl?
 
 % IN necessary?
-r(vp_pass2, 	impl:non,  ([], [], _), [['by']], _KB,
+r(vp_pass2, 	impl:non,  ([], [], _), [['by']], _,
 		br([nd( M, (((tlp(_,'by','IN',_,_), np:_~>(np:_~>s:_)~>(np:_~>s:_)) @ NP, _) @ Verb_Pass, np:_~>s:_), % sick-1745 s:dcl "is beng played"
 				Args, TF )],
 		  Sig)
@@ -1410,7 +1420,9 @@ r(vp_pass2, 	impl:non,  ([], [], _), [['by']], _KB,
 
 % Group(of C):[G]:T & VP:[G]:TF => VP:[C]:TF
 % sick-410
-r(group_of,	 impl:non,  ([C], [], _), [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']], _KB,
+r(group_of,	 impl:non,  ([C], [], _),
+  [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']],
+  _KB-_XP,
 %old this is not a gamma rule, Why we put C here?
 		br([ nd( _, ( (tlp(_,Group,_,_,_),pp~>n:_) @ ((tlp(_,'of',_,_,_),np:_~>pp)@C, pp), n:_ ),  [G],  true ),
 			 nd(M, (VP, np:F1~>s:F2),    [D],    TF ) % TT should be of type VP, otherwise C will be group too, Play with it
@@ -1423,7 +1435,9 @@ r(group_of,	 impl:non,  ([C], [], _), [['of','group'], ['of','body'], ['of','pie
 		memberchk((D,B), [(G,C), (C,G)]).
 		%add_heads((Group,pp~>n:_), (_,_,tlp(_,'group',_,_,_))).
 
-r(group_of,	 impl:non,  ([C], [], _), [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']], _KB,
+r(group_of,	 impl:non,  ([C], [], _),
+  [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']],
+  _KB-_XP,
 % for easyccg like analyses
 		br([ nd( _, ( ((tlp(_,'of',_,_,_),np:_~>n:_~>n:_)@C, _) @ (tlp(_,Group,_,_,_),n:_), _ ),  [G],  true ),
 			 nd(M, (VP, np:F1~>s:F2),    [D],    TF ) % TT should be of type VP, otherwise C will be group too, Play with it
@@ -1437,7 +1451,9 @@ r(group_of,	 impl:non,  ([C], [], _), [['of','group'], ['of','body'], ['of','pie
 
 % A@(Group(of C))@VP:[]:F => VP:[C]:F
 % sick-2472
-r(a_group_of,	 impl:non,  ([], [], _), [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']], _KB,
+r(a_group_of,	 impl:non,  ([], [], _),
+  [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']],
+  _KB-_XP,
 		br([ nd(M, ((A @ ((tlp(_,GR,_,_,_),pp~>n:_)@((tlp(_,'of',_,_,_),np:_~>pp)@C, pp), n:_), _) @ VP, s:_),  [],  false ) % could be true also ~group_of
 		   ],
 		  Sig)
@@ -1450,7 +1466,9 @@ r(a_group_of,	 impl:non,  ([], [], _), [['of','group'], ['of','body'], ['of','pi
 		%add_heads((Group,pp~>n:_), (_,_,tlp(_,'group',_,_,_))).
 
 % for easyccg style analyses sick-5264
-r(a_group_of,	 impl:non,  ([], [], _), [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']], _KB,
+r(a_group_of,	 impl:non,  ([], [], _),
+  [['of','group'], ['of','body'], ['of','piece'], ['of','slice'], ['of','crowd'], ['of','bunch'], ['of','herd'], ['of','pair']],
+  _KB-_XP,
 		br([ nd(M, ((A @ (((tlp(_,'of',_,_,_),np:_~>n:_~>n:_)@C, _) @ (tlp(_,GR,_,_,_),n:_), _), _) @ VP, s:_),  [],  false )
 		   ],
 		  Sig)
@@ -1465,7 +1483,7 @@ r(a_group_of,	 impl:non,  ([], [], _), [['of','group'], ['of','body'], ['of','pi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Rule for factive attitude verbs
-r(fact_v_s_tr,	impl:non, ([], [], _), _Lexicon, _KB,  %fracas-334  % add constraint to lexicon
+r(fact_v_s_tr,	impl:non, ([], [], _), _Lexicon, _,  %fracas-334  % add constraint to lexicon
 		br( [nd( _M, ( (tlp(_,FactV,_,_,_),s:_~>np:_~>s:_) @ Sen, np:_~>s:_),
 				 _Args, true )],
 		  Sig)
@@ -1475,7 +1493,7 @@ r(fact_v_s_tr,	impl:non, ([], [], _), _Lexicon, _KB,  %fracas-334  % add constra
 :-
 		factive(FactV).
 
-r(fact_v_tr,	impl:non, ([], [], _), _Lexicon, _KB,  % fracas-342   % add constraint to lexicon
+r(fact_v_tr,	impl:non, ([], [], _), _Lexicon, _,  % fracas-342   % add constraint to lexicon
 		br( [nd( _M, (( (tlp(_,FactV,_,_,_),_Ty1) @ (NP1,NPTy), _Ty2) @ (VP,np:F1~>s:F2), _Ty3),
 				 _Args, true )],
 		  Sig)
@@ -1487,7 +1505,7 @@ r(fact_v_tr,	impl:non, ([], [], _), _Lexicon, _KB,  % fracas-342   % add constra
 		(NPTy = np:_; NPTy = e),
 		factive(FactV).
 
-r(fact_v_fl,	impl:non, ([], [], _), _Lexicon, _KB,   % add constraint to lexicon
+r(fact_v_fl,	impl:non, ([], [], _), _Lexicon, _,   % add constraint to lexicon
 		br( [nd( _M, (( (tlp(_,FactV,_,_,_),_Ty1) @ (NP1,NPTy), _Ty2) @ (VP,np:F1~>s:F2), _Ty3),
 				 _Args, false )],
 		  Sig)
@@ -1502,7 +1520,7 @@ r(fact_v_fl,	impl:non, ([], [], _), _Lexicon, _KB,   % add constraint to lexicon
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % rule for verbs like manage: manage VP NP ---> VP NP
-r(ho_verb,	impl:non, ([], [], _), [['manage']], _KB,
+r(ho_verb,	impl:non, ([], [], _), [['manage']], _,
 		br( [nd( M, ((tlp(_Tk,Lm,POS,_,_), (np:_~>s:_)~>np:_~>s:_) @ VP, _), [Arg], TF )],
 		  Sig)
 		===>
@@ -1515,7 +1533,7 @@ r(ho_verb,	impl:non, ([], [], _), [['manage']], _KB,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % It is false, It is true
-r(it_is_tr_fl,  equi:non,  ([], [], _), [['it']], _KB,
+r(it_is_tr_fl,  equi:non,  ([], [], _), [['it']], _,
 		br([nd( [],  ( (((tlp(_,'be',_,_,_), (np:_~>s:_)~>s:_~>np:expl~>s:_) @ TrueFalse, _Ty1) @ S_em, _Ty2) @ IT, _ ),
 				[], X )],
 		  Sig)
@@ -1534,7 +1552,7 @@ r(it_is_tr_fl,  equi:non,  ([], [], _), [['it']], _KB,
 
 % rule for cardinal modifiers: just N, exactly N
 % fracas-105
-r(cardinal_mod, 	impl:non, ([], [], _), [['exactly'], ['just']], _KB,
+r(cardinal_mod, 	impl:non, ([], [], _), [['exactly'], ['just']], _,
 		br([nd( M, ((((tlp(_,Lm_RB,_,_,_), (n:_~>(np:_~>s:_)~>s:_)~>n:_~>(np:_~>s:_)~>s:_) @ TT_CD, _) @ TTn, _) @ TTvp, s:_),  Args, true )],
 		  Sig)
 		===>
@@ -1550,7 +1568,7 @@ r(cardinal_mod, 	impl:non, ([], [], _), [['exactly'], ['just']], _KB,
 % rule for transforming expletives to canonical form
 % e.h there are few singers from Georgia -> few singers are from Georgia
 % fracas-44
-r(there_trans, 	equi:non, ([], [], _), [['there', pos('IN')]], _KB,
+r(there_trans, 	equi:non, ([], [], _), [['there', pos('IN')]], _,
 		br([nd( M, ((Q @ ((IN@NP,n:_~>n:_)@N,n:_), (np:_~>s:_)~>s:_) @ (abst(_X,((BE@A,np:_~>s:_)@B,s:_)),np:_~>s:_), s:F),  [], TF )],
 		  Sig)
 		===>
@@ -1567,7 +1585,7 @@ r(there_trans, 	equi:non, ([], [], _), [['there', pos('IN')]], _KB,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Equality rules, restricted version
 % e.g. fracas-343
-r(equal1, 	impl:non, ([], [], _), [['be']], _KB,
+r(equal1, 	impl:non, ([], [], _), [['be']], _,
 		br([nd( M, (tlp(_,'be',_,_,_), np:_~>np:_~>s:_),  [A, B], true ),
 			nd( M, P, [A], TF )
 		   ],
@@ -1578,7 +1596,7 @@ r(equal1, 	impl:non, ([], [], _), [['be']], _KB,
 :-
 			true.
 
-r(equal2, 	impl:non, ([], [], _), [['be']], _KB,
+r(equal2, 	impl:non, ([], [], _), [['be']], _,
 		br([nd( M, (tlp(_,'be',_,_,_), np:_~>np:_~>s:_),  [A, B], true ),
 			nd( M, P, [B], TF )
 		   ],
