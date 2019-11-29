@@ -10,7 +10,7 @@
 	throw_error/2,
 	report/1,
 	report/2,
-	write_predictions_in_file/1
+	write_predictions_in_file/1,
 	print_pre_hyp/1
 	%debMode/1
 ]).
