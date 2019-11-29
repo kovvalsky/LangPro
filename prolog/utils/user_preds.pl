@@ -8,6 +8,7 @@
 		add_new_elements/3,
 		all_pairs_from_set/2,
 		at_most_n_random_members_from_list/3,
+		add/3, minus/3, diff/3,
 		choose/3,
 		const_ttTerm/1,
 		is_greater/2,
@@ -26,6 +27,7 @@
 		match_remove/3,
 		patt_remove/3,
 		prob_input_to_list/2,
+		prIDs_to_prIDs_Ans/2,
 		true_remove/3,
 		remove_adjacent_duplicates/2,
 		uList2List/2,
@@ -771,19 +773,24 @@ rm_redundant_set_of_facts(Set_Of_Facts, Clean) :-
 */
 rm_equi_set_of_facts_([], []).
 
-%subsumes_facts(X, Y)
-
-rm_equi_set_of_facts_([[Fact]|Rest], [[Fact]|List]) :-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% !!! this can be imporved
+% Given a list of KBs, remove the redundant ones
+%------------------------------------------
+% if one of the KBs = [symetric_rel(A,B)],
+% remove its symetric alternatives if any in the rest of KBs
+rm_equi_set_of_facts_([[Fact]|L_KB], [[Fact]|List]) :-
 	Fact =.. [Pred, Arg1, Arg2],
 	memberchk(Pred, [disj, ant_wn]), % list of symmetric predicates
 	H2 =.. [Pred, Arg2, Arg1],
-	select([H2], Rest, RestRest),
+	select([H2], L_KB, L_KB1),
 	!,
-	rm_equi_set_of_facts_(RestRest, List).
+	rm_equi_set_of_facts_(L_KB1, List).
 
-rm_equi_set_of_facts_([[Fact]|Rest], [[Fact]|List]) :-
+%
+rm_equi_set_of_facts_([[Fact]|L_KB], [[Fact]|List]) :-
 	findall(X, (
-		member(X, Rest),
+		member(X, L_KB),
 		\+memberchk(Fact, X)
 		), RestRest),
 	rm_equi_set_of_facts_(RestRest, List),
@@ -830,3 +837,23 @@ distribute_list_in_bins(EmptyList, EmptyBins) :-
 distribute_list_in_bins([E | List], [[E|B] | Bins]) :-
 	append(Bins, [B], Bins_B),
 	distribute_list_in_bins(List, Bins_B).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given a list of Problem IDs, return a list of Problem ID and answer pairs
+prIDs_to_prIDs_Ans(PrIDs, PrIDs_Ans) :-
+	findall(PrID-Ans, (
+		member(PrID, PrIDs),
+		sen_id(_, PrID, 'h', Ans, _)
+		), PrIDs_Ans).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros for arithmetic operations
+add(X, Y, Z) :-
+	Z is X + Y.
+
+minus(X, Y, Z) :-
+	Z is X - Y.
+
+diff(X, Y, Z) :-
+	T is X - Y,
+	abs(T, Z).

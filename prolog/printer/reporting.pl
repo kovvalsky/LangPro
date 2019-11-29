@@ -11,6 +11,7 @@
 	report/1,
 	report/2,
 	write_predictions_in_file/1
+	print_pre_hyp/1
 	%debMode/1
 ]).
 %==================================
@@ -80,3 +81,12 @@ write_id_answer(S, Results)  :-
 	atomic_list_concat([Id, '\t', Ans, '\n'], Text),
 	write(S, Text),
 	fail.
+
+%%%%%%%%%%%%%%%%%%%%%%
+% print premise(s) and hypothesis
+print_pre_hyp(PrId) :-
+	findall(Sen, (
+		sen_id(_, PrId, PH, _, Sent),
+		atomic_list_concat([PH, Sent], ': ', Sen)
+		), Sentences),
+	maplist(writeln, Sentences).
