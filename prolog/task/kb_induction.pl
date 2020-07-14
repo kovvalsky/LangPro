@@ -6,355 +6,526 @@
 %				 ]).
 
 :- use_module('../rules/rules', [op(610, xfx, ===>)]).
-:- use_module('../printer/reporting', [report/1]).
+:- use_module('../printer/reporting', [
+	report/1, par_format/2, print_pre_hyp/2, report/2, print_pre_hyp/1
+	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
-	list_to_freqList/2, rm_equi_set_of_facts_/2, shared_members/2, sort_list_length/2,
-	sublist_of_list/2, two_lists_to_pair_list/3, prob_input_to_list/2, jobsList_into_N_jobs_rest/3
+	concurrent_maplist_n_jobs/3, element_list_member/3, keep_smallest_lists/2,
+	list_to_freqList/2, shared_members/2, sort_list_length/2,
+	sublist_of_list/2, sym_rels_to_canonical/2, two_lists_to_pair_list/3, prob_input_to_list/2,
+	partition_list_into_N_even_lists/3, two_lists_to_pairList/3,
+	uList2List/2, prIDs_to_prIDs_Ans/2, get_value_def/3,
+	format_list/3, format_list_list/4, average_list/2, all_prIDs_Ans/1
 	]).
-:- use_module('../printer/reporting', [report/2]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module(library(pairs)).
+:- use_module('../prover/tableau_utils', [
+	get_closure_rules/2
+	]).
+:- use_module('../utils/induction_utils', [
+	add_lex_to_id_ans/2, filterAns_prIDs_Ans/3, format_pairs/2, get_IDAs/2,
+	includes_bad_fact/3, log_parameters/1, print_learning_phase_stats/3,
+	print_kb_learning_stages/3, print_phase_stats/4, partition_as_prIDs_Ans/6,
+	print_learning_stages/2, write_induced_kb_in_file/3, waif_cv3/3
+	]).
+:- use_module('../printer/conf_matrix', [draw_extended_matrix/2]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Given a list of problems with possibly specified answers,
+%
+train_dev_eval_sick_parts((Tccg,Tsen), (Dccg,Dsen), (Eccg,Esen), Config) :-
+	log_parameters(Config),
+	waif_cv3(TFile, DFile, EFile),
+	% load and train on train set
+	load_ccg_sen_probs(Tccg, Tsen, TPIDA),
+	%retractall(debMode('ind_kb')),
+	train_with_abduction(Config, TPIDA, KB, T_Scores, T_Acc),
+	format('~`=t Learned Knowledge ~`=t~80|~n', []),
+	maplist(writeln, KB),
+	unload_file(Tccg), unload_file(Tsen),
+	% pedict on train set
+	evaluate_on_portion(Config, KB, (Tccg,Tsen), TFile, TAPR),
+	% load and predict on dev set
+	( nonvar(Dccg), nonvar(Dsen) ->
+		evaluate_on_portion(Config, KB, (Dccg,Dsen), DFile, DAPR)
+	; 	DAPR = [0,0,0]
+	),
+	% load and predict on evaluation set
+	( nonvar(Eccg), nonvar(Esen) ->
+		evaluate_on_portion(Config, KB, (Eccg,Esen), EFile, EAPR)
+	; 	EAPR = [0,0,0]
+	),
+	% quick results
+	format('Train on Train::: ~w; Acc: ~2f~n', [T_Scores, T_Acc]),
+	format('Predict on Train::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', TAPR),
+	format('Predict on Dev  ::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', DAPR),
+	format('Predict on Eval ::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', EAPR).
+
+tde_sick_part(Tccg, Tsen, Config) :-
+	train_dev_eval_sick_parts((Tccg,Tsen), (Tccg,Tsen), (Tccg,Tsen), Config).
+
+%------------------------------------
+load_ccg_sen_probs(CCG, SEN, PIDAs) :-
+	ensure_loaded(CCG),
+	ensure_loaded(SEN),
+	%all_prIDs_Ans(PIDAs1), findall(P-A, (member(P-A, PIDAs1), between(1495,1500,P)), PIDAs).
+	all_prIDs_Ans(PIDAs).
+
+report_asserted_sen_ccg :-
+	findall(0, ccg(_,_), CCG),
+	findall(0, sen_id(_,_,_,_,_), Sen),
+	length(CCG, NCCG),
+	length(Sen, NSen),
+	format("~w ccg/2 and ~w sen_id/5~n", [NCCG, NSen]).
+
+%-------------------------------------
+evaluate_on_portion(Config, KB, (CCG,SEN), File, APR) :-
+	load_ccg_sen_probs(CCG, SEN, PIDA),
+	retractall(debMode(waif(_))),
+	assertz(debMode(waif(File))),
+	predict_with_iKB(Config, KB, PIDA, [_, AccE, PrecE, RecE], _, _, _),
+	unload_file(CCG), unload_file(SEN),
+	APR = [100*AccE, 100*PrecE, 100*RecE].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Knowledge induction with 10-fold cross-validation.
+% This is used to find the best settings for KB learning on small training data.
+% leave Answers as _ to allow all answers.
+cv_induce_knowledge(PrIDs, Answers, Config) :-
+	log_parameters(Config),
+	findall(TrAcc-TsAcc, (
+		fold_induce_knowledge(PrIDs, Answers, Config, Index, _D, TrAcc, TsAcc),
+		format('~n~n~t End of fold ~w ~t~50|~n', [Index]),
+		format('~`=t~50|~n Train: ~2f; Test: ~2f ~n~`=t~50|~n~n', [TrAcc, TsAcc])
+		), TrTsAs),
+	two_lists_to_pair_list(TrAs, TsAs, TrTsAs),
+	format('~`=t~50|~n', []),
+	format_pairs(' Train: ~2f; Test: ~2f ~n', TrTsAs),
+	average_list(TrAs, TrAv),
+	average_list(TsAs, TsAv),
+	format('~`=t~50|~nAve. Train: ~2f; Ave. Test: ~2f~n', [TrAv, TsAv]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% One fold, Index tracks the number of the fold
+fold_induce_knowledge(PrIDs, Answers, Config, Index, Detaield, TrAcc, TsAcc) :-
+	get_value_def(Config, 'fold', N),
+	partition_as_prIDs_Ans(PrIDs, Answers, 990, N, AllParts, _CumDiff),
+	select(Test, AllParts, TrainParts), % Leaves the choice point
+	nth1(Index, AllParts, Test),
+	append(TrainParts, Train),
+	%while_improve_induce_prove(Train, _UnSolved, Align, Check, [], _List_of_Cnt_KB). % with no init KB
+	train_test(Config, Train, Test, TrainInfo, TestInfo, TrAcc, TsAcc),
+	Detaield = ['train'-TrainInfo, 'test'-TestInfo].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Train on the training set with abduction and use abduced knowledge for testing
+train_test(Config, TrainPIDA, TestPIDA, TrainScores, TestScores, TrAcc, TsAcc) :-
+	train_with_abduction(Config, TrainPIDA, KB, TrainScores, TrAcc),
+	predict_with_iKB(Config, KB, TestPIDA, [_Total, Acc, Prec, Rec], TsAcc, _, _),
+	format(atom(TestScores), '~2f ~2f ~2f', [Acc, Prec, Rec]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Induce knowledge as long as it boosts the performace
+train_with_abduction(Config, TrainIDA, Induced_KB, TrainScores, TrAcc) :-
+	% base case: evaluate the prover on the data without any induced knowledge
+	concurrent_maplist_n_jobs(add_lex_to_id_ans, TrainIDA, TrainIDAL),
+	predict_with_iKB(Config, [], TrainIDAL, _, _Acc, SolvA0, FailA0),
+	% Try now if knowledge induction improves over the base case. Start with no initial KB
+	while_improve_induce_prove(TrainIDAL, FailA0-FailA, SolvA0-SolvA, Config, [], Induced_KB0),
+	maplist(length, [TrainIDAL, FailA, SolvA], [A, F, S]),
+	format(atom(TrainScores), '~2f ~2f', [100*S/A, 100*F/A]), % Accuracy and error rate
+	%append(List_of_Cnt_KB, Cnt_KB),
+	%two_lists_to_pair_list(_, KB0, Cnt_KB),
+	sort(0, @>, Induced_KB0, Induced_KB),
+	TrAcc is 100*S/A.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate prover on the list of pID,Ans[,Lex] using the induced knowledge
+predict_with_iKB(Config, IKB, IDALs, Score_List, Acc, SolvedA, FailedA) :-
+	get_value_def(Config, 'align', Align),
+	get_IDAs(IDALs, IDAs),
+	( debMode(parallel(_)) -> parallel_solve_entailment(Align, IKB, IDAs, Results)
+	; maplist(solve_entailment(Align, IKB), IDAs, Results)),
+	findall((ID,A), member((ID,A,A,_,_), Results), SolvedA),
+	findall((ID,A), ( member((ID,A,P,_,_), Results), A \= P ), FailedA),
+	draw_extended_matrix(Results, Score_List),
+	Score_List = [_Total, Acc_|_],
+	Acc is Acc_ * 100.
+
+assert_induced_rel(Rel) :-
+	assertz(induced_rel(Rel)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given a list of problems (leave as _ to get all problems)
+% with possibly specified list of answers (e.g., [yes] picks only entailment problems),
 % loop over the problems and induce KB untill it is not possible
-induce_knowledge(ToSolve, Answers, UnsolvedProbIDs, Align, Check, KB) :-
-	prob_input_to_list(ToSolve, ToSolve1),
-	findall( PrId-Ans, (
-		member(PrId,ToSolve1), sen_id(_,PrId,'h',Ans,_), memberchk(Ans,Answers)
-		), ToSolve_Ans),
-	induce_prove_loop(ToSolve_Ans, UnSolved_Ans, Align, Check, [], List_of_KB_cnt),
-	two_lists_to_pair_list(UnsolvedProbIDs, _, UnSolved_Ans),
-	print_kb_learning_stages(List_of_KB_cnt, KB).
+induce_knowledge(ToSolve, Answers, UnsolvedProbIDs, Config, KB) :-
+	log_parameters(Config),
+	prob_input_to_list(ToSolve, ToSolveList),
+	% augment problems with answers
+	prIDs_to_prIDs_Ans(ToSolveList, ToSolveList_Ans),
+	% filter the prob-ans pairs based on the answer set
+	filterAns_prIDs_Ans(ToSolveList_Ans, Answers, ToSolve_Ans),
+	while_improve_induce_prove(_IDALs, ToSolve_Ans-Failed1, []-Solved1, Config, [], List_of_Cnt_KB), % with no init KB
+	two_lists_to_pair_list(UnsolvedProbIDs, _, Failed1),
+	print_kb_learning_stages(List_of_Cnt_KB, Cnt_KB_srt, KB),
+	% write knowledge in a file
+	( debMode(waif(FileName)) -> write_induced_kb_in_file(Cnt_KB_srt, FileName, Config); true ),
+	append(Failed1, Solved1, All),
+	maplist(length, [All, Solved1, Failed1], [N, S1, F1]),
+	format('~`=t Acc (~2f%); Total (~w); Solved (~w); Failed (~w) ~`=t~100|~n~`=t~100|~n', [100*S1/N, N, S1, F1]).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Print learned knowledge according to the stages
-print_kb_learning_stages(List_of_KB_cnt, KB) :-
-	length(List_of_KB_cnt, Stages),
-	format('~`=t All Learned Knowledge (~w stages) ~`=t~100|~n', [Stages]),
-	print_learning_stages(1, List_of_KB_cnt),
-	append(List_of_KB_cnt, KB_cnt),
-	keysort(KB_cnt, KB_cnt_srt),
-	two_lists_to_pair_list(_, KB, KB_cnt_srt),
-	length(KB_cnt_srt, Len),
-	format('~`=t All together (~w rels) ~`=t~100|~n', [Len]),
-	maplist(writeln, KB_cnt_srt),
-	( debMode(waif(FileName)) -> write_induced_kb_in_file(KB_cnt_srt, FileName); true ).
-
-print_learning_stages(N, [H|Rest]) :-
-	!, format('~`-t Stage ~w ~`-t~100|~n', [N]),
-	maplist(writeln, H),
-	N1 is N + 1,
-	print_learning_stages(N1, Rest).
-
-print_learning_stages(_, []).
-
-% write induced knowledge in file that is readable by prolog
-write_induced_kb_in_file(KB_cnt_srt, FileName) :-
-	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
-	format(S, '~`%t Induced Knowledge ~`%t~50|~n', []),
-	maplist(write_kb_as_term(S, 'ind_rel'), KB_cnt_srt),
-	close(S).
-
-write_kb_as_term(S, Func, Term) :-
-	format(S, '~w(', Func),
-	write_term(S, Term, [quoted(true)]),
-	writeln(S, ').').
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% loop over the problems: prove problems and induce kb from proved ones,
-% then reuse the kb for proving & inducing new kb from the rest of the unproved problems
-induce_prove_loop(ToSolve_Ans, UnSolved_Ans, Align, Check, Init_KB, List_of_KB_cnt) :-
-	kb_induction_all(ToSolve_Ans, UnSol_Ans, Align, Check, Init_KB, KB_cnt),
-	( ToSolve_Ans == UnSol_Ans ->
-		report(['No improvemnet. Stop!']),
-		List_of_KB_cnt = [],
-		UnSolved_Ans = UnSol_Ans
-	; length(ToSolve_Ans, ToLen), length(UnSol_Ans, UnLen),
-		format('Improvement from ~w to ~w. Continue~n', [ToLen, UnLen]),
-		two_lists_to_pair_list(_, KB, KB_cnt),
-	  	append(Init_KB, KB, Init_KB1),
-		induce_prove_loop(UnSol_Ans, UnSolved_Ans, Align, Check, Init_KB1, List_of_KB_cnt1),
-		List_of_KB_cnt = [KB_cnt|List_of_KB_cnt1]
-	), !.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Loop over the problems and induce the KB gradually:
+% prove problems and induce kb from proved ones, then reuse the induced kb
+% for proving & inducing new kb from the rest of the unproved problems
+% ToSolve_Ans = Solved_Ans + UnSolved_Ans, all these are lists of problemID-Ans pairs
+while_improve_induce_prove(IDALs, FailA0-FailA, SolvA0-SolvA, Config, Init_KB, Induced_KB) :-
+	maplist(length, [IDALs, SolvA0, FailA0], [N, S0, F0]),
+	format('~`=t Acc (~2f%); Total (~w); Solved (~w); Failed (~w) ~`=t~80|~n~`=t~80|~n', [100*S0/N, N, S0, F0]),
+	kb_induction_all(Config, IDALs, SolvA0, Init_KB, Ind_KB),
+	( Ind_KB == [] -> Gain = 0
+	; append(Init_KB, Ind_KB, Init_KB1),
+		predict_with_iKB(Config, Init_KB1, IDALs, _, _, SolvA1, FailA1),
+		print_learning_phase_stats(FailA0-FailA1, SolvA0-SolvA1, Ind_KB),
+		length(SolvA1, S1),
+		Gain is S1 - S0 ),
+	( Gain =< 0 ->
+		format('~`=t~80|~nNo improvement (~w). Stop!~n~`=t~80|~n', [Gain]),
+		FailA = FailA0, % take the old values as the found KB is harmful and not retained
+		SolvA = SolvA0,
+		Induced_KB = [] % add no new Knowledge as it is harmful
+	; format('~`=t~80|~nImprovement (~w). Continue~n~`=t~80|~n', [Gain]),
+		%two_lists_to_pair_list(_, KB, Cnt_Facts0),
+		while_improve_induce_prove(IDALs, FailA1-FailA, SolvA1-SolvA, Config, Init_KB1, Rest_Ind_KB),
+		append(Ind_KB, Rest_Ind_KB, Induced_KB)
+	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge
-kb_induction_all(ToSolve_Ans, Unsolved_Ans, Align, Check, KB0, KB_cnt) :-
-	( debMode(parallel(Cores)) ->
-		jobsList_into_N_jobs_rest(ToSolve_Ans, Cores, JobList),
-		concurrent_maplist(kb_induction_some(Align,Check,KB0), JobList, List_of_KBs, List_of_Stats_Ans),
-		append(List_of_KBs, KBs),
-		append(List_of_Stats_Ans, Stats_Ans)
-	; kb_induction_some(Align, Check, KB0, ToSolve_Ans, KBs, Stats_Ans)
-	),
-	%findall(Stat_Ans-KB1, (
-	%	member(PrId_Ans, ToSolve_Ans),
-	%    kb_induction_prob(PrId_Ans, Align, Check, KB0, List_KB, Stat_Ans),
-	%    ( List_KB = [] -> KB1 = [];  List_KB = [KB1|_] )
-	%  ), UnsAns_KBs),
-	%two_lists_to_pair_list(Uns_Ans, KBs, UnsAns_KBs),
-	findall(U-A, (member(U-A,Stats_Ans), integer(U)), Unsolved_Ans),
-    append(KBs, KB_list),
-    list_to_freqList(KB_list, KB_cnt),
-	format('~`*t Learned knowledge ~`*t~100|~n'),
-	maplist(writeln, KB_cnt),
-	length(Unsolved_Ans, N),
-	format('Unsolved Problems (~w):~n~w~n~`*t~100|~n', [N, Unsolved_Ans]).
+kb_induction_all(Config, IDALs, SolvA, Init_KB, Ind_KB) :-
+	% for effciency solved examples can be omitted for induction
+	get_IDAs(IDALs, IDAs),
+	subtract(IDAs, SolvA, Unsolv_IDAs),
+	par_kb_induction_some(Config, Init_KB, Unsolv_IDAs, LL_KB, Info5),
+	% Get a new list of failed problems
+	findall((PrID,Ans), member([PrID,Ans,'solved',_,_], Info5), Draft_SolvA),
+	length(Draft_SolvA, Draft_S), length(SolvA, S),
+	format('~`-t Draft Results: solved ~w + ~w ~`-t~80|~n', [S, Draft_S]),
+	% print counts of induced relations
+	append(LL_KB, L_KB),
+	list_to_freqList(L_KB, KB_cnts),
+	transpose_pairs(KB_cnts, Cnt_KBs),
+	format_list(atom(List), '    ~w~n', Cnt_KBs),
+	format('~`-t Counts of Induced Relations ~`-t~50|~n~w~n', [List]),
+	% filter out induced relations by keeping only harmless ones. Using all problems!
+	exclude(=([]), LL_KB, Non_empty_KBs),
+	list_to_ord_set(Non_empty_KBs, Potential_KBs),
+	pick_harmless_KBs(Config, SolvA, IDALs, Potential_KBs, Ind_KB).
 
-% predicate tailored for concurrent_maplist
-kb_induction_some(Align, Check, KB0, PrIds_Answers, KBs, Stats_Answers) :-
-	maplist(kb_induction_prob(Align,Check,KB0), PrIds_Answers, List_of_list_of_KBs, Stats_Answers),
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pick only those KBs that doesn't hurt performance
+pick_harmless_KBs(Config, SolvA, IDALs, L_KBs, Harmless_KB) :-
+	% maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
+	concurrent_maplist_n_jobs(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
 	findall(KB, (
-		member(List_of_KBs, List_of_list_of_KBs),
-		(List_of_KBs=[] -> KB=[]; List_of_KBs=[KB|_])
-		), KBs).
+		member(KB-Sc-S-U, L_Best_KB_Score_SU),
+		( Sc > 0 -> Ast = '+ '; Ast = '- '),
+		format('~t~w~5| ~w ~w ~t~40+ Solved: ~w; Unsolved: ~w~n', [Sc, Ast, KB, S, U]),
+		Ast == '+ ' % filter out harmful ones
+	), KBs),
+	append(KBs, Harmless_KB0),
+	list_to_ord_set(Harmless_KB0, Harmless_KB).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------
+% Pick the best among the KB candidates induced from the same problem
+best_kb_wrt_data(Config, SolvA, IDALs, KBs, Best_KB-Score-S-U) :-
+	maplist(estimate_kb_wrt_data(Config, SolvA, IDALs), KBs, L_Score_SU),
+	sort(0, @>=, L_Score_SU, [Score-S-U|_]),
+	%!!! there can be several KBs with same max score, but pick the first
+	% 592 disj(put,reveal), disj(conceal,reveal)
+	nth1(I, L_Score_SU, Score-S-U),
+	nth1(I, KBs, Best_KB).
+
+%---------------------------------------------------
+% Evaluate KB wrt data in tems of how many proofs it helps minus harms
+estimate_kb_wrt_data(Config, SolvA, IDALs, IKB, Score-Solv-Unsolv) :-
+	% get word involved in KB
+	maplist([(ID,_), ID]>>true, SolvA, SolvIDs),
+	findall([A,B], (member(I,IKB), I=..[_,A,B]), ArgLists),
+	list_to_ord_set(ArgLists, IKB_Args),
+	% verify KB's contribution for each problem in data and calculate overall contribution
+	maplist(estimate_kb_wrt_prob(Config, IKB, IKB_Args), IDALs, L_Solv, L_Unsolv),
+	append(L_Solv, Solv0), list_to_ord_set(Solv0, Solv1),
+	append(L_Unsolv, Unsolv0), list_to_ord_set(Unsolv0, Unsolv1),
+	ord_subtract(Solv1, SolvIDs, Solv),
+	ord_intersection(SolvIDs, Unsolv1, Unsolv),
+	length(Solv, S), length(Unsolv, U), Score is S - U.
+
+% Evaluate KB wrt a single problem
+estimate_kb_wrt_prob(Config, IKB, IKB_Args, (ID,Ans,Lex), Solv, Unsolv) :-
+	element_list_member(IKB_Args, Lex, _Args),
+	!,
+	get_value_def(Config, 'align', Align),
+	entail(Align, IKB, ID, Ans, Pred, _, _, _),
+	( Ans == Pred -> Solv = [ID]; Unsolv = [ID] ).
+
+estimate_kb_wrt_prob(_Config, _IKB, _IKB_Args, (_,_,_Lex), [], []).
+
+
+
+
+%-----------------------------------------------
+% Predicate specially tailored for concurrent_maplist
+
+% Parallel mode
+par_kb_induction_some(Config, Init_KB, IDAs, KBs, Info5) :-
+	debMode(parallel(Cores)),
+	!,
+	partition_list_into_N_even_lists(IDAs, Cores, JobList),
+	concurrent_maplist(kb_induction_some(Config,Init_KB), JobList, List_of_KBs, List_of_Stats_Ans),
+	partition_list_into_N_even_lists(KBs, Cores, List_of_KBs),
+	partition_list_into_N_even_lists(Info5, Cores, List_of_Stats_Ans).
+
+% Non-parallel mode
+par_kb_induction_some(Config, Init_KB, IDAs, KBs, Info5) :-
+	kb_induction_some(Config, Init_KB, IDAs, KBs, Info5).
+
+% Auxiliary for maplist
+kb_induction_some(Config, Init_KB, IDAs, LL_KB, Info5) :-
+	maplist(kb_induction_prob(Config,Init_KB), IDAs, LL_KB, Info5).
+	% findall(KB, (
+	% 	member(L_KB, LL_KB),
+	% 	( L_KB=[] -> KB=[]; L_KB=[KB|_] ) %!!! pick only the first KB candidate
+	% 	), KBs).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge from a single problem
-kb_induction_prob(Align, ConstCheck, KB0, PrId-Ans, Learned_KBs, Stat_Ans) :-
-    findall(Sen, (
-		sen_id(_,PrId,PH,_,Sent), atomic_list_concat([PH,Sent],': ',Sen)
-		), Sentences),
-    Patterns = [_, _@_, (_@_)@_, _@(_@_)],
-    % Get branches
-    get_branches(PrId, Ans, Align, KB0, KB3, TTterms, Branches, Status),
-    !,
-	( Branches = [] ->
-		format('~w (~w): closed [~w]~n', [PrId, Ans, Status]),
-		Stat_Ans = 'closed'-Ans
-	; discover_knowledge(ConstCheck, TTterms, Branches, KB3, Patterns, Learned_KBs)
-	),
-	( Branches = [] ->
-		format('~w (~w): closed [~w]~n', [PrId, Ans, Status]),
-		Stat_Ans = 'closed'-Ans
-	; Learned_KBs = [] ->
-		format('~w (~w): no KB [~w]~n', [PrId, Ans, Status]),
-		Stat_Ans = PrId-Ans,
-		maplist(writeln, Sentences)
-	; format('~w (~w): !! KB [~w], KB: ~w~n', [PrId, Ans, Status, Learned_KBs]),
-		Stat_Ans = 'solved'-Ans,
-		maplist(writeln, Sentences),
-		report(Learned_KBs)
-	),
-	format('~`-t~50|~n').
+% This prints rarely when the parallel mode is on
+kb_induction_prob(Config, Init_KB, (PrId,Ans), Learned_KBs, Info5) :-
+	print_pre_hyp(PrId),
+	prepare_ttTerms_KB(PrId, _Config, Init_KB, PTT-HTT, AlPTT-AlHTT, AugKB),
+	get_branches(Ans, Config, AugKB, PTT-HTT, AlPTT-AlHTT, TTterms, Branches, Status),
+	%!!! Another branch is not built yet
+	!,
+	discover_knowledge(Config, TTterms, Branches, AugKB, (PrId,Ans), Status, Learned_KBs, Info5),
+	par_format('~t~w~6| [~w]-~w: ~w (~w)~n', Info5),
+	par_format('~`-t~50|~n', []).
 
-% if get_branches fails the produces demmy output
-kb_induction_prob(_Align, _ConstCheck, _KB0, PrId-Ans, [], PrId-Ans).
+% HACK find out if this happens
+kb_induction_prob(_Config, _Init_KB, _PrIdAs, _, _Stat_Ans) :-
+	format('??? This should not happen!'),
+	fail.
 
-%
-discover_knowledge(ConstCheck, TTterms, Branches, KB3, Patterns, Learned_KBs) :-
-    % Get relevant closure rules based on the lexicon extacted from Terms
-    extract_lex_NNPs_ttTerms(TTterms, Lexicon, _Names),
-    findall(RuleN, clause(r(RuleN,closure,_,_,_,_),_), ListClRules), % automatic retival of closure rules
-    list_to_ord_set(ListClRules, ClRules),
-    select_relevant_rules(Lexicon, ClRules, RelClRules),
-    % Find closing knowledge
-    maplist( pattern_filtered_nodes(Patterns), Branches, FilteredBranches ),
-	findall(K, ( % a list of sets of facts, that can close Branch
-	    member(Br,FilteredBranches), closing_knowledge(RelClRules,Br,KB3,K) % K is a list of lists
-	    ), PossKB), % a list of lists of lists
-	shared_members(KB_list, PossKB),
-	findall(Know, (
-		member(Know,KB_list), \+includes_bad_fact(Know,Lexicon,KB3)
-		), Good_KB_list),
-	sort(Good_KB_list, KB_ord),
-	rm_equi_set_of_facts_(KB_ord, KB_test),
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Discoveres knowledge from an open tableau (i.e. brancehs)
+% Specify a list of patterns that describe the terms in discovered knowledge
+
+discover_knowledge(_Config, _TTterms, _, _KB1, (PrId,Ans), 'defected', [], Info5) :-
+	!,
+	Info5 = [PrId, Ans, 'failed', 'Inconsistent types', 'defected'].
+
+% When tableau is closed, do nothing
+discover_knowledge(_Config, _TTterms, Branches, _KB1, (PrId,Ans), Status, [], Info5) :-
+	Branches == [], % to avoid leackage
+	!,
+	( memberchk(Ans, ['yes', 'no']) ->
+		Solved = 'solved'
+	;	Solved = 'failed'
+	),
+	Info5 = [PrId, Ans, Solved, 'closed', Status].
+
+
+% When gold label is unknown, do nothing
+discover_knowledge(_Config, _TTterms, [_|_], _KB1, (PrId,'unknown'), Status, [], Info5) :-
+	!,
+	Info5 = [PrId, 'unknown', 'solved', 'open', Status].
+
+% When gold label in yes|no and tablea is open, do abduction
+discover_knowledge(Config, TTterms, Branches, KB1, (PrId,Ans), Status, Learned_KBs, Info5) :-
+	Patterns = [_, _@_, (_@_)@_, _@(_@_)], % patterns of inspected LLFs
+	discover_patterned_knw(Config, TTterms, Branches, KB1, Patterns, Learned_KBs),
+	( Learned_KBs = []
+	->	Info5 =  [PrId, Ans, 'failed', 'open', Status]
+	; 	Info5 =  [PrId, Ans, 'solved', 'closed', Status],
+		format_list_list(atom(KBprint), '    ~w~n', '~w  ', Learned_KBs),
+		print_pre_hyp(atom(Problem), PrId),
+		format('~w!!! Possible KBs:~n~w~t~w~8| [~w]-~w: ~w (~w)~n', [Problem, KBprint | Info5])
+	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Learned_KBs is a list of KBs (sorted according to the size asc)
+% where each of the KB can close the tableau
+discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) :-
+	% Get relevant closure rules based on the lexicon extacted from Terms
+	get_value_def(Config, 'constchk', ConstCheck),
+	extract_lex_NNPs_ttTerms(TTterms, Lexicon, _Names),
+	get_closure_rules(Lexicon, ClRules),
+	% Following the patterns of nodes, find all possible KBs that closes the tableau
+	maplist( pattern_filtered_nodes(Patterns), Branches, FilteredBranches ),
+	findall(L_KB, ( % a list of sets of facts, that can close Branch
+		member(Br, FilteredBranches),
+		all_closing_KB(ClRules, Br, IniKB, L_KB) % K is a list of lists (of relations)
+		), LL_KB), % a list of lists of lists (of relations)
+	shared_members(L_ClKB, LL_KB),
+	% From found Closing KBs, select good ones that are compatible with Initial KB, IniKB
+	findall(ClKB, (
+		member(ClKB, L_ClKB),
+		\+includes_bad_fact(ClKB, Lexicon, IniKB)
+		), L_goodClKB),
+	sort(L_goodClKB, Ord_goodClKB),
+	% Discard those KBs that require more assumptions. So if there is KB0 < KB1, remove KB1
+	keep_smallest_lists(Ord_goodClKB, Abduced_L_KB), %!!! have a look
+	% Discard those KBs that make any sentence inconsistent
 	( ConstCheck ->
-	  	findall(K, (
-			member(K,KB_test), maplist(consistency_check(K),TTterms,Checks),
-			\+memberchk('Inconsistent',Checks)
-		), KB1)
-	; KB1 = KB_test
+		findall(K, (
+			member(K, Abduced_L_KB),
+			maplist(consistency_check(K-_XP), TTterms, Checks),
+			\+memberchk('Inconsistent', Checks)
+		), Cnst_Abd_L_KB)
+	; Cnst_Abd_L_KB = Abduced_L_KB
 	),
-	findall(X, (
-		member(X, KB1), \+((member(Y,KB1), X\=Y, sublist_of_list(Y,X)))
-		), KB),
-	sort_list_length(KB, Learned_KBs).
-	%term_to_atom(KB3, At_KB3),
-
-
-%	n_group_branches(N, BranchList, GrBranches),
-%	Patterns = [ (A,_), (A@B,_) ],
-%	abduce_by_closure(Patterns, GrBranches, Facts)
-
-
-%branches_to_cl_isa_branches(Patterns, Branches, Facts) :-
-%	maplist( closing_isa_facts(Patterns), Branches, Facts ).
-
+	sort_list_length(Cnst_Abd_L_KB, Learned_KBs).
+	%term_to_atom(IniKB, At_KB3),
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% strip away type and id info from nodes and
-% history and constant info from branches
-% also delete LLFs not mattching patterns
-/*
-thinen_branch( Patterns, br(NodeList,_,_), Thin ) :-
-    findall( N, (
-    	member(Node, NodeList),
-    	thinen_node(Patterns, Node, N)
-    	),
-      Thin).
-*/
-% strip away type and id info from nodes
-% fails for the LLFs not matching the patterns
-/*
-thinen_node( Patterns, ndId(nd(M, LLF, Args, TF),_Id), Thin ) :-
-	maplist(ttTerm_to_prettyTerm, M, Pr_M),
-	maplist(ttTerm_to_prettyTerm, Args, Pr_Args),
-	ttTerm_to_prettyTerm(LLF, Pr_LLF),
-	prettyTerm_of_patterns( Pr_LLF, Patterns),
-	Thin = nd(Pr_M, Pr_LLF, Pr_Args, TF).
-*/
+% Get TTterms necessary for tableau building
+% ??? redundant
+prepare_ttTerms_KB(PrId, _Config, Init_KB, PTT-HTT, AlPTT-AlHTT, KB3) :-
+	%prepare rule list, LLFs, and KB
+	%set_rule_eff_order,
+	problem_to_ttTerms('both', PrId, PTT, HTT, AlPTT, AlHTT, KB1),
+	append(Init_KB, KB1, KB2),
+	sort(KB2, KB3).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get branch list for a specific entailment problem and its answer
-get_branches(PrId, Ans, Align, KB0, KB3, TTterms, Branches, At_Status) :-
-	%prepare rule list, LLFs, and KB
-    set_rule_eff_order,
-    problem_to_ttTerms('both', PrId, Prem_TTs, Hypo_TTs, Align_Prem_TTs, Align_Hypo_TTs, KB1),
-    append(KB0, KB1, KB2),
-    sort(KB2, KB3),
-    append(Prem_TTs, Hypo_TTs, NoAlign_TTterms),
-    append(Align_Prem_TTs, Align_Hypo_TTs, Align_TTterms),
-    % consistency checking
-%    ( maplist(consistency_check(KB3), NoAlign_TTterms, Checks),
-%      memberchk('Inconsistent', Checks)	->
-%      	(TTterms, Branches, Status) = (NoAlign_TTterms, [], 'Inconsistent sentence')
-    ( % build tableau according to align value
-      Ans = 'yes' -> % for entailment
-    	generateTableau(KB3, Align_Prem_TTs, Align_Hypo_TTs, Branches_al, _, Status_al),
-    	( Branches_al = [] ->
-    		(TTterms, Branches, Status) = (Align_TTterms, Branches_al, Status_al) %!!! horrible code fix it
-    	; generateTableau(KB3, Prem_TTs, Hypo_TTs, Branches_noal, _, Status_noal),
-    	    ( Branches_noal \= [], Align = 'align' ->
-    	    	(TTterms, Branches, Status) = (Align_TTterms, Branches_al, Status_al)
-    	    ; (TTterms, Branches, Status) = (NoAlign_TTterms, Branches_noal, Status_noal)
-    	    )
-    	)
-      % for contradiction
-    ; generateTableau(KB3, Align_TTterms, [], Branches_al, _, Status_al),
-      ( Branches_al = [] ->
-    	  (TTterms, Branches, Status) = (Align_TTterms, Branches_al, Status_al)
-      ; generateTableau(KB3, NoAlign_TTterms, [], Branches_noal, _, Status_noal),
-          ( Branches_noal \= [], Align = 'align' ->
-    	      (TTterms, Branches, Status) = (Align_TTterms, Branches_al, Status_al)
-    	    ; (TTterms, Branches, Status) = (NoAlign_TTterms, Branches_noal, Status_noal)
-    	  )
-      )
-    ),
-    term_to_atom(Status, At_Status).
+get_branches('yes', Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :-
+	get_value_def(Config, 'align', Align),
+	append(PTT, HTT, TTs),
+	append(AlPTT, AlHTT, AlTTs),
+	% consistency checking
+%	( maplist(consistency_check(KB), TTs, Checks),
+%	  memberchk('Inconsistent', Checks)	->
+%	  	(TTterms, Brs, Status) = (TTs, [], 'Inconsistent sentence')
+	 % build tableau according to align value
+	% proof with alignmnet is used to close the tableau !!!
+	( Align = 'align' -> % proving with aligned TTterms
+		TTterms = AlTTs,
+		( generateTableau(KB-_, AlPTT, AlHTT, Brs, _, Status) -> true
+		; (Brs, Status) = (['fail'], 'defected') )
+	; Align = 'no_align' -> % proving without aligned TTterms
+		TTterms = TTs,
+		( generateTableau(KB-_, PTT, HTT, Brs, _, Status) -> true
+		; (Brs, Status) = (['fail'], 'defected') )
+	; Align = 'both' ->
+		( generateTableau(KB-_, AlPTT, AlHTT, Brs, _, Status) -> TTterms = AlTTs
+		; ( generateTableau(KB-_, PTT, HTT, Brs, _, Status) -> TTterms = TTs
+		  ; (Brs, Status) = (['fail'], 'defected') )
+		)
+	),
+	term_to_atom(Status, At_Status).
+
+get_branches('no', Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :-
+	get_value_def(Config, 'align', Align),
+	append(PTT, HTT, TTs),
+	append(AlPTT, AlHTT, AlTTs),
+	% for contradiction
+	( Align = 'align' -> % proving with aligned TTterms
+		TTterms = AlTTs,
+		( generateTableau(KB-_, AlTTs, [], Brs, _, Status) -> true
+		; (Brs, Status) = (['fail'], 'defected') )
+	; Align = 'no_align' -> % proving without aligned TTterms
+		TTterms = TTs,
+		( generateTableau(KB-_, TTs, [], Brs, _, Status) -> true
+		; (Brs, Status) = (['fail'], 'defected') )
+	; Align = 'both' ->
+		( generateTableau(KB-_, AlTTs, [], Brs, _, Status) -> TTterms = AlTTs
+		; ( generateTableau(KB-_, TTs, [], Brs, _, Status) -> TTterms = TTs
+		  ; (Brs, Status) = (['fail'], 'defected') )
+		)
+	),
+	term_to_atom(Status, At_Status).
+
+% get branches that keep the tableau open
+get_branches('unknown', Config, KB, PTT-HTT, AlPTT-AlHTT, _TTterms, Brs, Status) :-
+	get_value_def(Config, 'align', Align),
+	% Doesn't matter which one closes, if one closes this might already mean a contrdictory knowledge
+	% Entail + Contradiction = Neutral Rule is not used here
+	( close_any_tableau(Align, KB, PTT-HTT, AlPTT-AlHTT, Status) ->
+		Brs = []
+	; (Brs, Status) = (['unknown'], 'all open') %!!! or defected
+	).
+
+% Succeeds if one of the 4 tableaux closes for ent|cont x aligned|non-alogned
+close_any_tableau(Align, KB, PTT-HTT, AlPTT-AlHTT, Status) :-
+	append(PTT, HTT, TTs),
+	append(AlPTT, AlHTT, AlTTs),
+	( memberchk(Align, ['both', 'align']),
+	  generateTableau(KB-_, AlTTs, [], 		[], _, Status)
+	; memberchk(Align, ['both', 'no_align']),
+	  generateTableau(KB-_, TTs, [], 		[], _, Status)
+	; memberchk(Align, ['both', 'align']),
+	  generateTableau(KB-_, AlPTT, AlHTT, 	[], _, Status)
+	; memberchk(Align, ['both', 'no_align']),
+	  generateTableau(KB-_, PTT, HTT, 		[], _, Status)
+	),
+	!.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Find all KBs (a list of relations) that closes the given branch
+% with the help of initial KB0 and closure rules
+all_closing_KB(ClRules, BrNodes, KB0, L_KB) :-
+	findall(Knowledge, (
+		member(R, ClRules),
+		closing_rule_knowledge(BrNodes, R, KB0, Knowledge)
+		), KB_list),
+	sort(KB_list, L_KB).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Fact is an ISA relation over ttTerms of Patterns that closes Br(anch)
-% ID's are stripped away from the Nodes in branches
-closing_knowledge(Rules, BrNodes, KB0, KB) :-
-	findall(K, (
-		member(R, Rules),
-		closing_rule_knowledge(BrNodes, R, KB0, K)
-		), K_list),
-	sort(K_list, KB).
-
-% KB0 (and KB) is sorted. Now KB is of form  [Fact]
-closing_rule_knowledge(br(Nodes,_,_), Rule, KB0, KB) :-
+%---------------------------------------------------
+% Find NewKB such that in combination with an initial KB0, it causes Branch closure
+% KB0 (and NewKB) is sorted. The predicate is not deterministic!
+closing_rule_knowledge(br(Nodes,_,_), Rule, KB0, NewKB) :-
 	clause( r(Rule, closure, _, _, _, br(HeadNodes,_) ===> _), _Constraints ),
 	findHeadNodes(Nodes, HeadNodes, _IDs),
 	append(KB0, _, KB0_X),
-	r(Rule, closure, _, _, KB0_X, br(HeadNodes, _) ===> _),
-	remove_varTail_from_uList(KB0_X, KB_All),
-	sort(KB_All, BK_All_Sorted),
-	ord_subtract(BK_All_Sorted, KB0, KB).
+	r(Rule, closure, _, _, KB0_X-_XP, br(HeadNodes, _) ===> _),
+	uList2List(KB0_X, KB_All),
+	sym_rels_to_canonical(KB_All, Cano_KB_All),
+	sort(Cano_KB_All, KB_All_Sorted),
+	ord_subtract(KB_All_Sorted, KB0, NewKB).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-includes_bad_fact(List, Lex, KB) :-
-	member(X, List),
-	bad_fact(X, Lex, KB),
-	!.
-
-% identifies bad/nonsensical facts
-bad_fact(ant_wn(A, B), _Lex, KB) :-
-	memberchk(isa_wn(A, B), KB);
-	memberchk(isa_wn(B, A), KB).
-
-bad_fact(disj(A, B), _Lex, KB) :-
-	memberchk(isa_wn(A, B), KB);
-	memberchk(isa_wn(B, A), KB).
-
-% disj(yong boy, boy)
-bad_fact(disj(A, B), _Lex, KB) :-
-	atomic_list_concat(A_Words, ' ', A),
-	( memberchk(B, A_Words) %! lazy check
-	; A_Words = [_A1, A2],
-		memberchk(isa_wn(A2, B), KB)
-	). % avoids disj(kid, young boy) when isa_wn(boy, kid) SICK-train-3
-
-% disj(smile, smile nearby)
-bad_fact(disj(A, B), _Lex, KB) :-
-	atomic_list_concat(B_Words, ' ', B),
-	( memberchk(A, B_Words) %! lazy check
-	; B_Words = [_B1, B2],
-		memberchk(isa_wn(B2, A), KB)
-	).
-
-% disj(smile nearby, nearby smile)	but bit risky !!
-bad_fact(disj(A, B), _Lex, _KB) :-
-	atomic_list_concat([X, Y], ' ', A),
-	atomic_list_concat([Y, X], ' ', B).
-
-% isa_wn(full, empty)	for SICK-train-90
-bad_fact(isa_wn(A, B), _Lex, KB) :-
-	memberchk(ant_wn(A, B), KB).
-
-% disj(two, woman)	but bit risky !!
-bad_fact(Fact, Lex, _KB) :-
-	Fact =.. [_, A, B],
-	findall(0, (
-		member((A, PosA), Lex),
-	   	member((B, PosB), Lex),
-	    comparable_pos_tags(PosA, PosB)
-	    ), []).
-
-comparable_pos_tags(A, B) :-
-	atom_chars(A, [A1,A2|_]),
-	atom_chars(B, [B1,B2|_]),
-	( A = B
-	; [A1, A2] = [B1, B2]
-	; memberchk(A, ['CD', 'DT']),
-	  memberchk(B, ['CD', 'DT'])
-	; memberchk(A, ['JJ', 'RB']), % lone biker & jumps alone 87
-	  memberchk(B, ['JJ', 'RB'])
-	), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ttTerm is of form one of the Patterns, where
 % In each pattern variables stand for atoms
 % e.g., a@man@run is of form A@B@C but not of A@B
-pattern_filtered_nodes([], BrNodes, BrNodes).
+pattern_filtered_nodes([], BrNodes, BrNodes) :- !.
 
-pattern_filtered_nodes([P|Atterns], BrNodes, Filtered) :-
+pattern_filtered_nodes(Patterns, BrNodes, Filtered) :-
 	% detecting whether BrNodes are Branch or Nodes
-	( BrNodes = br(Nodes, Hist, Sig) ->
-	    Filtered = br(FilteredNodes, Hist, Sig)
-	  ; BrNodes = Nodes,
-	    Filtered = FilteredNodes
-	), % Filtering modes based on patterns
+	( BrNodes = br(Nodes, Hist, Sig)
+	->	Filtered = br(FilteredNodes, Hist, Sig)
+	; 	BrNodes = Nodes,
+		Filtered = FilteredNodes
+	), % Filtering nodes based on patterns
 	findall(NdId, (
 		member(NdId, Nodes),
-		ndId_of_patterns(NdId, [P|Atterns])
+		ndId_of_patterns(NdId, Patterns)
 		), FilteredNodes).
 
-ndId_of_patterns(_, []).
-
-ndId_of_patterns(ndId(Node,_), [P|Atterns]) :-
+%-----------------------------------------
+% Succeeds if LLF in node_id has a pattern from Patterns list
+ndId_of_patterns(ndId(Node,_), Patterns) :-
 	Node = nd(_, TT, _Args, _TF),
-	member(Pat, [P|Atterns]),
-	term_variables(Pat, PatVars),
+	member(Pat, Patterns),
+	term_variables(Pat, PatVars), % get all variables of pattern
 	ttTerm_to_prettyTerm(TT, Pat),
 	maplist(atom, PatVars).
 

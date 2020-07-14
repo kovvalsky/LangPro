@@ -2,7 +2,7 @@
 :- module('conf_matrix',
 	[
 		draw_matrix/1,
-		draw_extended_matrix/1
+		draw_extended_matrix/2
 	]).
 
 :- use_module('../printer/reporting', [
@@ -32,14 +32,14 @@ draw_matrix(Results) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Draws extended tableau for evaluation
-draw_extended_matrix(Results) :-
+draw_extended_matrix(Results, [Total,Acc,Prec,Rec]) :-
 	( debMode('2class') ->
-		draw_extended_matrix_2(Results)
-	  ; draw_extended_matrix_3(Results)
+		draw_extended_matrix_2(Results, 'nil')
+	  ; draw_extended_matrix_3(Results, [Total,Acc,Prec,Rec])
 	).
 
 
-draw_extended_matrix_3(Results) :-
+draw_extended_matrix_3(Results, [Total,Acc,Prec,Rec]) :-
 	write_predictions_in_file(Results),
 	% rule application count
 	( debMode('shallow') -> true;
@@ -119,7 +119,7 @@ draw_extended_matrix_3(Results) :-
 
 
 
-draw_extended_matrix_2(Results) :-
+draw_extended_matrix_2(Results, 'nil') :-
 	write_predictions_in_file(Results),
 	% Numbers for matrix
 	findall( _,	member((_, 'yes',	'yes', 		'closed',	'Terminated'), 	Results),	Y_Y), 	length(Y_Y, YY),

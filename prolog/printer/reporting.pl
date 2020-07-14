@@ -11,7 +11,9 @@
 	report/1,
 	report/2,
 	write_predictions_in_file/1,
-	print_pre_hyp/1
+	write_parList/1,
+	print_pre_hyp/2, print_pre_hyp/1,
+	par_format/2, par_format/3
 	%debMode/1
 ]).
 %==================================
@@ -73,20 +75,47 @@ write_predictions_in_file(FileName, Results) :-
 % writes id answer pairs in S
 % used with ignore/1 to go through all results
 write_id_answer(S, Results)  :-
-	member( (Id, _, Provers_Ans, _, _), Results),
-	once( 	(Provers_Ans, Ans) = ('unknown', 'NEUTRAL');
-			(Provers_Ans, Ans) = ('yes', 'ENTAILMENT');
-			(Provers_Ans, Ans) = ('no', 'CONTRADICTION')
+	member( (Id, Ans, Provers_Ans, Closed, Info), Results),
+	once( 	(Provers_Ans, Std_Ans) = ('unknown', 'NEUTRAL');
+			(Provers_Ans, Std_Ans) = ('yes', 'ENTAILMENT');
+			(Provers_Ans, Std_Ans) = ('no', 'CONTRADICTION')
 	),
-	atomic_list_concat([Id, '\t', Ans, '\n'], Text),
+	( debMode('waifx') ->
+		format(atom(Text), '~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~n', [Id, Ans, Std_Ans, Closed, Info])
+	;   format(atom(Text), '~w\t~w~n', [Id, Std_Ans])
+	),
 	write(S, Text),
 	fail.
 
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%
-% print premise(s) and hypothesis
-print_pre_hyp(PrId) :-
+% print premise(s) and hypothesis (parallel aware)
+print_pre_hyp(Source, PrId) :-
 	findall(Sen, (
 		sen_id(_, PrId, PH, _, Sent),
 		atomic_list_concat([PH, Sent], ': ', Sen)
 		), Sentences),
-	maplist(writeln, Sentences).
+	atomic_list_concat(Sentences, '\n', Problem),
+	par_format(Source, '~w~n', Problem).
+
+print_pre_hyp(PrId) :-
+	current_output(Source),
+	print_pre_hyp(Source, PrId).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% parallel processing aware format.
+% It suppresses printing is the parallel mode is on
+par_format(Source, Format, List) :-
+	current_output(Src),
+	( debMode(parallel(_)),
+	  Src = Source
+	  ->
+		true
+	; 	format(Source, Format, List)
+	).
+
+par_format(Format, List) :-
+	current_output(Source),
+	par_format(Source, Format, List).

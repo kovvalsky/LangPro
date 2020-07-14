@@ -25,7 +25,8 @@
 	ttTerms_same_type/2, extract_lex_NNPs_ttTerms/3, apply_ttFun_to_ttArgs/3
 	]).
 :- use_module('tableau_utils', [
-	assignIds/4, subtract_nodes/4, select_relevant_rules/3, ttTerms_to_nodes_sig/6
+	assignIds/4, subtract_nodes/4, select_relevant_rules/3, ttTerms_to_nodes_sig/6,
+	get_closure_rules/2
 	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,9 +98,7 @@ generateTableau(KB-XP, T_TermList, F_TermList, BrList, Tree, Status) :-
 		%( debMode('subWN') -> subWN_from_wn(Lexicon); rels_from_wn(Lexicon) ),
 		Count = [const_id(Ent_Id, _, Con_Id, _), node_id(Node_Id, _)],
 		%catch( call_with_time_limit(5, once(expand([Br], BrList, Tree, Count))), _, (writeln('time_limit_exceeded'), fail) ).
-		findall(RuleN, clause(r(RuleN,closure,_,_,_,_),_), ListClRules), % automatic retival of closure rules
-		list_to_ord_set(ListClRules, ClRules),
-		select_relevant_rules(Lexicon, ClRules, RelClRules),
+		get_closure_rules(Lexicon, RelClRules),
 		%rule_priority(EffRules),
 		rule_eff_order(EffRules),
 		( debMode('no_gq_llfs') ->

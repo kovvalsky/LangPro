@@ -9,12 +9,14 @@
 		select_relevant_rules/3,
 		ttTerms_to_nodes_sig/6,
 		genOldArgs/3,
-		genFreshArgs/5
+		genFreshArgs/5,
+		get_closure_rules/2
 		%feed_nodes_with_args/2
 	]).
 
 :- use_module('../lambda/type_hierarchy', [sub_type/2]).
 :- use_module('../lambda/lambda_tt', [op(605, xfy, ~>)]).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % assignIds(ListOfNodes, ID_ListOfNodes)
@@ -103,14 +105,14 @@ ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
 	maplist(ttTerm_to_node(false, ArgList), F_List, F_Nodes),
 	append(T_Nodes, F_Nodes, Nodes).
 	%list_to_ord_set(Sig, Signature), not necessary
-
-ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
-	genFreshArgs(Type, Args, [], Sig, const_id(0, Ent_Id, 0, Con_Id)), %!!! John from term, must be added to Signature and mustnt wait for Arg push application
-	maplist(apply_ttFun_to_ttArgs(Args), T_TTlist, T_List),
-	maplist(apply_ttFun_to_ttArgs(Args), F_TTlist, F_List),
-	maplist(ttTerm_to_node(true, []), T_List, T_Nodes),
-	maplist(ttTerm_to_node(false, []), F_List, F_Nodes),
-	append(T_Nodes, F_Nodes, Nodes).
+% 
+% ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
+% 	genFreshArgs(Type, Args, [], Sig, const_id(0, Ent_Id, 0, Con_Id)), %!!! John from term, must be added to Signature and mustnt wait for Arg push application
+% 	maplist(apply_ttFun_to_ttArgs(Args), T_TTlist, T_List),
+% 	maplist(apply_ttFun_to_ttArgs(Args), F_TTlist, F_List),
+% 	maplist(ttTerm_to_node(true, []), T_List, T_Nodes),
+% 	maplist(ttTerm_to_node(false, []), F_List, F_Nodes),
+% 	append(T_Nodes, F_Nodes, Nodes).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Converts a sign TF and TTexpression into a Node
@@ -160,3 +162,10 @@ genFreshArgs(Type, Args, Sig, NewSig, const_id(Eid1, Eid2, Cid1, Cid2)) :-
 % 	feed_nodes_with_args(Rest, Args), !.
 %
 % feed_nodes_with_args([], _).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Extract relevant closure rules
+get_closure_rules(Lexicon, ClRules) :-
+	findall(RuleN, clause(r(RuleN,closure,_,_,_,_),_), ListClRules),
+	list_to_ord_set(ListClRules, SetClRules),
+	select_relevant_rules(Lexicon, SetClRules, ClRules).

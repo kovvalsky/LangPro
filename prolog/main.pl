@@ -22,6 +22,8 @@
 % now it serves as parameter input
 :- dynamic debMode/1.
 
+%:- use_module(library(theme/dark)).
+
 debMode( 'nil' ).
 debMode( ral(400) ).
 %debMode( effCr(['nonProd', 'nonBr', 'equi', 'nonCons']) ). % old one, not effcient
@@ -31,6 +33,7 @@ reset_debMode :-
 	retractall( debMode(_) ),
 	assertz( debMode('nil') ),
 	assertz( debMode(effCr(['equi', 'nonBr', 'nonProd', 'nonCons'])) ),
+	set_rule_eff_order,
 	assertz( debMode(ral(400)) ).
 
 set_debMode([H | Rest]) :-
@@ -55,7 +58,7 @@ set_debMode([]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set parameters from the scratch
-parList(Parameters) :-
+parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
 	is_list(Parameters) ->
 		reset_debMode,
 		set_debMode(Parameters)
@@ -74,6 +77,7 @@ parList(Parameters) :-
 % complete_tree			Proof stopped when the RAL is reached, not when an open branch is found
 % 'prprb':				prints the problem
 %  waif(filename): 		writes answers in file in SICK style
+%  waifx				writes extended answers in file
 % 'ne':					reports MW Named Entity found
 % 'mwe':				multiword expression found
 % 'prlim':				prints when rule limit is reached
@@ -111,3 +115,4 @@ parList(Parameters) :-
 %  eccg				    latex trees are probted in different tex file
 %  ss([...])			list of frequent sysnsets to choose
 % allInt				All noun modifeirs are intersective
+% lab_map(mapping_name)	Map labels of problems to other ones, e.g., for SICK

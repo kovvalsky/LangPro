@@ -11,7 +11,8 @@
 		xml_probs_llfs/1,
 		xml_probs_llfs/2,
 		xml_senIDs_llfs/1,
-		xml_senIDs_llfs/2
+		xml_senIDs_llfs/2,
+		xml_senIDs_llfs/3
 	]).
 
 
@@ -60,17 +61,24 @@ xml_probs_llfs(Prob_IDs, XMLFile) :-
 % Given SenIDs, write corresponding CCG trees,
 % CCG terms and LLFs in a XML file
 xml_senIDs_llfs(List_Int) :-
-	xml_senIDs_llfs(List_Int, 'CCG_to_LLF').
+	xml_senIDs_llfs(List_Int, 'CCG_to_LLF', _).
 
 xml_senIDs_llfs(List_Int, XMLFile) :-
+	xml_senIDs_llfs(List_Int, XMLFile, _AnswerList).
+
+xml_senIDs_llfs(List_Int, XMLFile, AnswerList) :-
 	listInt_to_id_ccgs(List_Int, CCG_IDs),
+	% filter CCG_IDs based on the gold labels
+	findall( ccg(ID, CCG),
+		( member(ccg(ID,CCG), CCG_IDs), sen_id(ID, _, _, Answer, _), memberchk(Answer, AnswerList) ),
+		Filt_CCG_IDs),
 	( exists_directory('xml') -> true; make_directory('xml') ),
 	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName),
 	open(FullFileName, write, S, [encoding(utf8)]),
 	write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
 	write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/ttterms.xsl"?>\n'),
 	write(S, '<parsed_sentences>\n'),
-	xml_ccgIDs_to_llfs(S, CCG_IDs ),
+	xml_ccgIDs_to_llfs(S, Filt_CCG_IDs ),
 	write(S, '</parsed_sentences>\n'),
 	close(S),
 	( debMode('html') ->

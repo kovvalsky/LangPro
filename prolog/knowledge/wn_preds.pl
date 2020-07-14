@@ -143,11 +143,11 @@ assert_dis_wn((Lem1, Lem2, Num)) :-
 % strict hypernymy, non-reflexive
 word_hyp(W1, W2, Num) :-
 	debMode(ss(List)) ->
-		word_hyp(List, W1, W2, Num)
-	; word_hyp(_, W1, W2, Num).
+		word_hyp(List, W1, W2, Num, _, _)
+	; word_hyp(_, W1, W2, Num, _, _).
 
 
-word_hyp(SNs, W1, W2, Num) :-
+word_hyp(SNs, W1, W2, Num, SN1, SN2) :-
 	( nonvar(W1), nonvar(W2) ->
 		s(SS1, _, W1, _, SN1, _),
 		atom_chars(SS1, [Num |_]),

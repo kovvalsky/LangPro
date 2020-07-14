@@ -6,17 +6,24 @@
 :- module('user_preds',
 	[
 		add_new_elements/3,
+		average_list/2,
 		all_pairs_from_set/2,
 		at_most_n_random_members_from_list/3,
 		add/3, minus/3, diff/3,
 		choose/3,
+		concurrent_maplist_n_jobs/3,
 		const_ttTerm/1,
+		element_list_member/3,
 		is_greater/2,
-		partition_list_into_N_even_lists/3,
+		get_value_def/3,
+		keep_smallest_lists/2,
 		listInt_to_id_ccgs/2,
 		list_of_tuples_to_list_of_positions/2,
 		list_substitution/4,
 		list_to_freqList/2,
+		freqList_subtract/3,
+		format_list/3,
+		format_list_list/4,
 		list_to_set_using_match/2,
 		match_lowerCase/2,
 		neg/2,
@@ -25,17 +32,20 @@
 		probIDs_to_senIDs/2,
 		print_prob/1,
 		match_remove/3,
+		pairwise_append/2,
+		partition_list_into_N_even_lists/3,
 		patt_remove/3,
 		prob_input_to_list/2,
 		prIDs_to_prIDs_Ans/2,
+		all_prIDs_Ans/1,
 		true_remove/3,
 		remove_adjacent_duplicates/2,
 		uList2List/2,
-		rm_equi_set_of_facts_/2,
 		substitute_in_atom/4,
 		shared_members/2,
 		sort_list_length/2,
 		sublist_of_list/2,
+		sym_rels_to_canonical/2,
 		term_list_concat/2,
 		ttExp_to_ttTerm/2,
 		ttExp_to_ttTerm_info/3,
@@ -474,6 +484,12 @@ shared_members(Members, Lists) :-
     ; findall(M, (maplist(member(M), Lists)), Members).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% get all elements shared by a set of lists
+element_list_member(List_of_Lists, List, List_Element) :-
+	member(List_Element, List_of_Lists),
+	sublist_of_list(List_Element, List).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % C1 is replaced by C2 in Nodes and results in NewNodes
 list_substitution([H|T], C1, C2, [New_H|New_T]) :-
 	substitution(H, C1, C2, New_H),
@@ -498,7 +514,7 @@ substitute_in_atom(Atom, Old, New, Result) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pair elements of two lists
-two_lists_to_pairList([H1|Rest1], [H2|Rest2], [H1,H2|Rest]) :-
+two_lists_to_pairList([H1|Rest1], [H2|Rest2], [(H1,H2)|Rest]) :-
 	!,
 	two_lists_to_pairList(Rest1, Rest2, Rest).
 
@@ -622,11 +638,32 @@ repetition_list(X, N, List) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % print a list with each element on a new line
-writeln_list([]).
+writeln_list([]) :- !.
 
 writeln_list([H | Rest]) :-
 	writeln(H),
 	writeln_list(Rest).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Each member of list is formatted accordingly and sent to Source
+format_list(Source, Format, List) :-
+	findall(A, (
+		member(E, List),
+		format(atom(A), Format, [E])
+	), As),
+	atomic_list_concat(As, Message),
+	format(Source, '~w', [Message]).
+
+% Each member list of list is formatted as Format1
+% and its elements are formatted as Format2 and sent to Source
+format_list_list(Source, Format1, Format2, List_of_Lists) :-
+	findall(A1, (
+		member(List, List_of_Lists),
+		format_list(atom(A2), Format2, List),
+		format(atom(A1), Format1, [A2])
+	), As),
+	atomic_list_concat(As, Message),
+	format(Source, '~w', [Message]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % print a problem
@@ -733,16 +770,38 @@ prob_input_to_list(Input, List) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % List to sorted frequency list. List expected not to have free variables
-% Freq list has count-element as its members
+% Freq list has element-count as its members
 list_to_freqList(List, Freq) :-
-    %copy_term(List, L), % to avoid accidental bindings in List
-	findall(X_Count-X, (
-	    member(X, List),
-	    findall(1, member(X, List), X_Count_List),
-	    length(X_Count_List, X_Count)
-	    ), Count_Terms),
-	sort(Count_Terms, Sorted_Count_Terms),
-	keysort(Sorted_Count_Terms, Freq).
+	list_to_freqList(List, [], Freq).
+
+list_to_freqList([], FL, FL) :- !.
+
+list_to_freqList([E | Rest], FL1, FL2) :-
+	selectchk(E-N, FL1, RestFL1),
+	!,
+	N1 is N + 1,
+	list_to_freqList(Rest, [E-N1 | RestFL1], FL2).
+
+list_to_freqList([E | Rest], FL1, FL2) :-
+	list_to_freqList(Rest, [E-1 | FL1], FL2).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% It is assumed that there are no elements with th3 same key in FreqList
+% SubFL = { key:cnt | key in FL & val = FL[key] - (DelFL[key], def=0) > 0
+freqList_subtract([], _DelFL, []) :- !.
+
+freqList_subtract([Key-X | FL], DelFL, SubFL) :-
+	memberchk(Key-Y, DelFL),
+	!,
+	( X > Y ->
+		Z is X - Y,
+		freqList_subtract(FL, DelFL, SubFL1),
+		SubFL = [ Key-Z | SubFL1]
+	;	freqList_subtract(FL, DelFL, SubFL)
+	).
+
+freqList_subtract([Key-X | FL], DelFL, [Key-X | SubFL]) :-
+	freqList_subtract(FL, DelFL, SubFL).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % removes duplicates of symmetric predicates from the ord_list
@@ -759,53 +818,35 @@ rm_sym_preds_from_ord([H1|Rest], [H1|List]) :-
 	  ; List = Rest
 	).
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% only for singleton set of facts
-/*
-rm_redundant_set_of_facts(Set_Of_Facts, Clean) :-
-	findall(X, (
-		member(X, Set_Of_Facts),
-		member(Y, Set_Of_Facts),
-		X \= Y,
-		subsumes_facts(X, Y)
-		), Del).
-*/
-rm_equi_set_of_facts_([], []).
+% for a list of relations, set a canonical order for symetric relations
+sym_rels_to_canonical([], []) :- !.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% !!! this can be imporved
-% Given a list of KBs, remove the redundant ones
-%------------------------------------------
-% if one of the KBs = [symetric_rel(A,B)],
-% remove its symetric alternatives if any in the rest of KBs
-rm_equi_set_of_facts_([[Fact]|L_KB], [[Fact]|List]) :-
-	Fact =.. [Pred, Arg1, Arg2],
-	memberchk(Pred, [disj, ant_wn]), % list of symmetric predicates
-	H2 =.. [Pred, Arg2, Arg1],
-	select([H2], L_KB, L_KB1),
-	!,
-	rm_equi_set_of_facts_(L_KB1, List).
+sym_rels_to_canonical([R | Rels], [C | Cano_Rels]) :-
+	R =.. [Pred, Arg1, Arg2],
+	( memberchk(Pred, [disj, ant_wn]), Arg2 @=< Arg1 -> % list of symmetric predicates
+		C =.. [Pred, Arg2, Arg1]
+	; C = R ),
+	sym_rels_to_canonical(Rels, Cano_Rels).
 
-%
-rm_equi_set_of_facts_([[Fact]|L_KB], [[Fact]|List]) :-
-	findall(X, (
-		member(X, L_KB),
-		\+memberchk(Fact, X)
-		), RestRest),
-	rm_equi_set_of_facts_(RestRest, List),
-	!.
 
-rm_equi_set_of_facts_([[F1,F2|R]|Rest], [[F1,F2|R]|List]) :-
-	rm_equi_set_of_facts_(Rest, List).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given a list of lists, keep only those lists that are smallest,
+% not set-containing other lists
+keep_smallest_lists(List_of_Lists, Smallest_Lists) :-
+	findall(List, (
+		member(List, List_of_Lists),
+		\+(( member(L, List_of_Lists),
+			L \= List,
+			sublist_of_list(L, List)
+		  ))
+	),	Smallest_Lists).
 
 
 % All elements of the first list are elemenst of the second list
-sublist_of_list([], _) :-
-	!.
+sublist_of_list([], _) :- !.
 
-sublist_of_list([X|Rest], L) :-
-	!,
+sublist_of_list([X|Rest], L) :- !,
 	memberchk(X, L),
 	sublist_of_list(Rest, L).
 
@@ -838,6 +879,29 @@ distribute_list_in_bins([E | List], [[E|B] | Bins]) :-
 	append(Bins, [B], Bins_B),
 	distribute_list_in_bins(List, Bins_B).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Append list of lists pairwise
+% [[aa,...,az], [za,...,zz]] -> [aa+...+za,...az+...+zz]
+pairwise_append([], []) :- !.
+
+pairwise_append([LL|LLL], List_of_Nth_List) :-
+	findall(Nth_List, (
+		nth1(N, LL, _),
+		maplist(nth1(N), [LL|LLL], Nth_LLs),
+		append(Nth_LLs, Nth_List)
+	), List_of_Nth_List).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Break arguments into parts for concyrrent maplist
+concurrent_maplist_n_jobs(Functor, Inputs, Outputs) :-
+	debMode(parallel(N)), !,
+	partition_list_into_N_even_lists(Inputs, N, Job_List_Input),
+	concurrent_maplist(maplist(Functor), Job_List_Input, Job_List_Output),
+	partition_list_into_N_even_lists(Outputs, N, Job_List_Output).
+
+concurrent_maplist_n_jobs(Functor, Inputs, Outputs) :-
+	maplist(Functor, Inputs, Outputs).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Given a list of Problem IDs, return a list of Problem ID and answer pairs
 prIDs_to_prIDs_Ans(PrIDs, PrIDs_Ans) :-
@@ -845,6 +909,15 @@ prIDs_to_prIDs_Ans(PrIDs, PrIDs_Ans) :-
 		member(PrID, PrIDs),
 		sen_id(_, PrID, 'h', Ans, _)
 		), PrIDs_Ans).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+all_prIDs_Ans(PrIDs_Ans) :-
+	findall((PrID,Ans), (
+		sen_id(_,PrID,'h',Answer,_),
+		( pid_labs(PrID, KeyLabs), debMode(lab_map(Key)) ->
+			memberchk(Key-Ans, KeyLabs)
+		; Ans = Answer )
+	), PrIDs_Ans).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Macros for arithmetic operations
@@ -857,3 +930,24 @@ minus(X, Y, Z) :-
 diff(X, Y, Z) :-
 	T is X - Y,
 	abs(T, Z).
+
+average_list(List, Average) :-
+	length(List, N),
+	sum_list(List, Sum),
+	Average is Sum/N.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Get parameter value from key-value list
+% Either key-value is there or only key
+get_value_def(KeyVals, Key, Value) :-
+	memberchk(Key-Value, KeyVals),
+	!.
+
+% If only key is there, this means that the key is Boolean
+% Its existence results in true value and vice versa
+get_value_def(KeyVals, Key, Value) :-
+	( memberchk(Key, KeyVals) ->
+		Value = true
+	;	Value = false
+	), !.
+ % it is possible to add default values for some keys
