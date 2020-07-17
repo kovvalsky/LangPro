@@ -1312,7 +1312,7 @@ r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _,
 
 
 
-% Verb @ PR @ NP <=> Verb (PR @ NP)
+% Verb @ PR [NP..] => (PR @ NP) @ Verb [..]
 % jump over c1 <=> jump (over c1)
 % sick-150, 1480, 1483, 7755, wrong-1481
 r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,   %sick-150
@@ -1328,7 +1328,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-8091 accidentally
-/*r(v_pr_v_pp, 	impl:non, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,_POS,F1,F2), (np:_~>_)~>np:_~>_) @ VP, TyS ),  [C, D | Rest], TF )],
 			Sig)
 		===>
@@ -1338,9 +1338,10 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			final_value_of_type(TyS, s:_),
 			TyS = np:_~>TyVP,
 			set_type_for_tt(VP, TyVP, VP1),
-			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).*/
+			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-3561, 4117
+% PR @ V [C] => V @ PR [C]
 r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), (np:_~>s:_)~>np:_~>s:_) @ VP, TyVP),  [C], TF )],
 			Sig)
