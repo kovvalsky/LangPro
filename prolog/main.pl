@@ -9,7 +9,8 @@
 	'task/entail',
 	'task/kb_induction',
 	'xml/xml_output',
-	'printer/reporting'
+	'printer/reporting',
+	'testing/sick_train_trial_solved'
 	]).
 
 
@@ -68,6 +69,8 @@ parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
 % 				List of Parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  debMode
+% data:sick				use sick data
+% 'once_solved:parser'	compare predicted problems to the list of once-solved problems
 % 'xml'					write terms or tableaux in XML
 % 'html'				write twrms and tableaux in HTML, outomatically creates XML files too
 % 'fix': 				prints fixes done on CCG trees
@@ -115,4 +118,4 @@ parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
 %  eccg				    latex trees are probted in different tex file
 %  ss([...])			list of frequent sysnsets to choose
 % allInt				All noun modifeirs are intersective
-% lab_map(mapping_name)	Map labels of problems to other ones, e.g., for SICK
+% lab_map:mapping_name	Map labels of problems to other ones, e.g., for SICK
