@@ -16,7 +16,7 @@
 	sublist_of_list/2, sym_rels_to_canonical/2, two_lists_to_pair_list/3, prob_input_to_list/2,
 	partition_list_into_N_even_lists/3, two_lists_to_pairList/3,
 	uList2List/2, prIDs_to_prIDs_Ans/2, get_value_def/3,
-	format_list/3, format_list_list/4, average_list/2, all_prIDs_Ans/1
+	format_list/3, format_list_list/3, format_list_list/4, average_list/2, all_prIDs_Ans/1
 	]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module(library(pairs)).
@@ -25,7 +25,7 @@
 	]).
 :- use_module('../utils/induction_utils', [
 	add_lex_to_id_ans/2, filterAns_prIDs_Ans/3, format_pairs/2, get_IDAs/2,
-	includes_bad_fact/3, log_parameters/1, print_learning_phase_stats/3,
+	has_rel_against_kb/3, has_rel_wo_comparables/2, log_parameters/1, print_learning_phase_stats/3,
 	print_kb_learning_stages/3, print_phase_stats/4, partition_as_prIDs_Ans/6,
 	print_learning_stages/2, write_induced_kb_in_file/3, waif_cv3/3
 	]).
@@ -347,7 +347,9 @@ discover_knowledge(_Config, _TTterms, [_|_], _KB1, (PrId,'unknown'), Status, [],
 
 % When gold label in yes|no and tablea is open, do abduction
 discover_knowledge(Config, TTterms, Branches, KB1, (PrId,Ans), Status, Learned_KBs, Info5) :-
-	Patterns = [_, _@_, (_@_)@_, _@(_@_)], % patterns of inspected LLFs
+	% patterns of inspected LLFs
+	( get_value_def(Config, 'patterns', Patterns), is_list(Patterns) -> true
+	; Patterns = [_, _@_, (_@_)@_, _@(_@_)]	),
 	discover_patterned_knw(Config, TTterms, Branches, KB1, Patterns, Learned_KBs),
 	( Learned_KBs = []
 	->	Info5 =  [PrId, Ans, 'failed', 'open', Status]
@@ -362,7 +364,6 @@ discover_knowledge(Config, TTterms, Branches, KB1, (PrId,Ans), Status, Learned_K
 % where each of the KB can close the tableau
 discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) :-
 	% Get relevant closure rules based on the lexicon extacted from Terms
-	get_value_def(Config, 'constchk', ConstCheck),
 	extract_lex_NNPs_ttTerms(TTterms, Lexicon, _Names),
 	get_closure_rules(Lexicon, ClRules),
 	% Following the patterns of nodes, find all possible KBs that closes the tableau
@@ -373,14 +374,18 @@ discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) 
 		), LL_KB), % a list of lists of lists (of relations)
 	shared_members(L_ClKB, LL_KB),
 	% From found Closing KBs, select good ones that are compatible with Initial KB, IniKB
+	get_value_def(Config, 'constKB', ConstKB),
+	get_value_def(Config, 'compTerms', CompTerms),
 	findall(ClKB, (
 		member(ClKB, L_ClKB),
-		\+includes_bad_fact(ClKB, Lexicon, IniKB)
+		\+((has_rel_against_kb(ClKB, Lexicon, IniKB), ConstKB)),
+		\+((has_rel_wo_comparables(ClKB, Lexicon), CompTerms))
 		), L_goodClKB),
 	sort(L_goodClKB, Ord_goodClKB),
 	% Discard those KBs that require more assumptions. So if there is KB0 < KB1, remove KB1
 	keep_smallest_lists(Ord_goodClKB, Abduced_L_KB), %!!! have a look
 	% Discard those KBs that make any sentence inconsistent
+	get_value_def(Config, 'constchk', ConstCheck),
 	( ConstCheck ->
 		findall(K, (
 			member(K, Abduced_L_KB),
