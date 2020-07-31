@@ -5,7 +5,8 @@
 		filterAns_prIDs_Ans/3,
 		format_pairs/2,
 		get_IDAs/2,
-		includes_bad_fact/3,
+		has_rel_against_kb/3,
+		has_rel_wo_comparables/2,
 		log_parameters/1,
 		partition_as_prIDs_Ans/6,
 		print_learning_stages/2,
@@ -124,7 +125,7 @@ write_kb_as_term(S, Func, Term) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % List includes a bad fact wrt KB
 % Lex keeps POS-tags of constants that can be informative for constant comparability check
-includes_bad_fact(List, Lex, KB) :-
+has_rel_against_kb(List, Lex, KB) :-
 	member(X, List),
 	bad_fact(X, Lex, KB),
 	!.
@@ -172,9 +173,18 @@ bad_fact(Fact, Lex, _KB) :-
 	member((B, Pos), Lex),
 	memberchk(Pos, ['DT']).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+has_rel_wo_comparables(List, Lex) :-
+	member(X, List),
+	rel_wo_comparables(X, Lex),
+	!.
+
+%!!! This blocks disj(put@on, remove)
 % disj(two, woman)	but bit risky !!
-bad_fact(Fact, Lex, _KB) :-
+rel_wo_comparables(Fact, Lex) :-
 	Fact =.. [_, A, B],
+	member((A,_), Lex),
+	member((B,_), Lex),
 	findall(0, (
 		member((A, PosA), Lex),
 	   	member((B, PosB), Lex),
