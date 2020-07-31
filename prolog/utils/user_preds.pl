@@ -23,6 +23,7 @@
 		list_to_freqList/2,
 		freqList_subtract/3,
 		format_list/3,
+		format_list_list/3,
 		format_list_list/4,
 		list_to_set_using_match/2,
 		match_lowerCase/2,
@@ -75,6 +76,10 @@
 	]).
 :- use_module('../knowledge/knowledge', [isa/3]).
 :- use_module('../printer/reporting', [report/1]).
+:- use_module('../printer/reporting', [report/1]).
+
+:- multifile pid_labs/2.
+%:- discontiguous pid_labs/2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true_member(Element, List)
@@ -654,6 +659,15 @@ format_list(Source, Format, List) :-
 	atomic_list_concat(As, Message),
 	format(Source, '~w', [Message]).
 
+% Each list member is formatted accordingly and sent to Source
+format_list_list(Source, Format, List_of_Lists) :-
+	findall(A, (
+		member(List, List_of_Lists),
+		format(atom(A), Format, List)
+	), As),
+	atomic_list_concat(As, Message),
+	format(Source, '~w', [Message]).
+
 % Each member list of list is formatted as Format1
 % and its elements are formatted as Format2 and sent to Source
 format_list_list(Source, Format1, Format2, List_of_Lists) :-
@@ -914,8 +928,9 @@ prIDs_to_prIDs_Ans(PrIDs, PrIDs_Ans) :-
 all_prIDs_Ans(PrIDs_Ans) :-
 	findall((PrID,Ans), (
 		sen_id(_,PrID,'h',Answer,_),
-		( pid_labs(PrID, KeyLabs), debMode(lab_map(Key)) ->
-			memberchk(Key-Ans, KeyLabs)
+		( debMode(lab_map:Mapping) ->
+			pid_labs(PrID, MapLabs),
+			memberchk(Mapping-Ans, MapLabs)
 		; Ans = Answer )
 	), PrIDs_Ans).
 
