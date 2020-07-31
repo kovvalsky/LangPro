@@ -6,6 +6,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :-module(reporting, [
+	compare_to_once_solved/1,
 	report_error/2,
 	throw_error/2,
 	report/1,
@@ -119,3 +120,35 @@ par_format(Source, Format, List) :-
 par_format(Format, List) :-
 	current_output(Source),
 	par_format(Source, Format, List).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% compare the results to the once-solved list of problems
+compare_to_once_solved(Results) :-
+	debMode(once_solved:Parser),
+	debMode(data:sick),
+	nonvar(Parser), !,
+	% all problems that were solved now but never before
+	findall([ID,Gold,Pred,Cl,Info], (
+		member((ID,Gold,Pred,Cl,Info), Results),
+		Gold == Pred,
+		\+sick_solved(ID, Parser)
+	), First_time),
+	length(First_time, N1),
+	format('~`-t ~55|~n'),
+	format('First time solved now (~w): ~n', [N1]),
+	format_list_list(atom(M1), '  ~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~t~12+~n', First_time),
+	writeln(M1),
+	% all problems that were not solved now but once before
+	findall([ID,Gold,Pred,Cl,Info], (
+		member((ID,Gold,Pred,Cl,Info), Results),
+		Gold \= Pred,
+		sick_solved(ID, Parser)
+	), Not_now),
+	length(Not_now, N2),
+	format('~`-t ~55|~n'),
+	format('Not now but once solved (~w): ~n', [N2]),
+	format_list_list(atom(M2), '  ~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~t~12+~n', Not_now),
+	writeln(M2).
+
+compare_to_once_solved(_).

@@ -6,7 +6,7 @@
 	]).
 
 :- use_module('../printer/reporting', [
-	report/1, write_predictions_in_file/1
+	compare_to_once_solved/1, report/1, write_predictions_in_file/1
 	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,6 +41,7 @@ draw_extended_matrix(Results, [Total,Acc,Prec,Rec]) :-
 
 draw_extended_matrix_3(Results, [Total,Acc,Prec,Rec]) :-
 	write_predictions_in_file(Results),
+	compare_to_once_solved(Results),
 	% rule application count
 	( debMode('shallow') -> true;
 	  findall( Step,	member((_, _, _, 'closed', (_Ter, Step)), Results),  Steps ),
@@ -121,6 +122,7 @@ draw_extended_matrix_3(Results, [Total,Acc,Prec,Rec]) :-
 
 draw_extended_matrix_2(Results, 'nil') :-
 	write_predictions_in_file(Results),
+	compare_to_once_solved(Results),
 	% Numbers for matrix
 	findall( _,	member((_, 'yes',	'yes', 		'closed',	'Terminated'), 	Results),	Y_Y), 	length(Y_Y, YY),
 	findall( _,	member((_, 'yes',	'no_unk', 	'open', 	_),				Results),	Y_U), 	length(Y_U, YU),
