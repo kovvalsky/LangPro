@@ -51,7 +51,7 @@ rule_priority([
 	be_pp, be_a_s, be_a_obj, a_subj_be,
 	vp_pass2, %vp_pass1,
 	vp_pp,
-	v_pr_v_pp,
+	v_pr_v_pp, pr_v_v_pp, pr_v_v_pr, v__pr_v_pr,
 	the_c, %the,
 	fact_v_s_tr, fact_v_tr, fact_v_fl, it_is_tr_fl,
 	tr_every_c, fl_a_c, tr_no_c,
@@ -1328,7 +1328,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-8091 accidentally
-r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+r(pr_v_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,_POS,F1,F2), (np:_~>_)~>np:_~>_) @ VP, TyS ),  [C, D | Rest], TF )],
 			Sig)
 		===>
@@ -1342,7 +1342,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 
 % sick-3561, 4117
 % PR @ V [C] => V @ PR [C]
-r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+r(pr_v_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), (np:_~>s:_)~>np:_~>s:_) @ VP, TyVP),  [C], TF )],
 			Sig)
 		===>
@@ -1350,6 +1350,21 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Sig) )
 :-
 			set_type_for_tt(VP, pr~>TyVP, VP1).
+
+% sick-3702
+% V @ NP @ PP/PR [C] => V @ PP/PR @ NP [C]
+r(v__pr_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+		br([nd( M, ( (VP @ NP, _) @ (tlp(Tk,Over,POS,F1,F2),TyP), TyVP ), [C], TF )],
+			Sig)
+		===>
+		br([nd( M, ((VP1 @ (tlp(Tk,Over,POS,F1,F2),TyP), np:_~>TyVP) @ NP, TyVP), [C], TF )],
+			Sig) )
+:-
+			memberchk(TyP, [pp, pr]),
+			NP = (_, NP_Ty),
+			memberchk(NP_Ty, [np:_, e]),
+			final_value_of_type(TyVP, s:_),
+			set_type_for_tt(VP, TyP~>np:_~>TyVP, VP1).
 
 
 
