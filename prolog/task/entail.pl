@@ -333,39 +333,58 @@ consistency_check(KB_XP, LLF, Answer) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-entail(Align, PrId, Answer, Provers_Answer, XP, Closed, FinalStatus) :-
+entail(Align, Id, Answer, Provers_Answer, XP, Closed, FinalStatus) :-
 	% by default with empty initial KB
-	entail(Align, [], PrId, Answer, Provers_Answer, XP, Closed, FinalStatus).
+	entail(Align, [], Id, Answer, Provers_Answer, XP, Closed, FinalStatus).
 %/*
 % solves problems - doesnt knows the answer beforehand
-entail(Align, IKB, PrId, _Answer, Provers_Answer, XP, Closed, FinalStatus) :-
-	% writeln(PrId),
-	findall(_X, sen_id(_, PrId, _, _, _), Prem_Hyp), % finds the length of the problem
-	%problem_id_TTterms(PPrId, Prem_TTs, Hypo_TTs), Align_Prem_TTs = Prem_TTs, Align_Hypo_TTs = Hypo_TTs,
-	problem_to_ttTerms(Align, PrId, Prem_TTs, Hypo_TTs, Align_Prem_TTs, Align_Hypo_TTs, OKB),
-	append(IKB, OKB, KB), % merge initial and obtained KBs
-	append(Prem_TTs, Hypo_TTs, LLFs),
-	( ttTerms_same_type(LLFs, _Type) ->
-	  ( debMode('constchk') -> maplist(consistency_check(KB-[]), LLFs, Checks); Checks = [] ), % no explanation from consistency checking
-	  ( memberchk('Inconsistent', Checks) ->
-		  atomic_list_concat(Checks, ', ', Text), report(['Warning: CONTRADICTION found in an LLF:\n', Text]),
-		  (Provers_Answer, Closed, FinalStatus, XP) = ('unknown', 'NA', 'Defected', _)
-	  ; Align = 'align' ->
-	  	  solve_problem(PrId, KB-XP, Align_Prem_TTs, Align_Hypo_TTs, Provers_Answer, Closed, FinalStatus)
-	  ; Align = 'no_align' ->
-		  solve_problem(PrId, KB-XP, Prem_TTs, Hypo_TTs, Provers_Answer, Closed, FinalStatus)
-	  ; solve_problem(PrId, KB-XPna, Prem_TTs, Hypo_TTs, NoA_Prov_Ans, NoA_Closed, NoA_Status),
-	    solve_problem(PrId, KB-XPal, Align_Prem_TTs, Align_Hypo_TTs, Align_Prov_Ans, Align_Closed, Align_Status),
-	    ( Align_Closed \== 'closed', NoA_Closed \== 'closed', \+append(Prem_TTs, Hypo_TTs, Prem_Hyp) -> % if an item in the problem is defected
-		    (Provers_Answer, XP, Closed, FinalStatus) = ('unknown', _, 'NA', 'Defected')
-	    ; Align_Closed == 'closed' ->
-		    (Provers_Answer, XP, Closed, FinalStatus) =  (Align_Prov_Ans, XPal, Align_Closed, Align_Status)
-        ; (Provers_Answer, XP, Closed, FinalStatus)   =  (NoA_Prov_Ans, XPna, NoA_Closed, NoA_Status)
-	    )
-      ), !
-    ; report(['Inconsistency in node types - entail']),
-	  (Provers_Answer, Closed, FinalStatus) = ('unknown', 'NA', 'Defected')
+entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
+	% start tracing a particular problem
+	( debMode(gtraceProb(Id)) -> gtrace, true; true ),
+	nonvar(Align),
+	findall(_X, sen_id(_, Id, _, _, _), Prem_Hyp), % finds the length of the problem
+	%problem_id_TTterms(Id, P_TTs, H_TTs), AP_TTs = P_TTs, AH_TTs = H_TTs,
+	( problem_to_ttTerms(Align, Id, P_TTs, H_TTs, AP_TTs, AH_TTs, OKB) ->
+	  	append(IKB, OKB, KB), % merge initial and obtained KBs
+		append(P_TTs, H_TTs, LLFs),
+		( ttTerms_same_type(LLFs, _Type) ->
+			( debMode('constchk') ->
+				maplist(consistency_check(KB-[]), LLFs, Checks)
+			; Checks = []
+			),
+			( memberchk('Inconsistent', Checks) ->
+				atomic_list_concat(Checks, ', ', Text),
+				report(['Warning: CONTRADICTION found in an LLF:\n', Text]),
+				% no explanation from consistency checking
+	  			(Pred, Cl, Status, XP) = ('unknown', 'NA', 'Defected', _)
+			; align_solve_problem(Align, KB, Id, Prem_Hyp, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status)
+			)
+		; report(['Inconsistency in node types (entail/8)']),
+			(Pred, Cl, Status) = ('unknown', 'NA', 'Defected')
+		)
+	; report(['Failed to get ttTerms (entail/8)']),
+		(Pred, Cl, Status) = ('unknown', 'NA', 'Defected')
 	).
+
+% solve a problem which has well-formed and consistent LLFs
+% while solving take into account alignment flag
+align_solve_problem('align', KB, Id, _, _, _, AP_TTs, AH_TTs, Pred, XP, Cl, Status) :-
+	solve_problem(Id, KB-XP, AP_TTs, AH_TTs, Pred, Cl, Status).
+
+align_solve_problem('no_align', KB, Id, _, P_TTs, H_TTs, _, _, Pred, XP, Cl, Status) :-
+	solve_problem(Id, KB-XP, P_TTs, H_TTs, Pred, Cl, Status).
+
+align_solve_problem('both', KB, Id, P_H, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status) :-
+	solve_problem(Id, KB-XP_N, P_TTs, H_TTs, Pred_N, Cl_N, Status_N),
+	solve_problem(Id, KB-XP_A, AP_TTs, AH_TTs, Pred_A, Cl_A, Status_A),
+    ( Cl_A \== 'closed', Cl_N \== 'closed', \+append(P_TTs, H_TTs, P_H) ->
+		% if an item in the problem is defected
+		(Pred, XP, Cl, Status) = ('unknown', _, 'NA', 'Defected')
+	; Cl_A == 'closed' ->
+		(Pred, XP, Cl, Status) =  (Pred_A, XP_A, Cl_A, Status_A)
+	; (Pred, XP, Cl, Status)   =  (Pred_N, XP_N, Cl_N, Status_N)
+	).
+
 %*/
 
 % entailment for binary classification
@@ -438,19 +457,18 @@ gentail(Problem_Id) :-
 	gentail('no_align', Problem_Id).
 
 gentail(Align, Problem_Id) :-
+	gentail(Align, [], Problem_Id).
+
+gentail(Align, KB0, Problem_Id) :-
 	set_rule_eff_order, % defines an effciency order of rules
 	once(sen_id(_, Problem_Id, _, Answer, _)),
 	%problem_id_TTterms(Problem_Id, Prem_TTterms, Hypo_TTterms),
 	( Align == 'align' ->
-		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB)
-	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB)
+		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB1)
+	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB1)
 	),
-	%findall(ccg(Id, CCGTree),
-	%		( sen_id(Id, Problem_Id, _, _, _),
-	%		  ccg(Id, CCGTree) ),
-	%		CCG_IDs
-	%),
-	%ccgs_to_llfs_latex(CCG_IDs),
+	append(KB0, KB1, KB01),
+	list_to_ord_set(KB01, KB),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
 	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
@@ -472,25 +490,25 @@ gentail(Align, Problem_Id) :-
 	uList2List(XP_, XP),
 	format('XP: ~w~n', [XP]).
 
+% TODO: remove redundancy from this predicate
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % doesnt take into account answer of the problem
 gentail_no_answer(Problem_Id) :-
 	gentail_no_answer('no_align', Problem_Id).
 
 gentail_no_answer(Align, Problem_Id) :-
+	gentail_no_answer(Align, [], Problem_Id).
+
+gentail_no_answer(Align, KB0, Problem_Id) :-
 	set_rule_eff_order, % defines an effciency order of rules
 	once(sen_id(_, Problem_Id, _, Answer, _)),
 	%problem_id_TTterms(Problem_Id, Prem_TTterms, Hypo_TTterms),
 	( Align == 'align' ->
-		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB)
-	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB)
+		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB1)
+	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB1)
 	),
-	%findall(ccg(Id, CCGTree),
-	%		( sen_id(Id, Problem_Id, _, _, _),
-	%		  ccg(Id, CCGTree) ),
-	%		CCG_IDs
-	%),
-	%ccgs_to_llfs_latex(CCG_IDs),
+	append(KB0, KB1, KB01),
+	list_to_ord_set(KB01, KB),
 	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
 	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
@@ -602,6 +620,7 @@ ccgTree_to_TTterms(CCGTree, TTterms) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :-
+	( debMode(gtraceProb(Prob_Id)) -> gtrace, true; true ),
 	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'p', _, _), Prem_Sen_Ids),
 	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'h', _, _), Hypo_Sen_Ids),
 	findall(CCGTree,	( member(Id, Prem_Sen_Ids), ccg(Id, CCGTree) ),		PremCCGTrees),
