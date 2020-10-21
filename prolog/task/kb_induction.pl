@@ -43,6 +43,12 @@ train_dev_eval_sick_parts((Tccg,Tsen), (Dccg,Dsen), (Eccg,Esen), Config) :-
 	train_with_abduction(Config, TPIDA, KB, T_Scores, T_Acc),
 	format('~`=t Learned Knowledge ~`=t~80|~n', []),
 	maplist(writeln, KB),
+	% write knowledge
+	( debMode(waif(FileName)) ->
+		format(atom(KBFile), '~w_KB.pl', [FileName]),
+		write_induced_kb_in_file(KB, KBFile, Config)
+	; true
+	),
 	unload_file(Tccg), unload_file(Tsen),
 	% pedict on train set
 	evaluate_on_portion(Config, KB, (Tccg,Tsen), TFile, TAPR),
@@ -89,7 +95,7 @@ evaluate_on_portion(Config, KB, (CCG,SEN), File, APR) :-
 	APR = [100*AccE, 100*PrecE, 100*RecE].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Knowledge induction with 10-fold cross-validation.
+% Knowledge induction with 3-fold cross-validation.
 % This is used to find the best settings for KB learning on small training data.
 % leave Answers as _ to allow all answers.
 cv_induce_knowledge(PrIDs, Answers, Config) :-
@@ -306,18 +312,19 @@ kb_induction_some(Config, Init_KB, IDAs, LL_KB, Info5) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge from a single problem
 % This prints rarely when the parallel mode is on
-kb_induction_prob(Config, Init_KB, (PrId,Ans), Learned_KBs, Info5) :-
-	print_pre_hyp(PrId),
-	prepare_ttTerms_KB(PrId, _Config, Init_KB, PTT-HTT, AlPTT-AlHTT, AugKB),
-	get_branches(Ans, Config, AugKB, PTT-HTT, AlPTT-AlHTT, TTterms, Branches, Status),
-	%!!! Another branch is not built yet
-	!,
-	discover_knowledge(Config, TTterms, Branches, AugKB, (PrId,Ans), Status, Learned_KBs, Info5),
+kb_induction_prob(Config, KB0, (PrId,Ans), Learned_KBs, Info5) :-
+	( prepare_ttTerms_KB(PrId, _Config, KB0, PTT-HTT, AlPTT-AlHTT, KB1) ->
+		print_pre_hyp(PrId),
+		get_branches(Ans, Config, KB1, PTT-HTT, AlPTT-AlHTT, TTs, Brs, St),
+		!, %!!! Another branch is not built yet
+		discover_knowledge(Config, TTs, Brs, KB1, (PrId,Ans), St, Learned_KBs, Info5)
+	; Info5 = [PrId, Ans, 'failed', 'Failed to get TT-terms', 'defected']
+	),
 	par_format('~t~w~6| [~w]-~w: ~w (~w)~n', Info5),
 	par_format('~`-t~50|~n', []).
 
 % HACK find out if this happens
-kb_induction_prob(_Config, _Init_KB, _PrIdAs, _, _Stat_Ans) :-
+kb_induction_prob(_Config, _KB0, _PrIdAs, _, _Stat_Ans) :-
 	format('??? This should not happen!'),
 	fail.
 
@@ -401,12 +408,12 @@ discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get TTterms necessary for tableau building
 % ??? redundant
-prepare_ttTerms_KB(PrId, _Config, Init_KB, PTT-HTT, AlPTT-AlHTT, KB3) :-
+prepare_ttTerms_KB(PrId, _Config, Init_KB, PTT-HTT, AlPTT-AlHTT, Fin_KB) :-
 	%prepare rule list, LLFs, and KB
 	%set_rule_eff_order,
 	problem_to_ttTerms('both', PrId, PTT, HTT, AlPTT, AlHTT, KB1),
 	append(Init_KB, KB1, KB2),
-	sort(KB2, KB3).
+	sort(KB2, Fin_KB).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get branch list for a specific entailment problem and its answer
