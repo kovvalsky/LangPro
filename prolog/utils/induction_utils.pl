@@ -319,11 +319,15 @@ waif_cv3('exp.T', 'exp.D', 'exp.E').
 % Add lexicon and kb to problem id and answer pair
 add_lex_to_id_ans(ID_Ans, (ID,Ans,Lex)) :-
 	ID_Ans =.. [_, ID, Ans],
-	problem_to_ttTerms('both', ID, PTT, HTT, AlPTT, AlHTT, _KB),
-	append([PTT, HTT, AlPTT, AlHTT], TTterms),
-	extract_lex_NNPs_ttTerms(TTterms, LexPos, _Names),
-	findall(L, member((L,_), LexPos), LexList),
-	list_to_ord_set(LexList, Lex).
+	%write(ID),
+	( problem_to_ttTerms('both', ID, PTT, HTT, AlPTT, AlHTT, _KB) ->
+		append([PTT, HTT, AlPTT, AlHTT], TTterms),
+		extract_lex_NNPs_ttTerms(TTterms, LexPos, _Names),
+		findall(L, member((L,_), LexPos), LexList),
+		list_to_ord_set(LexList, Lex)
+	; Lex = []
+	).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
