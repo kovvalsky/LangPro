@@ -7,7 +7,9 @@ r=50; c=20; name=rEFF_r${r}_c${c}; sbatch --partition=short --time=30:00 --cpus-
 
 ```
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r800,w3,-k,c20_ab,ch,cKB,cT,p123.log
+
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,ch,cKB,cT,p123.log
+# results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c16_ab,ch,cKB,cT,p123.log
 ```
 
 
