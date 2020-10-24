@@ -15,6 +15,7 @@ results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,ch,cKB,cT,p123.
 
 *Ablation*
 ```
+# single
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,cKB,cT,p123.log
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,ch,cKB,p123.log
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,ch,cT,p123.log
@@ -22,6 +23,9 @@ results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,-k,-w,c20_ab,ch,cKB,cT,p123.
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,c20_ab,ch,cKB,cT,p123.log
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,ch,cKB,cT,p12.log
 results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,ch,cKB,cT,p1.log
+
+# tripple -cKB, -cT, -ch
+results/starSEM_2020/CV-3/ccg/train_trial/al,ch,r50,w3,-k,c20_ab,p123.log
 ```
 
 *Train & evaluate*
