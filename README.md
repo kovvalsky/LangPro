@@ -33,5 +33,5 @@ Checking WN relations:
 Without specifying POS tags:
 `wn_preds:represents_wn_rel((burn,A)-(burning,B), Fact).`
 
-Query for hyponym/hypernym
+Query for hyponym/hypernym:
 `wn_preds:word_hyp(_, walk, cover, P, S1, S2)`
