@@ -31,5 +31,7 @@ Checking WN relations:
 `Lex = [(fallen, 'JJ'), (dead, 'NN')], kb_from_wn(Lex, KB).`
 
 Without specifying POS tags:
-`wn_preds:represents_wn_rel((burn,A)-(burning,B), Fact).
-`
+`wn_preds:represents_wn_rel((burn,A)-(burning,B), Fact).`
+
+Query for hyponym/hypernym
+`wn_preds:word_hyp(_, walk, cover, P, S1, S2)`
