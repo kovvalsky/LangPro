@@ -1,6 +1,6 @@
 # LangPro: Natural Language Theorem Prover
 LangPro is a tableau-based theorem prover for natural logic and language.
-See the [online demo](http://h2770688.stratoserver.net/).
+See the [online demo](https://naturallogic.pro/LangPro/).
 <!-- (http://naturallogic.pro/langpro). -->
 
 Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment` (i.e. `yes`), `contradiction` (i.e. `no`) or `neutral` (i.e. `unknown`).  
