@@ -70,19 +70,19 @@ draw_extended_matrix_3(Results, [Total,Acc,Prec,Rec]) :-
 	% Calculating useful numbers
 	sum_list([YY, NN], 					YY_NN),
 	sum_list([YY_NN, YN, NY, UY, UN], 	YNU_YN),
-	( YNU_YN \= 0 ->  	Prec = YY_NN / YNU_YN; 	Prec = 2 ),
+	( YNU_YN \= 0 ->  	Prec = YY_NN / YNU_YN; 	Prec = 0 ),
 
 	sum_list([YY_NN, YN, NY, YU, NU], 	YN_YNU),
 	sum_list([YN_YNU, YD, ND],			YN_YNUD),
-	( YN_YNUD \= 0 ->  	Rec = YY_NN / YN_YNUD; 		Rec = 2 ),
-	( YN_YNU \= 0 ->  	TrRec = YY_NN / YN_YNU; 	TrRec = 2 ),
+	( YN_YNUD \= 0 ->  	Rec = YY_NN / YN_YNUD; 		Rec = 0 ),
+	( YN_YNU \= 0 ->  	TrRec = YY_NN / YN_YNU; 	TrRec = 0 ),
 
 	sum_list([YY_NN, UU], 			YY_NN_UU),
 	sum_list([YN_YNU, UY, UN, UU],	YNU_YNU),
 	sum_list([YNU_YNU, YD, ND, UD],	YNU_YNUD),
 	sum_list([YY_NN_UU, UD],		YY_NN_UU_UD),
-	( YNU_YNUD \= 0 ->  Acc = YY_NN_UU_UD / YNU_YNUD; 	Acc = 2 ),
-	( YNU_YNU \= 0 ->  	TrAcc = YY_NN_UU / YNU_YNU; 	TrAcc = 2 ),
+	( YNU_YNUD \= 0 ->  Acc = YY_NN_UU_UD / YNU_YNUD; 	Acc = 0 ),
+	( YNU_YNU \= 0 ->  	TrAcc = YY_NN_UU / YNU_YNU; 	TrAcc = 0 ),
 	% checking on correctness
 	length(Results, Total),
 	(YNU_YNUD is Total -> 	true; 	report(['Warnning: Matrix calculation']) ),
@@ -135,19 +135,19 @@ draw_extended_matrix_2(Results, 'nil') :-
 	findall( _,	member((_, 'no_unk',	'no_unk', 	'NA',		'Defected'), 	Results),	U_D), 	length(U_D, UD),
 	% Calculating useful numbers
 	sum_list([YY, UY], 	YUxY),
-	( YUxY \= 0 ->  	Prec = YY / YUxY; 	Prec = 2 ),
+	( YUxY \= 0 ->  	Prec = YY / YUxY; 	Prec = 0 ),
 
 	sum_list([YY, YU], 	YxYU),
 	sum_list([YxYU, YD], YxYUD),
-	( YxYUD \= 0 ->  	Rec = YY / YxYUD; 	Rec = 2 ),
-	( YxYU \= 0  ->  	TrRec = YY / YxYU; 	TrRec = 2 ),
+	( YxYUD \= 0 ->  	Rec = YY / YxYUD; 	Rec = 0 ),
+	( YxYU \= 0  ->  	TrRec = YY / YxYU; 	TrRec = 0 ),
 
 	sum_list([YY, UU], YY_UU),
 	sum_list([YY_UU, UY, YU],	YUxYU),
 	sum_list([YUxYU, YD, UD],	YUxYUD),
 	sum_list([YY_UU, UD],		YY_UU_UD),
-	( YUxYUD \= 0 ->  Acc = YY_UU_UD / YUxYUD; 	Acc = 2 ),
-	( YUxYU \= 0 ->  	TrAcc = YY_UU / YUxYU; 	TrAcc = 2 ),
+	( YUxYUD \= 0 ->  Acc = YY_UU_UD / YUxYUD; 	Acc = 0 ),
+	( YUxYU \= 0 ->  	TrAcc = YY_UU / YUxYU; 	TrAcc = 0 ),
 	% checking on correctness
 	length(Results, Total),
 	(YUxYUD is Total -> 	true; 	report(['Warnning: Matrix calculation']) ),
