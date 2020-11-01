@@ -119,3 +119,11 @@ parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
 %  ss([...])			list of frequent sysnsets to choose
 % allInt				All noun modifeirs are intersective
 % lab_map:mapping_name	Map labels of problems to other ones, e.g., for SICK
+%
+%%%%%%%%%%%%  Ab|In-duction parameters  %%%%%%%%%%%%%%%%%
+% align-(both|no_align|both)	when building tableau for abduction use $align LLFs
+% constchk			Use consistency check of sentences to discard induced KB
+% fold-N			Defines N-CV for abduction
+% constKB			abduced KB should be consistent with initial KB
+% compTerms			abduced KB should contain relations over compatible terms
+% patterns-[pat]	list of patterns, e.g., _@_, etc
