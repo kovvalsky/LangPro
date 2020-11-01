@@ -51,7 +51,7 @@ rule_priority([
 	be_pp, be_a_s, be_a_obj, a_subj_be,
 	vp_pass2, %vp_pass1,
 	vp_pp,
-	v_pr_v_pp,
+	v_pr_v_pp, pr_v_v_pp, pr_v_v_pr, v__pr_v_pr,
 	the_c, %the,
 	fact_v_s_tr, fact_v_tr, fact_v_fl, it_is_tr_fl,
 	tr_every_c, fl_a_c, tr_no_c,
@@ -189,7 +189,7 @@ r(int_mod_fl, impl:non, ([], [], _), _Lexicon, _KB-XP,
 		TLP = tlp(_,Lem,POS,_,_),
 		%!!! what about allInt here?
 		( intersective(Lem)
-		%; POS = 'JJ' % relaxing constraints sick-2791
+		; POS = 'JJ', debMode('allInt') % relaxing constraints sick-2791, 5671
 		; atom_chars(POS, ['V','B'|_]) % verbs are as intersective adjectives sick-2722
 		; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
 		  privative(Priv)
@@ -1312,7 +1312,7 @@ r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _,
 
 
 
-% Verb @ PR @ NP <=> Verb (PR @ NP)
+% Verb @ PR [NP..] => (PR @ NP) @ Verb [..]
 % jump over c1 <=> jump (over c1)
 % sick-150, 1480, 1483, 7755, wrong-1481
 r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,   %sick-150
@@ -1328,7 +1328,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-8091 accidentally
-/*r(v_pr_v_pp, 	impl:non, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+r(pr_v_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,_POS,F1,F2), (np:_~>_)~>np:_~>_) @ VP, TyS ),  [C, D | Rest], TF )],
 			Sig)
 		===>
@@ -1338,10 +1338,11 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			final_value_of_type(TyS, s:_),
 			TyS = np:_~>TyVP,
 			set_type_for_tt(VP, TyVP, VP1),
-			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).*/
+			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-3561, 4117
-r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+% PR @ V [C] => V @ PR [C]
+r(pr_v_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), (np:_~>s:_)~>np:_~>s:_) @ VP, TyVP),  [C], TF )],
 			Sig)
 		===>
@@ -1349,6 +1350,21 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Sig) )
 :-
 			set_type_for_tt(VP, pr~>TyVP, VP1).
+
+% sick-3702
+% V @ NP @ PP/PR [C] => V @ PP/PR @ NP [C]
+r(v__pr_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+		br([nd( M, ( (VP @ NP, _) @ (tlp(Tk,Over,POS,F1,F2),TyP), TyVP ), [C], TF )],
+			Sig)
+		===>
+		br([nd( M, ((VP1 @ (tlp(Tk,Over,POS,F1,F2),TyP), np:_~>TyVP) @ NP, TyVP), [C], TF )],
+			Sig) )
+:-
+			memberchk(TyP, [pp, pr]),
+			NP = (_, NP_Ty),
+			memberchk(NP_Ty, [np:_, e]),
+			final_value_of_type(TyVP, s:_),
+			set_type_for_tt(VP, TyP~>np:_~>TyVP, VP1).
 
 
 

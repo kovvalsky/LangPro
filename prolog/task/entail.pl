@@ -3,10 +3,10 @@
 :- use_module('../knowledge/wn_preds').
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
 :- use_module('../utils/user_preds', [
-	remove_adjacent_duplicates/2, prob_input_to_list/2, partition_list_into_N_even_lists/3,
+	prob_input_to_list/2, partition_list_into_N_even_lists/3,
 	at_most_n_random_members_from_list/3,  print_prob/1, ul_append_ul/2
 	]).
-:- use_module('../printer/conf_matrix', [draw_extended_matrix/1, draw_matrix/1]).
+:- use_module('../printer/conf_matrix', [draw_extended_matrix/2, draw_matrix/1]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../latex/latex_ttterm', [latex_probs_llfs/2]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
@@ -19,7 +19,7 @@
 	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2,
 	normalize_lexicon/2, token_norm_ttTerm/3
 	]).
-:- use_module('../knowledge/ind_kb', [add_ind_kb/2]).
+:- use_module('../knowledge/ind_kb', [add_ind_kb/2, induced_rel/1]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % entailment with the first GQTT
@@ -27,9 +27,9 @@ entail_all :- entail_all('both').
 
 entail_all(Align) :-
 	findall( (Problem_Id, Answer),
-		sen_id(_, Problem_Id, _, Answer, _),
+		( sen_id(_, Problem_Id, _, Answer, _), memberchk(Answer, ['yes', 'no', 'unknown']) ), % to descard ill-problems of SNLI
 		ProbIds_Answers),
-	remove_adjacent_duplicates(ProbIds_Answers, ProblemIds_Answers),
+	list_to_set(ProbIds_Answers, ProblemIds_Answers),
 	set_rule_eff_order, % defines an effciency order of rules
 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 	( debMode(parallel(_)) ->
@@ -37,7 +37,7 @@ entail_all(Align) :-
 		parallel_solve_entailment(Align, ProblemIds_Answers, Results)
 	; maplist(solve_entailment(Align), ProblemIds_Answers, Results)
 	),
-	draw_extended_matrix(Results).
+	draw_extended_matrix(Results, _Scores).
 
 
 %(Id, Ans, Provers_Ans, Closed, Status)
@@ -49,29 +49,10 @@ entail_all(Align, List_of_Answers) :-
 	findall( (Problem_Id, Answer),
 		( sen_id(_, Problem_Id, _, Answer, _), member(Answer, List_of_Answers)  ),
 		ProbIds_Answers),
-	remove_adjacent_duplicates(ProbIds_Answers, ProblemIds_Answers),
+	list_to_set(ProbIds_Answers, ProblemIds_Answers),
 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 	maplist(solve_entailment(Align), ProblemIds_Answers, Results),
-	draw_extended_matrix(Results).
-
-
-% parallel version of solve_entailment
-parallel_solve_entailment(Align, ProblemIds_Answers, Results) :-
-	debMode(parallel(Cores)),
-	partition_list_into_N_even_lists(ProblemIds_Answers, Cores, JobList),
-	length(JobList, JobNumber),
-	% report Job partition
-	report(['Number of jobs: ', JobNumber]),
-	maplist(length, JobList, ListJobLength),
-	atomic_list_concat(ListJobLength, ', ', JobMessage),
-	report(['Length of jobs: ', JobMessage]),
-	% Run concurrent solver for all jobs at the same time and collect all the results in the end
-	concurrent_maplist(solve_accu_job(Align), JobList, ResultList),
-	partition_list_into_N_even_lists(Results, _, ResultList).
-
-solve_accu_job(Align, ProblemIds_Answers, Results) :-
-	maplist(solve_entailment(Align), ProblemIds_Answers, Results).
-
+	draw_extended_matrix(Results, _Scores).
 
 
 entail_some(List_Int) :-
@@ -89,7 +70,7 @@ entail_some(Align, List_Int) :-
 	),
 	set_rule_eff_order, % defines an effciency order of rules
 	findall( (Problem_Id, Answer),  (member(Problem_Id, List), sen_id(_, Problem_Id, _, Answer, _)),  ProbIds_Answers ),
-	remove_adjacent_duplicates(ProbIds_Answers, ProblemIds_Answers),
+	list_to_set(ProbIds_Answers, ProblemIds_Answers),
 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 	( debMode(parallel(_)) ->
 		%concurrent_maplist(solve_entailment(Align), ProblemIds_Answers, Results)
@@ -97,7 +78,7 @@ entail_some(Align, List_Int) :-
 	; maplist(solve_entailment(Align), ProblemIds_Answers, Results)
 	),
 	%maplist(solve_entailment(Align), ProblemIds_Answers, Results),
-	draw_extended_matrix(Results).
+	draw_extended_matrix(Results, _Scores).
 
 
 % bad fracas 12,16,61,62,77,78,213,276,305,308,309,310
@@ -107,18 +88,18 @@ entail_some(Align, List_Int) :-
 % 	findall( (Problem_Id, Answer),
 % 		sen_id(_, Problem_Id, _, Answer, _),
 % 		ProbIds_Answers),
-% 	remove_adjacent_duplicates(ProbIds_Answers, ProblemIds_Answers),
+% 	list_to_set(ProbIds_Answers, ProblemIds_Answers),
 % 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 % 	maplist(list_solve_entailment, ProblemIds_Answers, Results),
 % 	%draw_matrix(Results).
-% 	draw_extended_matrix(Results).
+% 	draw_extended_matrix(Results, _Scores).
 
 
 % list_entail_some(List) :-
 % 	findall( (Problem_Id, Answer),
 % 		( member(Problem_Id, List), sen_id(_, Problem_Id, _, Answer, _) ),
 % 		ProbIds_Answers),
-% 	remove_adjacent_duplicates(ProbIds_Answers, ProblemIds_Answers),
+% 	list_to_set(ProbIds_Answers, ProblemIds_Answers),
 % 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 % 	maplist(list_solve_entailment, ProblemIds_Answers, Results),
 % 	draw_matrix(Results).
@@ -142,8 +123,8 @@ entail_some(Align, List_Int) :-
 			write(Id), write('-yes,'), writeln(' fail'), Result = (yes, false);
 			write(Id), write('-no, '), writeln(' pass'), Result = (no, false) ).
 */
-
-solve_entailment(Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) :-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+solve_entailment(Align, IKB, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) :-
 	( Answer = 'undef' ->
 		Ans = 'unknown'
 	  ; Ans = Answer
@@ -152,14 +133,40 @@ solve_entailment(Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) :
 	%	entail_2(Id, Ans, Provers_Ans, XP, Closed, Status);
 	( debMode('shallow') ->
 		shallow_reasoning(Id, Provers_Ans, XP_, Closed, Status)%,  Closed = 'closed'
-	; entail(Align, Id, Ans, Provers_Ans, XP_, Closed, Status)
+	; entail(Align, IKB, Id, Ans, Provers_Ans, XP_, Closed, Status)
 	),
 	term_to_atom(Status, AtomStatus),
-	( debMode('prprb') ->  findall(Sen, sen_id(_,Id,_,_,Sen), Sentences), maplist(writeln, Sentences); true ),
+	( ( debMode('prprb'); Provers_Ans \= Ans ) ->
+		findall(Sen, sen_id(_,Id,_,_,Sen), Sentences),
+		format_list(atom(Prob), '~n      ~w', Sentences)
+	; Prob = '' ),
 	uList2List(XP_, XP),
-	format('~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~t~12+ XP: ~w~n', [Id, Ans, Provers_Ans, Closed, AtomStatus, XP]).
+	format('~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~t~12+ XP: ~w~w~n', [Id, Ans, Provers_Ans, Closed, AtomStatus, XP, Prob]).
 
+solve_entailment( Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) :-
+	% by default initial KB is empty
+	solve_entailment(Align, [], (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status)).
 
+%----------------------------------------------
+% parallel version of solve_entailment
+parallel_solve_entailment(Align, ProblemIds_Answers, Results) :-
+	parallel_solve_entailment(Align, [], ProblemIds_Answers, Results).
+
+parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
+	debMode(parallel(Cores)),
+	partition_list_into_N_even_lists(ProblemIds_Answers, Cores, JobList),
+	length(JobList, JobNumber),
+	% report Job partition
+	report(['Number of jobs: ', JobNumber]),
+	maplist(length, JobList, ListJobLength),
+	atomic_list_concat(ListJobLength, ', ', JobMessage),
+	report(['Length of jobs: ', JobMessage]),
+	% Run concurrent solver for all jobs at the same time and collect all the results in the end
+	concurrent_maplist(solve_accu_job(Align, KB), JobList, ResultList),
+	partition_list_into_N_even_lists(Results, _, ResultList).
+
+solve_accu_job(Align, KB, ProblemIds_Answers, Results) :-
+	maplist(solve_entailment(Align, KB), ProblemIds_Answers, Results).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Returns List of TTterms corresponding to
@@ -325,37 +332,59 @@ consistency_check(KB_XP, LLF, Answer) :-
 	memberchk((Closed, Answer), [('open','Consistent'), ('closed','Inconsistent'), ('NA', 'Defected')]).
 
 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+entail(Align, Id, Answer, Provers_Answer, XP, Closed, FinalStatus) :-
+	% by default with empty initial KB
+	entail(Align, [], Id, Answer, Provers_Answer, XP, Closed, FinalStatus).
 %/*
 % solves problems - doesnt knows the answer beforehand
-entail(Align, PrId, _Answer, Provers_Answer, XP, Closed, FinalStatus) :-
-	% writeln(PrId),
-	findall(_X, sen_id(_, PrId, _, _, _), Prem_Hyp), % finds the length of the problem
-	%problem_id_TTterms(PPrId, Prem_TTs, Hypo_TTs), Align_Prem_TTs = Prem_TTs, Align_Hypo_TTs = Hypo_TTs,
-	problem_to_ttTerms(Align, PrId, Prem_TTs, Hypo_TTs, Align_Prem_TTs, Align_Hypo_TTs, KB),
-	append(Prem_TTs, Hypo_TTs, LLFs),
-	( ttTerms_same_type(LLFs, _Type) ->
-	  ( debMode('constchk') -> maplist(consistency_check(KB-[]), LLFs, Checks); Checks = [] ), % no explanation from consistency checking
-	  ( memberchk('Inconsistent', Checks) ->
-		  atomic_list_concat(Checks, ', ', Text), report(['Warning: CONTRADICTION found in an LLF:\n', Text]),
-		  (Provers_Answer, Closed, FinalStatus, XP) = ('unknown', 'NA', 'Defected', _)
-	  ; Align = 'align' ->
-	  	  solve_problem(PrId, KB-XP, Align_Prem_TTs, Align_Hypo_TTs, Provers_Answer, Closed, FinalStatus)
-	  ; Align = 'no_align' ->
-		  solve_problem(PrId, KB-XP, Prem_TTs, Hypo_TTs, Provers_Answer, Closed, FinalStatus)
-	  ; solve_problem(PrId, KB-XPna, Prem_TTs, Hypo_TTs, NoA_Prov_Ans, NoA_Closed, NoA_Status),
-	    solve_problem(PrId, KB-XPal, Align_Prem_TTs, Align_Hypo_TTs, Align_Prov_Ans, Align_Closed, Align_Status),
-	    ( Align_Closed \== 'closed', NoA_Closed \== 'closed', \+append(Prem_TTs, Hypo_TTs, Prem_Hyp) -> % if an item in the problem is defected
-		    (Provers_Answer, XP, Closed, FinalStatus) = ('unknown', _, 'NA', 'Defected')
-	    ; Align_Closed == 'closed' ->
-		    (Provers_Answer, XP, Closed, FinalStatus) =  (Align_Prov_Ans, XPal, Align_Closed, Align_Status)
-        ; (Provers_Answer, XP, Closed, FinalStatus)   =  (NoA_Prov_Ans, XPna, NoA_Closed, NoA_Status)
-	    )
-      ), !
-    ; report(['Inconsistency in node types - entail']),
-	  (Provers_Answer, Closed, FinalStatus) = ('unknown', 'NA', 'Defected')
+entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
+	% start tracing a particular problem
+	( debMode(gtraceProb(Id)) -> gtrace, true; true ),
+	nonvar(Align),
+	findall(_X, sen_id(_, Id, _, _, _), Prem_Hyp), % finds the length of the problem
+	%problem_id_TTterms(Id, P_TTs, H_TTs), AP_TTs = P_TTs, AH_TTs = H_TTs,
+	( problem_to_ttTerms(Align, Id, P_TTs, H_TTs, AP_TTs, AH_TTs, OKB) ->
+	  	append(IKB, OKB, KB), % merge initial and obtained KBs
+		append(P_TTs, H_TTs, LLFs),
+		( ttTerms_same_type(LLFs, _Type) ->
+			( debMode('constchk') ->
+				maplist(consistency_check(KB-[]), LLFs, Checks)
+			; Checks = []
+			),
+			( memberchk('Inconsistent', Checks) ->
+				atomic_list_concat(Checks, ', ', Text),
+				report(['Warning: CONTRADICTION found in an LLF:\n', Text]),
+				% no explanation from consistency checking
+	  			(Pred, Cl, Status, XP) = ('unknown', 'NA', 'Defected', _)
+			; align_solve_problem(Align, KB, Id, Prem_Hyp, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status)
+			)
+		; report(['Inconsistency in node types (entail/8)']),
+			(Pred, Cl, Status) = ('unknown', 'NA', 'Defected')
+		)
+	; report(['Failed to get ttTerms (entail/8)']),
+		(Pred, Cl, Status) = ('unknown', 'NA', 'Defected')
 	).
+
+% solve a problem which has well-formed and consistent LLFs
+% while solving take into account alignment flag
+align_solve_problem('align', KB, Id, _, _, _, AP_TTs, AH_TTs, Pred, XP, Cl, Status) :-
+	solve_problem(Id, KB-XP, AP_TTs, AH_TTs, Pred, Cl, Status).
+
+align_solve_problem('no_align', KB, Id, _, P_TTs, H_TTs, _, _, Pred, XP, Cl, Status) :-
+	solve_problem(Id, KB-XP, P_TTs, H_TTs, Pred, Cl, Status).
+
+align_solve_problem('both', KB, Id, P_H, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status) :-
+	solve_problem(Id, KB-XP_N, P_TTs, H_TTs, Pred_N, Cl_N, Status_N),
+	solve_problem(Id, KB-XP_A, AP_TTs, AH_TTs, Pred_A, Cl_A, Status_A),
+    ( Cl_A \== 'closed', Cl_N \== 'closed', \+append(P_TTs, H_TTs, P_H) ->
+		% if an item in the problem is defected
+		(Pred, XP, Cl, Status) = ('unknown', _, 'NA', 'Defected')
+	; Cl_A == 'closed' ->
+		(Pred, XP, Cl, Status) =  (Pred_A, XP_A, Cl_A, Status_A)
+	; (Pred, XP, Cl, Status)   =  (Pred_N, XP_N, Cl_N, Status_N)
+	).
+
 %*/
 
 % entailment for binary classification
@@ -428,19 +457,18 @@ gentail(Problem_Id) :-
 	gentail('no_align', Problem_Id).
 
 gentail(Align, Problem_Id) :-
+	gentail(Align, [], Problem_Id).
+
+gentail(Align, KB0, Problem_Id) :-
 	set_rule_eff_order, % defines an effciency order of rules
 	once(sen_id(_, Problem_Id, _, Answer, _)),
 	%problem_id_TTterms(Problem_Id, Prem_TTterms, Hypo_TTterms),
 	( Align == 'align' ->
-		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB)
-	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB)
+		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB1)
+	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB1)
 	),
-	%findall(ccg(Id, CCGTree),
-	%		( sen_id(Id, Problem_Id, _, _, _),
-	%		  ccg(Id, CCGTree) ),
-	%		CCG_IDs
-	%),
-	%ccgs_to_llfs_latex(CCG_IDs),
+	append(KB0, KB1, KB01),
+	list_to_ord_set(KB01, KB),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
 	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
@@ -462,25 +490,25 @@ gentail(Align, Problem_Id) :-
 	uList2List(XP_, XP),
 	format('XP: ~w~n', [XP]).
 
+% TODO: remove redundancy from this predicate
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % doesnt take into account answer of the problem
 gentail_no_answer(Problem_Id) :-
 	gentail_no_answer('no_align', Problem_Id).
 
 gentail_no_answer(Align, Problem_Id) :-
+	gentail_no_answer(Align, [], Problem_Id).
+
+gentail_no_answer(Align, KB0, Problem_Id) :-
 	set_rule_eff_order, % defines an effciency order of rules
 	once(sen_id(_, Problem_Id, _, Answer, _)),
 	%problem_id_TTterms(Problem_Id, Prem_TTterms, Hypo_TTterms),
 	( Align == 'align' ->
-		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB)
-	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB)
+		problem_to_ttTerms(Align, Problem_Id, _, _, Prem_TTterms, Hypo_TTterms, KB1)
+	  ; problem_to_ttTerms('no_align', Problem_Id, Prem_TTterms, Hypo_TTterms, _, _, KB1)
 	),
-	%findall(ccg(Id, CCGTree),
-	%		( sen_id(Id, Problem_Id, _, _, _),
-	%		  ccg(Id, CCGTree) ),
-	%		CCG_IDs
-	%),
-	%ccgs_to_llfs_latex(CCG_IDs),
+	append(KB0, KB1, KB01),
+	list_to_ord_set(KB01, KB),
 	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
 	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
@@ -592,6 +620,7 @@ ccgTree_to_TTterms(CCGTree, TTterms) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :-
+	( debMode(gtraceProb(Prob_Id)) -> gtrace, true; true ),
 	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'p', _, _), Prem_Sen_Ids),
 	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'h', _, _), Hypo_Sen_Ids),
 	findall(CCGTree,	( member(Id, Prem_Sen_Ids), ccg(Id, CCGTree) ),		PremCCGTrees),

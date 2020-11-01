@@ -90,7 +90,9 @@ r(cl_subsumption_complex, 	closure, _, _Lexicon, KB_xp,  %!!! is this rule worth
 				  ; match_list_only_terms(M1, M2) )
 				),
 			match_ttTerms(TTmod1, TTmod2, KB_xp), % ignoring tokens and heads  !!! no downward monotone e.g. fracas-210
-			tt_mon_up(TTmod1), %!!! fracas-211, 210, large mouse-/->large animal
+			once(( tt_mon_up(TTmod1) %!!! fracas-211, 210, large mouse-/->large animal
+			; debMode('allInt'), TTmod1 = (tlp(_,_,'JJ',_,_),_)
+			)),
 	 		ttTerm_to_informative_tt(TT1, (Term1, _Type1)),
 			ttTerm_to_informative_tt(TT2, (Term2, _Type2)),
 	 		atom(Term1),

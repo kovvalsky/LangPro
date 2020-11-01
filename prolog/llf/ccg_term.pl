@@ -10,7 +10,6 @@
 :- use_module('../lambda/lambda_tt', [
 	norm_tt/2, op(605, xfy, ~>), op(605, yfx, @)
 	]).
-:- use_module('../printer/reporting', [report/1]).	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,31 +30,32 @@ ccgTree_to_ccgTerm(Tree, (Term, UndirCat)) :-
 		%write(SemType), write('\t'), write(UndirCat), nl,	% for sem vs syn types
 		downcase_atom(Lemma, LowerCase),
 		Term = tlp(Token, LowerCase, POS, Feat1, Feat2);
-	Tree = lx(Cat, _, A) ->	
+	( Tree = lx(Cat, _, A)
+	; Tree = lex(Cat, _, A) ) ->
 		ccgTree_to_ccgTerm(A, TC),
 		dirCat_to_undirCat(Cat, UndirCat),
 		Term = TC;
 		%write(Tree), write('\m');% temp
-	( Tree = tr(Cat, A) 
-	; (Tree = tr(Cat, _, A)) )  ->  % second for easyCCG output
+	( Tree = tr(Cat, A)
+	; Tree = tr(Cat, _, A) )  ->  % second for easyCCG output
 		dirCat_to_undirCat(Cat, UndirCat),
 		UndirCat = (CatArg ~> CatVal) ~> CatVal,
 		ccgTree_to_ccgTerm(A, TC),
-		TC_X = (_, CatArg ~> CatVal),	
-		Term = abst(TC_X, (TC_X @ TC, CatVal));	
-	(Tree = fa(Cat, A, B); 
-	 Tree = ba(Cat, B, A))  -> 
+		TC_X = (_, CatArg ~> CatVal),
+		Term = abst(TC_X, (TC_X @ TC, CatVal));
+	( Tree = fa(Cat, A, B)
+	; Tree = ba(Cat, B, A) )  ->
 		dirCat_to_undirCat(Cat, UndirCat),
-		ccgTree_to_ccgTerm(A, TC_A), 
-		ccgTree_to_ccgTerm(B, TC_B),  
+		ccgTree_to_ccgTerm(A, TC_A),
+		ccgTree_to_ccgTerm(B, TC_B),
 		Term = TC_A @ TC_B;
-	(Tree =  fc(Cat, A, B);
-	 Tree =  bc(Cat, B, A);
-	 Tree = fxc(Cat, A, B);
-	 Tree = bxc(Cat, B, A)) ->
-		dirCat_to_undirCat(Cat, UndirCat), 
+	(Tree =  fc(Cat, A, B)
+	; Tree =  bc(Cat, B, A)
+	; Tree = fxc(Cat, A, B); Tree = fx(Cat, A, B)
+	; Tree = bxc(Cat, B, A); Tree = bx(Cat, B, A) ) ->
+		dirCat_to_undirCat(Cat, UndirCat),
 		UndirCat = Cat_X ~> Cat_Val,
-		ccgTree_to_ccgTerm(A, TC_A), 
+		ccgTree_to_ccgTerm(A, TC_A),
 		ccgTree_to_ccgTerm(B, TC_B),
 		TC_B = (_, Cat_X ~> Cat_Val_B),
 		TC_X = (_, Cat_X),
@@ -63,41 +63,48 @@ ccgTree_to_ccgTerm(Tree, (Term, UndirCat)) :-
 	Tree = conj(Cat, Arg, A, B) ->
 		dirCat_to_undirCat(Cat, UndirCat),
 		dirCat_to_undirCat(Arg, UndirArg),
-		UndirCat = UndirArg ~> UndirArg, 
-		ccgTree_to_ccgTerm(A, (TA, _CA)), 
+		UndirCat = UndirArg ~> UndirArg,
+		ccgTree_to_ccgTerm(A, (TA, _CA)),
 		ccgTree_to_ccgTerm(B, TC_B),
-		TC_A = (TA, UndirArg~>UndirArg~>UndirArg), 
+		TC_A = (TA, UndirArg~>UndirArg~>UndirArg),
 		TC_B = (_TB, UndirArg),
 		%term_to_atom(CA, Atom), writeln(Atom),
 		%term_to_atom(UndirCatArg, Atom1), writeln(Atom1),
 		%term_to_atom(CB, Atom2), writeln(Atom2),
 		Term = TC_A @ TC_B;
-	(Tree = lp(Cat, _, A);
-	 Tree = rp(Cat, A, _)) ->
+	( Tree = lp(Cat, P, A)
+	; Tree = rp(Cat, A, P) ) ->
 		dirCat_to_undirCat(Cat, UndirCat),
 		%B = t(_, _, _, P, _, _),
 		%once(member(P, [':','.',',','"', '#','$','`','(',')','\'', 'LQU', 'RQU'])),
-		ccgTree_to_ccgTerm(A, (Term, UndirCat));  
-	(Tree = ltc(Cat, _, A);
-	 Tree = rtc(Cat, A, _)) ->
+		ccgTree_to_ccgTerm(A, (Term1, UndirCat1)),
+		( UndirCat1 = UndirCat ->
+			Term = Term1 % punctuation can be omitted as it acts as identity term
+		; P =.. ['t', _PunctCat | TLPCN ],
+		  TP =.. ['t', UndirCat1~>UndirCat | TLPCN ], 
+		  ccgTree_to_ccgTerm(TP, TP_C),
+		  Term = TP_C @ (Term1, UndirCat1)
+		);
+	( Tree = ltc(Cat, _, A)
+	; Tree = rtc(Cat, A, _) ) ->
 		dirCat_to_undirCat(Cat, UndirCat),
 		ccgTree_to_ccgTerm(A, TC_A),
 		Term = TC_A;
-	(Tree = gbxc(Cat, 2, A, B);  Tree = gbc(Cat, 2, A, B);
-     Tree = gbxc(Cat, A, B);     Tree = gbc(Cat, A, B);
-	 Tree = gfxc(Cat, 2, B, A);  Tree = gfc(Cat, 2, B, A);
-     Tree = gfxc(Cat, B, A);     Tree = gfc(Cat, B, A) ) ->
+	( Tree = gbxc(Cat, 2, A, B);  Tree = gbc(Cat, 2, A, B)
+    ; Tree = gbxc(Cat, A, B);     Tree = gbc(Cat, A, B)
+	; Tree = gfxc(Cat, 2, B, A);  Tree = gfc(Cat, 2, B, A)
+    ; Tree = gfxc(Cat, B, A);     Tree = gfc(Cat, B, A) ) ->
 		dirCat_to_undirCat(Cat, UndirCat),
 		ccgTree_to_ccgTerm(A, TC_A),
 		ccgTree_to_ccgTerm(B, TC_B),
 		TC_A = (_, Cat_X ~> Cat_Y ~> Cat_Val_A),
-		UndirCat = Cat_X ~> Cat_Y ~> Cat_Val, 
+		UndirCat = Cat_X ~> Cat_Y ~> Cat_Val,
 		TC_X = (_, Cat_X),
 		TC_Y = (_, Cat_Y),
 		Term = abst(TC_X, (abst(TC_Y, (TC_B @ ((TC_A @ TC_X, Cat_Y ~> Cat_Val_A) @ TC_Y, Cat_Val_A), Cat_Val)), Cat_Y ~> Cat_Val));
-	Tree =.. [Comb | _],
-	report(['Error in getting CCGterms: ', Comb]).
-	%write(Id).	 
+	Tree =.. [Comb | _], % !!! fail?
+	format('Error in getting CCGterms: ~w', [Comb]).
+	%write(Id).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -114,10 +121,4 @@ dirCat_to_undirCat(DirCat, UndirCat) :-
 	nonvar(DirCat),
 	((DirCat = s; DirCat = n; DirCat = np) ->
 		UndirCat = DirCat : _Feat;
-	 UndirCat = DirCat ).	
-
-
-
-
-
-
+	 UndirCat = DirCat ).
