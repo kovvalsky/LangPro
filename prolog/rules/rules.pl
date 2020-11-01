@@ -189,7 +189,7 @@ r(int_mod_fl, impl:non, ([], [], _), _Lexicon, _KB-XP,
 		TLP = tlp(_,Lem,POS,_,_),
 		%!!! what about allInt here?
 		( intersective(Lem)
-		%; POS = 'JJ' % relaxing constraints sick-2791
+		; POS = 'JJ', debMode('allInt') % relaxing constraints sick-2791, 5671
 		; atom_chars(POS, ['V','B'|_]) % verbs are as intersective adjectives sick-2722
 		; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
 		  privative(Priv)
