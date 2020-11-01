@@ -11,7 +11,7 @@
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
-	concurrent_maplist_n_jobs/3, element_list_member/3, keep_smallest_lists/2,
+	concurrent_maplist_n_jobs/3, keep_smallest_lists/2, %element_list_member/3,
 	list_to_freqList/2, shared_members/2, sort_list_length/2,
 	sublist_of_list/2, sym_rels_to_canonical/2, two_lists_to_pair_list/3, prob_input_to_list/2,
 	partition_list_into_N_even_lists/3, two_lists_to_pairList/3,
@@ -25,7 +25,8 @@
 	]).
 :- use_module('../utils/induction_utils', [
 	add_lex_to_id_ans/2, filterAns_prIDs_Ans/3, format_pairs/2, get_IDAs/2,
-	has_rel_against_kb/3, has_rel_wo_comparables/2, log_parameters/1, print_learning_phase_stats/3,
+	has_rel_against_kb/3, has_rel_incomparables/2, kb_length/2,
+	log_parameters/1, print_learning_phase_stats/3,
 	print_kb_learning_stages/3, print_phase_stats/4, partition_as_prIDs_Ans/6,
 	print_learning_stages/2, write_induced_kb_in_file/3, waif_cv3/3
 	]).
@@ -33,7 +34,7 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% when development or evaluation sets are unspecified they will be ignored
 train_dev_eval_sick_parts((Tccg,Tsen), (Dccg,Dsen), (Eccg,Esen), Config) :-
 	log_parameters(Config),
 	waif_cv3(TFile, DFile, EFile),
@@ -101,7 +102,7 @@ evaluate_on_portion(Config, KB, (CCG,SEN), File, APR) :-
 cv_induce_knowledge(PrIDs, Answers, Config) :-
 	log_parameters(Config),
 	findall(TrAcc-TsAcc, (
-		fold_induce_knowledge(PrIDs, Answers, Config, Index, _D, TrAcc, TsAcc),
+		fold_induce_knowledge(Config, PrIDs, Answers, Index, _D, TrAcc, TsAcc),
 		format('~n~n~t End of fold ~w ~t~50|~n', [Index]),
 		format('~`=t~50|~n Train: ~2f; Test: ~2f ~n~`=t~50|~n~n', [TrAcc, TsAcc])
 		), TrTsAs),
@@ -115,7 +116,7 @@ cv_induce_knowledge(PrIDs, Answers, Config) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % One fold, Index tracks the number of the fold
-fold_induce_knowledge(PrIDs, Answers, Config, Index, Detaield, TrAcc, TsAcc) :-
+fold_induce_knowledge(Config, PrIDs, Answers, Index, Detailed, TrAcc, TsAcc) :-
 	get_value_def(Config, 'fold', N),
 	partition_as_prIDs_Ans(PrIDs, Answers, 990, N, AllParts, _CumDiff),
 	select(Test, AllParts, TrainParts), % Leaves the choice point
@@ -123,7 +124,7 @@ fold_induce_knowledge(PrIDs, Answers, Config, Index, Detaield, TrAcc, TsAcc) :-
 	append(TrainParts, Train),
 	%while_improve_induce_prove(Train, _UnSolved, Align, Check, [], _List_of_Cnt_KB). % with no init KB
 	train_test(Config, Train, Test, TrainInfo, TestInfo, TrAcc, TsAcc),
-	Detaield = ['train'-TrainInfo, 'test'-TestInfo].
+	Detailed = ['train'-TrainInfo, 'test'-TestInfo].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Train on the training set with abduction and use abduced knowledge for testing
@@ -250,22 +251,34 @@ pick_harmless_KBs(Config, SolvA, IDALs, L_KBs, Harmless_KB) :-
 %--------------------------------------------------
 % Pick the best among the KB candidates induced from the same problem
 best_kb_wrt_data(Config, SolvA, IDALs, KBs, Best_KB-Score-S-U) :-
-	maplist(estimate_kb_wrt_data(Config, SolvA, IDALs), KBs, L_Score_SU),
-	sort(0, @>=, L_Score_SU, [Score-S-U|_]),
+	maplist(estimate_kb_wrt_data(Config, SolvA, IDALs), KBs, L_Score_SU_KB),
+	sort(0, @>=, L_Score_SU_KB, Ord_L_Score_SU_KB),
+	Ord_L_Score_SU_KB = [MaxSc-_-_-_|_],
+	% keep KBs with max score & pick those with shortest relations
+	findall(X, (
+		member(X, Ord_L_Score_SU_KB), X = MaxSc-_-_-_
+	), L_MaxSc_SU_KB),
+	maplist([Head-KB, Head-KB-L]>>kb_length(KB, L),
+		L_MaxSc_SU_KB, L_MaxSc_SU_KB_Len),
+	sort(2, @=<, L_MaxSc_SU_KB_Len, [Score-S-U-Best_KB-_L | _]).
 	%!!! there can be several KBs with same max score, but pick the first
 	% 592 disj(put,reveal), disj(conceal,reveal)
-	nth1(I, L_Score_SU, Score-S-U),
-	nth1(I, KBs, Best_KB).
 
 %---------------------------------------------------
-% Evaluate KB wrt data in tems of how many proofs it helps minus harms
-estimate_kb_wrt_data(Config, SolvA, IDALs, IKB, Score-Solv-Unsolv) :-
+% Evaluate KB wrt data in terms of how many proofs it helps minus how many it harms
+estimate_kb_wrt_data(Config, SolvA, IDALs, IKB, Score-Solv-Unsolv-IKB) :-
 	% get word involved in KB
-	maplist([(ID,_), ID]>>true, SolvA, SolvIDs),
-	findall([A,B], (member(I,IKB), I=..[_,A,B]), ArgLists),
-	list_to_ord_set(ArgLists, IKB_Args),
+	maplist([(ID,_), ID]>>true, SolvA, SolvIDs_),
+	list_to_ord_set(SolvIDs_, SolvIDs),
+	% get lexical units for each rel of each KB: [disj('black dog', 'white cat')] -> [black,...,cat]
+	findall(List_AB, (
+		member(Rel,IKB), Rel=..[_,A,B],
+		atomic_list_concat(List_A, ' ', A),
+		atomic_list_concat(List_B, ' ', B),
+		append(List_A, List_B, List_AB)
+	), L_KB_Lex_Units),
 	% verify KB's contribution for each problem in data and calculate overall contribution
-	maplist(estimate_kb_wrt_prob(Config, IKB, IKB_Args), IDALs, L_Solv, L_Unsolv),
+	maplist(estimate_kb_wrt_prob(Config, IKB, L_KB_Lex_Units), IDALs, L_Solv, L_Unsolv),
 	append(L_Solv, Solv0), list_to_ord_set(Solv0, Solv1),
 	append(L_Unsolv, Unsolv0), list_to_ord_set(Unsolv0, Unsolv1),
 	ord_subtract(Solv1, SolvIDs, Solv),
@@ -273,14 +286,18 @@ estimate_kb_wrt_data(Config, SolvA, IDALs, IKB, Score-Solv-Unsolv) :-
 	length(Solv, S), length(Unsolv, U), Score is S - U.
 
 % Evaluate KB wrt a single problem
-estimate_kb_wrt_prob(Config, IKB, IKB_Args, (ID,Ans,Lex), Solv, Unsolv) :-
-	element_list_member(IKB_Args, Lex, _Args),
+estimate_kb_wrt_prob(Config, IKB, L_KB_Lex_Units, (ID,Ans,Lex), Solv, Unsolv) :-
+	member(KB_Lex_Units, L_KB_Lex_Units),
+	sublist_of_list(KB_Lex_Units, Lex),
 	!,
 	get_value_def(Config, 'align', Align),
 	entail(Align, IKB, ID, Ans, Pred, _, _, _),
-	( Ans == Pred -> Solv = [ID]; Unsolv = [ID] ).
+	( Ans == Pred ->
+		(Solv, Unsolv) = ([ID], [])
+	; (Solv, Unsolv) = ([], [ID])
+	).
 
-estimate_kb_wrt_prob(_Config, _IKB, _IKB_Args, (_,_,_Lex), [], []).
+estimate_kb_wrt_prob(_Config, _IKB, _L_KB_Lex_Units, (_,_,_Lex), [], []).
 
 
 
@@ -314,7 +331,8 @@ kb_induction_some(Config, Init_KB, IDAs, LL_KB, Info5) :-
 % This prints rarely when the parallel mode is on
 kb_induction_prob(Config, KB0, (PrId,Ans), Learned_KBs, Info5) :-
 	( prepare_ttTerms_KB(PrId, _Config, KB0, PTT-HTT, AlPTT-AlHTT, KB1) ->
-		print_pre_hyp(PrId),
+		% print_pre_hyp(PrId),
+		% for align-both, non-aligned is built only if aligned tableau generation fails
 		get_branches(Ans, Config, KB1, PTT-HTT, AlPTT-AlHTT, TTs, Brs, St),
 		!, %!!! Another branch is not built yet
 		discover_knowledge(Config, TTs, Brs, KB1, (PrId,Ans), St, Learned_KBs, Info5)
@@ -356,6 +374,7 @@ discover_knowledge(_Config, _TTterms, [_|_], _KB1, (PrId,'unknown'), Status, [],
 discover_knowledge(Config, TTterms, Branches, KB1, (PrId,Ans), Status, Learned_KBs, Info5) :-
 	% patterns of inspected LLFs
 	( get_value_def(Config, 'patterns', Patterns), is_list(Patterns) -> true
+	% by default, if not specified, patterns with upto 3 terms are used
 	; Patterns = [_, _@_, (_@_)@_, _@(_@_)]	),
 	discover_patterned_knw(Config, TTterms, Branches, KB1, Patterns, Learned_KBs),
 	( Learned_KBs = []
@@ -386,7 +405,7 @@ discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) 
 	findall(ClKB, (
 		member(ClKB, L_ClKB),
 		\+((has_rel_against_kb(ClKB, Lexicon, IniKB), ConstKB)),
-		\+((has_rel_wo_comparables(ClKB, Lexicon), CompTerms))
+		\+((has_rel_incomparables(ClKB, Lexicon), CompTerms))
 		), L_goodClKB),
 	sort(L_goodClKB, Ord_goodClKB),
 	% Discard those KBs that require more assumptions. So if there is KB0 < KB1, remove KB1
@@ -511,7 +530,7 @@ closing_rule_knowledge(br(Nodes,_,_), Rule, KB0, NewKB) :-
 	uList2List(KB0_X, KB_All),
 	sym_rels_to_canonical(KB_All, Cano_KB_All),
 	sort(Cano_KB_All, KB_All_Sorted),
-	ord_subtract(KB_All_Sorted, KB0, NewKB).
+	subtract(KB_All_Sorted, KB0, NewKB).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
