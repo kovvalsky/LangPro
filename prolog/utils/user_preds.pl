@@ -9,11 +9,12 @@
 		average_list/2,
 		all_pairs_from_set/2,
 		at_most_n_random_members_from_list/3,
+		atom_char_occur/3,
 		add/3, minus/3, diff/3,
 		choose/3,
 		concurrent_maplist_n_jobs/3,
 		const_ttTerm/1,
-		element_list_member/3,
+		%element_list_member/3,
 		is_greater/2,
 		get_value_def/3,
 		keep_smallest_lists/2,
@@ -25,6 +26,7 @@
 		format_list/3,
 		format_list_list/3,
 		format_list_list/4,
+		last_member/2,
 		list_to_set_using_match/2,
 		match_lowerCase/2,
 		neg/2,
@@ -474,6 +476,11 @@ true_choose([H|Rest], C, [H|Rest1]) :-
 	true_choose(Rest, C, Rest1).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pic last element of a list
+last_member(M, List) :-
+	once(append(_, [M], List)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % shuffle a list
 shuffle_list([], []).
 
@@ -489,10 +496,10 @@ shared_members(Members, Lists) :-
     ; findall(M, (maplist(member(M), Lists)), Members).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% get all elements shared by a set of lists
-element_list_member(List_of_Lists, List, List_Element) :-
-	member(List_Element, List_of_Lists),
-	sublist_of_list(List_Element, List).
+% List_Element is a member of List_of_Lists that is sublist of List
+% element_list_member(List_of_Lists, List, List_Element) :-
+% 	member(List_Element, List_of_Lists),
+% 	sublist_of_list(List_Element, List).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % C1 is replaced by C2 in Nodes and results in NewNodes
@@ -966,3 +973,14 @@ get_value_def(KeyVals, Key, Value) :-
 	;	Value = false
 	), !.
  % it is possible to add default values for some keys
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% count how many times chars of atom1 occur in atom2
+atom_char_occur(A1, A2, N) :-
+	atom_chars(A1, Chars1),
+	atom_chars(A2, Chars2),
+	findall(Ch, (
+		member(Ch, Chars2), memberchk(Ch, Chars1)
+	), Occurs),
+	length(Occurs, N).
