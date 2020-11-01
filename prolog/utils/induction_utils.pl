@@ -6,7 +6,8 @@
 		format_pairs/2,
 		get_IDAs/2,
 		has_rel_against_kb/3,
-		has_rel_wo_comparables/2,
+		has_rel_incomparables/2,
+		kb_length/2,
 		log_parameters/1,
 		partition_as_prIDs_Ans/6,
 		print_learning_stages/2,
@@ -20,8 +21,9 @@
 :- use_module(library(pairs)).
 :- use_module(library(random)).
 :- use_module('../utils/user_preds.pl', [
-	partition_list_into_N_even_lists/3, prob_input_to_list/2, prIDs_to_prIDs_Ans/2, diff/3,
-	freqList_subtract/3, list_to_freqList/2, pairwise_append/2
+	atom_char_occur/3, partition_list_into_N_even_lists/3, prob_input_to_list/2,
+	prIDs_to_prIDs_Ans/2, diff/3,
+	freqList_subtract/3, list_to_freqList/2, last_member/2, pairwise_append/2
 	]).
 %:- use_module('../printer/reporting', [write_parList/1]).
 
@@ -44,6 +46,10 @@ partition_as_prIDs_Ans(Problems, Answers, Seed, N, Parts, CumDiff) :-
 
 %---------------------------------
 % Print label distribution (%) from the problem-ans list
+print_prID_Ans_dist([], Distribution) :-
+	!, Distribution = [0, 0, 0],
+	format('Yes:~1f%  No:~1f%  Unk:~1f%~n', Distribution).
+
 print_prID_Ans_dist(PrIDs_Ans, Distribution) :-
 	length(PrIDs_Ans, N),
 	prID_Ans_distribution(PrIDs_Ans, Lab_cnt),
@@ -127,43 +133,21 @@ write_kb_as_term(S, Func, Term) :-
 % Lex keeps POS-tags of constants that can be informative for constant comparability check
 has_rel_against_kb(List, Lex, KB) :-
 	member(X, List),
-	bad_fact(X, Lex, KB),
+	once(bad_fact(X, Lex, KB)),
 	!.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % identifies bad/nonsensical facts
-bad_fact(ant_wn(A, B), _Lex, KB) :-
-	  memberchk(isa_wn(A, B), KB)
-	; memberchk(isa_wn(B, A), KB).
-
-bad_fact(disj(A, B), _Lex, KB) :-
-	  memberchk(isa_wn(A, B), KB)
-	; memberchk(isa_wn(B, A), KB).
-
-% disj(yong boy, boy)
-bad_fact(disj(A, B), _Lex, KB) :-
-	atomic_list_concat(A_Words, ' ', A),
-	( memberchk(B, A_Words) %! lazy check
-	; A_Words = [_A1, A2],
-		memberchk(isa_wn(A2, B), KB)
-	). % avoids disj(kid, young boy) when isa_wn(boy, kid) SICK-train-3
-
-% disj(smile, smile nearby)
-bad_fact(disj(A, B), _Lex, KB) :-
-	atomic_list_concat(B_Words, ' ', B),
-	( memberchk(A, B_Words) %! lazy check
-	; B_Words = [_B1, B2],
-		memberchk(isa_wn(B2, A), KB)
-	).
-
-% disj(smile nearby, nearby smile)	but bit risky !!!
-bad_fact(disj(A, B), _Lex, _KB) :-
-	atomic_list_concat([X, Y], ' ', A),
-	atomic_list_concat([Y, X], ' ', B).
+bad_fact(Fact, _Lex, KB) :-
+	Fact =.. [F, A, B],
+	memberchk(F, ['disj', 'ant_wn']),
+	positively_rel_p_p(KB, A, B).
 
 % isa_wn(full, empty)	for SICK-train-90
+% are isa_wn relations added during abduction?
 bad_fact(isa_wn(A, B), _Lex, KB) :-
-	memberchk(ant_wn(A, B), KB).
+	  memberchk(ant_wn(A, B), KB)
+	; memberchk(disj(A, B), KB).
 
 % don't learn knowkedge about determiners
 % avoid learning isa_wn(a, s) from 3122
@@ -173,23 +157,63 @@ bad_fact(Fact, Lex, _KB) :-
 	member((B, Pos), Lex),
 	memberchk(Pos, ['DT']).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% every word in A is positively related to some word in B
+% symmetric
+positively_rel_w_w(KB, A, B) :-
+	( A = B
+	; memberchk(isa_wn(A, B), KB)
+	; memberchk(isa_wn(B, A), KB)
+	; memberchk(sim_wn(A, B), KB)
+	; memberchk(sim_wn(B, A), KB)
+	), !.
+	%! der_wn?
+
+% Word is positively related to some word in a phrase
+% non-symmetric,
+% relates (young boy, boy), (young boy, kid) SICK-train-3
+positively_rel_p_w(KB, P, W) :-
+	atomic_list_concat(List, ' ', P),
+	member(L, List),
+	positively_rel_w_w(KB, W, L),
+	!.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% symmetric positive relatedness of phrases
+% relates (smile nearby, nearby smile)
+positively_rel_p_p(KB, P1, P2) :-
+	( pos_rel_p_p_(KB, P1, P2)
+	; pos_rel_p_p_(KB, P2, P1)
+	), !.
+
+% all words in the first phrase is positively related to some word in another phrase
+% non-symmetric
+pos_rel_p_p_(KB, P1, P2) :-
+	atomic_list_concat(Ws1, ' ', P1),
+	maplist(positively_rel_p_w(KB, P2), Ws1).
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-has_rel_wo_comparables(List, Lex) :-
+has_rel_incomparables(List, Lex) :-
 	member(X, List),
-	rel_wo_comparables(X, Lex),
+	rel_incomparables(X, Lex),
 	!.
 
 %!!! This blocks disj(put@on, remove)
 % disj(two, woman)	but bit risky !!
-rel_wo_comparables(Fact, Lex) :-
+rel_incomparables(Fact, Lex) :-
 	Fact =.. [_, A, B],
-	member((A,_), Lex),
-	member((B,_), Lex),
+	% being in lexicon is a pre-condition for checking incomparability
+	once(( member((A,_), Lex), member((B,_), Lex) )),
 	findall(0, (
 		member((A, PosA), Lex),
 	   	member((B, PosB), Lex),
 		comparable_pos_tags(PosA, PosB)
-	), []).
+	), Incomp_Num),
+	% makes findall more transparent
+	Incomp_Num = [].
 
 % this bloks examples like
 % 305(walk, covered); 305(walk, nude);
@@ -329,7 +353,6 @@ add_lex_to_id_ans(ID_Ans, (ID,Ans,Lex)) :-
 	).
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get IDAs from IDAs or IDALs
 get_IDAs(IDALs, IDAs) :-
@@ -337,3 +360,20 @@ get_IDAs(IDALs, IDAs) :-
 		member(E, IDALs),
 		once((E = (ID,A,_); E = (ID,A); E = (ID-A-_); E = (ID-A)))
 	), IDAs).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate length of KB as a sum of lengths of its relations
+% Length of a relation is 1 + sum of arg lengths
+% this is a length in terms of constants not characters
+kb_length(KB, N) :-
+	maplist(rel_length, KB, Ls),
+	sum_list(Ls, N).
+
+rel_length(Rel, N) :-
+	Rel =.. [R|Args],
+	maplist(llf_atom_length, [R|Args], Ls),
+	sum_list(Ls, N).
+
+llf_atom_length(Atom, L) :-
+	atom_char_occur('@ ', Atom, N),
+	L is N + 1. % splitting into N+1 piecies
