@@ -29,7 +29,7 @@ If you use the theorem prover, please cite [Abzianidze (2017)](https://www.aclwe
 
 For the manual on how to use the prover or how to obtain reported results, consult the [wiki](https://github.com/kovvalsky/LangPro/wiki). 
 
-# Quick links to the [manual pages](https://github.com/kovvalsky/LangPro/wiki):
+# Quick links to the [wiki pages](https://github.com/kovvalsky/LangPro/wiki):
 
 * [Using the prover](https://github.com/kovvalsky/LangPro/wiki/Using-the-prover)
 * [Producing LLFs](https://github.com/kovvalsky/LangPro/wiki/Producing-LLFs)
