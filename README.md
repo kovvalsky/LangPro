@@ -1,6 +1,6 @@
-# LangPro: Natural Language Theorem Prover
+# [LangPro](https://github.com/kovvalsky/LangPro): Natural [Lang](https://github.com/kovvalsky/LangPro)uage Theorem [Pro](https://github.com/kovvalsky/LangPro)ver
 LangPro is a tableau-based theorem prover for natural logic and language.
-See the [online demo](https://naturallogic.pro/LangPro/).
+See the [online demo](https://naturallogic.pro/LangPro/) (not the latest version).
 <!-- (http://naturallogic.pro/langpro). -->
 
 Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment` (i.e. `yes`), `contradiction` (i.e. `no`) or `neutral` (i.e. `unknown`).  
@@ -11,7 +11,7 @@ ____________    ________             ___________      ________________________  
 |Hypothesis|--->|Parser|------------>|Generator|----->|  for Natural Logic   |--->|relation|
 ‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾ 
 ```
-If you use the theorem prover please cite [Abzianidze (2017)](https://www.aclweb.org/anthology/D17-2020):
+If you use the theorem prover, please cite [Abzianidze (2017)](https://www.aclweb.org/anthology/D17-2020):
 ```
 @inproceedings{abzianidze-2017-langpro,
     title = "{L}ang{P}ro: Natural Language Theorem Prover",
@@ -27,9 +27,9 @@ If you use the theorem prover please cite [Abzianidze (2017)](https://www.aclweb
 }
 ```
 
-For the manual on how to use the prover, consult the [wiki](https://github.com/kovvalsky/LangPro/wiki). 
+For the manual on how to use the prover or how to obtain reported results, consult the [wiki](https://github.com/kovvalsky/LangPro/wiki). 
 
-Quick table of content of the manual:
+# Quick table of content of the manual:
 
 * [Using the prover](https://github.com/kovvalsky/LangPro/wiki/Using-the-prover)
 * [Producing LLFs](https://github.com/kovvalsky/LangPro/wiki/Producing-LLFs)
