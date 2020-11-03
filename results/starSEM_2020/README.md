@@ -13,7 +13,7 @@ if you don't want to use already parsed and prolog-formatted SICK sentences foun
 `cN` makes use of `N` threads for concurrent theorem proving. `c0` uses all available threads.  
 `w3` uses WordNet relations: synonymy, hypernymy/hyponymy, similar, derivation, and antonymy.  
 `ccg` denotes CCG derivations obtained from C&C with the rebanked model.  
-`eccg` denotes CCG derivations from EasyCCG with the standard model.
+`eccg` denotes CCG derivations from EasyCCG with the standard model.  
 `depccg.trihf.sep` denotes CCG derivations from DepCCG with thw standard triheadfirst model, where each SICK sentence is parsed separately.
 the DepCCG derivations use EasyCCG lemmatizer and the C&C named entity recognizer.
 This decision is not the best for performance but makes the settings comparable to [Yanaka et al. (2018)](https://www.aclweb.org/anthology/N18-1069/). 
