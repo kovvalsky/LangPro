@@ -45,6 +45,10 @@ results/starSEM_2020/TE/ccg/TD_E/al,ch,w3,-k,r50,c0_ab,ch,cKB,cT,p123.ans.T
 results/starSEM_2020/TE/ccg/TD_E/al,ch,w3,-k,r50,c0_ab,ch,cKB,cT,p123.log
 ```
 
+To run the abductive learning for derivations produced by other parsers, replace `ccg` with `eccg` or `depccg.trihf.sep` in the above command.
+
+# Evaluation scores
+
 The scores of training and evaluation can be found in `*.log` and also obtained via running the evaluation script on predicted labels:
 ```
 python3 python/evaluate.py --sys results/starSEM_2020/TE/ccg/TD_E/al,ch,w3,-k,r50,c0_ab,ch,cKB,cT,p123.ans.E  --gld SICK_dataset/SICK_test_annotated.txt 
@@ -53,6 +57,8 @@ Evaluate aggregated predictions from different CCG parser-based LangPro versions
 ```
 python3 python/evaluate.py --sys results/starSEM_2020/TE/ccg/TD_E/al,ch,w3,-k,r50,c0_ab,ch,cKB,cT,p123.ans.E  results/starSEM_2020/TE/eccg/TD_E/al,ch,w3,-k,r50,c0_ab,ch,cKB,cT,p123.ans.E  results/starSEM_2020/TE/depccg.trihf.sep/TD_E/al,ch,w3,-k,r50,c0_ab,ch,cKB,cT,p123.ans.E  --gld SICK_dataset/SICK_test_annotated.txt --hybrid
 ```
+
+# References
 
 For more details about the **Learning as Abduction** see [wiki pages](https://github.com/kovvalsky/LangPro/wiki/Learning-as-abduction)
 
