@@ -1,4 +1,4 @@
-**Replicating results reported in the [Learning as Abduction](https://arxiv.org/abs/2010.15909)** paper.
+**Replicating results reported in the [Learning as Abduction](https://arxiv.org/abs/2010.15909) paper.**
 
 # Required
 
