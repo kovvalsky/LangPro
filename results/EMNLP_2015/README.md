@@ -4,9 +4,9 @@ The hybrid predictions are aggregations of the predictions based on the C&C and 
 
 `Tested for 0054975c88a5ae1aa07c1d12800ee55108aec015`
 ```
-python3 python/evaluate.py --sys results/EMNLP_2015_results/sick_test_candc_800.ans  results/EMNLP_2015_results/sick_test_easyccg_800.ans --gld SICK_dataset/SICK_test_annotated.txt 
+python3 python/evaluate.py --sys results/EMNLP_2015/sick_test_candc_800.ans  results/EMNLP_2015/sick_test_easyccg_800.ans --gld SICK_dataset/SICK_test_annotated.txt 
 2 systems' output read
-results/EMNLP_2015_results/sick_test_candc_800.ans
+results/EMNLP_2015/sick_test_candc_800.ans
 ---------------------------------------------------------------
                      ENTAILMENT   CONTRADICTION         NEUTRAL
 ---------------------------------------------------------------
@@ -17,7 +17,7 @@ results/EMNLP_2015_results/sick_test_candc_800.ans
 accuracy    : 79.93%
 precision   : 97.99%
 recall      : 54.73%
-results/EMNLP_2015_results/sick_test_easyccg_800.ans
+results/EMNLP_2015/sick_test_easyccg_800.ans
 ---------------------------------------------------------------
                      ENTAILMENT   CONTRADICTION         NEUTRAL
 ---------------------------------------------------------------
@@ -29,7 +29,7 @@ accuracy    : 79.05%
 precision   : 97.99%
 recall      : 52.67%
 
-python3 python/evaluate.py --sys results/EMNLP_2015_results/sick_test_candc_800.ans  results/EMNLP_2015_results/sick_test_easyccg_800.ans --gld SICK_dataset/SICK_test_annotated.txt  --hybrid
+python3 python/evaluate.py --sys results/EMNLP_2015/sick_test_candc_800.ans  results/EMNLP_2015/sick_test_easyccg_800.ans --gld SICK_dataset/SICK_test_annotated.txt  --hybrid
 2 systems' output read
 **********************Hybrid**********************
 ---------------------------------------------------------------
