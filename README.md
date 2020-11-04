@@ -33,4 +33,5 @@ For the manual on how to use the prover or how to obtain reported results, consu
 
 * [Using the prover](https://github.com/kovvalsky/LangPro/wiki/Using-the-prover)
 * [Producing LLFs](https://github.com/kovvalsky/LangPro/wiki/Producing-LLFs)
+* [Learning as abduction](https://github.com/kovvalsky/LangPro/wiki/Learning-as-abduction)
 * [References](https://github.com/kovvalsky/LangPro/wiki/References)
