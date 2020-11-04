@@ -5,7 +5,6 @@ $ wc -l SICK_dataset/SICK_t*
    4501 SICK_dataset/SICK_train.txt
     501 SICK_dataset/SICK_trial.txt
    9930 total
-
 ```
 
 These files can be obtained from the [SemEval-14 task 1](https://alt.qcri.org/semeval2014/task1/index.php?id=data-and-tools):
