@@ -161,6 +161,13 @@ type_to_prettyType(A~>B, A1~>B1) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Term to pretty_ttTerm
+ttTerm_to_pretty_ttTerm(VarTT, (Var, PPtype)) :-
+	VarTT =.. [_, Var, Type],
+	var(Var), !,
+    type_to_prettyType(Type, PPtype), !.
+	%term_to_atom(Var,AtomVar),
+	%atom_chars(AtomVar, [_,_|Index])
+
 ttTerm_to_pretty_ttTerm(AtomTT, (Atom, PPtype)) :-
 	AtomTT =.. [_, Atom, Type],
 	( atom(Atom); integer(Atom) ),
@@ -173,13 +180,6 @@ ttTerm_to_pretty_ttTerm(TLP_TT, (Tok:Lem:Pos:F1:F2, PPtype)) :-
 ttTerm_to_pretty_ttTerm(TLP_TT, (Tok:Lem:Pos, PPtype)) :-
 	TLP_TT =.. [_, tlp(Tok,Lem,Pos), Type],
 	type_to_prettyType(Type, PPtype), !.
-
-ttTerm_to_pretty_ttTerm(VarTT, (Var, PPtype)) :-
-	VarTT =.. [_, Var, Type],
-	var(Var),
-    type_to_prettyType(Type, PPtype), !.
-	%term_to_atom(Var,AtomVar),
-	%atom_chars(AtomVar, [_,_|Index])
 
 ttTerm_to_pretty_ttTerm(AppTT, PPterm1 @ PPterm2) :-
 	AppTT =.. [_, TTterm1 @ TTterm2, _Type], !,
