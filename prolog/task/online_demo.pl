@@ -22,11 +22,11 @@ online_demo(ID) :-
 	current_output(S),
 	problem_to_ttTerms('align', ID, Prems, Hypos, Align_Prems, Align_Hypos, KB),
 	set_rule_eff_order,
-	check_problem(KB, Align_Prems, Align_Hypos, 'yes', _, Al_Cl_yes, Al_St_yes, Al_Tr_yes),
+	check_problem(KB, Align_Prems, Align_Hypos, 'yes', _, Al_Cl_yes, Al_St_yes, _, Al_Tr_yes),
 	( Al_St_yes \== 'Defected' ->
-		check_problem(KB, Align_Prems, Align_Hypos, 'no', _,  Al_Cl_no, Al_St_no, Al_Tr_no),
-		check_problem(KB, Prems, Hypos, 'yes', _, Cl_yes, St_yes, Tr_yes),
-		check_problem(KB, Prems, Hypos, 'no', _,  Cl_no, St_no, Tr_no),
+		check_problem(KB, Align_Prems, Align_Hypos, 'no', _,  Al_Cl_no, Al_St_no, _, Al_Tr_no),
+		check_problem(KB, Prems, Hypos, 'yes', _, Cl_yes, St_yes, _, Tr_yes),
+		check_problem(KB, Prems, Hypos, 'no', _,  Cl_no, St_no, _, Tr_no),
 		( Al_Cl_yes == 'closed' ->
 			YES = ['al', Al_Cl_yes, Al_St_yes],
 			Tree_yes = Al_Tr_yes
@@ -34,7 +34,7 @@ online_demo(ID) :-
 		  YES = ['na', Cl_yes, St_yes0],
 		  Tree_yes = Tr_yes
 		),
-		( Al_Cl_no ==  'closed' -> 
+		( Al_Cl_no ==  'closed' ->
 			NO  = ['al', Al_Cl_no,  Al_St_no],
 			Tree_no = Al_Tr_no
 		; ( St_no = (Ter2, N2) -> atomic_list_concat([Ter2,N2], St_no0); St_no0 = St_no ),

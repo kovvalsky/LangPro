@@ -6,17 +6,19 @@
 	[
 		assignIds/4,
 		subtract_nodes/4,
+		single_branch_model_rules/2,
 		select_relevant_rules/3,
 		ttTerms_to_nodes_sig/6,
 		genOldArgs/3,
 		genFreshArgs/5,
 		get_closure_rules/2
-		%feed_nodes_with_args/2
 	]).
 
 :- use_module('../lambda/type_hierarchy', [sub_type/2]).
 :- use_module('../lambda/lambda_tt', [op(605, xfy, ~>)]).
-
+:- use_module('../rules/rules', [op(610, xfx, ===>)]).
+:- use_module('../llf/ttterm_to_term', [
+	ttTerm_to_prettyTerm/2, ndId_to_pretty/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % assignIds(ListOfNodes, ID_ListOfNodes)
@@ -105,7 +107,7 @@ ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
 	maplist(ttTerm_to_node(false, ArgList), F_List, F_Nodes),
 	append(T_Nodes, F_Nodes, Nodes).
 	%list_to_ord_set(Sig, Signature), not necessary
-% 
+%
 % ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
 % 	genFreshArgs(Type, Args, [], Sig, const_id(0, Ent_Id, 0, Con_Id)), %!!! John from term, must be added to Signature and mustnt wait for Arg push application
 % 	maplist(apply_ttFun_to_ttArgs(Args), T_TTlist, T_List),
@@ -169,3 +171,23 @@ get_closure_rules(Lexicon, ClRules) :-
 	findall(RuleN, clause(r(RuleN,closure,_,_,_,_),_), ListClRules),
 	list_to_ord_set(ListClRules, SetClRules),
 	select_relevant_rules(Lexicon, SetClRules, ClRules).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% keep the rules that are relevant for creating a single branch model
+single_branch_model_rules(Rules1, Rules2) :-
+	findall(R, (
+		member(R, Rules1),
+		clause(r(R, Type, _, _, _, _Head ===> Body), _Constraints),
+		Type \= 'closure',
+		\+is_list(Body)
+	), Rules2).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ndId_to_pretty(ndId(Nd, Id), Pretty) :-
+	Nd = nd(Mods, TT, Args, TF),
+	maplist(ttTerm_to_prettyTerm, Mods, PrettyMods),
+	maplist(ttTerm_to_prettyTerm, Args, PrettyArgs),
+	ttTerm_to_prettyTerm(TT, PrettyTT),
+	format(atom(Pretty), '~t~w:~5|~t~w~6+ : ~w : ~w : ~w',
+		[Id, TF, PrettyMods, PrettyTT, PrettyArgs]).

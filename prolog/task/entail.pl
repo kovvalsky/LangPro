@@ -6,8 +6,9 @@
 	prob_input_to_list/2, partition_list_into_N_even_lists/3,
 	at_most_n_random_members_from_list/3,  print_prob/1, ul_append_ul/2
 	]).
+:- use_module('../utils/generic_preds', [ format_list/3 ]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2, draw_matrix/1]).
-:- use_module('../printer/reporting', [report/1]).
+:- use_module('../printer/reporting', [report/1, add_to_stream/2]).
 :- use_module('../latex/latex_ttterm', [latex_probs_llfs/2]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/aligner', [align_ttTerms/4]).
@@ -216,12 +217,9 @@ problem_id_list_TTterms(ProbId, List_Prem_TTterms, List_Hypo_TTterms) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % checks on entailment a problem with its Id
 % uses a single reading
-check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans, Closed, Status, Tree) :-
+check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans, Closed, Status, BrList, Tree) :-
 	!,
 	( generateTableau(KB_XP, Prem_TTterms, Hypo_TTterms, BrList, Tree, Status) ->
-		%( integer(Steps) ->
-		%	Status = ('Ter', Steps)
-		%;	Status = 'Limited'),
 		( BrList = [] ->
 			Closed = 'closed', Provers_Ans = 'yes'
 		;	Closed = 'open',   Provers_Ans = 'unknown'
@@ -231,20 +229,14 @@ check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans, Closed, Sta
 		Status = 'Defected'
 	).
 
-check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'no_unk', Provers_Ans, Closed, Status, Tree) :- %Wrong
+check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'no_unk', Provers_Ans, Closed, Status, BrList, Tree) :- %Wrong
 	!,
-	check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans, Closed, Status, Tree).
+	check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans, Closed, Status, BrList, Tree).
 
-
-
-check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'no', Provers_Ans, Closed, Status, Tree) :-
+check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'no', Provers_Ans, Closed, Status, BrList, Tree) :-
 	!,
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
-	( %fail,
-	  generateTableau(KB_XP, TTterms, [], BrList, Tree, Status) ->
-		%( integer(Steps) ->
-		%	Status = 'Terminated'
-		%;	Status = 'Limited'),
+	( generateTableau(KB_XP, TTterms, [], BrList, Tree, Status) ->
 		( BrList = [] ->
 			Closed = 'closed', Provers_Ans = 'no'
 		;	Closed = 'open',   Provers_Ans = 'unknown'
@@ -254,10 +246,10 @@ check_problem(KB_XP, Prem_TTterms, Hypo_TTterms, 'no', Provers_Ans, Closed, Stat
 		Status = 'Defected'
 	).
 
-check_problem(KB-XP, Prem_TTterms, Hypo_TTterms, 'unknown', Provers_Ans, Closed, Status, _) :-
+check_problem(KB-XP, Prem_TTterms, Hypo_TTterms, 'unknown', Provers_Ans, Closed, Status, _, _) :-
 	!,
-	check_problem(KB-XP_yes, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans_yes, Closed_yes, Status_yes, _Tree1),
-	check_problem(KB-XP_no, Prem_TTterms, Hypo_TTterms, 'no', Provers_Ans_no, Closed_no, Status_no, _Tree2),
+	check_problem(KB-XP_yes, Prem_TTterms, Hypo_TTterms, 'yes', Provers_Ans_yes, Closed_yes, Status_yes, _BrList1, _Tree1),
+	check_problem(KB-XP_no, Prem_TTterms, Hypo_TTterms, 'no', Provers_Ans_no, Closed_no, Status_no, _BrList2, _Tree2),
 	( Closed_yes == 'closed' ->
 		(Provers_Ans, Closed, Status, XP) = (Provers_Ans_yes, Closed_yes, Status_yes, XP_yes)
 	; Closed_no == 'closed' ->
@@ -277,9 +269,12 @@ check_problem(KB-XP, Prem_TTterms, Hypo_TTterms, 'unknown', Provers_Ans, Closed,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solves a problem vs check
-solve_problem(PrId, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, Status) :-
-	check_problem(KB-XP_yes, Prem_TTterms, Hypo_TTterms, 'yes', _, Closed_yes, Status_yes, Tree_yes),
-	check_problem(KB-XP_no, Prem_TTterms, Hypo_TTterms, 'no', _,  Closed_no, Status_no, Tree_no),
+solve_problem(PrId_Al, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, Status) :-
+	check_problem(KB-XP_yes, Prem_TTterms, Hypo_TTterms, 'yes', _, Closed_yes, Status_yes, Br_yes, Tree_yes),
+	check_problem(KB-XP_no, Prem_TTterms, Hypo_TTterms, 'no', _,  Closed_no, Status_no, Br_no, Tree_no),
+	% write tableau proofs if needed
+	add_to_stream('branches', ([PrId_Al, 'yes'], Br_yes)),
+	add_to_stream('branches', ([PrId_Al, 'no'], Br_no)),
 	( (Closed_yes, Closed_no) == ('closed', 'closed') ->
 		report(['Warning: CONTRADICTION and ENTAILMENT at the same time: so NEUTRAL']),
 		copy_term(XP_yes, XP),
@@ -289,10 +284,10 @@ solve_problem(PrId, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, Statu
 		%report_theUsedrules_in_tree(Tree_no)
 	; (Closed_yes, Closed_no) == ('closed', 'open') ->
 		(Prover_Ans, Closed, Status, XP)  = ('yes', Closed_yes, Status_yes, XP_yes),
-		( theUsedrules_in_tree(Tree_yes, [H|T]) -> report([PrId, ': ', [H|T]]); true )
+		( theUsedrules_in_tree(Tree_yes, [H|T]) -> report([PrId_Al, ': ', [H|T]]); true )
 	; (Closed_yes, Closed_no) == ('open', 'closed') ->
 		(Prover_Ans, Closed, Status, XP)  = ('no', Closed_no, Status_no, XP_no),
-		( theUsedrules_in_tree(Tree_no, [H|T]) -> report([PrId, ': ', [H|T]]); true )
+		( theUsedrules_in_tree(Tree_no, [H|T]) -> report([PrId_Al, ': ', [H|T]]); true )
 	; (Closed_yes, Closed_no) == ('open', 'open') ->
 		Status_yes = (_,Steps1),
 		Status_no  = (_,Steps2),
@@ -324,11 +319,11 @@ entail(Problem_Id, Answer, Provers_Answer, Closed, FinalStatus) :-
 	),	!.
 */
 
-
 % checks an LLF on consistency, faisl if it is not consistent
 consistency_check(KB_XP, LLF, Answer) :-
-	check_problem(KB_XP, [LLF], [], 'yes', _PrAns, Closed, _Status, _Tree),
+	check_problem(KB_XP, [LLF], [], 'yes', _PrAns, Closed, _Status, _BrList, _Tree),
 	%ignore(greason(KB, [LLF], [], 1)), % testing sentences separetly
+	% add_to_stream(branches, (PrId-'consistency', BrList)),
 	memberchk((Closed, Answer), [('open','Consistent'), ('closed','Inconsistent'), ('NA', 'Defected')]).
 
 
@@ -345,7 +340,7 @@ entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
 	findall(_X, sen_id(_, Id, _, _, _), Prem_Hyp), % finds the length of the problem
 	%problem_id_TTterms(Id, P_TTs, H_TTs), AP_TTs = P_TTs, AH_TTs = H_TTs,
 	( problem_to_ttTerms(Align, Id, P_TTs, H_TTs, AP_TTs, AH_TTs, OKB) ->
-	  	append(IKB, OKB, KB), % merge initial and obtained KBs
+		append(IKB, OKB, KB), % merge initial and obtained KBs
 		append(P_TTs, H_TTs, LLFs),
 		( ttTerms_same_type(LLFs, _Type) ->
 			( debMode('constchk') ->
@@ -356,7 +351,7 @@ entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
 				atomic_list_concat(Checks, ', ', Text),
 				report(['Warning: CONTRADICTION found in an LLF:\n', Text]),
 				% no explanation from consistency checking
-	  			(Pred, Cl, Status, XP) = ('unknown', 'NA', 'Defected', _)
+				(Pred, Cl, Status, XP) = ('unknown', 'NA', 'Defected', _)
 			; align_solve_problem(Align, KB, Id, Prem_Hyp, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status)
 			)
 		; report(['Inconsistency in node types (entail/8)']),
@@ -369,14 +364,14 @@ entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
 % solve a problem which has well-formed and consistent LLFs
 % while solving take into account alignment flag
 align_solve_problem('align', KB, Id, _, _, _, AP_TTs, AH_TTs, Pred, XP, Cl, Status) :-
-	solve_problem(Id, KB-XP, AP_TTs, AH_TTs, Pred, Cl, Status).
+	solve_problem(Id-'align', KB-XP, AP_TTs, AH_TTs, Pred, Cl, Status).
 
 align_solve_problem('no_align', KB, Id, _, P_TTs, H_TTs, _, _, Pred, XP, Cl, Status) :-
-	solve_problem(Id, KB-XP, P_TTs, H_TTs, Pred, Cl, Status).
+	solve_problem(Id-'no_align', KB-XP, P_TTs, H_TTs, Pred, Cl, Status).
 
 align_solve_problem('both', KB, Id, P_H, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status) :-
-	solve_problem(Id, KB-XP_N, P_TTs, H_TTs, Pred_N, Cl_N, Status_N),
-	solve_problem(Id, KB-XP_A, AP_TTs, AH_TTs, Pred_A, Cl_A, Status_A),
+	solve_problem(Id-'no_align', KB-XP_N, P_TTs, H_TTs, Pred_N, Cl_N, Status_N),
+	solve_problem(Id-'align', KB-XP_A, AP_TTs, AH_TTs, Pred_A, Cl_A, Status_A),
     ( Cl_A \== 'closed', Cl_N \== 'closed', \+append(P_TTs, H_TTs, P_H) ->
 		% if an item in the problem is defected
 		(Pred, XP, Cl, Status) = ('unknown', _, 'NA', 'Defected')

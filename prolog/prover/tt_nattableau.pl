@@ -26,7 +26,7 @@
 	]).
 :- use_module('tableau_utils', [
 	assignIds/4, subtract_nodes/4, select_relevant_rules/3, ttTerms_to_nodes_sig/6,
-	get_closure_rules/2
+	get_closure_rules/2, single_branch_model_rules/2
 	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,7 +108,8 @@ generateTableau(KB-XP, T_TermList, F_TermList, BrList, Tree, Status) :-
 		),
 		admissible_rules(AdmissRules),
 		( debMode('noAdmissRules') -> subtract(Rules, AdmissRules, Rules1); Rules1 = Rules ),
-		select_relevant_rules(Lexicon, Rules1, RelRules),
+		( debMode('single_branch_model') -> single_branch_model_rules(Rules1, Rules2); Rules2 = Rules1 ),
+		select_relevant_rules(Lexicon, Rules2, RelRules),
 		%RelRules = Rules,
 		%report(['All Rules: ', Rules]),
 		%report(['Relevant Rules: ', RelRules]),
@@ -237,13 +238,13 @@ dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB_XP, Coun
 	%remove_first(RuleId, Rules, SubtrRules), append(SubtrRules, [RuleId], NewRules), % priority of rules change
 	NewRules = Rules, % priority of rules doent change
 	( RuleType = equi ->
-		pruneBranch(BrNodes, IDs, CutBrNodes, _);
+		pruneBranch(BrNodes, IDs, CutBrNodes, _)
 	  %Body = br([], _) -> %when there are no node sfor addition, mods_noun rule e.g.
 		%CutBrNodes = BrNodes;
 	% leave alone old nodes in the beginning of the branch
 		%CutBrNodes = BrNodes
 	% throw used nodes in the end of the branch
-		pruneBranch(BrNodes, IDs, TempBrNodes, Removed),
+	; pruneBranch(BrNodes, IDs, TempBrNodes, Removed),
 		reverse(Removed, RevRemoved),
 		append(TempBrNodes, RevRemoved, CutBrNodes)
 	),
