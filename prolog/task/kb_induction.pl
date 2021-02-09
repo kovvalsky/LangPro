@@ -16,8 +16,9 @@
 	sublist_of_list/2, sym_rels_to_canonical/2, two_lists_to_pair_list/3, prob_input_to_list/2,
 	partition_list_into_N_even_lists/3, two_lists_to_pairList/3,
 	uList2List/2, prIDs_to_prIDs_Ans/2, get_value_def/3,
-	format_list/3, format_list_list/3, format_list_list/4, average_list/2, all_prIDs_Ans/1
-	]).
+	average_list/2, all_prIDs_Ans/1]).
+:- use_module('../utils/generic_preds', [
+ 	format_list/3, format_list_list/3, format_list_list/4]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module(library(pairs)).
 :- use_module('../prover/tableau_utils', [

@@ -587,7 +587,7 @@ r(beta_red,	 equi:non,  ([], [], _), _Lexicon, _, % fixes case when term is type
 
 %r(eta_red,	 equi:non,  _,
 
-r(push_arg, impl:non, ([], [], _), _Lexicon, _,  % should not intyroduce
+r(push_arg, impl:non, ([], [], _), _Lexicon, _,  % should not introduce
 		br([nd( M, (TT1 @ TT2, _),
 				Args, TF )],
 		  Sig)

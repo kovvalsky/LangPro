@@ -9,6 +9,8 @@
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../lambda/type_hierarchy', [cat_eq/2]).
 
+:- dynamic debMode/1.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 correct_ccgTerm(Term, SimCorrTerm) :-
 	add_heads(Term, Term_H), % binds category features
@@ -121,7 +123,7 @@ simplify( (tlp(Tk,Lem,Pos,F1,F2), Type), (tlp(Tk,Lemma,Pos,F1,F2), Type) ) :-
 	  Lem = 'a_lot_of', Lemma = 'many';
 	  Lem = 'neither', Lemma = 'no'; % fracas-46, but neither has a presupposition
 	  Lem = 'people', Lemma = 'person';
-	  Lem = 'n\'t', Lemma = 'not';	
+	  Lem = 'n\'t', Lemma = 'not';
 	  %Lem = 'the', Lemma = 'a'; %what about the dogs? % the concert means only one concert in the branch
 	  %Lem = 's', Lemma = 'a';	% ignore plurals
 	  Lemma = Lem

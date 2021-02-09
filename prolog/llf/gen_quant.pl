@@ -10,6 +10,9 @@
 	ttExp_to_ttTerm/2, list_to_set_using_match/2,
 	choose/3, true_member/2
 	]).
+:- use_module('../utils/generic_preds', [
+	true_member/2
+	]).
 :- use_module('../lambda/type_hierarchy', [final_value_of_type/2]).
 :- use_module('../lambda/lambda_tt', [
 	norm_tt/2, op(605, yfx, @), op(605, xfy, ~>)

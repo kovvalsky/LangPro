@@ -4,6 +4,7 @@
 	'task/online_demo',
 	'printer/extract',
 	'task/sent_sim',
+	'task/sentence_semantics',
 	'task/bag_of_words',
 	'prover/tt_nattableau',
 	'task/entail',
@@ -51,6 +52,13 @@ set_debMode([H | Rest]) :-
 	; H = parallel(Cores) ->
 		( var(Cores) -> current_prolog_flag(cpu_count, Cores); true ),
 		assertz( debMode(parallel(Cores)) )
+	; H = output_branches(Exts, Filename) ->
+		findall(_, (
+			member(Ext, Exts),
+			format(atom(FilenameExt), '~w.~w', [Filename, Ext]),
+			open(FilenameExt, write, S, [encoding(utf8), close_on_abort(true)]),
+			assertz( debMode(stream(branches, Ext, S)) )
+		), _)
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).
@@ -59,7 +67,7 @@ set_debMode([]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set parameters from the scratch
-parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
+parList(Parameters) :- % TODO fix the keywords and error on unknown ones
 	is_list(Parameters) ->
 		reset_debMode,
 		set_debMode(Parameters)
@@ -74,6 +82,7 @@ parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
 % 'xml'					write terms or tableaux in XML
 % 'html'				write twrms and tableaux in HTML, outomatically creates XML files too
 % 'fix': 				prints fixes done on CCG trees
+% gtraceProb(Id)		Trigger gtrace for a particular problem
 % 'proof_tree': 		develope a proof tree
 % 'aall':				allows alignment of any NPs
 % cpu_count				the number of threads to use for concurrent run
@@ -81,6 +90,7 @@ parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
 % 'prprb':				prints the problem
 %  waif(filename): 		writes answers in file in SICK style
 %  waifx				writes extended answers in file
+%  output_branches([txt,json], filename)	output branches in a json or txt (human readable) format
 % 'ne':					reports MW Named Entity found
 % 'mwe':				multiword expression found
 % 'prlim':				prints when rule limit is reached
@@ -108,12 +118,13 @@ parList(Parameters) :- % TODO fix the keywords and erro on unknown ones
 %  fracFilter			filter Fracas problems that are ill formed
 %  noPl					Treat plural morpheme as a
 %  constchk				allow consistency check
-%  noHOQ				Treating most,many,several,a_few,both as a
-%  noThe				Treat The as a
+%  noHOQ				Treating "most", "many", "several", "a_few", "both" as "a"
+%  noThe				Treat "the" as "a"
 %  shallow				using shallow classifier
 %  neg_cont				classifier based on negative vords to identify contradictions
 %  sub_ent				classifier based on subset of set of words to identify entailment
 %  noAdmissRules		exclude admissible rules
+%  single_branch_model	Apply rules in such a way that one gets only single branches
 %  EffCr([nonBr, equi, nonProd, nonCons])	defining an effciency criterion
 %  eccg				    latex trees are probted in different tex file
 %  ss([...])			list of frequent sysnsets to choose

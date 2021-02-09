@@ -17,6 +17,8 @@
 :- use_module('disjoint', [disj_/2]).
 :- use_module('../utils/user_preds', [substitute_in_atom/4]).
 :- use_module('../printer/reporting', [report/1]).
+
+:- dynamic debMode/1.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extracting relations from WordNet
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

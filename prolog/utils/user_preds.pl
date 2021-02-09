@@ -23,9 +23,6 @@
 		list_substitution/4,
 		list_to_freqList/2,
 		freqList_subtract/3,
-		format_list/3,
-		format_list_list/3,
-		format_list_list/4,
 		last_member/2,
 		list_to_set_using_match/2,
 		match_lowerCase/2,
@@ -44,6 +41,7 @@
 		true_remove/3,
 		remove_adjacent_duplicates/2,
 		uList2List/2,
+		sen_input_to_list/2,
 		substitute_in_atom/4,
 		shared_members/2,
 		sort_list_length/2,
@@ -55,7 +53,6 @@
 		tt_mon_up/1,
 		tt_mon/2,
 		tt_atomList_to_atomList/2,
-		true_member/2,
 		two_lists_to_pair_list/3,
 		two_lists_to_pairList/3,
 		ul_append/2,
@@ -70,9 +67,9 @@
 %    Generic User Defined Predicates
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- use_module('../knowledge/lexicon', [op(640, xfy, ::), '::'/2]).
+:- use_module('../knowledge/lexicon', ['::'/2]).
 :- use_module('../knowledge/ling', [text_to_number/2]).
-:- use_module('../lambda/lambda_tt', [op(605, xfy, ~>),	op(605, yfx, @)]).
+%:- use_module('../lambda/lambda_tt', [op(605, xfy, ~>),	op(605, yfx, @)]).
 :- use_module('../lambda/type_hierarchy', [
 	sub_type/2, typeExp_to_type/2, match_arg_type/3
 	]).
@@ -80,18 +77,15 @@
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../printer/reporting', [report/1]).
 
+:- op(640, xfy, ::).
+:- op(605, xfy, ~>). 	% more than : 600
+:- op(605, yfx, @).   	% more than : 600
+
 :- multifile pid_labs/2.
 %:- discontiguous pid_labs/2.
+:- dynamic debMode/1.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% true_member(Element, List)
-% checks if Element is bound with the member of List
-% also avoids binding variables of List
-true_member(E, List) :-
-	nonvar(List),
-	List = [Head | Rest],
-	(E == Head;  % fixed
-	 true_member(E, Rest) ).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % subsumed_member(Element, List)
@@ -657,36 +651,6 @@ writeln_list([H | Rest]) :-
 	writeln_list(Rest).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Each member of list is formatted accordingly and sent to Source
-format_list(Source, Format, List) :-
-	findall(A, (
-		member(E, List),
-		format(atom(A), Format, [E])
-	), As),
-	atomic_list_concat(As, Message),
-	format(Source, '~w', [Message]).
-
-% Each list member is formatted accordingly and sent to Source
-format_list_list(Source, Format, List_of_Lists) :-
-	findall(A, (
-		member(List, List_of_Lists),
-		format(atom(A), Format, List)
-	), As),
-	atomic_list_concat(As, Message),
-	format(Source, '~w', [Message]).
-
-% Each member list of list is formatted as Format1
-% and its elements are formatted as Format2 and sent to Source
-format_list_list(Source, Format1, Format2, List_of_Lists) :-
-	findall(A1, (
-		member(List, List_of_Lists),
-		format_list(atom(A2), Format2, List),
-		format(atom(A1), Format1, [A2])
-	), As),
-	atomic_list_concat(As, Message),
-	format(Source, '~w', [Message]).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % print a problem
 print_prob(ID) :-
 	findall(S, sen_id(_,ID,_,_,S), List),
@@ -771,7 +735,7 @@ listInt_to_id_ccgs(List_Int, CCGs) :-
 	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Various input for problem IDs to list of problem _IDs
+% Various input for problem IDs to list of problem IDs
 prob_input_to_list(Input, List) :-
 	( var(Input) ->
 		findall(X, sen_id(_,X,'h',_,_), List)
@@ -786,6 +750,25 @@ prob_input_to_list(Input, List) :-
 			findall(X, (sen_id(_,X,'h',_,_), X =< Sup), List)
 		; integer(Inf), var(Sup) ->
 				findall(X, (sen_id(_,X,'h',_,_), Inf =< X), List)
+		)
+	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Various input for sentence IDs to list of sentence IDs
+sen_input_to_list(Input, List) :-
+	( var(Input) ->
+		findall(X, sen_id(X,_,_,_,_), List)
+	; is_list(Input) ->
+		List = Input
+	; integer(Input) ->
+		List = [Input]
+	; Input = Inf-Sup ->
+		( integer(Inf), integer(Sup) ->
+			findall(X, (sen_id(X,_,_,_,_), between(Inf,Sup,X)), List)
+		; var(Inf), integer(Sup) ->
+			findall(X, (sen_id(X,_,_,_,_), X =< Sup), List)
+		; integer(Inf), var(Sup) ->
+				findall(X, (sen_id(X,_,_,_,_), Inf =< X), List)
 		)
 	).
 

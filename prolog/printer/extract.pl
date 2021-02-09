@@ -5,31 +5,34 @@
 		print_lx_rules/1,
 		print_used_lexical_rules/2
 	]).
-	
+
 :- use_module('../utils/user_preds', [
 	remove_adjacent_duplicates/2, all_pairs_from_set/2, writeln_list/1,
 	list_to_set_using_match/2
-	]).	
+	]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/ccg_term', [ccgIDTree_to_ccgIDTerm/2]).
 :- use_module('../llf/correct_term', [correct_ccgTerm/2]).
 :- use_module('../llf/ner', [ne_ccg/2]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2, type_to_prettyType/2]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
-	
+
+:- discontiguous ccg/2.
+:- multifile ccg/2.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Print all lexical rules
 print_all_lx_rules :-
 	findall(Tree, ccg(_, Tree), CCGTrees),
 	maplist(print_lx_rules, CCGTrees).
 
-print_lx_rules(Tree) :- 
+print_lx_rules(Tree) :-
 	Tree =.. [t | _] ->
 		true;
 	Tree =.. [lx | _] ->
-		term_to_atom(Tree, A_Tree),	
+		term_to_atom(Tree, A_Tree),
 		writeln(A_Tree);
-	(Tree =  fa(_, A, B); 
+	(Tree =  fa(_, A, B);
 	 Tree =  ba(_, B, A);
 	 Tree =  fc(_, A, B);
 	 Tree =  bc(_, B, A);
@@ -37,15 +40,15 @@ print_lx_rules(Tree) :-
 	 Tree = bxc(_, B, A);
 	 Tree = conj(_, _, A, B);
 	 Tree = gbxc(_, 2, A, B);
-	 Tree = gfxc(_, 2, B, A))  -> 
-		print_lx_rules(A), 
+	 Tree = gfxc(_, 2, B, A))  ->
+		print_lx_rules(A),
 		print_lx_rules(B);
 	(Tree = tr(_, A);
 	 Tree = lp(_, _, A);
 	 Tree = rp(_, A, _);
 	 Tree = ltc(_, _, A);
 	 Tree = rtc(_, A, _)) ->
-		print_lx_rules(A);  
+		print_lx_rules(A);
 	writeln('ERROR in getting CCGterms').
 
 
@@ -63,10 +66,10 @@ print_used_lexical_rules( Id, ((A, Ty), Type) ) :-
 	type_to_pretty_type(Type, P_Type),
 	term_to_atom(P_Ty, A_Ty),
 	term_to_atom(P_Type, A_Type),
-	ttTerm_to_prettyTerm((A, Ty), AtomTerm), 
+	ttTerm_to_prettyTerm((A, Ty), AtomTerm),
 	write(Id), write(': '), write(AtomTerm), write(': '),
 	write(A_Ty), write(' ----> '), writeln(A_Type),
-	print_used_lexical_rules(Id, (A, Ty)). 
+	print_used_lexical_rules(Id, (A, Ty)).
 
 print_used_lexical_rules( Id, (abst(_,A), _) ) :-
 	!, print_used_lexical_rules(Id, A).
@@ -79,7 +82,7 @@ print_used_lexical_rules( _, (TLP, _) ) :-
 
 type_to_pretty_type(A:X, B) :-
 	!,
-	( var(X) -> B = A;	B = A:X ).	
+	( var(X) -> B = A;	B = A:X ).
 
 type_to_pretty_type(A~>B, A1~>B1) :-
 	!,
@@ -95,18 +98,18 @@ type_to_pretty_type(A, A) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% extract verbs and nouns from a problem 
+% extract verbs and nouns from a problem
 %concepts_from_problems( Problems, List) :-
 
 concepts_from_data :-
 	findall(PrID, sen_id(_,PrID,_,_,_), PrIDs1),
 	remove_adjacent_duplicates(PrIDs1, PrIDs),
-	maplist(concepts_from_problem, PrIDs, Sets), 
+	maplist(concepts_from_problem, PrIDs, Sets),
 	%writeln_list(Sets).
-	maplist(all_pairs_from_set, Sets, List_of_Pairs), writeln_list(List_of_Pairs). 
-	
-	
-	
+	maplist(all_pairs_from_set, Sets, List_of_Pairs), writeln_list(List_of_Pairs).
+
+
+
 
 % concepts fropm a single problem
 concepts_from_problem(ProbID, Set) :-
@@ -143,11 +146,11 @@ concepts_from_ttTerm( (abst(_,TT), _Type), Set ) :-
 concepts_from_ttTerm( ((TT,Ty), _Type), Set ) :-
 	!, concepts_from_ttTerm((TT,Ty), List),
 	list_to_set_using_match(List, Set).
-	
-	
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 pr_lex_rules_from_CorrTerm(CCG_ID) :-
 	ccgIDTree_to_ccgIDTerm(CCG_ID, ccg(Id, CCGTerm)),
@@ -156,20 +159,3 @@ pr_lex_rules_from_CorrTerm(CCG_ID) :-
 	CCGTerm_final = CCGTerm_2,
 	correct_ccgTerm(CCGTerm_final, Corr_CCGTerm_final),
 	print_used_lexical_rules(Id, Corr_CCGTerm_final).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
