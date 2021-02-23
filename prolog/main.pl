@@ -73,6 +73,17 @@ parList(Parameters) :- % TODO fix the keywords and error on unknown ones
 		set_debMode(Parameters)
 	; throw_error('No list argument given to parList!', []).
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% add terms to a stream that usually corresponds to an open file
+add_to_stream(DataType, Data) :-
+	findall(_, (
+		debMode(stream(DataType, Ext, S)),
+		( DataType == 'branches' ->
+			add_branches_to_stream(S, Data, Ext)
+		)
+	), _).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 				List of Parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -104,7 +115,7 @@ parList(Parameters) :- % TODO fix the keywords and error on unknown ones
 % '2class':				binary classification
 %  ral(N):				rule application limit is N
 %  no_gq_llfs			dont obtain LLFs with generalized quantifiers, i.e. use fixed CCG terms
-% 'gq_report'			report how quantifier raising is going on
+%  gq_report			report how quantifier raising is going on
 %  pr_lex_rules			print lexical rules that are not explained
 %  pr_sen				print a sentence when running gen_llfs_latex
 %  disj					use hand-coded disjoint relation
@@ -128,8 +139,8 @@ parList(Parameters) :- % TODO fix the keywords and error on unknown ones
 %  EffCr([nonBr, equi, nonProd, nonCons])	defining an effciency criterion
 %  eccg				    latex trees are probted in different tex file
 %  ss([...])			list of frequent sysnsets to choose
-% allInt				All noun modifeirs are intersective
-% lab_map:mapping_name	Map labels of problems to other ones, e.g., for SICK
+%  allInt				All noun modifeirs are intersective
+%  lab_map:mapping_name	Map labels of problems to other ones, e.g., for SICK
 %
 %%%%%%%%%%%%  Ab|In-duction parameters  %%%%%%%%%%%%%%%%%
 % align-(both|no_align|both)	when building tableau for abduction use $align LLFs

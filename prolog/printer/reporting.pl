@@ -6,7 +6,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :-module(reporting, [
-	add_to_stream/2,
 	compare_to_once_solved/1,
 	report_error/2,
 	throw_error/2,
@@ -21,14 +20,13 @@
 ]).
 %==================================
 :- use_module(library(ansi_term)).
-:- use_module(library(term_to_json), [term_to_json/2]).
-:- use_module(library(http/json), [json_write/2, json_write/3]).
+
 
 :- use_module('../utils/generic_preds', [
 	format_list_list/3, format_list_list/4, format_list/3
 	]).
-:- use_module('../llf/ttterm_to_term', [
-	ttTerm_to_pretty_ttTerm/2, ndId_to_pretty/2]).
+% :- use_module('../llf/ttterm_to_term', [
+% 	ttTerm_to_pretty_ttTerm/2, ndId_to_pretty_atom/2]).
 
 :- dynamic debMode/1.
 :- dynamic sen_id/5.
@@ -166,38 +164,6 @@ compare_to_once_solved(Results) :-
 
 compare_to_once_solved(_).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-% add terms to a stream that usually corresponds to an open file
-add_to_stream(DataType, Data) :-
-	findall(_, (
-		debMode(stream(DataType, Ext, S)),
-		( DataType == 'branches' ->
-			add_branches_to_stream(Data, Ext, S)
-		)
-	), _).
-
-add_branches_to_stream((Info, BrList), Ext, S) :-
-	Info = [PrId | Mode],
-	maplist([br(Nodes,Hist,Sig), json{nodes:Nodes,rules:Hist,sig:Sig}]>>true,
-			BrList, L_JsonBr),
-	( Ext == 'json' ->
-		Dict = json{id:PrId, mode:Mode, branches:L_JsonBr},
-		term_to_json(Dict, Json),
-		json_write(S, Json, [width(0)])
-	; Ext == 'txt' ->
-		( memberchk('p', Info) -> PH = 'p'; PH = 'h' ), % FIXME: only works for single prem
-		once(sen_id(_, PrId, PH, Ans, Sent)),
-		format(S, 'branches: ~w~nsentence: ~w~n', [[Ans|Info], Sent]),
-		findall(_, (
-				member(br(NdIds,Hist,Sig), BrList),
-				maplist(ndId_to_pretty, NdIds, PrettyNdIds),
-				format(S, '  [~n    ~w~n', [Sig]),
-				format_list(S, '    ~w~n', Hist),
-				format_list(S, '    ~w~n', PrettyNdIds)
-			),_)
-	),
-	nl(S),
-	flush_output(S).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

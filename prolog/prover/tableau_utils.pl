@@ -17,8 +17,6 @@
 :- use_module('../lambda/type_hierarchy', [sub_type/2]).
 :- use_module('../lambda/lambda_tt', [op(605, xfy, ~>)]).
 :- use_module('../rules/rules', [op(610, xfx, ===>)]).
-:- use_module('../llf/ttterm_to_term', [
-	ttTerm_to_prettyTerm/2, ndId_to_pretty/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % assignIds(ListOfNodes, ID_ListOfNodes)
@@ -182,12 +180,3 @@ single_branch_model_rules(Rules1, Rules2) :-
 		Type \= 'closure',
 		\+is_list(Body)
 	), Rules2).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ndId_to_pretty(ndId(Nd, Id), Pretty) :-
-	Nd = nd(Mods, TT, Args, TF),
-	maplist(ttTerm_to_prettyTerm, Mods, PrettyMods),
-	maplist(ttTerm_to_prettyTerm, Args, PrettyArgs),
-	ttTerm_to_prettyTerm(TT, PrettyTT),
-	format(atom(Pretty), '~t~w:~5|~t~w~6+ : ~w : ~w : ~w',
-		[Id, TF, PrettyMods, PrettyTT, PrettyArgs]).
