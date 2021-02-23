@@ -1,10 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module('ttterm_to_term',
 	[
-		ndId_to_pretty/2,
+		ndId_to_pretty_atom/2,
 		ttTerm_to_prettyTerm/2,
 		ttTerm_to_norm_term/5,
-		ttTermList_to_prettyTermList/2,
 		type_to_prettyType/2,
 		ttTerm_to_pretty_ttTerm/2,
 		write_pretty_ttTerm/3
@@ -20,11 +19,11 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ttTerm_to_norm_term(TTterm, BENorm, Sig, Voc, Ev_Id) :-
-		ttTerm_to_Term(TTterm, Lambda_Term, Sig, Voc, Ev_Id),
-		%write(' Term,'),
-		%(term_to_atom(Lambda_Term, Lambda_Term_Atom), writeln(Lambda_Term_Atom)),
-		betaEtaNorm(Lambda_Term, BENorm).
-		%(term_to_atom(BENorm, BENorm_Atom), writeln(BENorm_Atom)),
+	ttTerm_to_Term(TTterm, Lambda_Term, Sig, Voc, Ev_Id),
+	%write(' Term,'),
+	%(term_to_atom(Lambda_Term, Lambda_Term_Atom), writeln(Lambda_Term_Atom)),
+	betaEtaNorm(Lambda_Term, BENorm).
+	%(term_to_atom(BENorm, BENorm_Atom), writeln(BENorm_Atom)),
 
 
 
@@ -97,22 +96,9 @@ ttvarsApp_to_term_list(TTvarApp, Term, List) :-
 		Term = Term1 @ Term2).
 
 
-
-
-
-ttTermList_to_prettyTermList([TT_H | TT_Rest], [H | Rest]) :-
-	ttTerm_to_prettyTerm(TT_H, H),
-	ttTermList_to_prettyTermList(TT_Rest, Rest).
-
-ttTermList_to_prettyTermList([], []).
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TTterm or TCterm expression to lambda term
-%ttTerm_to_prettyTerm(AtomTT, Atom) :-
-%	var(AtomTT),
-%	!,
-%	fail.
+% Type information is dropped
 
 ttTerm_to_prettyTerm(AtomTT, Atom) :-
 	AtomTT =.. [_, Atom, _],
@@ -142,56 +128,73 @@ ttTerm_to_prettyTerm((TT, _), Term) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Type to prettyType
+% Type to prettyType and vice versa
 type_to_prettyType(A, A) :-
-	(atom(A); var(A)),
-	!.
+	var(A), !.
 
-type_to_prettyType(A:F, A1) :-
-	( atom(F) ->
-	  	A1 = A:F
-	  ;	A = A1
-	), !.
+type_to_prettyType(A, A) :-
+	atom(A),
+	% basic types without features
+	memberchk(A, [pp, pr]), !.
+
+type_to_prettyType(A:F, A:F) :-
+	atom(F), !.
+
+type_to_prettyType(A:F, A) :-
+	atom(A),
+	var(F), !.
 
 type_to_prettyType(A~>B, A1~>B1) :-
-	nonvar(A),
-	nonvar(B), !,
 	type_to_prettyType(A, A1),
 	type_to_prettyType(B, B1).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Term to pretty_ttTerm
-ttTerm_to_pretty_ttTerm(VarTT, (Var, PPtype)) :-
-	VarTT =.. [_, Var, Type],
+% TT term to lambda term where leaves keep type/annotation info
+% predciate is bidirectional
+ttTerm_to_pretty_ttTerm(Var, Var) :- % catching unexpacted vars
 	var(Var), !,
-    type_to_prettyType(Type, PPtype), !.
-	%term_to_atom(Var,AtomVar),
-	%atom_chars(AtomVar, [_,_|Index])
-
+	format('Untyped variable in ttTerm_to_pretty_ttTerm/2'),
+	fail.
+% var: from left to right
+ttTerm_to_pretty_ttTerm(VarTT, (Var, PPtype)) :-
+	nonvar(VarTT), VarTT =.. [_, Var, Type],
+	var(Var), !,
+	type_to_prettyType(Type, PPtype).
+% var: from right to left
+ttTerm_to_pretty_ttTerm((Var, Type), (Var, PPtype)) :-
+	var(Var), !,
+	type_to_prettyType(Type, PPtype).
+% atom: from left to right
 ttTerm_to_pretty_ttTerm(AtomTT, (Atom, PPtype)) :-
-	AtomTT =.. [_, Atom, Type],
-	( atom(Atom); integer(Atom) ),
-	type_to_prettyType(Type, PPtype), !.
+	nonvar(AtomTT), AtomTT =.. [_F, Atom, Type], % _F can be comma or t
+	( atom(Atom); integer(Atom) ), !,
+	type_to_prettyType(Type, PPtype).
+% atom: from right to left
+ttTerm_to_pretty_ttTerm((Atom, Type), (Atom, PPtype)) :-
+	( atom(Atom); integer(Atom) ), !,
+	type_to_prettyType(Type, PPtype).
+% lexical with additional features
+ttTerm_to_pretty_ttTerm((tlp(T,L,P,F1,F2), Ty), (T:L:P:F1:F2, PPty)) :-
+	nonvar(T), !,
+	type_to_prettyType(Ty, PPty).
+% lexical with token, lemma, POS
+ttTerm_to_pretty_ttTerm((tlp(T,L,P), Ty), (T:L:P, PPty)) :-
+	nonvar(T), !,
+	type_to_prettyType(Ty, PPty).
 
-ttTerm_to_pretty_ttTerm(TLP_TT, (Tok:Lem:Pos:F1:F2, PPtype)) :-
-	TLP_TT =.. [_, tlp(Tok,Lem,Pos,F1,F2), Type],
-	type_to_prettyType(Type, PPtype), !.
+ttTerm_to_pretty_ttTerm((TT1 @ TT2, Type), PT1 @ PT2) :-
+	( nonvar(TT1); nonvar(PT1) ), !,
+	ttTerm_to_pretty_ttTerm(TT1, PT1),
+	ttTerm_to_pretty_ttTerm(TT2, PT2),
+	TT1 = (_, Ty~>Type),
+	TT2 = (_, Ty).
 
-ttTerm_to_pretty_ttTerm(TLP_TT, (Tok:Lem:Pos, PPtype)) :-
-	TLP_TT =.. [_, tlp(Tok,Lem,Pos), Type],
-	type_to_prettyType(Type, PPtype), !.
-
-ttTerm_to_pretty_ttTerm(AppTT, PPterm1 @ PPterm2) :-
-	AppTT =.. [_, TTterm1 @ TTterm2, _Type], !,
-	%type_to_prettyType(Type, PPtype),
-	ttTerm_to_pretty_ttTerm(TTterm1, PPterm1),
-	ttTerm_to_pretty_ttTerm(TTterm2, PPterm2).
-
-ttTerm_to_pretty_ttTerm(AbstTT, abst(PPvar, PPttTerm)) :-
-	AbstTT =.. [_, abst(TTvar, TT), _Type], !,
-	%type_to_prettyType(Type, PPtype),
-	ttTerm_to_pretty_ttTerm(TTvar, PPvar),
-	ttTerm_to_pretty_ttTerm(TT, PPttTerm).
+ttTerm_to_pretty_ttTerm((abst(TTvar, TT), Ty~>Type), abst(PTvar, PT)) :-
+	( nonvar(TTvar); nonvar(PTvar) ), !,
+	ttTerm_to_pretty_ttTerm(TTvar, PTvar),
+	ttTerm_to_pretty_ttTerm(TT, PT),
+	TT = (_, Type),
+	TTvar =.. [_, _, Ty].
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -227,10 +230,11 @@ write_pretty_ttTerm(Pre, I, abst(Var, PTT)) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ndId_to_pretty(ndId(Nd, Id), Pretty) :-
+ndId_to_pretty_atom(ndId(Nd, Id), Pretty) :-
 	Nd = nd(Mods, TT, Args, TF),
 	maplist(ttTerm_to_prettyTerm, Mods, PrettyMods),
 	maplist(ttTerm_to_prettyTerm, Args, PrettyArgs),
 	ttTerm_to_prettyTerm(TT, PrettyTT),
-	format(atom(Pretty), '~t~w:~5|~t~w~6+ : ~w : ~w : ~w',
+	% format(atom(Pretty), '~t~w:~5|~t~w~6+ : ~w : ~w : ~w',
+	format(atom(Pretty), '~w: ~w : ~w : ~w : ~w',
 		[Id, TF, PrettyMods, PrettyTT, PrettyArgs]).
