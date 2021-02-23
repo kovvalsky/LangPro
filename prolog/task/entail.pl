@@ -8,7 +8,7 @@
 	]).
 :- use_module('../utils/generic_preds', [ format_list/3 ]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2, draw_matrix/1]).
-:- use_module('../printer/reporting', [report/1, add_to_stream/2]).
+:- use_module('../printer/reporting', [report/1]).
 :- use_module('../latex/latex_ttterm', [latex_probs_llfs/2]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/aligner', [align_ttTerms/4]).
@@ -616,12 +616,7 @@ ccgTree_to_TTterms(CCGTree, TTterms) :-
 %
 problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :-
 	( debMode(gtraceProb(Prob_Id)) -> gtrace, true; true ),
-	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'p', _, _), Prem_Sen_Ids),
-	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'h', _, _), Hypo_Sen_Ids),
-	findall(CCGTree,	( member(Id, Prem_Sen_Ids), ccg(Id, CCGTree) ),		PremCCGTrees),
-	findall(CCGTree, 	( member(Id, Hypo_Sen_Ids), ccg(Id, CCGTree) ),		HypoCCGTrees),
-	maplist(ccgTree_to_correct_ccgTerm, PremCCGTrees, PremCCGTerms1),
-	maplist(ccgTree_to_correct_ccgTerm, HypoCCGTrees, HypoCCGTerms1),
+	problem_to_corrected_terms(Prob_Id, PremCCGTerms1, HypoCCGTerms1),
 	% extracting WN_relations for aligning
 	append(PremCCGTerms1, HypoCCGTerms1, AllCCGTerms),
 
@@ -659,39 +654,6 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 	), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% for list ttTerms
-%
-%problem_to_list_ttTerms(Align, Prob_Id, List_Prems, List_Hypos, List_Align_Prems, List_Align_Hypos) :-
-problem_to_list_ttTerms(Align, Prob_Id, List_Prems_R, List_Hypos_R, List_Align_Prems_R, List_Align_Hypos_R, []) :- % fix KB\=[]
-	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'p', _, _), Prem_Sen_Ids),
-	findall(Sen_Id, sen_id(Sen_Id, Prob_Id, 'h', _, _), Hypo_Sen_Ids),
-	findall(CCGTree,	( member(Id, Prem_Sen_Ids), ccg(Id, CCGTree) ),		PremCCGTrees),
-	findall(CCGTree, 	( member(Id, Hypo_Sen_Ids), ccg(Id, CCGTree) ),		HypoCCGTrees),
-	maplist(ccgTree_to_correct_ccgTerm, PremCCGTrees, PremCCGTerms),
-	maplist(ccgTree_to_correct_ccgTerm, HypoCCGTrees, HypoCCGTerms),
-	findall(List_TT, 	(member(X, PremCCGTerms), gen_quant_tt(X, List_TT)), 	List_Prems),
-	findall(List_TT, 	(member(X, HypoCCGTerms), gen_quant_tt(X, List_TT)), 	List_Hypos),
-	% chosing random readings, not all
-	at_most_n_random_members_from_list(List_Prems, 5, List_Prems_R),
-	at_most_n_random_members_from_list(List_Hypos, 5, List_Hypos_R),
-	% if align flag is on
-	( Align == 'align' ->
-		append(PremCCGTerms, HypoCCGTerms, CCGTerms),
-		align_ttTerms(CCGTerms, Align_CCGTerms, _, _KB_XP), % FIXME
-		length(HypoCCGTerms, N),
-		append(Align_PremCCGTerms, Align_HypoCCGTerms, Align_CCGTerms),
-		length(Align_HypoCCGTerms, N),
-		findall(List_TT, 	(member(X, Align_PremCCGTerms), gen_quant_tt(X, List_TT)), 	List_Align_Prems),
-		findall(List_TT, 	(member(X, Align_HypoCCGTerms), gen_quant_tt(X, List_TT)), 	List_Align_Hypos),
-		% chosing random readings, not all
-		at_most_n_random_members_from_list(List_Align_Prems, 5, List_Align_Prems_R),
-		at_most_n_random_members_from_list(List_Align_Hypos, 5, List_Align_Hypos_R)
-	  ; List_Align_Prems_R = [], % if 'no_align' then rturn empty lists
-		List_Align_Hypos_R = []
-	), !.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Produces a correct CCGTerm that needs type raising of the quatifiers
 % in order to get final ttTerm
 ccgTree_to_correct_ccgTerm(CCGTree, CCGTerm4) :-
@@ -703,3 +665,18 @@ ccgTree_to_correct_ccgTerm(CCGTree, CCGTerm4) :-
 		print_used_lexical_rules('unexplained', CCGTerm4)
 	  ; true
 	).
+
+
+problem_to_corrected_terms(PID, PremCCGTerms, HypoCCGTerms) :-
+	findall(SID, sen_id(SID, PID, 'p', _, _), Prem_SIDs),
+	findall(SID, sen_id(SID, PID, 'h', _, _), Hypo_SIDs),
+	findall(CCGTree, (
+		member(Id, Prem_SIDs),
+		ccg(Id, CCGTree)
+	), PremCCGTrees),
+	findall(CCGTree, (
+		member(Id, Hypo_SIDs),
+		ccg(Id, CCGTree)
+	), HypoCCGTrees),
+	maplist(ccgTree_to_correct_ccgTerm, PremCCGTrees, PremCCGTerms),
+	maplist(ccgTree_to_correct_ccgTerm, HypoCCGTrees, HypoCCGTerms).
