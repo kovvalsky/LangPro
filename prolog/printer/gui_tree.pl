@@ -15,7 +15,7 @@
 	list_to_set_using_match/2, term_list_concat/2
 	]).
 :- use_module('../printer/reporting', [report/1]).
-:- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2, ttTermList_to_prettyTermList/2]).
+:- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- dynamic font_size/1.
@@ -192,12 +192,12 @@ drawMotherNode(Pic, Node, FontSize, NodeRef) :-
 	ttTerm_to_prettyTerm(TTterm, LLF),
 	term_to_atom(LLF, AtomLLF),
 	% TTmods
-	ttTermList_to_prettyTermList(TTmods, Mods),
+	maplist(ttTerm_to_prettyTerm, TTmods, Mods),
 	term_to_atom(Mods, UglyAtomMods),
 	atomic_list_concat(ListAtomMods, '\'', UglyAtomMods),
 	atomic_list_concat(ListAtomMods, '', AtomMods),
 	% TTargs
-	ttTermList_to_prettyTermList(TTargs, Args),
+	maplist(ttTerm_to_prettyTerm, TTargs, Args),
 	term_to_atom(Args, UglyAtomArgs),
 	atomic_list_concat(ListAtomArgs, '\'', UglyAtomArgs),
 	atomic_list_concat(ListAtomArgs, '', AtomArgs),
