@@ -8,7 +8,7 @@
 :- use_module('../latex/latex_ttterm').
 :- use_module('../utils/user_preds', [
 	ttExp_to_ttTerm/2, list_to_set_using_match/2,
-	choose/3, true_member/2
+	choose/3
 	]).
 :- use_module('../utils/generic_preds', [
 	true_member/2

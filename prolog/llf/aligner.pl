@@ -17,7 +17,7 @@
 	npTTterm_unlike_constant/1, modTTterm_with_conj_sent_head/1
 	]).
 :- use_module('../utils/user_preds', [
-	ul_append/2, two_lists_to_pairList/3, uList2List/2
+	ul_append/2, uList2List/2
 	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,7 +33,7 @@ test_align(Prob_Id) :-
 	  	report([Prob_Id, ': '])
 	  ; report([Prob_Id, ': ' | CommonTTterms])
 	),
-	two_lists_to_pairList(CCGTerms, NewTTterms, PairList),
+	maplist([A,B,(A,B)]>>true, CCGTerms, NewTTterms, PairList),
 	%once_gen_quant_tt(CCGTerm4, TTterm),
 	print_ttTerms_in_latex(PairList).
 

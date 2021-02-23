@@ -17,7 +17,7 @@
 		%element_list_member/3,
 		is_greater/2,
 		get_value_def/3,
-		keep_smallest_lists/2,
+
 		listInt_to_id_ccgs/2,
 		list_of_tuples_to_list_of_positions/2,
 		list_substitution/4,
@@ -44,8 +44,7 @@
 		sen_input_to_list/2,
 		substitute_in_atom/4,
 		shared_members/2,
-		sort_list_length/2,
-		sublist_of_list/2,
+
 		sym_rels_to_canonical/2,
 		term_list_concat/2,
 		ttExp_to_ttTerm/2,
@@ -53,8 +52,6 @@
 		tt_mon_up/1,
 		tt_mon/2,
 		tt_atomList_to_atomList/2,
-		two_lists_to_pair_list/3,
-		two_lists_to_pairList/3,
 		ul_append/2,
 		ul_append_ul/2,
 		ul_member/2,
@@ -74,7 +71,6 @@
 	sub_type/2, typeExp_to_type/2, match_arg_type/3
 	]).
 :- use_module('../knowledge/knowledge', [isa/3]).
-:- use_module('../printer/reporting', [report/1]).
 :- use_module('../printer/reporting', [report/1]).
 
 :- op(640, xfy, ::).
@@ -490,12 +486,6 @@ shared_members(Members, Lists) :-
     ; findall(M, (maplist(member(M), Lists)), Members).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% List_Element is a member of List_of_Lists that is sublist of List
-% element_list_member(List_of_Lists, List, List_Element) :-
-% 	member(List_Element, List_of_Lists),
-% 	sublist_of_list(List_Element, List).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % C1 is replaced by C2 in Nodes and results in NewNodes
 list_substitution([H|T], C1, C2, [New_H|New_T]) :-
 	substitution(H, C1, C2, New_H),
@@ -517,22 +507,6 @@ substitution(Term, C1, C2, New_Term) :-
 substitute_in_atom(Atom, Old, New, Result) :-
 	atomic_list_concat(List, Old, Atom),
 	atomic_list_concat(List, New, Result).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% pair elements of two lists
-two_lists_to_pairList([H1|Rest1], [H2|Rest2], [(H1,H2)|Rest]) :-
-	!,
-	two_lists_to_pairList(Rest1, Rest2, Rest).
-
-two_lists_to_pairList([], [], []).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% A1,...,An + B1,...,Bn = A1-B1,...,An-Bn
-two_lists_to_pair_list([H1|Rest1], [H2|Rest2], [H1-H2|Rest]) :-
-	!,
-	two_lists_to_pair_list(Rest1, Rest2, Rest).
-
-two_lists_to_pair_list([], [], []).
 
 
 
@@ -707,6 +681,7 @@ nth1_projection(N, Term, Proj) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % returns sentence id list from problem id list or vice versa
+% FIXME from senIDs to ProbIDs doesnt work
 probIDs_to_senIDs([Prob_ID | Prob_Rest], Sen_IDs) :-
 	!, findall(ID, sen_id(ID, Prob_ID,_,_,_), IDs),
 	probIDs_to_senIDs(Prob_Rest, Sen_Rest),
@@ -834,33 +809,7 @@ sym_rels_to_canonical([R | Rels], [C | Cano_Rels]) :-
 	sym_rels_to_canonical(Rels, Cano_Rels).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Given a list of lists, keep only those lists that are smallest,
-% not set-containing other lists
-keep_smallest_lists(List_of_Lists, Smallest_Lists) :-
-	findall(List, (
-		member(List, List_of_Lists),
-		\+(( member(L, List_of_Lists),
-			L \= List,
-			sublist_of_list(L, List)
-		  ))
-	),	Smallest_Lists).
 
-
-% All elements of the first list are elemenst of the second list
-sublist_of_list([], _) :- !.
-
-sublist_of_list([X|Rest], L) :- !,
-	memberchk(X, L),
-	sublist_of_list(Rest, L).
-
-% sort list of lists according to length
-sort_list_length(List_of_lists, Sorted) :-
-	findall(Len-List, (
-		member(List,List_of_lists), length(List, Len)
-		), Length_List),
-	keysort(Length_List, Sorted_Length_List),
-	two_lists_to_pair_list(_Len, Sorted, Sorted_Length_List).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % chop list into N comparable parts

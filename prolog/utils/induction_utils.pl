@@ -301,7 +301,7 @@ print_kb_learning_stages(List_of_Cnt_KB, Cnt_KB_srt, KB) :-
 	% print all learned knowledge together
 	append(List_of_Cnt_KB, Cnt_KB),
 	sort(1, @>=, Cnt_KB, Cnt_KB_srt), % sort according to the 1st arg and descending
-	two_lists_to_pair_list(_, KB, Cnt_KB_srt),
+	maplist([A,B,A-B]>>true, _, KB, Cnt_KB_srt),
 	length(Cnt_KB_srt, Len),
 	format('~`=t All together (~w rels) ~`=t~100|~n', [Len]),
 	maplist(writeln, Cnt_KB_srt).

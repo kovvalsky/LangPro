@@ -2,11 +2,14 @@
 % Generic Predicates
 % These user defined predicates require no additional modules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- module('user_preds',
+:- module('generic_preds',
 	[
 		format_list/3,
 		format_list_list/3,
 		format_list_list/4,
+		keep_smallest_lists/2,
+		sort_list_length/2,
+		sublist_of_list/2,
 		true_member/2
 	]).
 
@@ -50,3 +53,33 @@ format_list_list(Source, Format1, Format2, List_of_Lists) :-
 	), As),
 	atomic_list_concat(As, Message),
 	format(Source, '~w', [Message]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given a list of lists, keep only those lists that are smallest,
+% not set-containing other lists
+keep_smallest_lists(List_of_Lists, Smallest_Lists) :-
+	findall(List, (
+		member(List, List_of_Lists),
+		\+(( member(L, List_of_Lists),
+			L \= List,
+			sublist_of_list(L, List)
+		  ))
+	),	Smallest_Lists).
+
+
+% All elements of the first list are elemenst of the second list
+sublist_of_list([], _) :- !.
+
+sublist_of_list([X|Rest], L) :- !,
+	memberchk(X, L),
+	sublist_of_list(Rest, L).
+
+
+% sort list of lists according to length
+sort_list_length(List_of_lists, Sorted) :-
+	findall(Len-List, (
+		member(List,List_of_lists), length(List, Len)
+		), Length_List),
+	keysort(Length_List, Sorted_Length_List),
+	maplist([A,B,A-B]>>true, _Len, Sorted, Sorted_Length_List).

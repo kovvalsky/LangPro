@@ -11,14 +11,16 @@
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
-	concurrent_maplist_n_jobs/3, keep_smallest_lists/2, %element_list_member/3,
-	list_to_freqList/2, shared_members/2, sort_list_length/2,
-	sublist_of_list/2, sym_rels_to_canonical/2, two_lists_to_pair_list/3, prob_input_to_list/2,
-	partition_list_into_N_even_lists/3, two_lists_to_pairList/3,
+	concurrent_maplist_n_jobs/3, %element_list_member/3,
+	list_to_freqList/2, shared_members/2,
+	sym_rels_to_canonical/2, prob_input_to_list/2,
+	partition_list_into_N_even_lists/3,
 	uList2List/2, prIDs_to_prIDs_Ans/2, get_value_def/3,
 	average_list/2, all_prIDs_Ans/1]).
 :- use_module('../utils/generic_preds', [
- 	format_list/3, format_list_list/3, format_list_list/4]).
+ 	format_list/3, format_list_list/3, format_list_list/4, keep_smallest_lists/2,
+	sublist_of_list/2, sort_list_length/2
+	]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module(library(pairs)).
 :- use_module('../prover/tableau_utils', [
@@ -107,7 +109,7 @@ cv_induce_knowledge(PrIDs, Answers, Config) :-
 		format('~n~n~t End of fold ~w ~t~50|~n', [Index]),
 		format('~`=t~50|~n Train: ~2f; Test: ~2f ~n~`=t~50|~n~n', [TrAcc, TsAcc])
 		), TrTsAs),
-	two_lists_to_pair_list(TrAs, TsAs, TrTsAs),
+	maplist([A,B,A-B]>>true, TrAs, TsAs, TrTsAs),
 	format('~`=t~50|~n', []),
 	format_pairs(' Train: ~2f; Test: ~2f ~n', TrTsAs),
 	average_list(TrAs, TrAv),
@@ -145,7 +147,7 @@ train_with_abduction(Config, TrainIDA, Induced_KB, TrainScores, TrAcc) :-
 	maplist(length, [TrainIDAL, FailA, SolvA], [A, F, S]),
 	format(atom(TrainScores), '~2f ~2f', [100*S/A, 100*F/A]), % Accuracy and error rate
 	%append(List_of_Cnt_KB, Cnt_KB),
-	%two_lists_to_pair_list(_, KB0, Cnt_KB),
+	%maplist([X,Y,X-Y]>>true, _, KB0, Cnt_KB),
 	sort(0, @>, Induced_KB0, Induced_KB),
 	TrAcc is 100*S/A.
 
@@ -177,7 +179,7 @@ induce_knowledge(ToSolve, Answers, UnsolvedProbIDs, Config, KB) :-
 	% filter the prob-ans pairs based on the answer set
 	filterAns_prIDs_Ans(ToSolveList_Ans, Answers, ToSolve_Ans),
 	while_improve_induce_prove(_IDALs, ToSolve_Ans-Failed1, []-Solved1, Config, [], List_of_Cnt_KB), % with no init KB
-	two_lists_to_pair_list(UnsolvedProbIDs, _, Failed1),
+	maplist([A,B,A-B]>>true, UnsolvedProbIDs, _, Failed1),
 	print_kb_learning_stages(List_of_Cnt_KB, Cnt_KB_srt, KB),
 	% write knowledge in a file
 	( debMode(waif(FileName)) -> write_induced_kb_in_file(Cnt_KB_srt, FileName, Config); true ),
@@ -207,7 +209,7 @@ while_improve_induce_prove(IDALs, FailA0-FailA, SolvA0-SolvA, Config, Init_KB, I
 		SolvA = SolvA0,
 		Induced_KB = [] % add no new Knowledge as it is harmful
 	; format('~`=t~80|~nImprovement (~w). Continue~n~`=t~80|~n', [Gain]),
-		%two_lists_to_pair_list(_, KB, Cnt_Facts0),
+		%maplist([X,Y,X-Y]>>true, _, KB, Cnt_Facts0),
 		while_improve_induce_prove(IDALs, FailA1-FailA, SolvA1-SolvA, Config, Init_KB1, Rest_Ind_KB),
 		append(Ind_KB, Rest_Ind_KB, Induced_KB)
 	).
