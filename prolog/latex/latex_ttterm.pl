@@ -244,7 +244,8 @@ latex_ttTerm_print(S, Pos, TTterm) :-
 	nonvar(TTterm),
 	TTterm = (Term, Type),
 	nonvar(Term),
-	Term = tlp(Token, Lem, PosTag, Feat1, Feat2),
+	( Term = tlp(Token, Lem, PosTag, Feat1, Feat2)
+	; Term = tlp(Token, Lem, PosTag), Feat1 = ' ', Feat2 = ' '),
 	!,
 	latex_term(Token, Latex_Token),
 	latex_term(Lem, Latex_Lem),
@@ -252,29 +253,23 @@ latex_ttTerm_print(S, Pos, TTterm) :-
 	tab(S, Pos),
 	latex_type(Type, Latex_type),
 	Pos8 is Pos,% + 8,
-	( Feat2 = 'Ins' ->
+	( Feat2 == 'Ins' ->
 		write(S, '[.\\node[text=green]{\n');
 	  Type = np:_ ->
 		write(S, '[.\\node[text=red]{\n');
 	  write(S, '[.\\node{\n') ),
 	tab(S, Pos8),
-	atomic_list_concat(['\\texttt{', Latex_Token, '}\\\\\n'], Print_Token),
-	write(S, Print_Token),
+	format(S, '\\texttt{~w}\\\\\n', [Latex_Token]),
 	tab(S, Pos8),
-	atomic_list_concat(['$', Latex_type, '$\\\\\n'], Print_type),
-	write(S, Print_type),
+	format(S, '$~w$\\\\\n', [Latex_type]),
 	tab(S, Pos8),
-	atomic_list_concat(['\\textbf{', Latex_Lem, '}\\\\\n'], Print_Lem),
-	write(S, Print_Lem),
+	format(S, '\\textbf{~w}\\\\\n', [Latex_Lem]),
 	tab(S, Pos8),
-	atomic_list_concat(['\\normalsize{', Latex_PosTag, '}\\\\\n'], Print_PosTag),
-	write(S, Print_PosTag),
+	format(S, '\\normalsize{~w}\\\\\n', [Latex_PosTag]),
 	tab(S, Pos8),
-	atomic_list_concat(['\\scriptsize{', Feat1, '}\\\\\n'], Print_Feat1),
-	write(S, Print_Feat1),
+	format(S, '\\scriptsize{~w}\\\\\n', [Feat1]),
 	tab(S, Pos8),
-	atomic_list_concat(['\\scriptsize{', Feat2, '} };\n'], Print_Feat2),
-	write(S, Print_Feat2),
+	format(S, '\\scriptsize{~w} };\n', [Feat2]),
 	tab(S, Pos8),
 	write(S, ']\n').
 
