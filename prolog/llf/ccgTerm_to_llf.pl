@@ -96,6 +96,8 @@ clean_list(A, B) :-
 	not_all_NN(A, B);
 	% not everybody ---> not every person
 	not_everybody(A, B);
+	% brown big a dog -> a brown big dog (NL: alpino)
+	% mods_det_noun(A, B);
 	%nn_n(A, B);
 	%it_is_np(A, B);
 	%it_is_mod(A, B);
@@ -107,6 +109,13 @@ extract_samples(A, _) :-
 	ttTerm_to_prettyTerm((B, np:_), Pr),
 	report([Pr]),
 	fail.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pull sinked determiner and put at the top
+% brown big a dog -> a brown big dog (NL: alpino)
+% mods_det_noun( ((ModTLP,np:_~>np:_,HMod) @ NP, np:_, _), New) :-
+% 	ModTLP
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach a particle modifying verbphrase to a verb
