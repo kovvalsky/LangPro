@@ -27,10 +27,11 @@
 entail_all :- entail_all('both').
 
 entail_all(Align) :-
-	findall( (Problem_Id, Answer),
-		( sen_id(_, Problem_Id, _, Answer, _), memberchk(Answer, ['yes', 'no', 'unknown']) ), % to descard ill-problems of SNLI
-		ProbIds_Answers),
-	list_to_set(ProbIds_Answers, ProblemIds_Answers),
+	findall((Problem_Id, Answer), (
+		sen_id(_, Problem_Id, h, Answer, _),
+		memberchk(Answer, ['yes', 'no', 'unknown'])
+	), ProblemIds_Answers),% to descard ill-problems of SNLI
+	% list_to_set(ProbIds_Answers, ProblemIds_Answers),
 	set_rule_eff_order, % defines an effciency order of rules
 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 	( debMode(parallel(_)) ->
@@ -47,10 +48,11 @@ entail_all(Align) :-
 entail_all([Ans | Rest]) :- entail_all('both', [Ans | Rest]).
 
 entail_all(Align, List_of_Answers) :-
-	findall( (Problem_Id, Answer),
-		( sen_id(_, Problem_Id, _, Answer, _), member(Answer, List_of_Answers)  ),
-		ProbIds_Answers),
-	list_to_set(ProbIds_Answers, ProblemIds_Answers),
+	findall((Problem_Id, Answer), (
+		sen_id(_, Problem_Id, h, Answer, _),
+		memberchk(Answer, List_of_Answers)
+	), ProblemIds_Answers),
+	%list_to_set(ProbIds_Answers, ProblemIds_Answers),
 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 	maplist(solve_entailment(Align), ProblemIds_Answers, Results),
 	draw_extended_matrix(Results, _Scores).
@@ -70,8 +72,11 @@ entail_some(Align, List_Int) :-
       ; List = L2
 	),
 	set_rule_eff_order, % defines an effciency order of rules
-	findall( (Problem_Id, Answer),  (member(Problem_Id, List), sen_id(_, Problem_Id, _, Answer, _)),  ProbIds_Answers ),
-	list_to_set(ProbIds_Answers, ProblemIds_Answers),
+	findall((Problem_Id, Answer), (
+		member(Problem_Id, List),
+		sen_id(_, Problem_Id, h, Answer, _)
+	), ProblemIds_Answers),
+	%list_to_set(ProbIds_Answers, ProblemIds_Answers),
 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 	( debMode(parallel(_)) ->
 		%concurrent_maplist(solve_entailment(Align), ProblemIds_Answers, Results)
@@ -656,27 +661,37 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Produces a correct CCGTerm that needs type raising of the quatifiers
 % in order to get final ttTerm
-ccgTree_to_correct_ccgTerm(CCGTree, CCGTerm4) :-
+ccgTree_to_correct_ccgTerm(CCGTree, CCGTerm) :-
 	ccgIDTree_to_ccgIDTerm(ccg(_,CCGTree), ccg(_,CCGTerm1)),
-	ne_ccg(CCGTerm1, CCGTerm2),
-	clean_ccgTerm_once(CCGTerm2, CCGTerm3),
-	correct_ccgTerm(CCGTerm3, CCGTerm4),
+	correct_ttterm(CCGTerm1, CCGTerm).
+
+correct_ttterm(TTTerm, Corrected) :-
+	ne_ccg(TTTerm, TTTerm1),
+	clean_ccgTerm_once(TTTerm1, TTTerm2),
+	correct_ccgTerm(TTTerm2, Corrected),
 	( debMode('pr_lex_rules') ->
-		print_used_lexical_rules('unexplained', CCGTerm4)
+		print_used_lexical_rules('unexplained', Corrected)
 	  ; true
 	).
 
-
-problem_to_corrected_terms(PID, PremCCGTerms, HypoCCGTerms) :-
+problem_to_corrected_terms(PID, PremCorrTrees, HypoCorrTrees) :-
 	findall(SID, sen_id(SID, PID, 'p', _, _), Prem_SIDs),
 	findall(SID, sen_id(SID, PID, 'h', _, _), Hypo_SIDs),
-	findall(CCGTree, (
+	findall(Tree, (
 		member(Id, Prem_SIDs),
-		ccg(Id, CCGTree)
-	), PremCCGTrees),
-	findall(CCGTree, (
+		sen_id_to_base_ttterm(Id, Tree)
+	), PremTrees),
+	findall(Tree, (
 		member(Id, Hypo_SIDs),
-		ccg(Id, CCGTree)
-	), HypoCCGTrees),
-	maplist(ccgTree_to_correct_ccgTerm, PremCCGTrees, PremCCGTerms),
-	maplist(ccgTree_to_correct_ccgTerm, HypoCCGTrees, HypoCCGTerms).
+		sen_id_to_base_ttterm(Id, Tree)
+	), HypoTrees),
+	maplist(correct_ttterm, PremTrees, PremCorrTrees),
+	maplist(correct_ttterm, HypoTrees, HypoCorrTrees).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+:- multifile sen_id_to_base_ttterm/2.
+:- discontiguous sen_id_to_base_ttterm/2.
+
+sen_id_to_base_ttterm(SID, TTterm) :-
+	ccg(SID, Tree), !,
+	ccgIDTree_to_ccgIDTerm(ccg(_,Tree), ccg(_,TTterm)).
