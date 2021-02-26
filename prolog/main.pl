@@ -1,5 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+:- use_module('utils/generic_preds', [ read_dict_from_json_file/2
+    ]).
+
 :- ensure_loaded([
 	'task/online_demo',
 	'printer/extract',
@@ -23,6 +26,8 @@
 % Initially debMode/1 was for bebugging
 % now it serves as parameter input
 :- dynamic debMode/1.
+:- multifile debMode/1.
+:- discontiguous debMode/1.
 
 %:- use_module(library(theme/dark)).
 
@@ -31,11 +36,13 @@ debMode( ral(400) ).
 %debMode( effCr(['nonProd', 'nonBr', 'equi', 'nonCons']) ). % old one, not effcient
 debMode( effCr(['equi', 'nonBr', 'nonProd', 'nonCons']) ). % one of four effcient ones
 
+
 reset_debMode :-
 	retractall( debMode(_) ),
 	assertz( debMode('nil') ),
 	assertz( debMode(effCr(['equi', 'nonBr', 'nonProd', 'nonCons'])) ),
 	set_rule_eff_order,
+	assertz( debMode(part('TRIAL')) ),
 	assertz( debMode(ral(400)) ).
 
 set_debMode([H | Rest]) :-
@@ -59,6 +66,9 @@ set_debMode([H | Rest]) :-
 			open(FilenameExt, write, S, [encoding(utf8), close_on_abort(true)]),
 			assertz( debMode(stream(branches, Ext, S)) )
 		), _)
+	; H = anno_json(JSON) ->
+		read_dict_from_json_file(JSON, AnnoDict),
+		assertz( debMode(anno_dict(AnnoDict)) )
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).
