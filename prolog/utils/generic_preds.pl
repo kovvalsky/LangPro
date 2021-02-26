@@ -8,10 +8,13 @@
 		format_list_list/3,
 		format_list_list/4,
 		keep_smallest_lists/2,
+		read_dict_from_json_file/2,
 		sort_list_length/2,
 		sublist_of_list/2,
 		true_member/2
 	]).
+
+:- use_module(library(http/json)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true_member(Element, List)
@@ -83,3 +86,9 @@ sort_list_length(List_of_lists, Sorted) :-
 		), Length_List),
 	keysort(Length_List, Sorted_Length_List),
 	maplist([A,B,A-B]>>true, _Len, Sorted, Sorted_Length_List).
+
+
+% read dictionary from json file
+read_dict_from_json_file(JSON, Dict) :-
+    open(JSON, read, S, [encoding(utf8), close_on_abort(true)]),
+    json_read_dict(S, Dict, [value_string_as(atom), default_tag(j)]).
