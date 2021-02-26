@@ -153,8 +153,7 @@ type_to_prettyType(A~>B, A1~>B1) :-
 % predciate is bidirectional
 ttTerm_to_pretty_ttTerm(Var, Var) :- % catching unexpacted vars
 	var(Var), !,
-	format('Untyped variable in ttTerm_to_pretty_ttTerm/2'),
-	fail.
+	format('Untyped variable in ttTerm_to_pretty_ttTerm/2'), fail.
 % var: from left to right
 ttTerm_to_pretty_ttTerm(VarTT, (Var, PPtype)) :-
 	nonvar(VarTT), VarTT =.. [_, Var, Type],
