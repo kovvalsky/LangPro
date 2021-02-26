@@ -5,7 +5,6 @@
 		adjuncted_ttTerm/1,
 		apply_ttFun_to_ttArgs/3,
 		conj_of_const_NNPs/1,
-		conj_of_const_NNPs/1,
 		extract_const_ttTerm/2,
 		extract_lex_NNPs_ttTerms/3,
 		feed_ttTerm_with_ttArgs/3,
@@ -558,13 +557,14 @@ proper_tt_isa((TT1_fun @ _, _),  (TT2_fun @ _, _), KB_xp) :- % FIXME args should
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true if TTterm is a conjunction of several constant NNPs
 conj_of_const_NNPs( (((Conj, np:_~>np:_~>np:_) @ TT1, _) @ TT2, _) ) :-
-	!,
+	nonvar(Conj), !, % prevent variable matching
 	Conj = tlp(_, Lemma, _CC, _, _),
 	member(Lemma, ['or', 'and']),
 	conj_of_const_NNPs(TT1),
 	conj_of_const_NNPs(TT2).
 
-conj_of_const_NNPs( (tlp(_,_,'NNP',_,_), np:_) ).
+conj_of_const_NNPs( (tlp(Tok,_,'NNP',_,_), np:_) ) :-
+	nonvar(Tok). % prevent variable matching
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true if TTterm is a Mod:NP~>NP @ Head:NP, where Mod is not conj@NP
