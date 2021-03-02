@@ -14,6 +14,7 @@
 	'task/kb_induction',
 	'xml/xml_output',
 	'printer/reporting',
+    'knowledge/wn_preds',
 	'testing/sick_train_trial_solved'
 	]).
 

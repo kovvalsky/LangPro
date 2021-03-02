@@ -5,7 +5,7 @@
 	[tt_mon_up/1, tt_atomList_to_atomList/2, is_greater/2]
 	).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
-:- use_module('../knowledge/wn_preds', [word_hyp/3]).
+%:- use_module('../knowledge/wn_preds', [word_hyp/3]).
 :- use_module('../lambda/type_hierarchy', [cat_eq/2, final_value_of_type/2, luc/3]).
 :- use_module('../llf/ttterm_preds', [
 	match_list_ttTerms/3, match_list_only_terms/2, match_ttTerms/3,

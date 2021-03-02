@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- use_module('../prover/tableau_analysis').
-:- use_module('../knowledge/wn_preds').
+%:- use_module('../knowledge/wn_preds').
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
 :- use_module('../utils/user_preds', [
 	prob_input_to_list/2, partition_list_into_N_even_lists/3,

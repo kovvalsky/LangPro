@@ -1,24 +1,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- module(wn_preds,
-	[
-		kb_from_wn/2,
-		word_hyp/3
-	]).
-
-:- ensure_loaded([
-	'../../WNProlog/wn_hyp',
-	%'wn_h_',
- 	'../../WNProlog/wn_sim',
-	'../../WNProlog/wn_ant',
-	'../../WNProlog/wn_der',
-	'../../WNProlog/wn_s'
-	]).
+% :- module(wn_preds,
+% 	[
+% 		kb_from_wn/2,
+% 		word_hyp/3
+% 	]).
 
 :- use_module('disjoint', [disj_/2]).
-:- use_module('../utils/user_preds', [substitute_in_atom/4]).
+:- use_module('../utils/generic_preds', [substitute_in_atom/4]).
 :- use_module('../printer/reporting', [report/1]).
 
 :- dynamic debMode/1.
+
+:- multifile ant/4, der/4, hyp/2, ins/2, s/6, sim/2.
+:- discontiguous ant/4, der/4, hyp/2, ins/2, s/6, sim/2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extracting relations from WordNet
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,13 +45,22 @@ kb_from_wn(Lex, KB) :-
 	).
 */
 
+ss_type_to_num(Type, Num) :-
+	( Type == 'n' -> Num = '1'
+	; Type == 'v' -> Num = '2'
+	; Type == 'a' -> Num = '3'
+	; Type == 's' -> Num = '3'
+	; Type == 'r' -> Num = '4'
+	; fail ).
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % checks if (Word, POS) is in wordnet
 lemPos_in_WordNet((Lemma, POS), (Lemma, Num)) :-
 	pos_to_cat_num(POS, Num),
-	s(SS, _, Lemma, _, _, _),
-	atom_chars(SS, [Num |_]),
+	s(_,_,Lemma,Type,_,_),
+	ss_type_to_num(Type, Num),
 	!.
 
 % Takes a lexicon and returns all possible pairs of different ellements
@@ -151,22 +154,22 @@ word_hyp(W1, W2, Num) :-
 
 word_hyp(SNs, W1, W2, Num, SN1, SN2) :-
 	( nonvar(W1), nonvar(W2) ->
-		s(SS1, _, W1, _, SN1, _),
-		atom_chars(SS1, [Num |_]),
+		s(SS1, _, W1, Type1, SN1, _),
+		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs),
 		hyp_(SS1, SS2)
 	; nonvar(W1) ->
-		s(SS1, _, W1, _, SN1, _),
-		atom_chars(SS1, [Num |_]),
+		s(SS1, _, W1, Type1, SN1, _),
+		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
 		hyp_(SS1, SS2),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs)
 	; nonvar(W2) ->
-		s(SS2, _, W2, _, SN2, _),
-		atom_chars(SS2, [Num |_]),
+		s(SS2, _, W2, Type2, SN2, _),
+		ss_type_to_num(Type2, Num),
 		memberchk(SN2, SNs),
 		hyp_(SS1, SS2),
 		s(SS1, _, W1, _, SN1, _),
@@ -207,23 +210,23 @@ word_sim(W1, W2, Num) :-
 
 word_sim(SNs, W1, W2, Num) :-
 	( nonvar(W1), nonvar(W2) ->
-		s(SS1, _, W1, _, SN1, _),
-		atom_chars(SS1, [Num |_]),
+		s(SS1, _, W1, Type1, SN1, _),
+		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
 		s(SS2, _, W2, _, SN2, _),
 		%atom_chars(SS1, [Num |_]),
 		memberchk(SN2, SNs),
 		sim(SS1, SS2)
 	; nonvar(W1) ->
-		s(SS1, _, W1, _, SN1, _),
-		atom_chars(SS1, [Num |_]),
+		s(SS1, _, W1, Type1, SN1, _),
+		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
 		sim(SS1, SS2),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs)
 	; nonvar(W2) ->
-		s(SS2, _, W2, _, SN2, _),
-		atom_chars(SS2, [Num |_]),
+		s(SS2, _, W2, Type2, SN2, _),
+		ss_type_to_num(Type2, Num),
 		memberchk(SN2, SNs),
 		sim(SS1, SS2),
 		s(SS1, _, W1, _, SN1, _),
@@ -354,22 +357,22 @@ word_ant(W1, W2, Num) :-
 
 word_ant(SNs, W1, W2, Num) :-
 	( nonvar(W1), nonvar(W2)) ->
-		s(SS1, _, W1, _, SN1, _),
+		s(SS1, _, W1, Type1, SN1, _),
 		memberchk(SN1, SNs),
-		atom_chars(SS1, [Num |_]),
+		ss_type_to_num(Type1, Num),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs),
 		ant(SS1,_, SS2,_) % relaxed
  	; nonvar(W1) ->
-		s(SS1, _, W1, _, SN1, _),
-		atom_chars(SS1, [Num |_]),
+		s(SS1, _, W1, Type1, SN1, _),
+		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
 		ant(SS1,_, SS2,_),  % relaxed
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs)
 	; nonvar(W2) ->
-		s(SS2, _, W2, _, SN1, _),
-		atom_chars(SS2, [Num |_]),
+		s(SS2, _, W2, Type2, SN1, _),
+		ss_type_to_num(Type2, Num),
 		memberchk(SN1, SNs),
 		ant(SS1,_, SS2,_), % relaxed
 		s(SS1, _, W1, _, SN1, _),
@@ -389,10 +392,10 @@ word_ant(SNs, W1, W2, Num) :-
 word_shared_children(W1, W2, Num, W_List) :-
 	nonvar(W1),
 	nonvar(W2),
-	s(SS1,_,W1,_,_,_),
-	atom_chars(SS1, [Num  |_]),
-	s(SS2,_,W2,_,_,_),
-	atom_chars(SS2, [Num  |_]),
+	s(SS1,_,W1,Type1,_,_),
+	ss_type_to_num(Type1, Num),
+	s(SS2,_,W2,Type2,_,_),
+	ss_type_to_num(Type2, Num),
 	( hypernym(SS1, SS2) ->
 		SSX = SS1,
 		findall(W, s(SSX,_,W,_,_,_), W_List);
@@ -413,12 +416,12 @@ word_shared_children(W1, W2, Num, W_List) :-
 % whether all senses of a word isa Word who has uniq sysnset
 all_senses_hyp_uniq(Word, Num, Class) :-
 	%pos_to_cat_num(POS, Num),
-	( findall(SS2, s(SS2, _, Class, _, _, _), [SS_Class]) -> true
+	( findall(SS2-Type, s(SS2, _, Class, Type, _, _), [SS_Class-Type_Class]) -> true
 	; report(['Error: ', Class, ' has multi-SynSets']),  false
 	),
-	atom_chars(SS_Class, [Num |_]),
+	ss_type_to_num(Type_Class, Num),
 	findall(SS1,
-			( s(SS1, _, Word, _, _, _), atom_chars(SS1, [Num |_]) ),
+			( s(SS1, _, Word, Type, _, _), ss_type_to_num(Type, Num) ),
 			All_SS_Word ),
 	findall(SS_Class, member(_,All_SS_Word), SS_Class_List),
 	once(maplist(hypernym, All_SS_Word, SS_Class_List)).
@@ -430,12 +433,12 @@ all_senses_hyp_uniq(Word, Num, Class) :-
 % whether none of senses of a word isa Word who has uniq sysnset
 none_senses_hyp_uniq(Word, Num, Class) :-
 	%pos_to_cat_num(POS, Num),
-	( findall(SS2, s(SS2, _, Class, _, _, _), [SS_Class]) -> true
+	( findall(SS2-Type, s(SS2, _, Class, Type, _, _), [SS_Class-Type_Class]) -> true
 	; report(['Error: ', Class, ' has multi-SynSets']),  false
 	),
-	atom_chars(SS_Class, [Num |_]),
+	ss_type_to_num(Type_Class, Num),
 	findall(SS1,
-			( s(SS1, _, Word, _, _, _), atom_chars(SS1, [Num |_]) ),
+			( s(SS1, _, Word, Type, _, _), ss_type_to_num(Type, Num) ),
 			All_SS_Word ),
 	%findall(SS_Class, member(_,All_SS_Word), SS_Class_List),
 	%maplist(hypernym, All_SS_Word, SS_Class_List).
@@ -493,30 +496,30 @@ extract_sub_wn([]).
 % Finds Hypernym SynSet as a list for a word
 word_hyp_ss(W1, W_List, Num) :-
 	nonvar(W1),
-	s(SS1,_,W1,_,_,_),
-	atom_chars(SS1, [Num |_]),
+	s(SS1,_,W1,Type1,_,_),
+	ss_type_to_num(Type1, Num),
 	hypernym(SS1, SS2),
 	findall(W, s(SS2,_,W,_,_,_), W_List).
 
 word_dir_hyper_ss(W1, W_List, Num) :-
 	nonvar(W1),
-	s(SS1,_,W1,_,_,_),
-	atom_chars(SS1, [Num |_]),
+	s(SS1,_,W1,Type1,_,_),
+	ss_type_to_num(Type1, Num),
 	hyp(SS1, SS2),
 	findall(W, s(SS2,_,W,_,_,_), W_List).
 
 word_dir_hypon_ss(W1, W_List, Num) :-
 	nonvar(W1),
-	s(SS1,_,W1,_,_,_),
-	atom_chars(SS1, [Num |_]),
+	s(SS1,_,W1,Type1,_,_),
+	ss_type_to_num(Type1, Num),
 	hyp(SS2, SS1),
 	findall(W, s(SS2,_,W,_,_,_), W_List).
 
 % prints Synsets of all senses of the word
 word_ss(W1, W_List, Num) :-
 	nonvar(W1),
-	s(SS1,_,W1,_,_,_),
-	atom_chars(SS1, [Num |_]),
+	s(SS1,_,W1,Type1,_,_),
+	ss_type_to_num(Type1, Num),
 	findall(W, s(SS1,_,W,_,_,_), W_List).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -575,17 +578,19 @@ hyp_ban(X, Banned, Y) :-
 max_ss(Top, Num) :-
 	%s(Top,_,_,_,_,_),
 	hyp(_, Top),
-	atom_chars(Top, [Num |_]),
+	s(Top,_,_,Type,_,_),
+	ss_type_to_num(Type, Num),
 	\+hyp(Top, _).
 
 min_ss(Bot, Num) :-
 	%s(Bot,_,_,_,_,_),
 	hyp(Bot, _),
-	atom_chars(Bot, [Num |_]),
+	s(Bot,_,_,Type,_,_),
+	ss_type_to_num(Type, Num),
 	\+hyp(_, Bot).
 
 alone_ss(Alone, Num) :-
-	s(Alone,_,_,_,_,_),
-	atom_chars(Alone, [Num |_]),
+	s(Alone,_,_,Type,_,_),
+	ss_type_to_num(Type, Num),
 	\+hyp(Alone, _),
 	\+hyp(_, Alone).
