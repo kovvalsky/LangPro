@@ -8,7 +8,7 @@
 :- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/3]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
-:- use_module('ttterm_preds', [set_type_for_tt/3]).
+:- use_module('ttterm_preds', [add_heads/2, set_type_for_tt/3]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../lambda/type_hierarchy', [cat_eq/2]).
 
@@ -16,8 +16,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % beginings of ccgTree to LLF convertion
-ccgTerm_to_llf(Term_H, LLF) :-
-	once(clean(Term_H, LLF)).
+ccgTerm_to_llf(Term, LLF) :-
+	%add_heads(Term, Term_H), % binds category features
+	once(clean(Term, LLF)).
+	%add_heads(LLF, LLF_H).
 
 
 
@@ -25,25 +27,25 @@ ccgTerm_to_llf(Term_H, LLF) :-
 % Cleans CCG_term by applying clean_list
 clean(X,_) :-	var(X), writeln('Variable accounted'), !, fail.
 
-clean( (X,Ty,H), (X,Ty,H) ) :-
+clean((X,Ty), (X,Ty)) :-
 	var(X), !.
 
-clean( A, B) :-
+clean(A, B) :-
 	once(clean_list(A, C)),
 	clean(C, B).
 
-clean( (A@B,Ty,H), (A1@B1,Ty,H) ) :-
+clean((A@B,Ty), (A1@B1,Ty)) :-
 	clean(A, A1),
 	clean(B, B1).
 
-clean( (abst(A,B),Ty,H), (abst(A1,B1),Ty,H) ) :-
+clean((abst(A,B),Ty), (abst(A1,B1),Ty)) :-
 	clean(A, A1),
 	clean(B, B1).
 
-clean( ((A,Ty1,H),Ty2,H), ((A1,Ty1,H),Ty2,H) ) :-
-	clean( (A,Ty1,H), (A1,Ty1,H) ).
+clean(((A,Ty1),Ty2), ((A1,Ty1),Ty2)) :-
+	clean((A,Ty1), (A1,Ty1)).
 
-clean( A, A ).
+clean(A, A).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clean_list(A, B) :-
@@ -115,76 +117,92 @@ extract_samples(A, _) :-
 % mods_det_noun( ((ModTLP,np:_~>np:_,HMod) @ NP, np:_, _), New) :-
 % 	ModTLP
 
+tlp_pos_in_list(TLP, List) :-
+	nonvar(TLP),
+	TLP = tlp(_,_,POS,_,_),
+	memberchk(POS, List).
 
+tlp_pos_with_prefixes(TLP, Prefixes) :-
+	nonvar(TLP),
+	TLP = tlp(_,_,POS,_,_),
+	findall(PF, (
+		member(PF, Prefixes),
+		atom_concat(PF, _, POS)
+	), [_|_]).
+
+is_tlp(TLP) :-
+	nonvar(TLP),
+	TLP =.. [tlp|_].
+
+get_det_tlp(L, D) :-
+	( debMode('the') ->
+  	  D = tlp('the','the','DT','I-NP','Ins')
+	; D = tlp(L,L,'DT','I-NP','Ins') ).
+
+fix_report(Message) :-
+	( is_list(Message) -> M = Message; M = [Message] ),
+	( debMode('fix') -> report(M); true ).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach a particle modifying verbphrase to a verb
 % sick-192: up@stand -> stand_up, is this necessary after MWE look up in WN is done?
-attach_pr_to_verb( ((tlp(Tk_RP,Lm_RP,'RP',_,_), (np:_~>s:_)~>np:_~>s:_, _) @ VB, _, _),  NewTT ) :-
-	VB = ( ((tlp(Tk_V,Lm_V,POS,F1,F2), Verb_Ty, H_VB) @ Rest), VB_Ty, H_VB ),
+attach_pr_to_verb(
+ 	((tlp(TP,LP,'RP',_,_),(np:_~>s:_)~>np:_~>s:_) @ VP, _),
+	( ((tlp(T,L,POS,F1,F2),V_Ty) @ Rest), VP_Ty )
+) :-
+	VP = ((tlp(TV,LV,POS,F1,F2),V_Ty) @ Rest, VP_Ty),
 	atom_chars(POS, ['V','B'|_]),
-	atomic_list_concat([Tk_V, '_', Tk_RP], Tk),
-	atomic_list_concat([Lm_V, '_', Lm_RP], Lm),
-	New_H = tlp(Verb_Ty,Lm,POS,F1,F2),
-	NewTT = ( ((tlp(Tk,Lm,POS,F1,F2), Verb_Ty, New_H) @ Rest), VB_Ty, New_H ).
+	atomic_list_concat([TV, '_', TP], T),
+	atomic_list_concat([LV, '_', LP], L).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % lex_rule (A conj B) -> conj (lex_rule A) (lex_rule B)
 % is this necessary for vp->n,n lex rule? results in insertion of several "which"
-put_lex_rule_under_conj( ((TTexp, Ty1, _H1), Ty2, _H2),  New_X ) :- %!!! %+++
-	TTexp = (Conj @ TT1, Ty1~>Ty1, _) @ TT2,
-	Conj = (tlp(Tk,Lm,POS,F1,F2), Ty~>Ty~>Ty, _),
-	New_Type = Ty2~>Ty2~>Ty2,
-	New_Conj = (tlp(Tk,Lm,POS,F1,F2), New_Type, H_Conj),
-	H_Conj = tlp(New_Type,Lm,POS,F1,F2),
-	TT1 = (_, _, H_TT1),
-	TT2 = (_, _, H_TT2),
-	New_TT1 = (TT1, Ty2, H_TT1),
-	New_TT2 = (TT2, Ty2, H_TT2),
-	( debMode('fix') -> report(['!!! Fix: put_lex_rule_under_conj']); true ),
-	New_X = ((New_Conj @ New_TT1, Ty2~>Ty2, H_Conj) @ New_TT2, Ty2, H_TT2).
+put_lex_rule_under_conj(
+	((((TLP_Conj,A~>A~>A) @ (T1,A), A~>A) @ (T2,A), A), B),
+	((((TLP_Conj,B~>B~>B) @ S1, B~>B) @ S2, B), B)
+) :- %!!! %+++
+	is_tlp(TLP_Conj),
+	set_type_for_tt(T1, B, S1),
+	set_type_for_tt(T2, B, S2),
+	fix_report('!!! Fix: put_lex_rule_under_conj').
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % e.g. who sleep ((most man, n), np)  ---> ((most (who man sleep, n), n), np)
 % fracas-58,74 eccg
-put_rel_cl_under_det( ( (W@VP, np:_~>np:_,HW) @ ((M@N,n:F1,HNP),np:F2,HNP), np:_, HNP ), Fixed) :- %+++
-	W = (tlp(WTk,WLm,WPOS,WF1,WF2), WTy~>_,HW), % why not any modifier?
-	nonvar(WPOS),
-	member(WPOS, ['WDT', 'WP']),
-	VP = (_, np:_~>s:_, _),
-	NewHW = tlp(WTy~>n:_~>n:_, WLm, WPOS, WF1, WF2),
-	NewW = (tlp(WTk, WLm, WPOS, WF1, WF2), WTy~>n:_~>n:_, NewHW),
-	( debMode('fix') -> report(['!!! Fix: put_rel_cl_under det or modN']); true ),
-	Fixed =  ((M @ ((NewW@VP, n:_~>n:_, NewHW) @ N, n:_, HNP), n:F1, HNP), np:F2, HNP).
+put_rel_cl_under_det(
+	( (W@VP,np:_~>np:_) @ ((M@N,n:F1),np:F2), np:_),
+	( (M @ ((W1@VP, n:_~>n:_) @ N, n:_), n:F1), np:F2 )
+) :- %+++
+	W = (WH_TLP, WTy~>_), % why not any modifier?
+	tlp_pos_in_list(WH_TLP, ['WDT', 'WP']),
+	VP = (_,np:_~>s:_),
+	W1 = (WH_TLP, WTy~>n:_~>n:_),
+	fix_report('!!! Fix: put_rel_cl_under det or modN').
 	% if M is DEt then put_mod_under_det will fix this issue
 
 % e.g. who (a woman) sleeps ---> a (who woman sleep)
 % sick-2722, f %!!! a group of people dancing
-put_rel_cl_under_det( (WhTTH @ (QuanTTH@NounTTH,np:_,H_Quant), np:_, _), Fixed) :- %+++
-	WhTTH = ((tlp(Tk,Lm,POS,Feat1,Feat2), VpTy~>np:_~>np:_, _) @ VP , np:_~>np:_, _), % why not any modifier?
-	QuanTTH = (tlp(_,_,'DT',_,_), n:_~>np:_, H_Quant),  % why lexical item only? why not any n~->np?
-	nonvar(POS),
-	member(POS, ['WDT', 'WP']),
-	New_Head_Wh = tlp(VpTy~>n:_~>n:_, Lm, POS, Feat1, Feat2),
-	New_WhTTH = ((tlp(Tk,Lm,POS,Feat1,Feat2), VpTy~>n:_~>n:_, New_Head_Wh) @ VP, n:_~>n:_, New_Head_Wh),
-	( debMode('fix') -> report(['!!! Fix: put_rel_cl_under_det']); true ),
-	Fixed = (QuanTTH @ (New_WhTTH @ NounTTH, n:_, New_Head_Wh), np:_, H_Quant).
+put_rel_cl_under_det(
+	( ((WH_TLP,VpTy~>np:_~>np:_) @ VP, np:_~>np:_) @ (Q@N,np:_), np:F2),
+	( Q @ (((WH_TLP,VpTy~>n:_~>n:_) @ VP, n:_~>n:_) @ N, n:_), np:F2 )
+) :- %+++
+	tlp_pos_in_list(WH_TLP, ['WDT', 'WP']), % why not any modifier? instead of _~>np~>np
+	Q = (tlp(_,_,'DT',_,_), n:_~>np:_),  % why lexical item only? why not any n~->np?
+	fix_report('!!! Fix: put_rel_cl_under_det').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % e.g. (of:np,np,np) (s friend) (a group) ---> a ((of:np,n,n) (s friends) group)
 % sick-140 eccg
-put_ppMod_under_det( (((Of,np:_~>np:_~>np:_,_)@NP1,np:_~>np:_,_) @ NP2, np:_, _), Fixed) :- %+++
-	clean(NP2, (Det@N,np:_,HDet)),
-	Of = tlp(_,Lm,'IN',F1,F2),
-	TypeOf = np:_~>n:_~>n:_,
-	HOf = tlp(TypeOf, Lm, 'IN', F1, F2),
-	NewOf = (Of, TypeOf, HOf),
-	NewPP = (NewOf @ NP1, n:_~>n:_, HOf),
-	N = (_,n:_,HN),
-	Det = (_,n:_~>np:_,HDet),
-	( debMode('fix') -> report(['!!! Fix: put_ppMod_under_det']); true ),
-	Fixed = (Det @ (NewPP@N,n:_,HN), np:_, HDet).
+put_ppMod_under_det(
+	( ((Of,np:Z~>np:_~>np:_)@NP1,np:_~>np:_) @ NP2, np:_ ),
+	( Det @ (((Of,np:Z~>n:X~>n:Y)@NP1, n:X~>n:Y) @ N, n:Y), np:U)
+) :- %+++
+	clean(NP2, (Det@N, np:U)),
+	Det = (_,n:_~>np:_),
+	tlp_pos_in_list(Of, ['IN']),
+	fix_report('!!! Fix: put_ppMod_under_det').
 
 
 %%%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -192,52 +210,49 @@ put_ppMod_under_det( (((Of,np:_~>np:_~>np:_,_)@NP1,np:_~>np:_,_) @ NP2, np:_, _)
 % something, everybody, 'DT'
 % Jews, Americans, States, Airlines, 'NNPS'
 % it,PRP; then,RB; more,JJR  n -> np --------> X,PRP,np
-nnp_n_np_to_np( (X, np:_, _),  (tlp(Token,Lemma,POS,F1,F2), np:_, H1) ) :- % +++
-	X = (tlp(Token,Lemma,POS,F1,F2), n:_, _),
-	(POS = 'NNP'; POS = 'DT'; POS = 'NNPS'; POS = 'PRP'; POS = 'RB'; POS = 'JJR'),
-	( debMode('fix') -> report(['!!! Fix: proper names as np']); true ),
-	H1 = tlp(np:_,Lemma,POS,F1,F2).
+nnp_n_np_to_np(
+	( (TLP, n:_), np:X ),
+	( TLP, np:X )
+) :- % +++
+	tlp_pos_in_list(TLP, ['NNP','DT','NNPS','PRP','RB','JJR']),
+	fix_report('!!! Fix: proper names as np').
 
 % (south:n~>n @ Europe:NNP:n):np to (the @ (south:n~>n @ Europe:NNP:n)):np
 % south Europe ~~> the south Europe, fracas-44
-nnp_n_np_to_np( (X, np:_, _),  (The @ X, np:_, The_H) ) :- % +++
-	X = (_, n:_, H),
-	nonvar(H),
-	H = tlp(_Cat,_,'NNP',_,_),
-	The = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_, The_H),
-	The_H = tlp(n:_~>np:_,'the','DT','I-NP','Ins'),
-	( debMode('fix') -> report(['!!! Fix: modified proper names as np']); true ).
+nnp_n_np_to_np(
+	( (N, n:X), np:_),
+	( The @ (N, n:X), np:_)
+) :- % +++
+	add_heads((N, n:X), (_,_,Head)),
+	tlp_pos_in_list(Head, ['NNP']),
+	The = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_),
+	fix_report('!!! Fix: modified proper names as np').
 
 
 %%%%%%%%%%%%%%%%%%% lex rule N->NP for verbs %%%%%%%%%%%%%%%%%%%%%%%%%
 % e.g. seasoning,VBG,n, climbing:VBG,n, rule directly for compunds
-vb_n_np_to_np( ((T, n:B, H), np:A, _),  (Y @ (T, n:B, H), np:A, H_Y) ) :-
-	nonvar(H),
-	H = tlp(n:_,_,POS,_,_),
-	atom_chars(POS, ['V','B'|_]), % often VBG
+vb_n_np_to_np(
+	( (T,n:Y), np:X ),
+	( (D, n:_~>np:X) @ (T,n:Y), np:X )
+) :-
+	add_heads((T,n:Y), (_,_,Head)),
+	tlp_pos_with_prefixes(Head, ['VB']), % often VBG
 	%(Cat = n:_; Cat = pp~>n:_), %why constraining category?
-	( debMode('the') ->
-		Y = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:A, H_Y),
-		H_Y = tlp(n:_~>np:_,'the','DT','I-NP','Ins')
-	  ; Y = (tlp('a','a','DT','I-NP','Ins'), n:_~>np:A, H_Y),
-		H_Y = tlp(n:_~>np:_,'a','DT','I-NP','Ins')
-	),
-	( debMode('fix') -> report(['!!! Fix: insert DT for n:VB* complex term']); true ).
+	get_det_tlp('a', D),
+	fix_report('!!! Fix: insert DT for n:VB* complex term').
 
 
 %%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % n with NN heads to np
 % e.g. oil,NN,n -> np -----> a@oil,DT,np
 % why compunds and constants are seprated? why not to treat them with the same rule?
-nn_n_np_to_np( (X, np:_, _),  (Y @ X, np:_, H_Y) ) :- % +++
-	X = (tlp(_,_,'NN',_,_), n:_, _),
-	( debMode('the') ->
-		Y = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'the','DT','I-NP','Ins')
-	  ; Y = (tlp('a','a','DT','I-NP','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'a','DT','I-NP','Ins')
-	),
-	( debMode('fix') -> report(['!!! Fix: insert DT for n:NN constant']); true ).
+nn_n_np_to_np(
+	( (N, n:X), np:Y),
+	( (D, n:_~>np:Y) @ (N,n:X), np:Y )
+) :- % +++
+	tlp_pos_in_list(N, ['NN']),
+	get_det_tlp('a', D),
+	fix_report('!!! Fix: insert DT for n:NN constant').
 
 /*nn_n_np_to_np( (X, np:F, _),  (New_X, np:F, H) ) :- % version 2, all matching nouns are constants
 	X = (tlp(Tk,Lm,'NN',F1,F2), n:_, _),
@@ -247,347 +262,310 @@ nn_n_np_to_np( (X, np:_, _),  (Y @ X, np:_, H_Y) ) :- % +++
 
 % e.g. crude@oil,NN,n ------> a@(cruid@oil),DT,np
 % e.g. oil,NN,pp~>n for april delivery ----> a@(oil@for_april_delivery)
-nn_n_np_to_np( (X, np:_, _),  (Y @ X, np:_, H_Y) ) :-  % +++
-	X = (_, n:_, H),
-	nonvar(H),
-	H = tlp(Cat,_,'NN',_,_),
+nn_n_np_to_np(
+	( (N, n:X), np:Y ),
+	( (D,n:_~>np:_) @ (N,n:X), np:Y)
+) :-  % +++
+	add_heads((N,n:X), (_,_,Head)),
+	nonvar(Head),
+	Head = tlp(Cat,_,'NN',_,_),
 	(Cat = n:_; Cat = pp~>n:_), %why constraining category?
-	( debMode('the') ->
-		Y = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'the','DT','I-NP','Ins')
-	  ; Y = (tlp('a','a','DT','I-NP','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'a','DT','I-NP','Ins')
-	),
-	( debMode('fix') -> report(['!!! Fix: insert DT for n:NN complex term']); true ).
+	get_det_tlp('a', D),
+	fix_report('!!! Fix: insert DT for n:NN complex term').
 
 
 %%%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%
 % n with NNS heads to np, NNS is changed in NN by simply/2 predicate
 % e.g. dogs,NNS,n -> np -----> s@dogs,PL,np
-nns_n_np_to_np( (X, np:_, _),  (Y @ X, np:_, H_Y) ) :- % +++
-	X = (tlp(_,_,'NNS',_,_), n:_, _),
-	( debMode('the') ->
-		Y = (tlp('the','the','DT','0','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'the','DT','0','Ins')
-	  ; Y = (tlp('s','s','DT','0','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'s','DT','0','Ins')
-	),
-	( debMode('fix') -> report(['!!! Fix: insert DT for n:NNS constant']); true ).
-	%Y = (tlp('s','s','DT','0','Ins'), n:_~>np:_, H_Y)
-	%Y = (tlp('a','a','DT','I-NP','O'), n~>np),
-	%H_Y = tlp(n:_~>np:_,'s','DT','0','Ins').
+nns_n_np_to_np(
+	( (NNS,n:X), np:Y ),
+	( (D,n:_~>np:_) @ (NNS,n:X), np:Y )
+) :- % +++
+	tlp_pos_in_list(NNS, ['NNS']),
+	get_det_tlp('s', D),
+	fix_report('!!! Fix: insert DT for n:NNS constant').
+
 % e.g. hungry@dogs,NNS,n -> np -----> s@(hungry@dogs),PL,np
 % e.g. apples,NNS,pp~>n for april delivery ----> s@(apples@for_april_delivery)
-nns_n_np_to_np( (X, np:_, _),  (Y @ X, np:_, H_Y) ) :- % +++
-	X = (_, n:_, H),
-	nonvar(H),
-	H = tlp(Cat,_,'NNS',_,_),
-	( Cat = n:_; Cat = pp~>n:_), %why constraining the category?
-	( debMode('the') ->
-		Y = (tlp('the','the','DT','0','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'the','DT','0','Ins')
-	  ; Y = (tlp('s','s','DT','0','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'s','DT','0','Ins')
-	),
-	( debMode('fix') -> report(['!!! Fix: insert DT for n:NNS complex term']); true ).
+nns_n_np_to_np(
+	( (NNS,n:X), np:Y ),
+	( (D,n:_~>np:_) @ (NNS,n:X), np:Y )
+) :- % +++
+	add_heads((NNS,n:X), (_,_,Head)),
+	nonvar(Head),
+	Head = tlp(Cat,_,'NNS',_,_),
+	( Cat = n:_; Cat = pp~>n:_ ), %why constraining the category?
+	get_det_tlp('s', D),
+	fix_report('!!! Fix: insert DT for n:NNS complex term').
 
 %%%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%
 % type change from n to np
 % e.g. $@37,CD,n:num -> np -----> $@37,CD,np
-n_np_to_np( (X, np:_, _),  New_TTH ) :-
-	X = (TLP, n:_, H),
-	nonvar(TLP),
-	TLP =.. [tlp | _],
-	nonvar(H),
-	H = tlp(n:num,Lm,'CD',F1,F2),
-	( atom_chars(F2, [_,_,'D','A','T']) ->
- 		Feat = 'dat'
-	  ;	Feat = 'num'
-	),
-	%Y = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_, H_Y),
-	%H_Y = tlp(n:_~>np:_,'the','DT','I-NP','Ins'),
-	%New_TTH = (Y @ X, np:_, H_Y).
-	New_TTH = (TLP, np:Feat, tlp(np:Feat,Lm,'CD',F1,F2)).
+n_np_to_np(
+	( (CD,n:num), np:_ ),
+	( CD, np:Feat )
+) :-
+	is_tlp(CD),
+	CD = tlp(_,_,'CD',_,F),
+	( atom_chars(F, [_,_,'D','A','T']) ->
+ 	  Feat = 'dat'
+	; Feat = 'num' ),
+	fix_report('!!! Fix: make CD,n:num of category np').
 
 % a girl in (white, n, np)
-n_np_to_np( (X, np:_, _),  (Y @ X, np:_, H_Y) ) :-
-	X = (tlp(_,_,'JJ',_,_), n:_, _H),
-	( debMode('the') ->
-		Y = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'the','DT','I-NP','Ins')
-	  ; Y = (tlp('a','a','DT','I-NP','Ins'), n:_~>np:_, H_Y),
-		H_Y = tlp(n:_~>np:_,'a','DT','I-NP','Ins')
-	),
-	( debMode('fix') -> report(['!!! Fix: insert DT for n:JJ constants']); true ).
-
+n_np_to_np(
+	( (JJ,n:X), np:Y ),
+	( (D,n:_~>np:_) @ (JJ,n:X), np:Y )
+) :-
+	tlp_pos_in_list(JJ, ['JJ']),
+	get_det_tlp('a', D),
+	fix_report('!!! Fix: insert DT for n:JJ constants').
 
 %%%%%%%%%%%%%%%%% lex rule N->NP & VP->N,N %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ((((M,np~>s),n~>n) @ Smith:n:NNP, n), np) --->  (which:(np~>s)~>np~>np @ M:np~>s) @ Smith:np
 % Smith see X did Y, wrong analysis mainly, fracas-345
-np_which_mod(  ((((VP, np:_~>s:_, H_VP), n:_~>n:_, _) @ (N, n:_, _), n:_, _), np:_, _), New_TTH) :- %+++
-	N = tlp(_Tk, Lm, POS, F1, F2),  % constraint POS = NNP,NNPS,DT,PRP
-	H_NNP = tlp(np:_, Lm, POS, F1, F2),
-	TTH_NNP = (N, np:_, H_NNP),
-	Cat_Wh = (np:_~>s:_)~>np:_~>np:_,
-	H_Wh = tlp(Cat_Wh,'which','WDT','I-NP','Ins'),
-	Which = (tlp('which','which','WDT','I-NP','Ins'), Cat_Wh, H_Wh),
-	( debMode('fix') -> report(['!!! Fix: insert Which:vp->np->np for modifying np']); true ),
-	New_TTH = ((Which @ (VP, np:_~>s:_, H_VP), np:_~>np:_, H_Wh) @ TTH_NNP, np:_, H_NNP).
-
+np_which_mod(
+	( (((VP,np:X~>s:Y),n:_~>n:_) @ (N,n:_), n:_), np:_),
+	((WH @ (VP,np:X~>s:Y), np:_~>np:_) @ (N,np:_), np:_)
+) :- %+++
+	is_tlp(N),  % constraint POS = NNP,NNPS,DT,PRP
+	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:_~>s:_)~>np:_~>np:_),
+	fix_report('!!! Fix: insert Which:vp->np->np for modifying np').
 
 %%%%%%%%%%%%%%%%%%% lex rule VP->N,N %%%%%%%%%%%%%%%%%%%%%%%%%
 % X:np->s:pss/ng  -> n->n  ------>  which @ (is @ X)
 % e.g. from@Canada@produced,np->s:pss -> n->n -----> which@(is@(from@Canada@produced))
-np_pss_to_n_n( ((X, Cat_X, H_X), n:_~>n:_, _), (Which @ (X, Cat_X, H_X), n:_~>n:_, H_Which) ) :- %!!! how do you deal with the verb then? any rule fpr this? %+++
-	Cat_X = np:_~>s:F,
+np_pss_to_n_n(
+	( (VP,np:X~>s:F), n:_~>n:_ ),
+	( WH @ (VP,np:X~>s:F), n:_~>n:_ )
+) :- %!!! how do you deal with the verb then? any rule fpr this? %+++
 	memberchk(F, [ng, adj, pss, dcl]), % adj: full of X:np~>s:sdj--->n~>n, relax constrain with no checking?
-	% define which
-	Cat_Which = (np:_~>s:_)~>n:_~>n:_,
-	H_Which = tlp(Cat_Which,'which','WDT','I-NP','Ins'),
-	Which = (tlp('which','which','WDT','I-NP','Ins'), Cat_Which, H_Which),
-	% define is
-	%Cat_Is = Cat_X~>np:_~>s:dcl,
-	%H_Is = tlp(Cat_Is,'be','VBZ','I-VP','Ins'),
-	%Is = (tlp('is','be','VBZ','I-VP','Ins'), Cat_Is, H_Is),
-	( debMode('fix') -> report(['!!! Fix: insert Which Is for lex_rule. Feature = ', F]); true ).
-	%Is_X = (Is @ (X, Cat_X, H_X), np:_~>s:dcl, H_X).
-
+	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:_~>s:_)~>n:_~>n:_),
+	fix_report(['!!! Fix: insert Which Is for lex_rule. Feature = ', F]).
 
 % for ((owning cars) (evevry man)) -> ( who (owning cars) (evevry man))
-lex_rule_np_s_to_np_np( ( ((VP,np:A~>s:B,H1), np:C~>np:D, _) @ DetNP, np:E, H3), New ) :- %+++
+lex_rule_np_s_to_np_np(
+	( ((VP,np:A~>s:B), np:C~>np:D) @ QNP, np:E),
+	( (WH @ (VP,np:A~>s:B), np:C~>np:D) @ QNP, np:E )
+) :- %+++
 	% define NP modifier "who", we dont use "is"
-	Cat_Wh = (np:A~>s:B)~>np:C~>np:_,
-	H_Wh = tlp(Cat_Wh,'which','WDT','I-NP','Ins'),
-	Wh = (tlp('which','which','WDT','I-NP','Ins'), Cat_Wh, H_Wh),
-	% define is
-	%Cat_Is = (np:A~>s:B)~>np:A~>s:B,
-	%H_Is = tlp(Cat_Is,'be','VBZ','I-VP','Ins'),
-	%Is = (tlp('is','be','VBZ','I-VP','Ins'), Cat_Is, H_Is),
-	%Be_VP = (Is @ (VP,np:A~>s:B,H1), np:A~>s:B, H1),
-	( debMode('fix') -> report(['!!! Fix: insert Which Is for lex_rule: vp->np->np']); true ),
-	New = ( (Wh @ (VP,np:A~>s:B,H1), np:C~>np:D, H_Wh) @ DetNP, np:E, H3 ).
+	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:A~>s:B)~>np:C~>np:_),
+	fix_report('!!! Fix: insert Which Is for lex_rule: vp->np->np').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach the modifier to the head of rlative clause or passive clause
 % (X, n~>n) @ [(who @ Z, n~>n) @ (Y,n)] ~~~> (who @ Z, n~>n) @ [(X, n~>n) @ (Y,n)]
 % (X, n~>n) @ [((VPpass:np~>s), n~>n) @ (Y,n)] ~~~>((VPpass:np~>s), n~>n) @ [(X, n~>n) @ (Y,n)]  %sick-2712, 7649
-put_mod_inside_who( (TTn_mod @ (TTwho_nn @ TTn, n:_, _H1), n:_, _H2), New ) :- %+++
-	nonvar(TTwho_nn),
-	( TTwho_nn = ((tlp(_,'who',_,_,_),_,_) @ _TTvp, n:_~>n:_, _H)
-	; TTwho_nn = ( (_, np:_~>s:_, _), n:_~>n:_, _)
+put_mod_inside_who(
+	( Mod @ (WHC @ TTn, n:_), n:_ ),
+	( WHC @ (Mod @ TTn, N), N )
+) :- %+++
+	nonvar(WHC),
+	( WHC = ((tlp(_,'who',_,_,_),_) @ _VP, n:_~>n:_)
+	; WHC = ((_, np:_~>s:_), n:_~>n:_)
 	),
-	TTn_mod = (TTexp, _~>N, _),
+	Mod = (TTexp, _~>N),
 	TTexp \= (_,_,_), % "posed slept man" will loop in commutation modifiers, sick-964
-	TTn = (_, _, Hn),
-		( debMode('fix') -> report(['!!! Fix: put_mod_inside_who']); true ),
-	New = (TTwho_nn @ (TTn_mod @ TTn, N, Hn), N, Hn).
-
-
+	fix_report('!!! Fix: put_mod_inside_who').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % change type n~>n to n~>np for JJ(S) words like many, several, most, few, etc
-nn_to_n_np( (((TLP,n:F1~>n:_,_) @ TTn,n:_,_), np:F2,_), ((NewTLP,Ty,H) @ TTn, np:F2, H) ) :- %+++
-	TLP = tlp(Tk,Lem,Pos,Feat1,Feat2),
-	Ty = n:F1~>np:F2,
-	( member(Lem, ['several', 'many', 'few', 'most']) ->
-		NewPos = 'DT'
-	  ; Pos = 'CD',
-		NewPos = Pos
-	),
-	H = tlp(Ty, Lem, NewPos, Feat1, Feat2),   %!!! Check that this takes ito account plural cases too: several dogs
-	( debMode('fix') -> report(['!!! Fix: identify modifiers as quantifiers']); true ),
-	NewTLP = tlp(Tk, Lem, NewPos, Feat1, Feat2).
-% exactly,(n~>n)~>n~>n @ two,n~>n @ N,n : np ~~~> exactly,(n~>np)~>n~>np @ two,n~>np @ N,n - fracas-85
-nn_to_n_np( (((TTexp,n:F1~>n:_,_) @ TTn,n:_,_), np:F2,_), ((NewTLP,Ty,H_CD) @ TTn, np:F2, H_CD) ) :- %+++
-	TTexp = (TLP_RB, (n:_~>n:_)~>n:_~>n:_, _) @ (TLP_CD, n:_~>n:_, _),
-	TLP_RB = tlp(_,Lm1,'RB',Feat11,Feat12),
-	TLP_CD = tlp(_,Lm2,'CD',Feat21,Feat22),
-	Ty = n:F1~>np:F2,
-	H_RB = tlp(Ty~>Ty,Lm1,'RB',Feat11,Feat12),
-	H_CD = tlp(Ty,Lm2,'CD',Feat21,Feat22),
-	( debMode('fix') -> report(['!!! Fix: change type to correct one']); true ),
-	NewTLP = (TLP_RB, Ty~>Ty, H_RB) @ (TLP_CD, Ty, H_CD).
+nn_to_n_np(
+	( ((Q,n:X~>n:_) @ N, n:_), np:Y ),
+	( (tlp(Tk,L,P1,F1,F2),n:X~>np:Y) @ N, np:Y )
+) :- %+++
+	is_tlp(Q),
+	Q = tlp(Tk,L,P,F1,F2),
+	( memberchk(L, ['several', 'many', 'few', 'most']) -> P1 = 'DT'
+	; P = 'CD', P1 = P ),
+	%!!! Check that this takes ito account plural cases too: several dogs
+	fix_report('!!! Fix: identify modifiers as quantifiers').
 
+% exactly,(n~>n)~>n~>n @ two,n~>n @ N,n : np ~~> exactly,(n~>np)~>n~>np @ two,n~>np @ N,n - fracas-85
+nn_to_n_np(
+	( (((RB,_) @ (CD,n:_~>n:_), n:X~>n:_) @ N, n:_), np:Y ),
+	( ((RB, Ty~>Ty) @ (CD, Ty), Ty) @ N, np:Y )
+) :- %+++
+	tlp_pos_in_list(RB, ['RB']),
+	tlp_pos_in_list(CD, ['CD']),
+	Ty = n:X~>np:Y,
+	fix_report('!!! Fix: change type to correct one').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Change plural-some to several
-some_nns_to_afew_nns( ((Some,n:F1~>np:F2,_) @ TTn,np:F3,_), ((Afew,Ty,H) @ TTn, np:F3, H) ) :-
-	Some = tlp(_, Lem, 'DT', _Feat1, _Feat2),
-	TTn = (_, _, tlp(_,_,'NNS',_,_)),
-	member(Lem, ['some']),
-	Ty = n:F1~>np:F2,
-	Afew = tlp('a_few','a_few','DT','0','Ins'),
-	H = tlp(Ty,'a_few','DT','0','Ins').
+some_nns_to_afew_nns(
+	( (Some,n:F1~>np:F2) @ TTn, np:F3 ),
+	( (Afew,n:F1~>np:F2) @ TTn, np:F3 )
+) :-
+	is_tlp(Some),
+	Some = tlp(_,'some','DT',_,_),
+	add_heads(TTn, (_,_,Head)),
+	tlp_pos_in_list(Head, ['NNS']),
+	Afew = tlp('a_few','a_few','DT','0','Ins').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Change plural-the to s-morpehem
-the_nns_to_s_nns( ((The,n:F1~>np:F2,TheH) @ TTn,np:F3,_), ((S_DT,Ty,H) @ TTn, np:F3, H) ) :-
-	The = tlp(_, Lem, 'DT', _Feat1, Feat2),
-	Feat2 \= 'VIP', % avoids a loop
-	TTn = (_, _, tlp(_,_,'NNS',_,_)),
-	member(Lem, ['the']), % different from several, some
-	Ty = n:F1~>np:F2,
-	( debMode('the') ->
-		S_DT = The, Feat2 = 'VIP',
-		H = TheH
-	  ; S_DT = tlp('s','s','DT','0','Ins'),
-		H = tlp(Ty,'s','DT','0','Ins')
-	).
-
+the_nns_to_s_nns(
+	( (The,n:X~>np:Y) @ TTn, np:Z ),
+	( (Det,n:X~>np:Y) @ TTn, np:Z )
+) :-
+	\+debMode('the'),
+	is_tlp(The),
+	The = tlp(_,'the','DT',_,_), % different from several, some
+	add_heads(TTn, (_,_,Head)),
+	tlp_pos_in_list(Head, ['NNS']),
+	Det = tlp('s','s','DT','0','Ins').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % change conjunctive comma to and
-comma_to_and( (tlp(',', ',', ',', F1, F2), Ty~>Ty~>Ty, _), (TLP, Ty~>Ty~>Ty, NewH) ) :-
-	TLP = tlp('and', 'and', 'CC', F1, F2),
-	( debMode('fix') -> report(['!!! Fix: comma replaced by and']); true ),
-	NewH = tlp(Ty~>Ty~>Ty, 'and', 'CC', F1, F2).
+comma_to_and(
+	( tlp(',', ',', ',',F1,F2), Ty~>Ty~>Ty ),
+	( tlp('and','and','CC',F1,F2), Ty~>Ty~>Ty )
+) :-
+	fix_report('!!! Fix: comma replaced by and').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach remote DT to the head of NP
 % e.g. The [people who were at the meeting] [All] laughed
-attach_remote_DT_to_noun( (((tlp(Tk,Lm,'DT',F1,F2), Ty, _) @ TT_VP, np:_~>s:dcl, _) @ TT_NP, s:dcl, _),  New_TT ) :-
-	TLP = tlp(Tk,Lm,'DT',F1,F2),
-	Ty = (np:_~>s:dcl) ~>np:_~>s:dcl,
-	( TT_NP = ( (tlp(_,'the','DT',_,_), DT_Ty, _) @ TT_n, np:F3, _) %frac-93
-	; TT_NP = ( TT_n, np:F3, _), DT_Ty = n:_~>np:F3, TT_n = (_, n:_, _) %%frac-99
+attach_remote_DT_to_noun(
+	( ((DT,(np:_~>s:dcl)~>np:_~>s:dcl) @ VP, np:_~>s:dcl) @ NP, s:dcl ),
+	( VP @ ((DT,DTy) @ TT_n, np:F3), STy )
+) :-
+	tlp_pos_in_list(DT, ['DT']),
+	( NP = ( (tlp(_,'the','DT',_,_),DTy) @ TT_n, np:F3 ) %frac-93
+	; NP = ( TT_n, np:F3 ), DTy = n:_~>np:F3, TT_n = (_, n:_) %%frac-99
 	),
-	New_TT_NP = ((TLP, DT_Ty, TLP_H) @ TT_n, np:F3, TLP_H),
-	TLP_H = tlp(DT_Ty,Lm,'DT',F1,F2),
-	TT_VP = (_, np:_~>Val_Ty, VP_H),
-	( debMode('fix') -> report(['!!! Fix: attach remote DT to noun']); true ),
-	New_TT =  (TT_VP @ New_TT_NP, Val_Ty, VP_H).
+	VP = (_, np:_~>STy),
+	fix_report('!!! Fix: attach remote DT to noun').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ((n->n @ everyone, n), np) ---> (every, n->np) @ (n->n @ person)
-n_mod_everyone( (( TTn_mod @ (tlp(_,Lm,'DT',_,_),n:_,_), n:_, _), np:F1, _),  New_TTH ) :-
-	nonvar(Lm),
-	decompose_everyone(Lm, Quant, Noun),
-	Quant_H = tlp(n:F2~>np:F1, Quant, 'DT', 'Ins', 'Ins'),
-	Quant_TTH = ( tlp(Quant, Quant, 'DT', 'Ins', 'Ins'), n:F2~>np:F1, Quant_H ),
-	Noun_H = tlp(n:F2, Noun, 'NN', 'Ins', 'Ins'),
-	Noun_TTH = ( tlp(Noun, Noun, 'NN', 'Ins', 'Ins'), n:F2, Noun_H ),
-	( debMode('fix') -> report(['!!! Fix: decompose GQ']); true ),
-	New_TTH = (Quant_TTH @ (TTn_mod @ Noun_TTH, n:F2, Noun_H), np:F1, Quant_H).
+n_mod_everyone(
+	( (Mod @ (tlp(_,L,'DT',_,_),n:_), n:_), np:F1 ),
+	( (Quant,n:F2~>np:F1) @ (Mod @ (Noun,n:F2), n:F2), np:F1)
+) :-
+	nonvar(L),
+	decompose_everyone(L, Q, N),
+	Quant = tlp(Q,Q,'DT','Ins','Ins'),
+	Noun = tlp(N,N,'NN','Ins','Ins'),
+	fix_report('!!! Fix: decompose GQ').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % someone,np -> some:n->np @ person:n
-some_one( (tlp(_,Lm,'DT',_Feat1,_),np:F1,_), New_TTH ) :-
-	%nonvar(Lm),
-	decompose_everyone(Lm, Quant, Noun),
-	Quant_TTH = ( tlp(Quant, Quant, 'DT', 'Ins', 'Ins'), n:F2~>np:F1, Quant_H ),
-	Quant_H = tlp(n:F2~>np:F1, Quant, 'DT', 'Ins', 'Ins'),
-	Noun_TTH = ( tlp(Noun, Noun, 'NN', 'Ins', 'Ins'), n:F2, Noun_H ),
-	Noun_H = tlp(n:F2, Noun, 'NN', 'Ins', 'Ins'),
-	( debMode('fix') -> report(['!!! Fix: decompose GQ']); true ),
-	New_TTH = (Quant_TTH @ Noun_TTH, np:F1, Quant_H).
+some_one(
+	( tlp(_,L,'DT',_Feat1,_),np:F1 ),
+	( (Quant,n:F2~>np:F1) @ (Noun,n:F2), np:F1 )
+) :-
+	nonvar(L),
+	decompose_everyone(L, Q, N),
+	Quant = tlp(Q,Q,'DT','Ins','Ins'),
+	Noun = tlp(N,N,'NN','Ins','Ins'),
+	fix_report('!!! Fix: decompose GQ').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % no,n~>np (sleeping:n~>n one:n) -> no,n~>np (sleeping:n~>n person:n)
-some_sleeping_one( ( (tlp(Tk,'no',POS,Feat1,Feat2),n:F1~>np:F2,H) @ Noun_TT, np:F3, _Head), New_TTH ) :-
-	nonvar(Tk),
-	Noun_TT = ( Nmod @ (tlp(_,'one','NN',_,_),n:F,_), n:X, _),
-	Person_TT = (tlp('person','person','NN','Ins','Ins'), n:F, Head_Per),
-	Head_Per = tlp(n:F,'person','NN','Ins','Ins'),
-	( debMode('fix') -> report(['!!! Fix: GQ with verb']); true ),
-	New_TTH = ( (tlp(Tk,'no',POS,Feat1,Feat2),n:F1~>np:F2,H) @ ( Nmod @ Person_TT, n:X, Head_Per), np:F3, H ).
+some_sleeping_one(
+	( (Q,n:X~>np:Y) @ (Nmod @ (One,n:F), n:X), np:Z ),
+	( (Q,n:X~>np:Y) @ (Nmod @ Person, n:X), np:Z )
+) :-
+	is_tlp(Q), Q = tlp(_,'no',_,_,_),
+	is_tlp(One), One = tlp(_,'one','NN',_,_),
+	Person = (tlp('person','person','NN','Ins','Ins'), n:F),
+	fix_report('!!! Fix: GQ with verb').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % no,n~>np (one:n~>n typing:n) -> no,n~>np (typing:n~>n person:n) sick-3353, 3439
-no_noun_typing( ( (tlp(Tk,'no',POS,Feat1,Feat2),n:F1~>np:F2,H) @ TT_N, np:F3, _Head), New_TTH ) :-
-	nonvar(Tk),
-	TT_N = ( (tlp(Tk_N,Lm_N,POS_N,_NF1,_NF2),n:_~>n:_,_) @ (tlp(Tk_V,Lm_V,_POS_V,_VF1,_VF2),n:_,_), n:F, _), %!!! multiword noun and vping?
-	memberchk(POS_N, ['NNS', 'NN']),
-	atom_chars(Tk_V, Tk_V_list), append(_, ['i','n','g'], Tk_V_list),
-	Noun_TT = (tlp(Tk_N,Lm_N,POS_N,'Ins','Ins'), n:F, Head_Noun),
-	Head_Noun = tlp(n:F,Lm_N,POS_N,'Ins','Ins'),
-	Verb_TT = (tlp(Tk_V,Lm_V,'VBG','Ins','Ins'), n:F~>n:F, Head_Verb),
-	Head_Verb = tlp(n:F~>n:F,Lm_V,'VBG','Ins','Ins'),
-	( debMode('fix') -> report(['!!! Fix: Verb modifying noun']); true ),
-	New_TTH = ( (tlp(Tk,'no',POS,Feat1,Feat2),n:F1~>np:F2,H) @ ( Verb_TT @ Noun_TT, n:F, Head_Noun), np:F3, H).
-
+no_noun_typing(
+	( (Q,n:X~>np:Y) @ ((N,n:_~>n:_) @ (V,n:_), n:F), np:Z ),
+	( (Q,n:X~>np:Y) @ ( (Verb,n:F~>n:F) @ (N,n:F), n:F), np:Z )
+) :-
+	is_tlp(Q), Q = tlp(_,'no',_,_,_),
+	tlp_pos_in_list(N, ['NNS', 'NN']),
+	is_tlp(V), V = tlp(TV,LV,_,_,_), %!!! multiword noun and vping?
+	atom_concat(_, 'ing', TV),
+	Verb = tlp(TV,LV,'VBG','Ins','Ins'),
+	fix_report('!!! Fix: Verb modifying noun').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % [its, n,(np,s),s]  ---> [s, np,n,(np,s),s] @ [it, np]
 % sick-5003
-poss_pr_to_s_pr( (tlp(_,Lm,'PRP$',_,_), Type, _), New_TTH ) :-
+poss_pr_to_s_pr(
+	( tlp(_,Lm,'PRP$',_,_), Type ),
+	( (S,np:X~>Type) @ (It,np:X), Type )
+) :-
 	Type = n:_~>np:_, % type before type raising
 	nonvar(Lm),
 	lemma_of_poss_pr(Lm, Lm_pr),
-	H_pr = tlp(np:X, Lm_pr, 'PRP', 'Ins', 'Ins'),
-	TTH_pr = (tlp(Lm_pr, Lm_pr, 'PRP','Ins','Ins'), np:X, H_pr),
-	Ty_s = np:X~>Type, % type before type raising
-	H_s = tlp(Ty_s, '\'s', 'POS', 'Ins', 'Ins'),
-	TTH_s = ( tlp('\'s', '\'s', 'POS', 'Ins', 'Ins'), Ty_s, H_s),
-	New_TTH = ( TTH_s @ TTH_pr, Type, H_s ).
-
+	It = tlp(Lm_pr,Lm_pr,'PRP','Ins','Ins'),
+	S = tlp('\'s','\'s','POS','Ins','Ins').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % N of [the] dogs,np ---> N dogs
 % fracas-46
-numOfNNS_to_numNNS( (Num @ ((tlp(_,'of',_,_,_),_NP:_~>pp,_) @ NP, pp,_), np:_, _), New_TTH ) :-
+numOfNNS_to_numNNS(
+	( (Num,_) @ ((tlp(_,'of',_,_,_),_:_~>pp) @ NP, pp), np:_),
+	( (Num,n:_~>np:_) @ N, np:_ )
+) :-
 	NP = (Term, _), nonvar(Term),
-	!,
-	Num = (tlp(Tk,Lm,Pos,F1,F2), _, _),
-	( Pos = 'CD' % fracas-46
-	; member(Lm, ['none', 'all', 'each'])
+	is_tlp(Num), Num = tlp(_,L,P,_,_), !,
+	( P = 'CD' % fracas-46
+	; member(L, ['none', 'all', 'each'])
 	),
-	Head = tlp(n:_~>np:_,Lm,Pos,F1,F2),
-	New_Num = (tlp(Tk,Lm,Pos,F1,F2),n:_~>np:_, Head),
-	once( ( NP = ((_Det,n:_~>np:_,_) @ N, np:_, _)
-		  ; NP = (N, np:_ ,_), N = (_, n:_, _)
-		  ; NP = (_, n:_, _),  N = NP ) ),
-	( debMode('fix') -> report(['!!! Fix: 5 of Dogs -> 5 Dogs']); true ),
-	New_TTH = (New_Num @ N, np:_, Head).
+	once( ( NP = ((_,n:_~>np:_) @ N, np:_)
+		  ; NP = (N, np:_), N = (_, n:_)
+		  ; NP = (_, n:_),  N = NP ) ),
+	fix_report('!!! Fix: 5 of Dogs -> 5 Dogs').
 
 % None of [the] kids,n,np ---> None kids
 %sick-122
-numOfNNS_to_numNNS( ((((tlp(_,'of',_,_,_),_,_) @ NP, n:_~>n:_,_) @ Num, n:_,_), np:_,_),  New_TTH ) :-
-	Num = (tlp(Tk,Lm,Pos,F1,F2), _, _),
-	( Pos = 'CD' % fracas-46
-	; member(Lm, ['none', 'all', 'each']) %sick-122
+numOfNNS_to_numNNS(
+	( (((tlp(_,'of',_,_,_),_) @ NP, n:_~>n:_) @ (Num,_), n:_), np:_ ),
+	( (Num,n:_~>np:_) @ N, np:_ )
+) :-
+	is_tlp(Num), Num = tlp(_,L,P,_,_),
+	( P = 'CD' % fracas-46
+	; member(L, ['none', 'all', 'each']) %sick-122
 	),
-	Head = tlp(n:_~>np:_,Lm,Pos,F1,F2),
-	New_Num = (tlp(Tk,Lm,Pos,F1,F2),n:_~>np:_, Head),
-	once( ( NP = ((_Det,n:_~>np:_,_) @ N, np:_, _)
-		  ; NP = (N, np:_ ,_), N = (_, n:_, _)
-		  ; NP = (_, n:_, _),  N = NP ) ),
-	( debMode('fix') -> report(['!!! Fix: 5 of Dogs -> 5 Dogs']); true ),
-	New_TTH = (New_Num @ N, np:_, Head).
+	once( ( NP = ((_,n:_~>np:_) @ N, np:_)
+		  ; NP = (N, np:_), N = (_, n:_)
+		  ; NP = (_, n:_),  N = NP ) ),
+	fix_report('!!! Fix: 5 of Dogs -> 5 Dogs').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % All:PDT:np~>np the:n~>np dogs:n ---> All dogs
 %!!! should not be "not all", "not every"
 % fracas-92
-pdt_rm_dt_noun( (PDT @ ((tlp(_,_,'DT',_,_),n:_~>np:_,_) @ Noun, np:_,_), np:_, _), New_TTH ) :-
-	PDT = (tlp(Tk,Lm,'PDT',F1,F2), np:_~>np:_, _),
-	Head = tlp(n:_~>np:_,Lm,'DT',F1,F2),
-	Det = (tlp(Tk,Lm,'DT',F1,F2),n:_~>np:_, Head),
-	( debMode('fix') -> report(['!!! Fix: attach pre determiner']); true ),
-	New_TTH = (Det @ Noun, np:_, Head).
+pdt_rm_dt_noun(
+	( (tlp(T,L,'PDT',F1,F2),np:_~>np:_) @ ((DT,n:_~>np:_) @ N, np:_), np:_ ),
+	( (tlp(T,L,'DT',F1,F2),n:_~>np:_) @ N, np:_)
+) :-
+	nonvar(L),
+	tlp_pos_in_list(DT, ['DT']),
+	fix_report('!!! Fix: attach pre determiner').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % not @ (all @ birds) -> not @ all @ birds
-not_all_NN( (NOT @ ((ALL_TLP, n:_~>np:_, ALL_H) @ Noun, np:_, ALL_H), np:_, _), New_TTH ) :-
-	NOT = (NOT_TLP, _, NOT_H), % pos = RB?
-	ALL_TLP = tlp(_,_,'DT',_,_), %urgent, fracas-134, atomic list concat why removing this clause causes a problem?
-	NOT_TLP = tlp(_,_,_,_,_),
-	nonvar(NOT_H),
-	NOT_H =.. [tlp, _ | Rest],
+not_all_NN(
+	( (NOT,_) @ ((ALL,n:_~>np:_) @ Noun, np:_), np:_ ),
+	( ((NOT,Ty) @ (ALL,n:_~>np:_), n:_~>np:_) @ Noun, np:_ )
+) :-
+	tlp_pos_in_list(ALL, ['DT']), %urgent, fracas-134,
+	% fracas-134, atomic list concat why removing this clause causes a problem?
+	is_tlp(NOT), % pos = RB?
 	Ty = (n:_~>np:_)~>n:_~>np:_,
-	NOT_H1 =.. [tlp, Ty | Rest],
-	New_TTH = (((NOT_TLP, Ty, NOT_H1) @ (ALL_TLP, n:_~>np:_, ALL_H), n:_~>np:_, ALL_H) @ Noun, np:_, ALL_H),
-	( debMode('fix') -> report(['!!! Fix: not (all dogs) -> (not all) dogs']); true ).
+	fix_report('!!! Fix: not (all dogs) -> (not all) dogs').
 
 % not @ everybody -> not @ every @ person
-not_everybody( (NOT @ (EB_TLP, np:_, EB_H), np:_, EB_H), New_TTH ) :-
-	nonvar(EB_TLP),
-	EB = (EB_TLP, np:_, EB_H),
-	EB_TLP = tlp(_,_,_,_,_),
+not_everybody(
+	( NOT @ (EB_TLP, np:_), np:_ ),
+	NOT_EB
+) :-
+	is_tlp(EB_TLP),
+	EB = (EB_TLP, np:_),
 	once(clean(EB, EB1)),
-	EB1 = (_,np:_,EB1_H),
 	( EB \= EB1 ->
-		once(clean( (NOT@EB1, np:_, EB1_H), New_TTH)),
-		( debMode('fix') -> report(['!!! Fix: not everybody -> (not every) person']); true )
+		once(clean((NOT@EB1, np:_), NOT_EB)),
+		fix_report('!!! Fix: not everybody -> (not every) person')
 	;	fail
 	).
 

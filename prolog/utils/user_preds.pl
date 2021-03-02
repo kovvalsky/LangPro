@@ -42,7 +42,7 @@
 		remove_adjacent_duplicates/2,
 		uList2List/2,
 		sen_input_to_list/2,
-		substitute_in_atom/4,
+
 		shared_members/2,
 
 		sym_rels_to_canonical/2,
@@ -502,13 +502,6 @@ substitution(Term, C1, C2, New_Term) :-
 	atomic_list_concat(List, Atom_C1, Atom_Term),
 	atomic_list_concat(List, Atom_C2, Atom_New_Term),
 	atom_to_term(Atom_New_Term, New_Term, _).
-
-% substitutes Old by New in Atom and unifies result with Result
-substitute_in_atom(Atom, Old, New, Result) :-
-	atomic_list_concat(List, Old, Atom),
-	atomic_list_concat(List, New, Result).
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pair elements of two lists

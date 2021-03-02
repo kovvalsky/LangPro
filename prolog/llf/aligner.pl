@@ -11,10 +11,9 @@
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
-:- use_module('correct_term', [add_heads/2]).
 :- use_module('ttterm_preds', [
 	print_ttTerms_in_latex/1, npTTterm_as_constant/1, match_ttTerms/3,
-	npTTterm_unlike_constant/1, modTTterm_with_conj_sent_head/1
+	npTTterm_unlike_constant/1, modTTterm_with_conj_sent_head/1, add_heads/2
 	]).
 :- use_module('../utils/user_preds', [
 	ul_append/2, uList2List/2

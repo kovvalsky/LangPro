@@ -2,6 +2,7 @@
 :- module('ttterm_preds',
 	[
 		abst_ttTerm_with_ttArgs/3,
+		add_heads/2,
 		adjuncted_ttTerm/1,
 		apply_ttFun_to_ttArgs/3,
 		conj_of_const_NNPs/1,
@@ -750,3 +751,42 @@ pretty_vars_in_ttterm_(X-P, Z, (Exp, _)) :-
 	; Exp = (E,_) ->
 		pretty_vars_in_ttterm_(X-P, Z, (E,_))
 	; report(['Error: unexpected clause in pretty_vars_in_ttterms']).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+add_heads( (Tr,Ty), (Tr,Ty,_H) ) :-
+	var(Tr), !.
+
+add_heads( (Tr,Ty), (Term_H,Ty,_H) ) :- %heads can change in lx rules
+	Tr = (Tr1,Ty1),
+	Term_H = (_,Ty1,_), !,
+	add_heads((Tr1,Ty1), Term_H).
+
+add_heads( (Abst,Type), (Abst_H,Type,H) ) :-
+	Abst = abst(TTX, (Tr,Ty)),
+	Abst_H = abst( TTX, (Tr_H,Ty,H_1) ), !, %? before (TTX,_)
+	ignore(H_1 = H),
+	add_heads((Tr,Ty), (Tr_H,Ty,H_1)). %some details needed, % due to attach_pr_to_verb
+
+
+add_heads( (App,Type), (App_H,Type,H) ) :-
+	App = (Tr1, Ty1) @ (Tr2, Ty2),
+	App_H = (Tr1_H1,Ty1,H1)@(Tr2_H2,Ty2,H2), !,
+	add_heads((Tr1, Ty1), (Tr1_H1, Ty1, H1)),
+	add_heads((Tr2, Ty2), (Tr2_H2, Ty2, H2)), %some details needed
+	detect_head((Ty1,H1), (Ty2,H2), H).
+
+add_heads((TLP,Ty), (TLP,Ty,H)) :-
+	TLP = tlp(_,Lm,Pos,F1,F2),
+	ignore(H = tlp(Ty,Lm,Pos,F1,F2)). % due to attach_pr_to_verb
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%detect_head( (Ty~>Ty, _), (Ty, H2), H2 ) :- !.
+
+detect_head( (Ty2~>Ty1, _), (Ty2, H2), H2 ) :-
+	cat_eq(Ty1, Ty2), !.  % binds category features
+
+detect_head( (_, H1), (_, _), H1 ) :-
+	!.
+
+detect_head( (_, _), (_, _), _). % for removing heads since word substitutions cannot project upwards

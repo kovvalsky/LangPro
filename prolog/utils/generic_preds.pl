@@ -11,6 +11,7 @@
 		read_dict_from_json_file/2,
 		sort_list_length/2,
 		sublist_of_list/2,
+		substitute_in_atom/4,
 		true_member/2
 	]).
 
@@ -92,3 +93,9 @@ sort_list_length(List_of_lists, Sorted) :-
 read_dict_from_json_file(JSON, Dict) :-
     open(JSON, read, S, [encoding(utf8), close_on_abort(true)]),
     json_read_dict(S, Dict, [value_string_as(atom), default_tag(j)]).
+
+
+% substitutes Old by New in Atom and unifies result with Result
+substitute_in_atom(Atom, Old, New, Result) :-
+	atomic_list_concat(List, Old, Atom),
+	atomic_list_concat(List, New, Result).
