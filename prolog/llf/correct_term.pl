@@ -43,6 +43,7 @@ simplify( (tlp(_Tk,Lem,'NNS',F1,F2), Type),  SimTT) :-
 
 % substitute possesive pronouns with 'the' sick-240
 simplify( (tlp(_Tk,_Lem,'PRP$',F1,F2), Type),  SimTT) :-
+	Type = n:_~>np:_,
 	SimTT = (tlp('the','the','DT',F1,F2), Type),
 	!.
 

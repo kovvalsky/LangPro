@@ -8,7 +8,10 @@
 :- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/3]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
-:- use_module('ttterm_preds', [add_heads/2, set_type_for_tt/3]).
+:- use_module('ttterm_preds', [
+	add_heads/2, set_type_for_tt/3, apply_ttMods_to_ttArg/3,
+	right_branch_tt_search/4
+	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../lambda/type_hierarchy', [cat_eq/2]).
 
@@ -99,7 +102,7 @@ clean_list(A, B) :-
 	% not everybody ---> not every person
 	not_everybody(A, B);
 	% brown big a dog -> a brown big dog (NL: alpino)
-	% mods_det_noun(A, B);
+	mods_det_noun(A, B);
 	%nn_n(A, B);
 	%it_is_np(A, B);
 	%it_is_mod(A, B);
@@ -111,12 +114,10 @@ extract_samples(A, _) :-
 	ttTerm_to_prettyTerm((B, np:_), Pr),
 	report([Pr]),
 	fail.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% pull sinked determiner and put at the top
-% brown big a dog -> a brown big dog (NL: alpino)
-% mods_det_noun( ((ModTLP,np:_~>np:_,HMod) @ NP, np:_, _), New) :-
-% 	ModTLP
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% auxiliary preds
 tlp_pos_in_list(TLP, List) :-
 	nonvar(TLP),
 	TLP = tlp(_,_,POS,_,_),
@@ -142,6 +143,23 @@ get_det_tlp(L, D) :-
 fix_report(Message) :-
 	( is_list(Message) -> M = Message; M = [Message] ),
 	( debMode('fix') -> report(M); true ).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pull sinked determiner and put at the top
+% brown big a dog -> a brown big dog (NL: alpino)
+mods_det_noun(
+	( (Mod,np:_~>np:_) @ NP, np:_ ),
+	( Det @ Mods_N, np:X )
+) :-
+	is_tlp(Mod),
+	right_branch_tt_search(Det, NP, Mods, Noun),
+	Det = (DT,n:_~>np:X),
+	tlp_pos_in_list(DT, ['DT']),
+	maplist([(_,np:_~>np:_)]>>true, Mods),
+	maplist([L,New]>>set_type_for_tt(L, n:_~>n:_, New),
+		[(Mod,np:_~>np:_)|Mods], Mods1),
+	apply_ttMods_to_ttArg(Mods1, Noun, Mods_N).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach a particle modifying verbphrase to a verb
@@ -551,7 +569,8 @@ not_all_NN(
 ) :-
 	tlp_pos_in_list(ALL, ['DT']), %urgent, fracas-134,
 	% fracas-134, atomic list concat why removing this clause causes a problem?
-	is_tlp(NOT), % pos = RB?
+	% expecting negation, but blocking weird order in alpino/npn:"jonge de jongens"
+	tlp_pos_in_list(NOT, ['RB']),
 	Ty = (n:_~>np:_)~>n:_~>np:_,
 	fix_report('!!! Fix: not (all dogs) -> (not all) dogs').
 

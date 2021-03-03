@@ -22,7 +22,7 @@
 	ul_append/2, patt_remove/3, add_new_elements/3, list_substitution/4
 	]).
 :- use_module('../llf/ttterm_preds', [
-	ttTerms_same_type/2, extract_lex_NNPs_ttTerms/3, apply_ttFun_to_ttArgs/3
+	ttTerms_same_type/2, extract_lex_NNPs_ttTerms/3
 	]).
 :- use_module('tableau_utils', [
 	assignIds/4, subtract_nodes/4, select_relevant_rules/3, ttTerms_to_nodes_sig/6,

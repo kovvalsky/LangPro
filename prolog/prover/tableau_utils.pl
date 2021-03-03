@@ -17,6 +17,7 @@
 :- use_module('../lambda/type_hierarchy', [sub_type/2]).
 :- use_module('../lambda/lambda_tt', [op(605, xfy, ~>)]).
 :- use_module('../rules/rules', [op(610, xfx, ===>)]).
+:- use_module('../llf/ttterm_preds', [apply_ttFun_to_ttArgs/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % assignIds(ListOfNodes, ID_ListOfNodes)
@@ -98,8 +99,10 @@ ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)) :-
 			T_List = T_TTlist,
 			F_List = F_TTlist,
 			ArgList = Args
-		;	maplist(apply_ttFun_to_ttArgs(Args), T_TTlist, T_List),
-			maplist(apply_ttFun_to_ttArgs(Args), F_TTlist, F_List),
+		;	maplist({Args}/[T_TT1,T_TT2]>>apply_ttFun_to_ttArgs(T_TT1,Args,T_TT2),
+				T_TTlist, T_List),
+			maplist({Args}/[F_TT1,F_TT2]>>apply_ttFun_to_ttArgs(F_TT1,Args,F_TT2),
+				F_TTlist, F_List),
 			ArgList = [] ),
 	maplist(ttTerm_to_node(true, ArgList), T_List, T_Nodes),
 	maplist(ttTerm_to_node(false, ArgList), F_List, F_Nodes),

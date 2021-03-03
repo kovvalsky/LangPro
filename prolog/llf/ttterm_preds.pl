@@ -5,6 +5,7 @@
 		add_heads/2,
 		adjuncted_ttTerm/1,
 		apply_ttFun_to_ttArgs/3,
+		apply_ttMods_to_ttArg/3,
 		conj_of_const_NNPs/1,
 		extract_const_ttTerm/2,
 		extract_lex_NNPs_ttTerms/3,
@@ -23,6 +24,7 @@
 		proper_tt_isa/3,
 		pretty_vars_in_ttterm/4,
 		print_ttTerms_in_latex/1,
+		right_branch_tt_search/4,
 		set_type_for_tt/3,
 		set_type_for_tt/5,
 		subset_only_terms/2,
@@ -43,6 +45,16 @@
 :- use_module('../lambda/type_hierarchy', [
 	cat_eq/2, final_value_of_type/2, luc/3, general_cat/2
 	]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Right branch search a TT
+right_branch_tt_search(F, (F@B,_), [], B).
+
+right_branch_tt_search(F, (A@B,_), [A|L], R) :-
+	right_branch_tt_search(F, B, L, R).
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TTterm to expressive, informative atom
@@ -538,11 +550,22 @@ set_type_for_tt( (TT, _Ty), Type, (TT, Type), _, []) :- %!!! changed variables a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % applies tt function to list of tt arguments
-apply_ttFun_to_ttArgs([], TTFun, TTFun).
+apply_ttFun_to_ttArgs(TTFun, [], TTFun).
 
-apply_ttFun_to_ttArgs([(H,Ty1) | TTRest], (Fun,Ty1~>Ty2), TTApp) :-
+apply_ttFun_to_ttArgs((Fun,Ty1~>Ty2), [(H,Ty1) | TTRest], TTApp) :-
 	TT = ((Fun,Ty1~>Ty2) @ (H,Ty1), Ty2),
-	apply_ttFun_to_ttArgs(TTRest, TT, TTApp).
+	apply_ttFun_to_ttArgs(TT, TTRest, TTApp).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% apply a list of modifier terms to an argument
+% first applied modifier is the last in the list
+% in this way, the list has a right branching order
+apply_ttMods_to_ttArg([], Arg, Arg).
+
+apply_ttMods_to_ttArg([H|Tail], (Arg,TyA), Result) :-
+	append(Front, [(M,TyA~>TyM)], [H|Tail]),
+	TT = ((M,TyA~>TyM) @ (Arg,TyA), TyM),
+	apply_ttMods_to_ttArg(Front, TT, Result).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
