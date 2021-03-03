@@ -159,19 +159,19 @@ word_hyp(SNs, W1, W2, Num, SN1, SN2) :-
 		memberchk(SN1, SNs),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs),
-		hyp_(SS1, SS2)
+		hyp_(SS1, [], SS2)
 	; nonvar(W1) ->
 		s(SS1, _, W1, Type1, SN1, _),
 		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
-		hyp_(SS1, SS2),
+		hyp_(SS1, [], SS2),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs)
 	; nonvar(W2) ->
 		s(SS2, _, W2, Type2, SN2, _),
 		ss_type_to_num(Type2, Num),
 		memberchk(SN2, SNs),
-		hyp_(SS1, SS2),
+		hyp_(SS1, [], SS2),
 		s(SS1, _, W1, _, SN1, _),
 		memberchk(SN1, SNs)
 	; false ).
@@ -182,21 +182,24 @@ word_hyp(SNs, W1, W2, Num, SN1, SN2) :-
 hypernym(SS1, SS2) :-
 	nonvar(SS1) ->
 		hyp(SS1, SSX),
-		hyp_(SSX, SS2);
+		hyp_(SSX, [], SS2);
 	nonvar(SS2) ->
 		hyp(SSX, SS2),
-		hyp_(SS1, SSX).
+		hyp_(SS1, [], SSX).
 
 % reflexive and transitive hyp/2
-hyp_(X, X).
+% avoids loops (EN-WN has no loop but ODWN has "word_hyp(buurt, jongen, '1').")
+hyp_(X, _Path, X).
 
-hyp_(X, Y) :-
+hyp_(X, Path, Y) :-
 	nonvar(X) ->
 		hyp(X, Z),
-		hyp_(Z, Y);
+		\+memberchk(Z, Path),
+		hyp_(Z, [Z|Path], Y);
 	nonvar(Y) ->
 		hyp(Z, Y),
-		hyp_(X, Z).
+		\+memberchk(Z, Path),
+		hyp_(X, [Z|Path], Z).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
