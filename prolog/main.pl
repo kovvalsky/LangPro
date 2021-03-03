@@ -105,6 +105,7 @@ add_to_stream(DataType, Data) :-
 % 'html'				write twrms and tableaux in HTML, outomatically creates XML files too
 % 'fix': 				prints fixes done on CCG trees
 % gtraceProb(Id)		Trigger gtrace for a particular problem
+% gtraceSen(Id)		   Trigger gtrace for a particular sentence
 % 'proof_tree': 		develope a proof tree
 % 'aall':				allows alignment of any NPs
 % cpu_count				the number of threads to use for concurrent run
