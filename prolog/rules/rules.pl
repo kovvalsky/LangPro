@@ -615,6 +615,7 @@ r(push_arg, impl:non, ([], [], _), _Lexicon, _,  % should not introduce
 			).
 % const(B), not necesary. B is never unbound var, it is typed later, accepts only atoms
 
+% Assumes apposition because WH-clause is NP-modifier
 r(push_arg, equi:non, ([], [], _), [['who']], _,
 		br([nd( M, (TT1 @ (Wh_VP @ NP, np:_), _),
 				Args, TF )],
