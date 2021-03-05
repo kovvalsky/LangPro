@@ -24,17 +24,15 @@ ccgTerm_to_llf(Term, LLF) :-
 	once(clean(Term, LLF)).
 	%add_heads(LLF, LLF_H).
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Cleans CCG_term by applying clean_list
+% Cleans CCG_term by applying term fixing procedures
 clean(X,_) :-	var(X), writeln('Variable accounted'), !, fail.
 
 clean((X,Ty), (X,Ty)) :-
 	var(X), !.
 
 clean(A, B) :-
-	once(clean_list(A, C)),
+	once(fix_term(A, C)),
 	clean(C, B).
 
 clean((A@B,Ty), (A1@B1,Ty)) :-
@@ -51,104 +49,44 @@ clean(((A,Ty1),Ty2), ((A1,Ty1),Ty2)) :-
 clean(A, A).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clean_list(A, B) :-
-	%extract_samples(A, A);
-	% lex_rule (A conj B) -> conj (lex_rule A) (lex_rule B)
-	put_lex_rule_under_conj(A, B); % takes scope over others
-	% plural the to s-morpheme
-	the_nns_to_s_nns(A, B);
-	% plural some to several
-	some_nns_to_afew_nns(A, B);
-	% two of NNS ---> two NNS
-	numOfNNS_to_numNNS(A, B);
-	% cat1=n, cat2=np, cat(Quant:JJ)=n~>n to (Quant, n~>np) @ n
-	nn_to_n_np(A, B);
-	%tlp NNP of cat1=n, cat2=np convert to tlp of cat=np
-	nnp_n_np_to_np(A, B);
-	%tlp NN of cat1=n, cat2=np convert to tlp of cat=np
-	nn_n_np_to_np(A, B);
-	%tlp NNS of cat1=n, cat2=np convert to tlp of cat=np
-	nns_n_np_to_np(A, B);
-	%tt of cat1=n, cat2=np convert to tt of cat=np
-	n_np_to_np(A, B);
-	np_pss_to_n_n(A, B);
-	% climbing,VBG,n --> a/the climbing, np
-	vb_n_np_to_np(A, B);
-	% (owning X) (every man) --> who (owning X) (every man)
-	lex_rule_np_s_to_np_np(A, B);
-	%nnp_conj_n_np_to_np(A, B); % canceled by put_lex_rule_under_conj
-	put_mod_inside_who(A, B);
-	comma_to_and(A, B);
-	attach_remote_DT_to_noun(A, B);
-	n_mod_everyone(A, B);
-	some_one(A, B); %sick-2405, 6146, 3258
-	some_sleeping_one(A, B); %sick-2404
-	% no@(one@typing)
-	no_noun_typing(A, B); %sick-3439,2937
-	% relative clause should modify noun not np
-	put_rel_cl_under_det(A, B);
-	% attach particle to verb
-	attach_pr_to_verb(A, B);
-	% put pp modifier under det and attached to noun
-	put_ppMod_under_det(A, B);
-	% inserts which:vp,np,np as np modifier (for wrong analyses mainly)
-	np_which_mod(A, B);
-	% all the dogs ---> all dogs
-	pdt_rm_dt_noun(A, B);
-	% poss_pr to pos@pr
-	poss_pr_to_s_pr(A, B);
-	% not (all dogs) ---> not all dogs
-	not_all_NN(A, B);
-	% not everybody ---> not every person
-	not_everybody(A, B);
-	% brown big a dog -> a brown big dog (NL: alpino)
-	mods_det_noun(A, B);
-	%nn_n(A, B);
-	%it_is_np(A, B);
-	%it_is_mod(A, B);
-	fail.
-
-
-extract_samples(A, _) :-
-	A = ((tlp(_,'by',_,_,_), _~>(np:_~>s:pss)~>_,_) @ (B, np:_, _), (np:_~>s:pss)~>_, _),
-	ttTerm_to_prettyTerm((B, np:_), Pr),
-	report([Pr]),
-	fail.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% auxiliary preds
-tlp_pos_in_list(TLP, List) :-
-	nonvar(TLP),
-	TLP = tlp(_,_,POS,_,_),
-	memberchk(POS, List).
-
-tlp_pos_with_prefixes(TLP, Prefixes) :-
-	nonvar(TLP),
-	TLP = tlp(_,_,POS,_,_),
-	findall(PF, (
-		member(PF, Prefixes),
-		atom_concat(PF, _, POS)
-	), [_|_]).
-
-is_tlp(TLP) :-
-	nonvar(TLP),
-	TLP =.. [tlp|_].
-
-get_det_tlp(L, D) :-
-	( debMode('the') ->
-  	  D = tlp('the','the','DT','I-NP','Ins')
-	; D = tlp(L,L,'DT','I-NP','Ins') ).
-
-fix_report(Message) :-
-	( is_list(Message) -> M = Message; M = [Message] ),
-	( debMode('fix') -> report(M); true ).
-
+% lex_rule (A conj B) -> conj (lex_rule A) (lex_rule B)
+% is this necessary for vp->n,n lex rule? results in insertion of several "which"
+% takes scope over others
+fix_term(
+	((((TLP_Conj,A~>A~>A) @ (T1,A), A~>A) @ (T2,A), A), B),
+	((((TLP_Conj,B~>B~>B) @ S1, B~>B) @ S2, B), B)
+) :- %!!! %+++
+	is_tlp(TLP_Conj),
+	set_type_for_tt(T1, B, S1),
+	set_type_for_tt(T2, B, S2),
+	fix_report('!!! Fix: put_lex_rule_under_conj').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% pull sinked determiner and put at the top
-% brown big a dog -> a brown big dog (NL: alpino)
-mods_det_noun(
+% make PP S-modifier an argument of copula
+% PP:s~>s @ (is:vp @ np) -> is:pp~>np~>s @ PP:pp @ np
+% NL:npn-987p: in NP1 (is NP2) -> is (in NP1) NP2
+fix_term(
+	( ((PP,np:_~>s:_~>s:_) @ NP1, _) @ ((Be,np:Y~>s:X) @ NP2, _), s:Z ),
+	( (((Be,pp~>np:Y~>s:X) @ ((PP,np:_~>pp) @ NP1, pp), np:Y~>s:X) @ NP2, s:Z) )
+) :-
+	tlp_pos_in_list(PP, ['IN']),
+	fix_report('!!! Fix: pp_be_to_be_pp').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% make the determiner ordinary that takes np~>s:adj as an argument
+% NL:npn-987h: no:vp[adj]~>np @ adult:vp[adj] -> no:n~>np @ adult:n
+fix_term(
+	( (Det,(np:_~>s:adj)~>np:Y) @ VP_adj, np:X ),
+	( (Det,n:_~>np:Y) @ Noun, np:X )
+) :-
+	is_tlp(Det),
+	set_type_for_tt(VP_adj, n:_, Noun),
+	fix_report('!!! Fix: det_pred_adj').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pull sinked determiner and put at the top of NP
+% NL:Lassy: brown (big (a dog)) -> a (brown (big dog))
+fix_term(
 	( (Mod,np:_~>np:_) @ NP, np:_ ),
 	( Det @ Mods_N, np:X )
 ) :-
@@ -159,37 +97,41 @@ mods_det_noun(
 	maplist([(_,np:_~>np:_)]>>true, Mods),
 	maplist([L,New]>>set_type_for_tt(L, n:_~>n:_, New),
 		[(Mod,np:_~>np:_)|Mods], Mods1),
-	apply_ttMods_to_ttArg(Mods1, Noun, Mods_N).
+	apply_ttMods_to_ttArg(Mods1, Noun, Mods_N),
+	fix_report('!!! Fix: mods_det_noun').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% attach a particle modifying verbphrase to a verb
-% sick-192: up@stand -> stand_up, is this necessary after MWE look up in WN is done?
-attach_pr_to_verb(
+% recover [pss] feature in types from [pt] since Lassy has no info for such feature
+% SICKNL:1333 (worden,vp[pt]~>vp[dcl]) ((door NP,vp[pt]~>vp[pt]) (gemeten,vp[pt])) ->
+%             (worden,vp[pss]~>vp[dcl]) ((door NP,vp[pss]~>vp[pss]) (gemeten,vp[pss]))
+% NL:Lassy: brown (big (a dog)) -> a (brown (big dog))
+fix_term(
+	( (Worden,(np:X~>s:pt)~>TyVP) @ VP, TyVP ),
+	( (Worden,(np:X~>s:pss)~>TyVP) @ VP_pss, TyVP )
+) :-
+	tlp_pos_in_list(Worden, ['RB','AUX']),
+	tlp_lemma_in_list(Worden, ['worden','is','zijn','be']), % remove NL words?
+	set_type_for_tt(VP, np:X~>s:pss, VP_pss).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% attach a VP-modifying particle to a verb
+% sick-192: up@stand -> stand_up
+% is this necessary after MWE look up in WN is done?
+fix_term(
  	((tlp(TP,LP,'RP',_,_),(np:_~>s:_)~>np:_~>s:_) @ VP, _),
 	( ((tlp(T,L,POS,F1,F2),V_Ty) @ Rest), VP_Ty )
 ) :-
 	VP = ((tlp(TV,LV,POS,F1,F2),V_Ty) @ Rest, VP_Ty),
 	atom_chars(POS, ['V','B'|_]),
 	atomic_list_concat([TV, '_', TP], T),
-	atomic_list_concat([LV, '_', LP], L).
+	atomic_list_concat([LV, '_', LP], L),
+	fix_report('!!! Fix: attach_pr_to_verb').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% lex_rule (A conj B) -> conj (lex_rule A) (lex_rule B)
-% is this necessary for vp->n,n lex rule? results in insertion of several "which"
-put_lex_rule_under_conj(
-	((((TLP_Conj,A~>A~>A) @ (T1,A), A~>A) @ (T2,A), A), B),
-	((((TLP_Conj,B~>B~>B) @ S1, B~>B) @ S2, B), B)
-) :- %!!! %+++
-	is_tlp(TLP_Conj),
-	set_type_for_tt(T1, B, S1),
-	set_type_for_tt(T2, B, S2),
-	fix_report('!!! Fix: put_lex_rule_under_conj').
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% relative clause should modify noun not np
 % e.g. who sleep ((most man, n), np)  ---> ((most (who man sleep, n), n), np)
 % fracas-58,74 eccg
-put_rel_cl_under_det(
+fix_term(
 	( (W@VP,np:_~>np:_) @ ((M@N,n:F1),np:F2), np:_),
 	( (M @ ((W1@VP, n:_~>n:_) @ N, n:_), n:F1), np:F2 )
 ) :- %+++
@@ -200,20 +142,38 @@ put_rel_cl_under_det(
 	fix_report('!!! Fix: put_rel_cl_under det or modN').
 	% if M is DEt then put_mod_under_det will fix this issue
 
-% e.g. who (a woman) sleeps ---> a (who woman sleep)
+% e.g. who sleeps (a woman) ---> a (who sleep woman)
 % sick-2722, f %!!! a group of people dancing
-put_rel_cl_under_det(
+fix_term(
 	( ((WH_TLP,VpTy~>np:_~>np:_) @ VP, np:_~>np:_) @ (Q@N,np:_), np:F2),
 	( Q @ (((WH_TLP,VpTy~>n:_~>n:_) @ VP, n:_~>n:_) @ N, n:_), np:F2 )
 ) :- %+++
-	tlp_pos_in_list(WH_TLP, ['WDT', 'WP']), % why not any modifier? instead of _~>np~>np
+	% why not any modifier? instead of _~>np~>np
+	tlp_pos_in_list(WH_TLP, ['WDT','WP','PRP$','DT']), % NL:die:PRP$,DT
 	Q = (tlp(_,_,'DT',_,_), n:_~>np:_),  % why lexical item only? why not any n~->np?
 	fix_report('!!! Fix: put_rel_cl_under_det').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% attach the modifier to the head of rlative clause or passive clause
+% (X, n~>n) @ [(who @ Z, n~>n) @ (Y,n)] ~~~> (who @ Z, n~>n) @ [(X, n~>n) @ (Y,n)]
+% (X, n~>n) @ [((VPpass:np~>s), n~>n) @ (Y,n)] ~~~>((VPpass:np~>s), n~>n) @ [(X, n~>n) @ (Y,n)]  %sick-2712, 7649
+fix_term(
+	( Mod @ (WHC @ TTn, n:_), n:_ ),
+	( WHC @ (Mod @ TTn, N), N )
+) :- %+++
+	nonvar(WHC),
+	( WHC = ((tlp(_,'who',_,_,_),_) @ _VP, n:_~>n:_)
+	; WHC = ((_, np:_~>s:_), n:_~>n:_)
+	),
+	Mod = (TTexp, _~>N),
+	TTexp \= (_,_,_), % "posed slept man" will loop in commutation modifiers, sick-964
+	fix_report('!!! Fix: put_mod_inside_who').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% put pp modifier under det and attached to noun
 % e.g. (of:np,np,np) (s friend) (a group) ---> a ((of:np,n,n) (s friends) group)
 % sick-140 eccg
-put_ppMod_under_det(
+fix_term(
 	( ((Of,np:Z~>np:_~>np:_)@NP1,np:_~>np:_) @ NP2, np:_ ),
 	( Det @ (((Of,np:Z~>n:X~>n:Y)@NP1, n:X~>n:Y) @ N, n:Y), np:U)
 ) :- %+++
@@ -222,13 +182,13 @@ put_ppMod_under_det(
 	tlp_pos_in_list(Of, ['IN']),
 	fix_report('!!! Fix: put_ppMod_under_det').
 
-
 %%%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%
+%tlp NNP of cat1=n, cat2=np convert to tlp of cat=np
 % e.g. Oracle,NNP,n -> np -----> Oracle,NNP,np
 % something, everybody, 'DT'
 % Jews, Americans, States, Airlines, 'NNPS'
 % it,PRP; then,RB; more,JJR  n -> np --------> X,PRP,np
-nnp_n_np_to_np(
+fix_term(
 	( (TLP, n:_), np:X ),
 	( TLP, np:X )
 ) :- % +++
@@ -237,7 +197,7 @@ nnp_n_np_to_np(
 
 % (south:n~>n @ Europe:NNP:n):np to (the @ (south:n~>n @ Europe:NNP:n)):np
 % south Europe ~~> the south Europe, fracas-44
-nnp_n_np_to_np(
+fix_term(
 	( (N, n:X), np:_),
 	( The @ (N, n:X), np:_)
 ) :- % +++
@@ -246,10 +206,10 @@ nnp_n_np_to_np(
 	The = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_),
 	fix_report('!!! Fix: modified proper names as np').
 
-
 %%%%%%%%%%%%%%%%%%% lex rule N->NP for verbs %%%%%%%%%%%%%%%%%%%%%%%%%
+% climbing,VBG,n --> a/the climbing, np
 % e.g. seasoning,VBG,n, climbing:VBG,n, rule directly for compunds
-vb_n_np_to_np(
+fix_term(
 	( (T,n:Y), np:X ),
 	( (D, n:_~>np:X) @ (T,n:Y), np:X )
 ) :-
@@ -259,12 +219,12 @@ vb_n_np_to_np(
 	get_det_tlp('a', D),
 	fix_report('!!! Fix: insert DT for n:VB* complex term').
 
-
 %%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%%%
+% tlp NN of cat1=n, cat2=np convert to tlp of cat=np
 % n with NN heads to np
 % e.g. oil,NN,n -> np -----> a@oil,DT,np
 % why compunds and constants are seprated? why not to treat them with the same rule?
-nn_n_np_to_np(
+fix_term(
 	( (N, n:X), np:Y),
 	( (D, n:_~>np:Y) @ (N,n:X), np:Y )
 ) :- % +++
@@ -280,7 +240,7 @@ nn_n_np_to_np(
 
 % e.g. crude@oil,NN,n ------> a@(cruid@oil),DT,np
 % e.g. oil,NN,pp~>n for april delivery ----> a@(oil@for_april_delivery)
-nn_n_np_to_np(
+fix_term(
 	( (N, n:X), np:Y ),
 	( (D,n:_~>np:_) @ (N,n:X), np:Y)
 ) :-  % +++
@@ -291,11 +251,11 @@ nn_n_np_to_np(
 	get_det_tlp('a', D),
 	fix_report('!!! Fix: insert DT for n:NN complex term').
 
-
 %%%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%
+% tlp NNS of cat1=n, cat2=np convert to tlp of cat=np
 % n with NNS heads to np, NNS is changed in NN by simply/2 predicate
 % e.g. dogs,NNS,n -> np -----> s@dogs,PL,np
-nns_n_np_to_np(
+fix_term(
 	( (NNS,n:X), np:Y ),
 	( (D,n:_~>np:_) @ (NNS,n:X), np:Y )
 ) :- % +++
@@ -305,7 +265,7 @@ nns_n_np_to_np(
 
 % e.g. hungry@dogs,NNS,n -> np -----> s@(hungry@dogs),PL,np
 % e.g. apples,NNS,pp~>n for april delivery ----> s@(apples@for_april_delivery)
-nns_n_np_to_np(
+fix_term(
 	( (NNS,n:X), np:Y ),
 	( (D,n:_~>np:_) @ (NNS,n:X), np:Y )
 ) :- % +++
@@ -317,9 +277,10 @@ nns_n_np_to_np(
 	fix_report('!!! Fix: insert DT for n:NNS complex term').
 
 %%%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%
+% tt of cat1=n, cat2=np convert to tt of cat=np
 % type change from n to np
 % e.g. $@37,CD,n:num -> np -----> $@37,CD,np
-n_np_to_np(
+fix_term(
 	( (CD,n:num), np:_ ),
 	( CD, np:Feat )
 ) :-
@@ -331,7 +292,7 @@ n_np_to_np(
 	fix_report('!!! Fix: make CD,n:num of category np').
 
 % a girl in (white, n, np)
-n_np_to_np(
+fix_term(
 	( (JJ,n:X), np:Y ),
 	( (D,n:_~>np:_) @ (JJ,n:X), np:Y )
 ) :-
@@ -340,9 +301,10 @@ n_np_to_np(
 	fix_report('!!! Fix: insert DT for n:JJ constants').
 
 %%%%%%%%%%%%%%%%% lex rule N->NP & VP->N,N %%%%%%%%%%%%%%%%%%%%%%%%%%%
+% inserts which:vp,np,np as np modifier (for wrong analyses mainly)
 % ((((M,np~>s),n~>n) @ Smith:n:NNP, n), np) --->  (which:(np~>s)~>np~>np @ M:np~>s) @ Smith:np
 % Smith see X did Y, wrong analysis mainly, fracas-345
-np_which_mod(
+fix_term(
 	( (((VP,np:X~>s:Y),n:_~>n:_) @ (N,n:_), n:_), np:_),
 	((WH @ (VP,np:X~>s:Y), np:_~>np:_) @ (N,np:_), np:_)
 ) :- %+++
@@ -353,7 +315,7 @@ np_which_mod(
 %%%%%%%%%%%%%%%%%%% lex rule VP->N,N %%%%%%%%%%%%%%%%%%%%%%%%%
 % X:np->s:pss/ng  -> n->n  ------>  which @ (is @ X)
 % e.g. from@Canada@produced,np->s:pss -> n->n -----> which@(is@(from@Canada@produced))
-np_pss_to_n_n(
+fix_term(
 	( (VP,np:X~>s:F), n:_~>n:_ ),
 	( WH @ (VP,np:X~>s:F), n:_~>n:_ )
 ) :- %!!! how do you deal with the verb then? any rule fpr this? %+++
@@ -361,8 +323,10 @@ np_pss_to_n_n(
 	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:_~>s:_)~>n:_~>n:_),
 	fix_report(['!!! Fix: insert Which Is for lex_rule. Feature = ', F]).
 
-% for ((owning cars) (evevry man)) -> ( who (owning cars) (evevry man))
-lex_rule_np_s_to_np_np(
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% explain lex_rule vp --> np~>np
+% ((owning X, vp), np~>np) (every man) --> (who,vp~>(np~>np)) (owning X, vp) (every man)
+fix_term(
 	( ((VP,np:A~>s:B), np:C~>np:D) @ QNP, np:E),
 	( (WH @ (VP,np:A~>s:B), np:C~>np:D) @ QNP, np:E )
 ) :- %+++
@@ -370,25 +334,10 @@ lex_rule_np_s_to_np_np(
 	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:A~>s:B)~>np:C~>np:_),
 	fix_report('!!! Fix: insert Which Is for lex_rule: vp->np->np').
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% attach the modifier to the head of rlative clause or passive clause
-% (X, n~>n) @ [(who @ Z, n~>n) @ (Y,n)] ~~~> (who @ Z, n~>n) @ [(X, n~>n) @ (Y,n)]
-% (X, n~>n) @ [((VPpass:np~>s), n~>n) @ (Y,n)] ~~~>((VPpass:np~>s), n~>n) @ [(X, n~>n) @ (Y,n)]  %sick-2712, 7649
-put_mod_inside_who(
-	( Mod @ (WHC @ TTn, n:_), n:_ ),
-	( WHC @ (Mod @ TTn, N), N )
-) :- %+++
-	nonvar(WHC),
-	( WHC = ((tlp(_,'who',_,_,_),_) @ _VP, n:_~>n:_)
-	; WHC = ((_, np:_~>s:_), n:_~>n:_)
-	),
-	Mod = (TTexp, _~>N),
-	TTexp \= (_,_,_), % "posed slept man" will loop in commutation modifiers, sick-964
-	fix_report('!!! Fix: put_mod_inside_who').
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % change type n~>n to n~>np for JJ(S) words like many, several, most, few, etc
-nn_to_n_np(
+% cat1=n, cat2=np, cat(Quant:JJ)=n~>n to (Quant, n~>np) @ n
+fix_term(
 	( ((Q,n:X~>n:_) @ N, n:_), np:Y ),
 	( (tlp(Tk,L,P1,F1,F2),n:X~>np:Y) @ N, np:Y )
 ) :- %+++
@@ -400,7 +349,7 @@ nn_to_n_np(
 	fix_report('!!! Fix: identify modifiers as quantifiers').
 
 % exactly,(n~>n)~>n~>n @ two,n~>n @ N,n : np ~~> exactly,(n~>np)~>n~>np @ two,n~>np @ N,n - fracas-85
-nn_to_n_np(
+fix_term(
 	( (((RB,_) @ (CD,n:_~>n:_), n:X~>n:_) @ N, n:_), np:Y ),
 	( ((RB, Ty~>Ty) @ (CD, Ty), Ty) @ N, np:Y )
 ) :- %+++
@@ -411,7 +360,7 @@ nn_to_n_np(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Change plural-some to several
-some_nns_to_afew_nns(
+fix_term(
 	( (Some,n:F1~>np:F2) @ TTn, np:F3 ),
 	( (Afew,n:F1~>np:F2) @ TTn, np:F3 )
 ) :-
@@ -423,7 +372,7 @@ some_nns_to_afew_nns(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Change plural-the to s-morpehem
-the_nns_to_s_nns(
+fix_term(
 	( (The,n:X~>np:Y) @ TTn, np:Z ),
 	( (Det,n:X~>np:Y) @ TTn, np:Z )
 ) :-
@@ -436,7 +385,7 @@ the_nns_to_s_nns(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % change conjunctive comma to and
-comma_to_and(
+fix_term(
 	( tlp(',', ',', ',',F1,F2), Ty~>Ty~>Ty ),
 	( tlp('and','and','CC',F1,F2), Ty~>Ty~>Ty )
 ) :-
@@ -445,7 +394,7 @@ comma_to_and(
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach remote DT to the head of NP
 % e.g. The [people who were at the meeting] [All] laughed
-attach_remote_DT_to_noun(
+fix_term(
 	( ((DT,(np:_~>s:dcl)~>np:_~>s:dcl) @ VP, np:_~>s:dcl) @ NP, s:dcl ),
 	( VP @ ((DT,DTy) @ TT_n, np:F3), STy )
 ) :-
@@ -458,11 +407,12 @@ attach_remote_DT_to_noun(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ((n->n @ everyone, n), np) ---> (every, n->np) @ (n->n @ person)
-n_mod_everyone(
-	( (Mod @ (tlp(_,L,'DT',_,_),n:_), n:_), np:F1 ),
+fix_term(
+	( (Mod @ (tlp(_,L,POS,_,_),n:_), n:_), np:F1 ),
 	( (Quant,n:F2~>np:F1) @ (Mod @ (Noun,n:F2), n:F2), np:F1)
 ) :-
 	nonvar(L),
+	memberchk(POS, ['DT','PRON','PRP','PRP$']),
 	decompose_everyone(L, Q, N),
 	Quant = tlp(Q,Q,'DT','Ins','Ins'),
 	Noun = tlp(N,N,'NN','Ins','Ins'),
@@ -470,11 +420,13 @@ n_mod_everyone(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % someone,np -> some:n->np @ person:n
-some_one(
-	( tlp(_,L,'DT',_Feat1,_),np:F1 ),
+% sick-2405, 6146, 3258
+fix_term(
+	( tlp(_,L,POS,_Feat1,_),np:F1 ),
 	( (Quant,n:F2~>np:F1) @ (Noun,n:F2), np:F1 )
 ) :-
 	nonvar(L),
+	memberchk(POS, ['DT','PRON','PRP','PRP$']),
 	decompose_everyone(L, Q, N),
 	Quant = tlp(Q,Q,'DT','Ins','Ins'),
 	Noun = tlp(N,N,'NN','Ins','Ins'),
@@ -482,7 +434,8 @@ some_one(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % no,n~>np (sleeping:n~>n one:n) -> no,n~>np (sleeping:n~>n person:n)
-some_sleeping_one(
+% sick-2404
+fix_term(
 	( (Q,n:X~>np:Y) @ (Nmod @ (One,n:F), n:X), np:Z ),
 	( (Q,n:X~>np:Y) @ (Nmod @ Person, n:X), np:Z )
 ) :-
@@ -492,8 +445,9 @@ some_sleeping_one(
 	fix_report('!!! Fix: GQ with verb').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% no,n~>np (one:n~>n typing:n) -> no,n~>np (typing:n~>n person:n) sick-3353, 3439
-no_noun_typing(
+% no,n~>np (one:n~>n typing:n) -> no,n~>np (typing:n~>n person:n)
+% sick-2937, 3353, 3439
+fix_term(
 	( (Q,n:X~>np:Y) @ ((N,n:_~>n:_) @ (V,n:_), n:F), np:Z ),
 	( (Q,n:X~>np:Y) @ ( (Verb,n:F~>n:F) @ (N,n:F), n:F), np:Z )
 ) :-
@@ -505,9 +459,10 @@ no_noun_typing(
 	fix_report('!!! Fix: Verb modifying noun').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% convert possessive pronoun as a possessive marker applied to the pronoun
 % [its, n,(np,s),s]  ---> [s, np,n,(np,s),s] @ [it, np]
 % sick-5003
-poss_pr_to_s_pr(
+fix_term(
 	( tlp(_,Lm,'PRP$',_,_), Type ),
 	( (S,np:X~>Type) @ (It,np:X), Type )
 ) :-
@@ -520,7 +475,7 @@ poss_pr_to_s_pr(
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % N of [the] dogs,np ---> N dogs
 % fracas-46
-numOfNNS_to_numNNS(
+fix_term(
 	( (Num,_) @ ((tlp(_,'of',_,_,_),_:_~>pp) @ NP, pp), np:_),
 	( (Num,n:_~>np:_) @ N, np:_ )
 ) :-
@@ -536,7 +491,7 @@ numOfNNS_to_numNNS(
 
 % None of [the] kids,n,np ---> None kids
 %sick-122
-numOfNNS_to_numNNS(
+fix_term(
 	( (((tlp(_,'of',_,_,_),_) @ NP, n:_~>n:_) @ (Num,_), n:_), np:_ ),
 	( (Num,n:_~>np:_) @ N, np:_ )
 ) :-
@@ -550,10 +505,11 @@ numOfNNS_to_numNNS(
 	fix_report('!!! Fix: 5 of Dogs -> 5 Dogs').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% all the dogs ---> all dogs
 % All:PDT:np~>np the:n~>np dogs:n ---> All dogs
 %!!! should not be "not all", "not every"
 % fracas-92
-pdt_rm_dt_noun(
+fix_term(
 	( (tlp(T,L,'PDT',F1,F2),np:_~>np:_) @ ((DT,n:_~>np:_) @ N, np:_), np:_ ),
 	( (tlp(T,L,'DT',F1,F2),n:_~>np:_) @ N, np:_)
 ) :-
@@ -562,8 +518,8 @@ pdt_rm_dt_noun(
 	fix_report('!!! Fix: attach pre determiner').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% not @ (all @ birds) -> not @ all @ birds
-not_all_NN(
+% not @ (all @ birds) -> (not @ all) @ birds
+fix_term(
 	( (NOT,_) @ ((ALL,n:_~>np:_) @ Noun, np:_), np:_ ),
 	( ((NOT,Ty) @ (ALL,n:_~>np:_), n:_~>np:_) @ Noun, np:_ )
 ) :-
@@ -574,8 +530,9 @@ not_all_NN(
 	Ty = (n:_~>np:_)~>n:_~>np:_,
 	fix_report('!!! Fix: not (all dogs) -> (not all) dogs').
 
-% not @ everybody -> not @ every @ person
-not_everybody(
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% not @ everybody -> (not @ every) @ person
+fix_term(
 	( NOT @ (EB_TLP, np:_), np:_ ),
 	NOT_EB
 ) :-
@@ -655,3 +612,44 @@ tc_to_string( (abst(A, B),_), Str ) :-
 	tc_to_string(A, StrA),
 	tc_to_string(B, StrB),
 	atomic_list_concat(['(', StrA, '.', StrB, ')'], Str).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+extract_samples(A, _) :-
+	A = ((tlp(_,'by',_,_,_), _~>(np:_~>s:pss)~>_,_) @ (B, np:_, _), (np:_~>s:pss)~>_, _),
+	ttTerm_to_prettyTerm((B, np:_), Pr),
+	report([Pr]),
+	fail.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% auxiliary preds
+tlp_pos_in_list(TLP, List) :-
+	nonvar(TLP),
+	TLP = tlp(_,_,POS,_,_),
+	memberchk(POS, List).
+
+tlp_lemma_in_list(TLP, List) :-
+	nonvar(TLP),
+	TLP = tlp(_,Lemma,_,_,_),
+	memberchk(Lemma, List).
+
+tlp_pos_with_prefixes(TLP, Prefixes) :-
+	nonvar(TLP),
+	TLP = tlp(_,_,POS,_,_),
+	findall(PF, (
+		member(PF, Prefixes),
+		atom_concat(PF, _, POS)
+	), [_|_]).
+
+is_tlp(TLP) :-
+	nonvar(TLP),
+	TLP =.. [tlp|_].
+
+get_det_tlp(L, D) :-
+	( debMode('the') ->
+  	  D = tlp('the','the','DT','I-NP','Ins')
+	; D = tlp(L,L,'DT','I-NP','Ins') ).
+
+fix_report(Message) :-
+	( is_list(Message) -> M = Message; M = [Message] ),
+	( debMode('fix') -> report(M); true ).
