@@ -101,9 +101,23 @@ r(cl_subsumption_complex, 	closure, _, _Lexicon, KB_xp,  %!!! is this rule worth
 
 
 % closure related to "There is"
-r(contra_there, 	closure, _, [['there']], _,
+r(contra_there, 	closure, _, [['there', 'be']], _,
 		br([nd( [], (((tlp(_,'be',_,_,_),_) @ TT, _) @ (tlp(_,'there',_,_,_),np:thr), s:_) ,
 				[], false )],
+		  Sig)
+		===>
+		br([nd( [], (true, t), [], false )], % only semnatic terms
+		  Sig) )
+:-
+			debMode('no_gq_llfs') ->
+				TT = (Term, _),
+				( atom(Term); Term=.. [tlp | _])
+			;	true.
+
+% for different analysis of expletives use by Alpino: there(be(c1))
+r(contra_be, 	closure, _, [['be']], _,
+		br([nd( [], (tlp(_,'be',_,_,_),np:_~>s:_) ,
+				[TT], false )],
 		  Sig)
 		===>
 		br([nd( [], (true, t), [], false )], % only semnatic terms
@@ -326,9 +340,9 @@ r(cl_group_of, 		closure, _,  [['of','group'], ['of','body'], ['of','piece'], ['
 % C1 did C2, Dance(C2) -> Danced(C1), which problems?
 % puting seasoning vs seasoning SICK-5340?? accomodate this too
 % make this as a normal rule!
-
-r(cl_do_vp, 	closure, _, [['do']], _,
-		br([nd( M1, (tlp(_,'do',_,_,_), np:_~>np:_~>s:_), 	[C2, C1], 	TF1 ),
+% NL:doen, replacing with do is not safe as plaatsen<doen sicknl-3250
+r(cl_do_vp, 	closure, _, [['do'], ['doen']], _,
+		br([nd( M1, (tlp(_,Do,_,_,_), np:_~>np:_~>s:_), 	[C2, C1], 	TF1 ),
 		    nd( _, (tlp(_,Dance,_NN,_,_), n:_),				[C2],		TF2 ),
 		    nd( M3, (tlp(_,Dance,_,_,_), np:_~>s:_),		[C1],		TF3 )
 		   ],
@@ -337,6 +351,7 @@ r(cl_do_vp, 	closure, _, [['do']], _,
 		br([nd( [], (true, t), [], false )], % only semnatic terms
 		  Sig) )
 :-
+			memberchk(Do, ['do','doen']),
 			(	(TF1, TF2, TF3) = (true, true, false),
              	subset_only_terms(M3, M1)
 			;	(TF1, TF2, TF3) = (false, true, true),
