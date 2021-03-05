@@ -123,6 +123,7 @@ latex_ttTerm_preambule(S) :-
 	write(S, '\\setlength\\headsep{0in}\n'),
 	write(S, '\\setlength\\headheight{0in}\n'),
 	write(S, '\\setlength\\topskip{0in}\n'),
+	write(S, '\\usepackage[utf8]{inputenc}\n'),
 	write(S, '\\usepackage{tikz-qtree-compat}\n'),
 	write(S, '%\\usepackage{spverbatim}\n'),
 	write(S, '\\usepackage{amssymb}\n'),
