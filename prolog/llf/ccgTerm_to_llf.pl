@@ -104,7 +104,6 @@ fix_term(
 % recover [pss] feature in types from [pt] since Lassy has no info for such feature
 % SICKNL:1333 (worden,vp[pt]~>vp[dcl]) ((door NP,vp[pt]~>vp[pt]) (gemeten,vp[pt])) ->
 %             (worden,vp[pss]~>vp[dcl]) ((door NP,vp[pss]~>vp[pss]) (gemeten,vp[pss]))
-% NL:Lassy: brown (big (a dog)) -> a (brown (big dog))
 fix_term(
 	( (Worden,(np:X~>s:pt)~>TyVP) @ VP, TyVP ),
 	( (Worden,(np:X~>s:pss)~>TyVP) @ VP_pss, TyVP )
@@ -112,6 +111,37 @@ fix_term(
 	tlp_pos_in_list(Worden, ['RB','AUX']),
 	tlp_lemma_in_list(Worden, ['worden','is','zijn','be']), % remove NL words?
 	set_type_for_tt(VP, np:X~>s:pss, VP_pss).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% n lexical subjects of passives will use lex_rule to become np
+% and later will be processed by lex_rule elimination rule
+% SICKNL:2704 (worden,vp[pt]~>n~>s:dcl) VP_pt n ->
+%             (worden,vp[pss]~>vp[dcl]) VP_pt ((n),np)
+fix_term(
+	( ((Worden,(np:X~>s:Y)~>n:_~>S) @ VP, _) @ (Noun,n:A), _ ),
+	( ((Worden,(np:X~>s:Y)~>np:Z~>S) @ VP, np:Z~>S) @ ((Noun,n:A),np:Z), S )
+) :-
+	tlp_pos_in_list(Worden, ['RB','AUX']),
+	tlp_lemma_in_list(Worden, ['worden','is','zijn','be']). % remove NL words?
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% n argumnet of prepositions will use lex_rule to become np
+% and will be later processed again by lex_rule elimination rule
+% SICKNL:2704 ('IN',n~>vp~>vp) n --> ('IN',np~>vp~>vp) ((n),np)
+
+% Note that this rule is applied to larger phrase with Head because, fixing earlier
+% is better as other fixing rules (e.g., put pp modifier under det) depend on this
+fix_term( % for n~>vp~>vp, n~>np~>np, n~>n~>n cases
+	( ((IN,n:_~>ModTy) @ (Noun,n:X), _) @ Head, Ty ),
+	( ((IN,np:Y~>ModTy) @ ((Noun,n:X),np:Y), ModTy) @ Head, Ty )
+) :-
+	tlp_pos_in_list(IN, ['IN']).
+
+fix_term( % for n~>pp case
+	( (IN,n:_~>Ty1) @ (Noun,n:X), Ty2 ),
+	( (IN,np:Y~>Ty1) @ ((Noun,n:X),np:Y), Ty2 )
+) :-
+	tlp_pos_in_list(IN, ['IN']).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach a VP-modifying particle to a verb
@@ -183,7 +213,7 @@ fix_term(
 	fix_report('!!! Fix: put_ppMod_under_det').
 
 %%%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%
-%tlp NNP of cat1=n, cat2=np convert to tlp of cat=np
+% tlp NNP of cat1=n, cat2=np convert to tlp of cat=np
 % e.g. Oracle,NNP,n -> np -----> Oracle,NNP,np
 % something, everybody, 'DT'
 % Jews, Americans, States, Airlines, 'NNPS'
