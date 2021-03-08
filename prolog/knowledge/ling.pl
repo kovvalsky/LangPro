@@ -10,7 +10,7 @@
 	a_list_of_colors/1
 ]).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % lemma of a possessive pronoun
 lemma_of_poss_pr('my', 	 'I').
 lemma_of_poss_pr('your', 'you').
@@ -19,22 +19,28 @@ lemma_of_poss_pr('our',  'we').
 lemma_of_poss_pr('their','they').
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % detect a quantifier and a head noun from a word
-% everyone -> every person 
+% everyone -> every person
 decompose_everyone(Word, Quant, Head) :-
 	member(Word, ['everybody', 'everyone']) -> (Quant, Head) = ('every', 'person');
 	member(Word, ['somebody', 'someone']) -> (Quant, Head) = ('a', 'person');
 	member(Word, ['nobody']) -> (Quant, Head) = ('no', 'person');
 	Word = 'everything' -> (Quant, Head) = ('every', 'thing');
 	Word = 'something' -> (Quant, Head) = ('some', 'thing');
-	Word = 'nothing' -> (Quant, Head) = ('no', 'thing').
-
+	Word = 'nothing' -> (Quant, Head) = ('no', 'thing');
+	% NL
+	% note that een/geen wouldn't be replced with a/no at this stage, so using a/no
+	Word = 'iemand' -> (Quant, Head) = ('a', 'persoon');
+	Word = 'niemand' -> (Quant, Head) = ('no', 'persoon');
+	Word = 'iets' -> (Quant, Head) = ('a', 'entiteit');
+	Word = 'niets' -> (Quant, Head) = ('no', 'entiteit');
+	Word = 'iedereen' -> (Quant, Head) = ('every', 'persoon').
 
 
 %text_to_number(Atom, Num) :-
 
-text_to_number('a', 	1).	
+text_to_number('a', 	1).
 text_to_number('one', 	1).
 text_to_number('two', 	2).
 text_to_number('three', 3).
@@ -59,16 +65,3 @@ a_list_of_colors([
 'white',
 'yellow'
 ]).
-
-
-
-
-
-
-
-
-
-
-
-
-
