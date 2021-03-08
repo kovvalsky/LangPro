@@ -453,13 +453,15 @@ extract_const_ttTerm(_, Const, Const).
 % feeding TT with argument list ttArgs;
 % feeding order complies with ttArgs list order;
 % TT have to be S-category returning functor ? %!!!why?
-feed_ttTerm_with_ttArgs((Exp, A~>B), NewTT, [TTarg | Rest]) :-
-	!,
-	TTarg = (_, A), %sub_type(Ty, A), !, % for some reasons
-	TT = ((Exp, A~>B) @ TTarg, B),
-	feed_ttTerm_with_ttArgs(TT, NewTT, Rest).
-
-feed_ttTerm_with_ttArgs((Exp, s:F), (Exp, s:F), []).
+feed_ttTerm_with_ttArgs((Term,Ty), NewTT, TTArgs) :-
+	apply_ttFun_to_ttArgs((Term,Ty), TTArgs, NewTT),
+	NewTT = (_, s:_).
+% 	!,
+% 	TTarg = (_, A), %sub_type(Ty, A), !, % for some reasons
+% 	TT = ((Exp, A~>B) @ TTarg, B),
+% 	feed_ttTerm_with_ttArgs(TT, NewTT, Rest).
+%
+% feed_ttTerm_with_ttArgs((Exp, s:F), (Exp, s:F), []).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % abst_ttTerm_with_ttArgs(TT, NewTT, ttArgs)
 % NewTT is a result of abstracting TT with the list ttArgs;
