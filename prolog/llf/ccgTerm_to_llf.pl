@@ -13,7 +13,7 @@
 	right_branch_tt_search/4
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
-:- use_module('../lambda/type_hierarchy', [cat_eq/2]).
+:- use_module('../lambda/type_hierarchy', [cat_eq/2, final_value_of_type/2]).
 
 :- dynamic debMode/1.
 
@@ -113,16 +113,31 @@ fix_term(
 	set_type_for_tt(VP, np:X~>s:pss, VP_pss).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% n lexical subjects of passives will use lex_rule to become np
+% n arguments of passives or verbs will use lex_rule to become np
 % and later will be processed by lex_rule elimination rule
-% SICKNL:2704 (worden,vp[pt]~>n~>s:dcl) VP_pt n ->
-%             (worden,vp[pss]~>vp[dcl]) VP_pt ((n),np)
+% fix_term(
+% 	( ((Worden,(np:X~>s:Y)~>n:_~>S) @ VP, _) @ (Noun,n:A), _ ),
+% 	( ((Worden,(np:X~>s:Y)~>np:Z~>S) @ VP, np:Z~>S) @ ((Noun,n:A),np:Z), S )
+% ) :-
+% 	tlp_pos_in_list(Worden, ['RB','AUX']),
+% 	tlp_lemma_in_list(Worden, ['worden','is','zijn','be']). % remove NL words?
+
+
 fix_term(
-	( ((Worden,(np:X~>s:Y)~>n:_~>S) @ VP, _) @ (Noun,n:A), _ ),
-	( ((Worden,(np:X~>s:Y)~>np:Z~>S) @ VP, np:Z~>S) @ ((Noun,n:A),np:Z), S )
+	( VP @ (Noun,n:A), VP_Ty ),
+	( VP1 @ ((Noun,n:A),np:Z), VP_Ty )
 ) :-
-	tlp_pos_in_list(Worden, ['RB','AUX']),
-	tlp_lemma_in_list(Worden, ['worden','is','zijn','be']). % remove NL words?
+	final_value_of_type(VP_Ty, s:_),
+	add_heads(VP, (_,_,Head)),
+	% should there be a constraint that VP has only applications?
+	( % SICKNL:3598 doet:n~>vp oefeningen:n -> doet:np~>vp ((oefeningen:n),np)
+	  tlp_pos_with_prefixes(Head, ['VB'])
+	; % SICKNL:2704 (worden,vp[pt]~>n~>s:dcl) VP_pt n ->
+	  %             (worden,vp[pss]~>vp[dcl]) VP_pt ((n),np)
+	  tlp_pos_in_list(Head, ['RB','AUX']),
+	  tlp_lemma_in_list(Head, ['worden','is','zijn','be']) % remove NL words?
+	),
+	set_type_for_tt(VP, np:Z~>VP_Ty, VP1).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % n argumnet of prepositions will use lex_rule to become np
