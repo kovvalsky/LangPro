@@ -10,7 +10,8 @@
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('ttterm_preds', [
 	add_heads/2, set_type_for_tt/3, apply_ttMods_to_ttArg/3,
-	right_branch_tt_search/4
+	right_branch_tt_search/4, is_tlp/1, tlp_pos_in_list/2,
+	tlp_lemma_in_list/2, tlp_pos_with_prefixes/2
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../lambda/type_hierarchy', [cat_eq/2, final_value_of_type/2]).
@@ -665,36 +666,12 @@ extract_samples(A, _) :-
 	report([Pr]),
 	fail.
 
+fix_report(Message) :-
+	( is_list(Message) -> M = Message; M = [Message] ),
+	( debMode('fix') -> report(M); true ).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% auxiliary preds
-tlp_pos_in_list(TLP, List) :-
-	nonvar(TLP),
-	TLP = tlp(_,_,POS,_,_),
-	memberchk(POS, List).
-
-tlp_lemma_in_list(TLP, List) :-
-	nonvar(TLP),
-	TLP = tlp(_,Lemma,_,_,_),
-	memberchk(Lemma, List).
-
-tlp_pos_with_prefixes(TLP, Prefixes) :-
-	nonvar(TLP),
-	TLP = tlp(_,_,POS,_,_),
-	findall(PF, (
-		member(PF, Prefixes),
-		atom_concat(PF, _, POS)
-	), [_|_]).
-
-is_tlp(TLP) :-
-	nonvar(TLP),
-	TLP =.. [tlp|_].
 
 get_det_tlp(L, D) :-
 	( debMode('the') ->
   	  D = tlp('the','the','DT','I-NP','Ins')
 	; D = tlp(L,L,'DT','I-NP','Ins') ).
-
-fix_report(Message) :-
-	( is_list(Message) -> M = Message; M = [Message] ),
-	( debMode('fix') -> report(M); true ).

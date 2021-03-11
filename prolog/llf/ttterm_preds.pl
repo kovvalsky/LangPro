@@ -6,10 +6,12 @@
 		adjuncted_ttTerm/1,
 		apply_ttFun_to_ttArgs/3,
 		apply_ttMods_to_ttArg/3,
+		cc_as_fun/1,
 		conj_of_const_NNPs/1,
 		extract_const_ttTerm/2,
 		extract_lex_NNPs_ttTerms/3,
 		feed_ttTerm_with_ttArgs/3,
+		is_tlp/1,
 		match_list_ttTerms/3,
 		match_list_only_terms/2,
 		match_ttTerms/3,
@@ -28,6 +30,9 @@
 		set_type_for_tt/3,
 		set_type_for_tt/5,
 		subset_only_terms/2,
+		tlp_lemma_in_list/2,
+		tlp_pos_in_list/2,
+		tlp_pos_with_prefixes/2,
 		token_norm_ttTerm/3,
 		ttTerm_to_informative_tt/2,
 		ttTerms_same_type/2,
@@ -580,7 +585,7 @@ proper_tt_isa((TT1_fun @ _, _),  (TT2_fun @ _, _), KB_xp) :- % FIXME args should
 	proper_tt_isa(TT1_fun, TT2_fun, KB_xp). % not sufficeint condition but necessary
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true if TTterm is a conjunction of several constant NNPs
 conj_of_const_NNPs( (((Conj, np:_~>np:_~>np:_) @ TT1, _) @ TT2, _) ) :-
 	nonvar(Conj), !, % prevent variable matching
@@ -599,15 +604,18 @@ np_mod_app_np( ((Mod,np:_~>np:_) @ _TT2, np:_) ) :-
 		member(Lemma, ['or', 'and']))
 	  ).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% true if TTterm is CC@A where CC is a term with POS CC
+cc_as_fun( ((TLP_CC,_) @ _B, _Ty) ) :-
+	( tlp_pos_in_list(TLP_CC, ['CC'])
+	; tlp_lemma_in_list(TLP_CC, ['and', 'or', 'who']) ), !.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Convert constant (either NP or e-type) to e-type
 tt_constant_to_tt_entity((C, Type), (C, e)) :-
 	member(Type, [np:_, e]),
 	!.
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checks if ttTerm is A:n~>np @ N:n and if it can treated as constant
@@ -815,3 +823,28 @@ detect_head( (_, H1), (_, _), H1 ) :-
 	!.
 
 detect_head( (_, _), (_, _), _). % for removing heads since word substitutions cannot project upwards
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% auxiliary preds
+tlp_pos_in_list(TLP, List) :-
+	nonvar(TLP),
+	TLP =.. [tlp,_,_,POS|_],
+	memberchk(POS, List).
+
+tlp_lemma_in_list(TLP, List) :-
+	nonvar(TLP),
+	TLP =.. [tlp,_,Lemma|_],
+	memberchk(Lemma, List).
+
+tlp_pos_with_prefixes(TLP, Prefixes) :-
+	nonvar(TLP),
+	TLP =.. [tlp,_,_,POS|_],
+	findall(PF, (
+		member(PF, Prefixes),
+		atom_concat(PF, _, POS)
+	), [_|_]).
+
+is_tlp(TLP) :-
+	nonvar(TLP),
+	TLP =.. [tlp|_].
