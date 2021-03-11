@@ -27,7 +27,7 @@
 	tt_constant_to_tt_entity/2, modList_be_args_to_nodeList/3,
 	match_ttTerms/3, match_list_ttTerms/3, proper_tt_isa/3, extract_const_ttTerm/2,
 	set_type_for_tt/3, is_tlp/1, tlp_pos_in_list/2, tlp_lemma_in_list/2,
-	tlp_pos_with_prefixes/2, cc_as_fun/1
+	tlp_pos_with_prefixes/2, cc_as_fun/1, wh_mod_np_to_nodes/3
 	]).
 :- use_module('../prover/tableau_utils', [
 	genOldArgs/3, genFreshArgs/5
@@ -1415,15 +1415,18 @@ r(vp_pass2, 	impl:non,  ([], [], _), [['by']], _,
 				Args, TF )],
 		  Sig)
 		===>
-		br([nd(	M, Verb, New_Args, TF ) | Rest],
+		br([nd(	M, Verb, Args_NP1, TF ) | Rest],
 		  Sig) )
 :-
-		append(Args, [NP], New_Args),
-		( NP = (Tr,np:_) ->
-			append(Args, [(Tr,e)], New_Args1),
-		  	Rest = [nd(M, Verb, New_Args1, TF)]
-		  ; Rest = []
-		),
+		( wh_mod_np_to_nodes(NP, NP1, WH_Nodes) -> true
+		; NP1 = NP, WH_Nodes = [] ),
+		% move arg NP at the end of the arg list
+		append(Args, [NP1], Args_NP1),
+		% add a node for NP:e too
+		( NP1 = (Tr,np:_) ->
+			append(Args, [(Tr,e)], Args_NPe),
+			Rest = [nd(M, Verb, Args_NPe, TF) | WH_Nodes]
+		; Rest = WH_Nodes ),
 		Verb_Pass = (_, TypePss),
 		set_final_value_of_type(TypePss, TypeDcl, s:dcl),
 		set_type_for_tt(Verb_Pass, np:_~>TypeDcl, Verb).

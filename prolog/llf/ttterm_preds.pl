@@ -37,7 +37,8 @@
 		ttTerm_to_informative_tt/2,
 		ttTerms_same_type/2,
 		tt_constant_to_tt_entity/2,
-		unpack_ttTerm/2
+		unpack_ttTerm/2,
+		wh_mod_np_to_nodes/3
 	]).
 
 
@@ -823,6 +824,15 @@ detect_head( (_, H1), (_, _), H1 ) :-
 	!.
 
 detect_head( (_, _), (_, _), _). % for removing heads since word substitutions cannot project upwards
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% auxiliary preds
+wh_mod_np_to_nodes((WH @ NP, np:_), NP, [nd([], VP, [NP], true)|Rest]) :-
+	WH = ((Who, (np:_~>s:_)~>_Mod) @ VP, np:_~>np:_),
+	tlp_lemma_in_list(Who, ['who']),
+	( NP = (Term,np:_) ->
+		Rest = [nd([], VP, [(Term,e)], true)]
+	; Rest = [] ).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
