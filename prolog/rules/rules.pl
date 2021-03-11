@@ -26,7 +26,8 @@
 	adjuncted_ttTerm/1, modList_node_to_modNode_list/2,
 	tt_constant_to_tt_entity/2, modList_be_args_to_nodeList/3,
 	match_ttTerms/3, match_list_ttTerms/3, proper_tt_isa/3, extract_const_ttTerm/2,
-	set_type_for_tt/3
+	set_type_for_tt/3, is_tlp/1, tlp_pos_in_list/2, tlp_lemma_in_list/2,
+	tlp_pos_with_prefixes/2, cc_as_fun/1
 	]).
 :- use_module('../prover/tableau_utils', [
 	genOldArgs/3, genFreshArgs/5
@@ -1218,62 +1219,64 @@ r(the,  impl:new,  ([], Args, Cids), [['the']], _,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % conjunction rules
-r(arg_dist,	equi:non,  ([], [], _), _Lexicon, _,  %maybe impl?  this rule needed by sick-7889
-		br([nd( M, ( ( ( (tlp(Tk,Conj,Pos,F1,F2), Ty~>Ty~>Ty) @ TT1, _ ) @ TT2, _ ) @ TTArg, Type),
+r(arg_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %maybe impl?  this rule needed by sick-7889
+		br([nd( M, ( ( ( (TLP_CC, Ty~>Ty~>Ty) @ TT1, _ ) @ TT2, _ ) @ TTArg, Type),
 				Args, TF )],
 		  Sig)
 		===>
-		br([nd(	M, (((tlp(Tk,Conj,Pos,F1,F2), Ty2~>Ty2~>Ty2) @ (TT1 @ TTArg, Type), Type~>Type) @ (TT2 @ TTArg, Type), Type),
+		br([nd(	M, (((TLP_CC, Ty2~>Ty2~>Ty2) @ (TT1 @ TTArg, Type), Type~>Type) @ (TT2 @ TTArg, Type), Type),
 				Args, TF )],
 		  Sig) )
 :-
-			TTArg = (_, _ArgType). % check typing!!!
+			tlp_pos_in_list(TLP_CC, ['CC']),
+			\+cc_as_fun(TTArg).
+			%TTArg = (_, _ArgType). % check typing!!!
 			%TT1 = (_, _Ty1~>Ty2).
 
 % distribute function only over entity arguments, sleep (and John Sam) -> (sleep John) and (sleep Sam)
 r(fun_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %!!! equi
-		br([nd( M, (Fun @ (((tlp(Tk,Conj,'CC',F1,F2), Ty~>Ty~>Ty) @ Arg1, _Ty1) @ Arg2, _Ty2), Type),
+		br([nd( M, (Fun @ (((TLP_CC, Ty~>Ty~>Ty) @ Arg1, _Ty1) @ Arg2, _Ty2), Type),
 				Args, TF )],
 		  Sig)
 		===>
-		br([nd(	M, (((tlp(Tk,Conj,'CC',F1,F2), Type~>Type~>Type) @ (Fun @ Arg1, Type), Type~>Type) @ (Fun @ Arg2, Type), Type),
+		br([nd(	M, (((TLP_CC, Type~>Type~>Type) @ (Fun @ Arg1, Type), Type~>Type) @ (Fun @ Arg2, Type), Type),
 				Args, TF )],
 		  Sig) )
 :-
-			nonvar(Conj),
+			\+cc_as_fun(Fun),
+			tlp_pos_in_list(TLP_CC, ['CC']),
 			memberchk(Ty, [np:_, e]).
 
 r(det_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB_xp,  %!!! equi
 		br([nd( M,
-                ((Det @ (((TLPconj,n:_~>n:_~>n:_) @ A, _) @ B, _), Ty) @ VP, Type),
+                ((Det @ (((TLP_CC,n:_~>n:_~>n:_) @ A, _) @ B, _), Ty) @ VP, Type),
 				[], TF )],
 		  Sig)
 		===>
 		br([nd(	M,
-                (((TLPconj,n:_~>n:_~>n:_) @ ((Det@A,Type)@VP,Ty), Type~>Type) @ ((Det@B,Ty)@VP,Type), Type),
+                (((TLP_CC,n:_~>n:_~>n:_) @ ((Det@A,Type)@VP,Ty), Type~>Type) @ ((Det@B,Ty)@VP,Type), Type),
 				[], TF )],
 		  Sig) )
 :-
-			A = (tlp(_,Lm_A,_,_,_),_),
-			B = (tlp(_,Lm_B,_,_,_),_),
+			tlp_lemma_in_list(A, [Lm_A]),
+			tlp_lemma_in_list(B, [Lm_B]),
 			disjoint(Lm_A, Lm_B, KB_xp), !,
-			Det = (tlp(_,Lm_Det,_,_,_),_),
-			memberchk(Lm_Det, ['a','the','s','a_few','many']),
-			nonvar(TLPconj),
-			TLPconj = tlp(_,_,'CC',_,_).
+			tlp_lemma_in_list(Det, ['a','the','s','a_few','many']),
+			tlp_pos_in_list(TLP_CC, ['CC']).
 
 %but not with disjunction! every A (C or D) =/=> every A C or every A D !!!
 
 r(fun_dist,	impl:non,  ([], [], _), [[pos('CC')]], _,  %impl!!! every A and B =/always/= every A and Every B,  some man sleep and eat =/= some man eat and some man sleep
-		br([nd( M, (Fun @ (((tlp(Tk,Conj,'CC',F1,F2), Ty~>Ty~>Ty) @ Arg1, _Ty1) @ Arg2, _Ty2), Type),
+		br([nd( M, (Fun @ (((TLP_CC, Ty~>Ty~>Ty) @ Arg1, _Ty1) @ Arg2, _Ty2), Type),
 				Args, TF )],
 		  Sig)
 		===>
-		br([nd(	M, (((tlp(Tk,Conj,'CC',F1,F2), Type~>Type~>Type) @ (Fun @ Arg1, Type), Type~>Type) @ (Fun @ Arg2, Type), Type),
+		br([nd(	M, (((TLP_CC, Type~>Type~>Type) @ (Fun @ Arg1, Type), Type~>Type) @ (Fun @ Arg2, Type), Type),
 				Args, TF )],
 		  Sig) )
 :-
-			nonvar(Conj),
+			\+cc_as_fun(Fun),
+			tlp_pos_in_list(TLP_CC, ['CC']),
 			Fun \= ((tlp(_,'a',_,_,_),_) @ _B, _),
 			\+memberchk(Ty, [np:_, e]).
 
