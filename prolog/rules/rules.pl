@@ -598,21 +598,14 @@ r(push_arg, impl:non, ([], [], _), _Lexicon, _,  % should not introduce
 			| Rest],
 		  Sig) )
 :-
-			TT2 = (Term, Type),
-			nonvar(Term),
+			TT2 = (Term, Type), nonvar(Term),
 			once((Term =.. [tlp | _]; atom(Term); Type = pp)),
 			( Type = np:Feat, Feat \== 'thr' -> %!!! excluded there:np
 				Rest = [nd(M,  TT1, [(Term, e) | Args], TF )] % what if Term is complex?
 				%add_new_elements_in_the_end([TT2, (Term,e)], Sig, Sig1) % no need to add
-			; Type = np:thr -> % for there:np
-				Rest = []%,
-				%Sig1 = Sig
-			; TT2 = (_Term, e) ->
-				Rest = []%,
-				%add_new_elements_in_the_end([TT2], Sig, Sig1)
-			; Type = pp, %maybe introduce a constant in Sig?
-			  Rest = []%,
-			  %Sig1 = Sig
+			; Type = np:thr -> Rest = [] % for there:np
+			; TT2 = (_Term, e) -> Rest = [] %add_new_elements_in_the_end([TT2], Sig, Sig1)
+			; Type = pp, Rest = [] %maybe introduce a constant in Sig?
 			).
 % const(B), not necesary. B is never unbound var, it is typed later, accepts only atoms
 
@@ -1414,7 +1407,7 @@ r(vp_pass1, 	impl:non,  ([], [], _), [['by']], _,
 		  ; Rest = []
 		),
 		set_final_value_of_type(TypePss, TypeDcl, s:dcl),
-		set_type_for_tt((VPpss, pp~>TypePss), np:_~>TypeDcl, Verb).	% change s:pss to s:dcl?
+		set_type_for_tt((VPpss, pp~>TypePss), np:_~>TypeDcl, Verb).
 
 % IN necessary?
 r(vp_pass2, 	impl:non,  ([], [], _), [['by']], _,
@@ -1433,7 +1426,7 @@ r(vp_pass2, 	impl:non,  ([], [], _), [['by']], _,
 		),
 		Verb_Pass = (_, TypePss),
 		set_final_value_of_type(TypePss, TypeDcl, s:dcl),
-		set_type_for_tt(Verb_Pass, np:_~>TypeDcl, Verb).	% change s:pss to s:dcl?
+		set_type_for_tt(Verb_Pass, np:_~>TypeDcl, Verb).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
