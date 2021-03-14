@@ -4,7 +4,7 @@
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
 :- use_module('../utils/user_preds', [
 	prob_input_to_list/2, partition_list_into_N_even_lists/3,
-	at_most_n_random_members_from_list/3,  print_prob/1, ul_append_ul/2
+	at_most_n_random_members_from_list/3,  print_prob/1
 	]).
 :- use_module('../utils/generic_preds', [ format_list/3 ]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2, draw_matrix/1]).
@@ -138,15 +138,14 @@ solve_entailment(Align, IKB, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status
 	%( debMode('2class') ->
 	%	entail_2(Id, Ans, Provers_Ans, XP, Closed, Status);
 	( debMode('shallow') ->
-		shallow_reasoning(Id, Provers_Ans, XP_, Closed, Status)%,  Closed = 'closed'
-	; entail(Align, IKB, Id, Ans, Provers_Ans, XP_, Closed, Status)
+		shallow_reasoning(Id, Provers_Ans, XP, Closed, Status)%,  Closed = 'closed'
+	; entail(Align, IKB, Id, Ans, Provers_Ans, XP, Closed, Status)
 	),
 	term_to_atom(Status, AtomStatus),
 	( ( debMode('prprb'); Provers_Ans \= Ans ) ->
 		findall(Sen, sen_id(_,Id,_,_,Sen), Sentences),
 		format_list(atom(Prob), '~n      ~w', Sentences)
 	; Prob = '' ),
-	uList2List(XP_, XP),
 	format('~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~t~12+ XP: ~w~w~n', [Id, Ans, Provers_Ans, Closed, AtomStatus, XP, Prob]).
 
 solve_entailment( Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) :-
@@ -282,8 +281,7 @@ solve_problem(PrId_Al, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, St
 	add_to_stream('branches', ([PrId_Al, 'no'], Br_no)),
 	( (Closed_yes, Closed_no) == ('closed', 'closed') ->
 		report(['Warning: CONTRADICTION and ENTAILMENT at the same time: so NEUTRAL']),
-		copy_term(XP_yes, XP),
-		ul_append_ul(XP, XP_no),
+		append(XP_yes, XP_no, XP),
 		(Prover_Ans, Closed, Status) = ('unknown', 'open', 'Terminated')%,  %!!!
 		%report_theUsedrules_in_tree(Tree_yes),
 		%report_theUsedrules_in_tree(Tree_no)
@@ -301,11 +299,11 @@ solve_problem(PrId_Al, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, St
 			Status = ('Lim',Steps)
 	  	  ; Status = ('Ter',Steps)
 		),
-		(Prover_Ans, Closed, XP)  = ('unknown', 'open', _)%,
+		(Prover_Ans, Closed, XP)  = ('unknown', 'open', [])%,
 		%report_theUsedrules_in_tree(Tree_yes),
 		%report_theUsedrules_in_tree(Tree_no)
    	; (Closed_yes == 'NA'; Closed_no == 'NA') ->
-		(Prover_Ans, Closed, Status, XP)  = ('unknown', 'NA', 'Defected', _)
+		(Prover_Ans, Closed, Status, XP)  = ('unknown', 'NA', 'Defected', [])
 	; report(['Error: this should not had happened'])
 	).
 /*
@@ -356,7 +354,7 @@ entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
 				atomic_list_concat(Checks, ', ', Text),
 				report(['Warning: CONTRADICTION found in an LLF:\n', Text]),
 				% no explanation from consistency checking
-				(Pred, Cl, Status, XP) = ('unknown', 'NA', 'Defected', _)
+				(Pred, Cl, Status, XP) = ('unknown', 'NA', 'Defected', [])
 			; align_solve_problem(Align, KB, Id, Prem_Hyp, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status)
 			)
 		; report(['Inconsistency in node types (entail/8)']),
@@ -379,7 +377,7 @@ align_solve_problem('both', KB, Id, P_H, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP,
 	solve_problem(Id-'align', KB-XP_A, AP_TTs, AH_TTs, Pred_A, Cl_A, Status_A),
     ( Cl_A \== 'closed', Cl_N \== 'closed', \+append(P_TTs, H_TTs, P_H) ->
 		% if an item in the problem is defected
-		(Pred, XP, Cl, Status) = ('unknown', _, 'NA', 'Defected')
+		(Pred, XP, Cl, Status) = ('unknown', [], 'NA', 'Defected')
 	; Cl_A == 'closed' ->
 		(Pred, XP, Cl, Status) =  (Pred_A, XP_A, Cl_A, Status_A)
 	; (Pred, XP, Cl, Status)   =  (Pred_N, XP_N, Cl_N, Status_N)
@@ -480,14 +478,13 @@ gentail(Align, KB0, Problem_Id) :-
 		writeln('No hypothesis found for this problem!')
 	;	% Reason! problem is ok
 	  Answer = 'no' ->
-		greason(KB-XP_, TTterms, [], [Problem_Id, 'no', Align])
+		greason(KB-XP, TTterms, [], [Problem_Id, 'no', Align])
 	; Answer = 'yes' ->
-		greason(KB-XP_, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])
-	; greason(KB-XP_, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align]) ->
+		greason(KB-XP, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])
+	; greason(KB-XP, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align]) ->
 		true
-	; greason(KB-XP_, TTterms, [], [Problem_Id, 'no', Align])
+	; greason(KB-XP, TTterms, [], [Problem_Id, 'no', Align])
 	),
-	uList2List(XP_, XP),
 	format('XP: ~w~n', [XP]).
 
 % TODO: remove redundancy from this predicate
@@ -522,16 +519,15 @@ gentail_no_answer(Align, KB0, Problem_Id) :-
 	  Answer = 'no' ->
 		%append(Prem_TTterms, Hypo_TTterms, TTterms),
 		ignore(greason(KB-_, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])),
-		greason(KB-XP_, TTterms, [], [Problem_Id, 'no', Align])
+		greason(KB-XP, TTterms, [], [Problem_Id, 'no', Align])
 	; Answer = 'yes' ->
 		ignore(greason(KB-_, TTterms, [], [Problem_Id, 'no', Align])),
-		greason(KB-XP_, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])
-	; greason(KB-XP_, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align]) ->
+		greason(KB-XP, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align])
+	; greason(KB-XP, Prem_TTterms, Hypo_TTterms, [Problem_Id, 'yes', Align]) ->
 		true
 	; %append(Prem_TTterms, Hypo_TTterms, TTterms),
-	  greason(KB-XP_, TTterms, [], [Problem_Id, 'no', Align])
+	  greason(KB-XP, TTterms, [], [Problem_Id, 'no', Align])
 	),
-	uList2List(XP_, XP),
 	format('XP: ~w~n', [XP]).
 
 
@@ -549,11 +545,10 @@ ganalysis(Sign, Problem_Id) :-
 	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	( Sign = 'true' ->
-		greason(KB-XP_, TTterms, [], Problem_Id)
+		greason(KB-XP, TTterms, [], Problem_Id)
 	; Sign = 'false' ->
-		greason(KB-XP_, [], TTterms, Problem_Id)
+		greason(KB-XP, [], TTterms, Problem_Id)
 	),
-	uList2List(XP_, XP),
 	format('XP: ~w~n', [XP]).
 
 
@@ -675,15 +670,13 @@ correct_ttterm(TTTerm, Corrected) :-
 	).
 
 problem_to_corrected_terms(PID, PremCorrTrees, HypoCorrTrees) :-
-	findall(SID, sen_id(SID, PID, 'p', _, _), Prem_SIDs),
-	findall(SID, sen_id(SID, PID, 'h', _, _), Hypo_SIDs),
 	findall(Tree, (
-		member(Id, Prem_SIDs),
-		sen_id_to_base_ttterm(Id, Tree)
+		sen_id(SID, PID, 'p', _, _),
+		sen_id_to_base_ttterm(SID, Tree)
 	), PremTrees),
 	findall(Tree, (
-		member(Id, Hypo_SIDs),
-		sen_id_to_base_ttterm(Id, Tree)
+		sen_id(SID, PID, 'h', _, _),
+		sen_id_to_base_ttterm(SID, Tree)
 	), HypoTrees),
 	maplist(correct_ttterm, PremTrees, PremCorrTrees),
 	maplist(correct_ttterm, HypoTrees, HypoCorrTrees).

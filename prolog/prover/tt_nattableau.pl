@@ -18,7 +18,7 @@
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../rules/rules', [op(610, xfx, ===>), r/6, admissible_rules/1]).
 :- use_module('../utils/user_preds', [
-	ttExp_to_ttTerm/2, uList2List/2, choose/3, match_remove/3,
+	ttExp_to_ttTerm/2, uList2List/2, uList_to_ord_set/2, choose/3, match_remove/3,
 	ul_append/2, patt_remove/3, add_new_elements/3, list_substitution/4
 	]).
 :- use_module('../llf/ttterm_preds', [
@@ -77,7 +77,7 @@ greason(KB_XP, T_TermList, F_TermList, Info) :- % remove problem ID from arg lis
 % generateTableau(Prem, Concl, BrList, Tree)
 % generates tableau proof in styles of
 % a list of branches and a tree
-generateTableau(KB-XP, T_TermList, F_TermList, BrList, Tree, Status) :-
+generateTableau(KB-XP1, T_TermList, F_TermList, BrList, Tree, Status) :-
 	/*F_TermList = [], T_TermList = [] ->
 		writeln('No premise & hypothesis'), fail;
 	F_TermList = [] ->
@@ -118,13 +118,11 @@ generateTableau(KB-XP, T_TermList, F_TermList, BrList, Tree, Status) :-
 		debMode(ral(RAL)),
 		( debMode('complete_tree') -> Limit = RAL-'comp'; Limit = RAL-'part' ),
 		( apply_closure_rules(IdList, Br, RelClRules, Cl_IDs, Cl_Rule, KB-XP) ->
-			(BrList, Status) = ([], ('Ter', 1)),
+			(BrList, Status, XP) = ([], ('Ter', 1), _UList),
 			findSubTree(Tree, Node_Id, tree(_, closer([Cl_IDs, Cl_Rule])))
 		; once(expand([Br], BrList, Tree, _Closing_IDs, KB-XP, Count, (RelRules, RelClRules), 0, Status, Limit)) %, % ClosingIDs is unspecified
-		    %,( debMode(usedRules(UR)), list_of_used_rules(Tree, ListR), list_to_set(ListR, SetR), intersection(UR, SetR, [H|T]) -> term_to_atom([H|T], At), report(['Used rules: ', At]); true )
-			%uList2List(Closing_IDs, Cl_IDs),
-		    %report(['Closing ids: ', Cl_IDs])
-		)
+		),
+		uList_to_ord_set(XP, XP1)
 	;	writeln('Inconsistency in node types - generateTableau'),
 		fail
 	)%,
@@ -455,15 +453,11 @@ growBranch(Br, CutBranch, NewBranch, SubTree, RuleApp, NodeId, KB_XP, ClRs, Clos
 	append(RevNodeList_id, FilteredCutBrNodes, NewTabNodes),
 % adding new nodes in the end of the branch
 	%append(FilteredCutBrNodes, NodeList_id, NewTableauNodes),
-	( findall(	[Cl_IDs, Cl_Rule],
-				apply_closure_rules(IdList, br(NewTabNodes,_,_), ClRs, Cl_IDs, Cl_Rule, KB_XP),
-				List_of_ClRuleApps  ), % find one and stop!fix it
-	  List_of_ClRuleApps = [ClRuleApp | _]  ->
+	( apply_closure_rules(IdList, br(NewTabNodes,_,_), ClRs, Cl_IDs, Cl_Rule, KB_XP) ->
+		ClRuleApp = [Cl_IDs, Cl_Rule],
 		TableauNodes = [],
-		maplist( nth1(1), List_of_ClRuleApps, List_of_ClosureIDs ),
-		ul_append(Closing_IDs, List_of_ClosureIDs)
-	; TableauNodes = NewTabNodes
-	),
+		ul_append(Closing_IDs, [Cl_IDs])
+	; TableauNodes = NewTabNodes ),
 	%remove_be_node_from_branch(br(TableauNodes, History, Sig), NewBranch), % ignoring be rule,maybe not necessary anymore
 	NewBranch = br(TableauNodes, History, Sig),
 	( debMode('proof_tree') ->
