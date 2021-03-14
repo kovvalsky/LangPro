@@ -237,8 +237,7 @@ r(push_mod,  impl:non,  ([], [], _), _Lexicon, _, % why not equivalent?
 			%TTexp \= tlp(_,'not',_,_,_),
 			\+(( TTexp = (tlp(_,Con,_,_,_),_) @ _,  member(Con, [if, and, or, who]) )), % exclude 'not'?
 			( ( adjuncted_ttTerm(TT)
-			  ; Ty1 = np:_~>s:_
-			  ; Ty1 = np:_~>np:_~>s:_
+			  ; memberchk(Ty1, [s:_, np:_~>s:_, np:_~>np:_~>s:_])
 			  ) ->
 				append(M, [(TTexp,Ty1~>Ty1)], M1)
 			  ;	TF = true,
@@ -1315,7 +1314,7 @@ r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _,
 % sick-150, 1480, 1483, 7755, wrong-1481
 r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,   %sick-150
 		br([nd( M, ( VP @ (tlp(Tk,Over,_,F1,F2), pr), TyS), [C, D | Rest], TF )],
-			Sig)
+			Sig) % why C, D? why not only C?
 		===>
 		br([nd( M, ((Prep @ C, TyVP~>TyVP) @ VP1, TyVP), [D | Rest], TF )],
 			Sig) )
@@ -1347,6 +1346,7 @@ r(pr_v_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 		br([nd( M, (VP1 @ (tlp(Tk,Over,POS,F1,F2), pr), TyVP),  [C], TF )],
 			Sig) )
 :-
+			memberchk(POS, ['RP','IN','TO','RB']),
 			set_type_for_tt(VP, pr~>TyVP, VP1).
 
 % sick-3702
@@ -1359,6 +1359,7 @@ r(v__pr_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [p
 			Sig) )
 :-
 			memberchk(TyP, [pp, pr]),
+			memberchk(POS, ['RP','IN','TO','RB']),
 			NP = (_, NP_Ty),
 			memberchk(NP_Ty, [np:_, e]),
 			final_value_of_type(TyVP, s:_),
