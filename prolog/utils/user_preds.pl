@@ -41,6 +41,7 @@
 		true_remove/3,
 		remove_adjacent_duplicates/2,
 		uList2List/2,
+		uList_to_ord_set/2,
 		sen_input_to_list/2,
 
 		shared_members/2,
@@ -136,6 +137,10 @@ is_uList(UList) :-
 	append(_, Var, UList),
 	var(Var),
 	!.
+
+uList_to_ord_set(UList, OrdSet) :-
+	uList2List(UList, List),
+	list_to_ord_set(List, OrdSet).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 remove_adjacent_duplicates([H,H|Rest], Rest1) :-
