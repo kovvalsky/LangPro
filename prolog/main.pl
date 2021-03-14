@@ -69,7 +69,8 @@ set_debMode([H | Rest]) :-
 		), _)
 	; H = anno_json(JSON) ->
 		read_dict_from_json_file(JSON, AnnoDict),
-		assertz( debMode(anno_dict(AnnoDict)) )
+		assertz( debMode(anno_dict(AnnoDict)) ),
+		assertz( debMode(anno_json(JSON)) )
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).

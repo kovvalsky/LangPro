@@ -28,7 +28,7 @@
 % :- use_module('../llf/ttterm_to_term', [
 % 	ttTerm_to_pretty_ttTerm/2, ndId_to_pretty_atom/2]).
 
-:- dynamic debMode/1.
+% :- dynamic debMode/1. % this blocks user:debMode
 :- dynamic sen_id/5.
 :- dynamic sick_solved/2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,8 +65,11 @@ report(Message, Term) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % report parameters
 write_parList(S) :-
-	findall(P, debMode(P), Pars),
-	format(S, '~w', [Pars]).
+	findall(P, (
+		debMode(P),
+		P \= anno_dict(_) % this is entire content of loaded json file
+	), Pars),
+	format(S, '~p', [Pars]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % write prediction if a file is given
