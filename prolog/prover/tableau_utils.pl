@@ -83,7 +83,7 @@ rule_condition_is_sat(Lexicon, A) :-
 	; atom(A) ->
 		L = (A,_)
 	; A = ty(pp) ->
-	  ( L = (_,'IN'); L = (_,'RP'); L = (_,'TO') )
+	  ( L = (_,'IN'); L = (_,'RP'); L = (_,'TO'); L = (_,'RB') )
 	; report('Unknown Rule lex item!!!'), fail ),
 	memberchk(L, Lexicon),
 	!.
