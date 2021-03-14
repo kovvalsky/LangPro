@@ -101,6 +101,7 @@ add_to_stream(DataType, Data) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  debMode
 % data:sick				use sick data
+% lang(nl)				activate NL-specific rules, e.g., vp_pr_vs_vp for beklimmen<=>klimmen@op
 % 'once_solved:parser'	compare predicted problems to the list of once-solved problems
 % 'xml'					write terms or tableaux in XML
 % 'html'				write twrms and tableaux in HTML, outomatically creates XML files too
