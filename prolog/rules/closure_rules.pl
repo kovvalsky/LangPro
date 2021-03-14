@@ -12,7 +12,8 @@
 	subset_only_terms/2, ttTerm_to_informative_tt/2
 	]).
 :- use_module('../knowledge/knowledge', [
-	disjoint/3, isa/3, ant_wn/3, derive/3, instance/3, not_instance/3, not_disjoint/3, not_isa/3
+	disjoint/3, isa/3, ant_wn/3, derive/3, instance/3, not_instance/3,
+	not_disjoint/3, not_isa/3, positional_isa/3
 	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,11 +68,33 @@ r(vp_pp_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]]
 :-
 			cat_eq(Type1, Type2), % because sick-2388: slice of y: x & slice y: x
 			match_list_ttTerms(Args1, Args2, KB_xp),
-			once( ( M2 = []
-				  ; match_list_only_terms(M1, M2) )
-				),
+			once(( M2 = []; match_list_only_terms(M1, M2) )),
 	 		atom(VP1), atom(VP2),
 			isa(VP1, VP2, KB_xp).
+
+
+% doen@op => opdoen sicknl-2911
+% beklimmen => klimmen@op sicknl-4006/11
+r(vp_pr_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], KB_xp,
+		br([nd( M1, ( (tlp(_,VP1,POS1,_,_),_) @ (tlp(_,PR,'IN',_,_),pr), Type1 ),   Args1,   TF1 ),
+			nd( M2, ( tlp(_,VP2,POS2,_,_), Type2 ),   Args2,   TF2 )
+		   ],
+		  Sig)
+		===>
+		br([nd( [], (true, t), [], false )],
+		  Sig) )
+:-
+			debMode(lang(nl)),
+			memberchk(TF1-TF2, [true-false, false-true]),
+			cat_eq(Type1, Type2),
+			atom_chars(POS1, ['V','B'|_]), atom_chars(POS2, ['V','B'|_]),
+			match_list_ttTerms(Args1, Args2, KB_xp),
+			once(( match_list_only_terms(M1, M2)
+			     ; TF1 == false, M1 = []
+				 ; TF2 == false, M2 = [] )),
+	 		atom(VP1), atom(VP2), atom(PR),
+			( TF1 == true -> positional_isa(VP1-PR, VP2, KB_xp)
+			; positional_isa(VP2, VP1-PR, KB_xp) ).
 
 
 % closure related to comlex concept subsumption (dirty addition to cl_subsumption)

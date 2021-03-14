@@ -13,7 +13,8 @@
 		instance/3,
 		not_instance/3,
 		not_disjoint/3,
-		not_isa/3
+		not_isa/3,
+		positional_isa/3
 	]).
 
 :- multifile is_/2.
@@ -320,6 +321,23 @@ word_synonyms(W1, W2, KB-XP) :-
 	isa(W1, W2, KB-XP),
 	isa(W2, W1, KB-XP), % more efficient
 	!.
+
+% doen@op <=> opdoen sicknl-2911
+% klimmen@op <=> beklimmen sicknl-4006/11
+positional_isa(Pre_V2, V1-PR, KB-XP) :-
+	member(P, [PR, 'be', 'ver']),
+	atom_concat(P, V2, Pre_V2),
+	isa(V2, V1, KB-_XP), !,
+	atomic_list_concat([V1,PR], '_', V1_PR),
+	ul_append(XP, [isa(V1_PR, Pre_V2)]).
+
+positional_isa(V1-PR, Pre_V2, KB-XP) :-
+	member(P, [PR, 'be', 'ver']),
+	atom_concat(P, V2, Pre_V2),
+	isa(V1, V2, KB-_XP), !,
+	atomic_list_concat([V1,PR], '_', V1_PR),
+	ul_append(XP, [isa(V1_PR, Pre_V2)]).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
