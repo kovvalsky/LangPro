@@ -73,8 +73,8 @@ r(vp_pp_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]]
 			isa(VP1, VP2, KB_xp).
 
 
-% doen@op => opdoen sicknl-2911
-% beklimmen => klimmen@op sicknl-4006/11
+% doen@op => opdoen sicknl-2911, beklimmen => klimmen@op sicknl-4006/11
+% snijder@door => doorsnijden sicknl-4650
 r(vp_pr_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], KB_xp,
 		br([nd( M1, ( (tlp(_,VP1,POS1,_,_),_) @ (tlp(_,PR,'IN',_,_),pr), Type1 ),   Args1,   TF1 ),
 			nd( M2, ( tlp(_,VP2,POS2,_,_), Type2 ),   Args2,   TF2 )
