@@ -191,12 +191,14 @@ fix_term(
 % e.g. who sleeps (a woman) ---> a (who sleep woman)
 % sick-2722, f %!!! a group of people dancing
 fix_term(
-	( ((WH_TLP,VpTy~>np:_~>np:_) @ VP, np:_~>np:_) @ (Q@N,np:_), np:F2),
+	( ((WH_TLP,VpTy~>np:_~>np:_) @ VP, np:_~>np:_) @ (NP,np:X), np:F2),
 	( Q @ (((WH_TLP,VpTy~>n:_~>n:_) @ VP, n:_~>n:_) @ N, n:_), np:F2 )
 ) :- %+++
 	% why not any modifier? instead of _~>np~>np
 	tlp_pos_in_list(WH_TLP, ['WDT','WP','PRP$','DT']), % NL:die:PRP$,DT
-	Q = (tlp(_,_,'DT',_,_), n:_~>np:_),  % why lexical item only? why not any n~->np?
+	clean((NP,np:X), (Q@N,np:X)), % sub-cleaning can reveal the quantifier
+	Q = (Q_TLP, n:_~>np:_),  % why lexical item only? why not any n~->np?
+	tlp_pos_in_list(Q_TLP, ['DT','CD']),
 	fix_report('!!! Fix: put_rel_cl_under_det').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
