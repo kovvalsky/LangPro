@@ -364,17 +364,18 @@ r(cl_group_of, 		closure, _,  [['of','group'], ['of','body'], ['of','piece'], ['
 % puting seasoning vs seasoning SICK-5340?? accomodate this too
 % make this as a normal rule!
 % NL:doen, replacing with do is not safe as plaatsen<doen sicknl-3250
-r(cl_do_vp, 	closure, _, [['do'], ['doen']], _,
+r(cl_do_vp, 	closure, _, [['do'], ['doen']], KB_xp,
 		br([nd( M1, (tlp(_,Do,_,_,_), np:_~>np:_~>s:_), 	[C2, C1], 	TF1 ),
-		    nd( _, (tlp(_,Dance,_NN,_,_), n:_),				[C2],		TF2 ),
-		    nd( M3, (tlp(_,Dance,_,_,_), np:_~>s:_),		[C1],		TF3 )
+		    nd( _, (tlp(_,Dance1,_NN,_,_), n:_),				[C2],		TF2 ),
+		    nd( M3, (tlp(_,Dance2,_,_,_), np:_~>s:_),		[C1],		TF3 )
 		   ],
 		  Sig)
 		===>
 		br([nd( [], (true, t), [], false )], % only semnatic terms
 		  Sig) )
 :-
-			memberchk(Do, ['do','doen']),
+			( debMode(lang('nl')) -> Do = 'doen'; Do = 'do' ),
+			once(( Dance1 = Dance2; derive(Dance1, Dance2, KB_xp))),
 			(	(TF1, TF2, TF3) = (true, true, false),
              	subset_only_terms(M3, M1)
 			;	(TF1, TF2, TF3) = (false, true, true),
