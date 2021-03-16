@@ -13,7 +13,8 @@
 	right_branch_tt_search/4, is_tlp/1, tlp_pos_in_list/2,
 	tlp_lemma_in_list/2, tlp_pos_with_prefixes/2
 	]).
-:- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
+:- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>), norm_tt/2
+	]).
 :- use_module('../lambda/type_hierarchy', [cat_eq/2, final_value_of_type/2]).
 
 :- dynamic debMode/1.
@@ -100,6 +101,20 @@ fix_term(
 		[(Mod,np:_~>np:_)|Mods], Mods1),
 	apply_ttMods_to_ttArg(Mods1, Noun, Mods_N),
 	fix_report('!!! Fix: mods_det_noun').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Remove unnecessary type-raising for "Det N and N" with meaning "Det N and Det N"
+% (and abst(X,X@adult) abst(X,X@kid)) @ the --> and (the adult)(the kid)
+% !!! if type-raising correctly done, dist_arg should do this job
+fix_term(
+	( (((CC,C~>C~>C) @ (abst(V1,NP1),Ty1),_) @ (abst(V2,NP2),Ty2),_) @ D, np:X ),
+	( ((CC,T~>T~>T) @ D_NP1, T~>T) @ D_NP2, T )
+) :-
+	tlp_pos_in_list(CC, ['CC']),
+	C = (n:_~>np:_)~>np:_,
+	norm_tt( ((abst(V1,NP1),Ty1) @ D, np:X), D_NP1 ),
+	norm_tt( ((abst(V2,NP2),Ty2) @ D, np:X), D_NP2 ),
+	T = np:X.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % recover [pss] feature in types from [pt] since Lassy has no info for such feature
