@@ -20,6 +20,9 @@ def parse_arguments():
     parser.add_argument(
     '--hybrid', action='store_true',
         help="Print result of hybrid or all")
+    parser.add_argument(
+    '--write-hybrid', metavar='FILE',
+        help="Write hybrid predictions in a file for later use")
     # meta parameters
     parser.add_argument(
     '-v', '--verbose', dest='v', default=0, type=int, metavar='N',
@@ -38,7 +41,7 @@ def detect_prediction_format(line):
     # 67: ENTAILMENT
     pat['default'] = '(\d+)\s+(NEUTRAL|CONTRADICTION|ENTAILMENT)$'
     #  56: [unknown], unknown,    open, Ter,70
-    pat['langpro'] = '\s*(\d+):\s*\[\w+\],?\s*(\w+),?\s*[a-zA-Z,0-9 ]+\s*$'
+    pat['langpro'] = '\s*(\d+):\s*\[\w+\],?\s*(\w+),?\s*'
     #     630: [contradiction]   contradiction (bliksem)
     pat['amrfol'] = '\s*(\d+):\s*\[\w+\]\s*(\w+)\s*[()a-zA-Z,0-9 ]+\s*$'
     # check which pattern matches
@@ -62,17 +65,17 @@ def read_id_labels(filepath):
     id_labels = {}
     with open(filepath) as f:
         pattern = None # yet unknown
-        reading_finished = False # true if all predictions were read
         for line in f:
             line = line.strip()
             if not pattern: pattern = detect_prediction_format(line)
             if pattern:
                 m = re.match(pattern, line)
                 if m:
-                    if reading_finished: RuntimeError("Discontinuous prediction block")
-                    id_labels[m.group(1)] = canonical_label(m.group(2))
-                else:
-                    reading_finished = True
+                    pid, pred = m.group(1), m.group(2)
+                    if pid in id_labels:
+                        assert pred == id_labels[pid], f"two diff predictions for {pid}"
+                    else:
+                        id_labels[pid] = canonical_label(pred)
     if not id_labels:
         raise RuntimeError("No predictions retrieved")
     return id_labels
@@ -90,7 +93,7 @@ def read_systems_id_labels(filepaths):
     return sys_id_label
 
 # #################################
-def aggregate_answers(sys_id_label):
+def aggregate_answers(sys_id_label, out=None):
     '''Combine the answers of the systems in one'''
     prob_ids = next(iter(sys_id_label.values())).keys()
     id_labels = defaultdict(list)
@@ -111,6 +114,11 @@ def aggregate_answers(sys_id_label):
                 id_ans[p] = 'NEUTRAL'
         else:
             id_ans[p] = 'NEUTRAL'
+    # write aggregated answers in a file if requested
+    if out:
+        with open(out, 'w') as F:
+            for i, ans in id_ans.items():
+                F.write(f"{i}\t{ans}\n")
     return id_ans, id_labels
 
 #################################
@@ -150,7 +158,9 @@ if __name__ == '__main__':
     assert len(first_sys_ans) == len(gld_ans),\
         f"The sources contain different number of problems ({len(first_sys_ans)} vs {len(gld_ans)})"
     # draw matrix
-    systems_id_pred = { 'Hybrid': aggregate_answers(sys_id_label)[0] } if args.hybrid else sys_id_label
+    systems_id_pred = { 'Hybrid': aggregate_answers(sys_id_label, out=args.write_hybrid)[0] } \
+                        if args.hybrid else \
+                      sys_id_label
     for name, sys_ans in systems_id_pred.items():
         print("{:*^50}".format(name))
         lab_pairs = [ (sys_ans[k], gld_ans[k]) for k in sys_ans ]
