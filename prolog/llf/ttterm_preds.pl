@@ -27,6 +27,8 @@
 		pretty_vars_in_ttterm/4,
 		print_ttTerms_in_latex/1,
 		right_branch_tt_search/4,
+		rel_clause_ttterm/1,
+		red_rel_clause_ttterm/1,
 		set_type_for_tt/3,
 		set_type_for_tt/5,
 		subset_only_terms/2,
@@ -834,6 +836,13 @@ wh_mod_np_to_nodes((WH @ NP, np:_), NP, [nd([], VP, [NP], true)|Rest]) :-
 		Rest = [nd([], VP, [(Term,e)], true)]
 	; Rest = [] ).
 
+% TTterm is a relative clause
+rel_clause_ttterm(( (WH,_) @ (_VP,np:_~>s:_), n:_~>n:_ )) :-
+	tlp_lemma_in_list(WH, ['who']).
+
+% TTterm is a reduced relative clause with type-changing
+red_rel_clause_ttterm(( (VP, np:_~>s:_), n:_~>n:_ )) :-
+	nonvar(VP).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % auxiliary preds
