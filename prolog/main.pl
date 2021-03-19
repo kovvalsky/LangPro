@@ -43,7 +43,7 @@ reset_debMode :-
 	assertz( debMode('nil') ),
 	assertz( debMode(effCr(['equi', 'nonBr', 'nonProd', 'nonCons'])) ),
 	set_rule_eff_order,
-	assertz( debMode(part('TRIAL')) ),
+	assertz( debMode(parts(['TRIAL'])) ),
 	assertz( debMode(ral(400)) ).
 
 set_debMode([H | Rest]) :-
@@ -71,6 +71,9 @@ set_debMode([H | Rest]) :-
 		read_dict_from_json_file(JSON, AnnoDict),
 		assertz( debMode(anno_dict(AnnoDict)) ),
 		assertz( debMode(anno_json(JSON)) )
+	; H = parts(_) ->
+		retractall( debMode(parts(_)) ),
+		assertz( debMode(H) )
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).
