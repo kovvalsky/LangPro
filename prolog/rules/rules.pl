@@ -1221,9 +1221,9 @@ r(arg_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %maybe impl?  this rule n
 		  Sig) )
 :-
 			tlp_pos_in_list(TLP_CC, ['CC']),
-			\+cc_as_fun(TTArg).
+			\+cc_as_fun(TTArg),
 			%TTArg = (_, _ArgType). % check typing!!!
-			%TT1 = (_, _Ty1~>Ty2).
+			TT1 = (_, _Ty1~>Ty2).
 
 % distribute function only over entity arguments, sleep (and John Sam) -> (sleep John) and (sleep Sam)
 r(fun_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %!!! equi
