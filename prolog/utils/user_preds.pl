@@ -80,7 +80,7 @@
 
 :- multifile pid_labs/2.
 %:- discontiguous pid_labs/2.
-:- dynamic debMode/1.
+%:- dynamic debMode/1.
 
 
 
