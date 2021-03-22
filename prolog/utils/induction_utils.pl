@@ -314,7 +314,9 @@ log_parameters(Config) :-
 
 
 log_parameters(Source, Config) :-
-	findall(P, debMode(P), Pars),
+	findall(P, (
+		debMode(P), P \= anno_dict(_)
+	), Pars),
 	format(Source, '~`%t Parameters of parList ~`%t~50|~n%%% ~w~n~n', [Pars]),
 	format(Source, '~`%t Induction config ~`%t~50|~n%%% ~w~n', [Config]).
 
