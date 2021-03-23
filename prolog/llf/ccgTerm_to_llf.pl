@@ -11,7 +11,8 @@
 :- use_module('ttterm_preds', [
 	add_heads/2, set_type_for_tt/3, apply_ttMods_to_ttArg/3,
 	right_branch_tt_search/4, is_tlp/1, tlp_pos_in_list/2, rel_clause_ttterm/1,
-	tlp_lemma_in_list/2, tlp_pos_with_prefixes/2, red_rel_clause_ttterm/1
+	tlp_lemma_in_list/2, tlp_pos_with_prefixes/2, red_rel_clause_ttterm/1,
+	is_cc_ttTerm/1
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>), norm_tt/2
 	]).
@@ -89,16 +90,19 @@ fix_term(
 % pull sinked determiner and put at the top of NP
 % NL:Lassy: brown (big (a dog)) -> a (brown (big dog))
 fix_term(
-	( (Mod,np:_~>np:_) @ (NP,np:Y), np:_ ),
+	( ModTT @ (NP,np:Y), np:_ ),
 	( Det @ Mods_N, np:X )
 ) :-
-	is_tlp(Mod), nonvar(NP),
+	ModTT = (Mod, np:_~>np:_),
+	% ModTT can be lexical, conjunction of TTs, or a TT with a modifier,...
+	%once(( is_tlp(Mod); is_cc_ttTerm(ModTT) )),
+	nonvar(NP), nonvar(Mod),
 	right_branch_tt_search(Det, (NP,np:Y), Mods, Noun),
 	Det = (DT,n:_~>np:X),
 	tlp_pos_in_list(DT, ['DT']),
 	maplist([(_,np:_~>np:_)]>>true, Mods),
 	maplist([L,New]>>set_type_for_tt(L, n:_~>n:_, New),
-		[(Mod,np:_~>np:_)|Mods], Mods1),
+		[ModTT | Mods], Mods1),
 	apply_ttMods_to_ttArg(Mods1, Noun, Mods_N),
 	fix_report('!!! Fix: mods_det_noun').
 
@@ -137,7 +141,6 @@ fix_term(
 % ) :-
 % 	tlp_pos_in_list(Worden, ['RB','AUX']),
 % 	tlp_lemma_in_list(Worden, ['worden','is','zijn','be']). % remove NL words?
-
 
 fix_term(
 	( VP @ (Noun,n:A), VP_Ty ),

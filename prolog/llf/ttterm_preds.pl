@@ -12,6 +12,7 @@
 		extract_lex_NNPs_ttTerms/3,
 		feed_ttTerm_with_ttArgs/3,
 		is_tlp/1,
+		is_cc_ttTerm/1,
 		match_list_ttTerms/3,
 		match_list_only_terms/2,
 		match_ttTerms/3,
@@ -655,11 +656,15 @@ npTTterm_unlike_constant((TTdet @ _, np:_)) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checks if ttTerm is Conj @ Term
 % this kind of ttTerms are not good for treating as constants in aligned settings
-modTTterm_with_conj_sent_head((TTconj @ _, Ty~>Ty)) :-
-	TTconj = (tlp(_,Lm,'CC',_,_), Ty~>Ty~>Ty),
-	final_value_of_type(Ty, s:_),
-	nonvar(Lm).
+modTTterm_with_conj_sent_head(((TLPconj, Ty~>Ty~>Ty) @ _, _)) :-
+	tlp_pos_in_list(TLPconj, ['CC']),
+	final_value_of_type(Ty, s:_).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% is a TTterm built with a coordination
+is_cc_ttTerm(((Conj @ _A, _) @ _B, _)) :-
+	Conj = (TLPconj, Ty~>Ty~>Ty),
+	tlp_pos_in_list(TLPconj, ['CC']).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

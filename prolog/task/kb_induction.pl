@@ -460,6 +460,8 @@ get_branches('yes', Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :
 	; Align = 'both' ->
 		( generateTableau(KB-_, AlPTT, AlHTT, Brs, _, Status) -> TTterms = AlTTs
 		; ( generateTableau(KB-_, PTT, HTT, Brs, _, Status) -> TTterms = TTs
+		% ( generateTableau(KB-_, PTT, HTT, Brs, _, Status) -> TTterms = TTs
+		% ; ( generateTableau(KB-_, AlPTT, AlHTT, Brs, _, Status) -> TTterms = AlTTs
 		  ; (Brs, Status) = (['fail'], 'defected') )
 		)
 	),
@@ -481,6 +483,8 @@ get_branches('no', Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :-
 	; Align = 'both' ->
 		( generateTableau(KB-_, AlTTs, [], Brs, _, Status) -> TTterms = AlTTs
 		; ( generateTableau(KB-_, TTs, [], Brs, _, Status) -> TTterms = TTs
+		% ( generateTableau(KB-_, TTs, [], Brs, _, Status) -> TTterms = TTs
+		% ; ( generateTableau(KB-_, AlTTs, [], Brs, _, Status) -> TTterms = AlTTs
 		  ; (Brs, Status) = (['fail'], 'defected') )
 		)
 	),
