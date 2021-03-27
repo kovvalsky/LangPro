@@ -43,7 +43,7 @@ reset_debMode :-
 	assertz( debMode('nil') ),
 	assertz( debMode(effCr(['equi', 'nonBr', 'nonProd', 'nonCons'])) ),
 	set_rule_eff_order,
-	assertz( debMode(parts(['TRIAL'])) ),
+	assertz( debMode(parts(['trial'])) ),
 	assertz( debMode(ral(400)) ).
 
 set_debMode([H | Rest]) :-
