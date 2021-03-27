@@ -148,33 +148,43 @@ assert_dis_wn((Lem1, Lem2, Num)) :-
 % strict hypernymy, non-reflexive
 word_hyp(W1, W2, Num) :-
 	debMode(ss(List)) ->
-		word_hyp(List, W1, W2, Num, _, _)
-	; word_hyp(_, W1, W2, Num, _, _).
+	  word_hyp(List, W1, W2, Num, _, _, _Path)
+	; word_hyp(_, W1, W2, Num, _, _, _Path).
 
 
-word_hyp(SNs, W1, W2, Num, SN1, SN2) :-
+word_hyp(SNs, W1, W2, Num, SN1, SN2, Path) :-
 	( nonvar(W1), nonvar(W2) ->
 		s(SS1, _, W1, Type1, SN1, _),
 		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs),
-		hyp_(SS1, _Path, [], SS2)
+		hyp_(SS1, Path, [], SS2)
 	; nonvar(W1) ->
 		s(SS1, _, W1, Type1, SN1, _),
 		ss_type_to_num(Type1, Num),
 		memberchk(SN1, SNs),
-		hyp_(SS1, _Path, [], SS2),
+		hyp_(SS1, Path, [], SS2),
 		s(SS2, _, W2, _, SN2, _),
 		memberchk(SN2, SNs)
 	; nonvar(W2) ->
 		s(SS2, _, W2, Type2, SN2, _),
 		ss_type_to_num(Type2, Num),
 		memberchk(SN2, SNs),
-		hyp_(SS1, _Path, [], SS2),
+		hyp_(SS1, Path, [], SS2),
 		s(SS1, _, W1, _, SN1, _),
 		memberchk(SN1, SNs)
 	; false ).
+
+% print all hypernyms or hyponyms of a given word
+print_all_word_hyp(W1, W2) :-
+	% exactly one is (non)var
+	( var(W1) -> nonvar(W2), A = 1, W1 = Ord_NWs
+	; var(W2), A = 2, W2 = Ord_NWs ),
+	findall(W1-W2-N, word_hyp(W1, W2, N), WWNs),
+	maplist({A}/[XY-L, L-Z]>>arg(A,XY,Z), WWNs, NWs),
+	sort(0, @<, NWs, Ord_NWs),
+	maplist(writeln, Ord_NWs).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % Transitive closure of hyp/2 WN relation
