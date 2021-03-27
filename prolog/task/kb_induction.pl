@@ -51,9 +51,8 @@ train_dev_eval_sick_parts((Tccg,Tsen), (Dccg,Dsen), (Eccg,Esen), Config) :-
 	( debMode(waif(FileName)) ->
 		format(atom(KBFile), '~w_KB.pl', [FileName]),
 		write_induced_kb_in_file(KB, KBFile, Config)
-	; true
-	),
-	unload_file(Tccg), unload_file(Tsen),
+	; true ),
+	(atom(Tccg), atom(Tsen) -> unload_file(Tccg), unload_file(Tsen); true ),
 	% pedict on train set
 	evaluate_on_portion(Config, KB, (Tccg,Tsen), TFile, TAPR),
 	% load and predict on dev set
@@ -76,11 +75,19 @@ tde_sick_part(Tccg, Tsen, Config) :-
 	train_dev_eval_sick_parts((Tccg,Tsen), (Tccg,Tsen), (Tccg,Tsen), Config).
 
 %------------------------------------
+load_ccg_sen_probs(Parts, _, PIDAs) :-
+	debMode(lang('nl')), !,
+	retractall( debMode(parts(_)) ),
+	assertz( debMode(parts(Parts)) ),
+	all_prIDs_Ans(PIDAs).
+
+
 load_ccg_sen_probs(CCG, SEN, PIDAs) :-
 	ensure_loaded(CCG),
 	ensure_loaded(SEN),
 	%all_prIDs_Ans(PIDAs1), findall(P-A, (member(P-A, PIDAs1), between(1495,1500,P)), PIDAs).
 	all_prIDs_Ans(PIDAs).
+%------------------------------------
 
 report_asserted_sen_ccg :-
 	findall(0, ccg(_,_), CCG),
@@ -95,7 +102,7 @@ evaluate_on_portion(Config, KB, (CCG,SEN), File, APR) :-
 	retractall(debMode(waif(_))),
 	assertz(debMode(waif(File))),
 	predict_with_iKB(Config, KB, PIDA, [_, AccE, PrecE, RecE], _, _, _),
-	unload_file(CCG), unload_file(SEN),
+	(atom(CCG), atom(SEN) -> unload_file(CCG), unload_file(SEN); true ),
 	APR = [100*AccE, 100*PrecE, 100*RecE].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -242,8 +249,9 @@ kb_induction_all(Config, IDALs, SolvA, Init_KB, Ind_KB) :-
 pick_harmless_KBs(Config, SolvA, IDALs, L_KBs, Harmless_KB) :-
 	% maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
 	concurrent_maplist_n_jobs(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
+	sort([1,1,2], @>=, L_Best_KB_Score_SU, Ord_L_Best_KB_Score_SU),
 	findall(KB, (
-		member(KB-Sc-S-U, L_Best_KB_Score_SU),
+		member(KB-Sc-S-U, Ord_L_Best_KB_Score_SU),
 		( Sc > 0 -> Ast = '+ '; Ast = '- '),
 		format('~t~w~5| ~w ~w ~t~40+ Solved: ~w; Unsolved: ~w~n', [Sc, Ast, KB, S, U]),
 		Ast == '+ ' % filter out harmful ones
@@ -439,56 +447,30 @@ prepare_ttTerms_KB(PrId, _Config, Init_KB, PTT-HTT, AlPTT-AlHTT, Fin_KB) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get branch list for a specific entailment problem and its answer
-get_branches('yes', Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :-
+get_branches(Ans, Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :-
 	get_value_def(Config, 'align', Align),
 	append(PTT, HTT, TTs),
 	append(AlPTT, AlHTT, AlTTs),
+	( Align == 'align' -> P = AlPTT, H = AlHTT
+	; Align == 'no_align' -> P = PTT, H = HTT
+	; Align == 'both' ),
+	( Ans == 'yes' -> T_TTs = P, F_TTs = H, T_aTTs = AlPTT, F_aTTs = AlHTT
+	; Ans == 'no' -> append(P, H, T_TTs), F_TTs = [], T_aTTs = AlTTs, F_aTTs = [] ),
 	% consistency checking
 %	( maplist(consistency_check(KB), TTs, Checks),
 %	  memberchk('Inconsistent', Checks)	->
 %	  	(TTterms, Brs, Status) = (TTs, [], 'Inconsistent sentence')
 	 % build tableau according to align value
 	% proof with alignmnet is used to close the tableau !!!
-	( Align = 'align' -> % proving with aligned TTterms
-		TTterms = AlTTs,
-		( generateTableau(KB-_, AlPTT, AlHTT, Brs, _, Status) -> true
-		; (Brs, Status) = (['fail'], 'defected') )
-	; Align = 'no_align' -> % proving without aligned TTterms
-		TTterms = TTs,
-		( generateTableau(KB-_, PTT, HTT, Brs, _, Status) -> true
-		; (Brs, Status) = (['fail'], 'defected') )
-	; Align = 'both' ->
-		( generateTableau(KB-_, AlPTT, AlHTT, Brs, _, Status) -> TTterms = AlTTs
-		; ( generateTableau(KB-_, PTT, HTT, Brs, _, Status) -> TTterms = TTs
-		% ( generateTableau(KB-_, PTT, HTT, Brs, _, Status) -> TTterms = TTs
-		% ; ( generateTableau(KB-_, AlPTT, AlHTT, Brs, _, Status) -> TTterms = AlTTs
-		  ; (Brs, Status) = (['fail'], 'defected') )
-		)
-	),
+	( generateTableau(KB-_, T_TTs, F_TTs, Brs, _, Status) ->
+	  append(T_TTs, F_TTs, TTterms)
+	; Align == 'both', generateTableau(KB-_, T_aTTs, F_aTTs, Brs, _, Status) ->
+	  % aligned TTterms
+	  TTterms = AlTTs
+	; (Brs, Status) = (['fail'], 'defected'),
+	  TTterms = TTs ),
 	term_to_atom(Status, At_Status).
 
-get_branches('no', Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :-
-	get_value_def(Config, 'align', Align),
-	append(PTT, HTT, TTs),
-	append(AlPTT, AlHTT, AlTTs),
-	% for contradiction
-	( Align = 'align' -> % proving with aligned TTterms
-		TTterms = AlTTs,
-		( generateTableau(KB-_, AlTTs, [], Brs, _, Status) -> true
-		; (Brs, Status) = (['fail'], 'defected') )
-	; Align = 'no_align' -> % proving without aligned TTterms
-		TTterms = TTs,
-		( generateTableau(KB-_, TTs, [], Brs, _, Status) -> true
-		; (Brs, Status) = (['fail'], 'defected') )
-	; Align = 'both' ->
-		( generateTableau(KB-_, AlTTs, [], Brs, _, Status) -> TTterms = AlTTs
-		; ( generateTableau(KB-_, TTs, [], Brs, _, Status) -> TTterms = TTs
-		% ( generateTableau(KB-_, TTs, [], Brs, _, Status) -> TTterms = TTs
-		% ; ( generateTableau(KB-_, AlTTs, [], Brs, _, Status) -> TTterms = AlTTs
-		  ; (Brs, Status) = (['fail'], 'defected') )
-		)
-	),
-	term_to_atom(Status, At_Status).
 
 % get branches that keep the tableau open
 get_branches('unknown', Config, KB, PTT-HTT, AlPTT-AlHTT, _TTterms, Brs, Status) :-
