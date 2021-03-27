@@ -12,7 +12,7 @@
 	add_heads/2, set_type_for_tt/3, apply_ttMods_to_ttArg/3,
 	right_branch_tt_search/4, is_tlp/1, tlp_pos_in_list/2, rel_clause_ttterm/1,
 	tlp_lemma_in_list/2, tlp_pos_with_prefixes/2, red_rel_clause_ttterm/1,
-	is_cc_ttTerm/1
+	proper_modttTerm/1
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>), norm_tt/2
 	]).
@@ -93,13 +93,14 @@ fix_term(
 	( ModTT @ (NP,np:Y), np:_ ),
 	( Det @ Mods_N, np:X )
 ) :-
+	proper_modttTerm(ModTT),
 	ModTT = (Mod, np:_~>np:_),
 	% ModTT can be lexical, conjunction of TTs, or a TT with a modifier,...
 	%once(( is_tlp(Mod); is_cc_ttTerm(ModTT) )),
 	nonvar(NP), nonvar(Mod),
 	right_branch_tt_search(Det, (NP,np:Y), Mods, Noun),
 	Det = (DT,n:_~>np:X),
-	tlp_pos_in_list(DT, ['DT']),
+	tlp_pos_in_list(DT, ['DT','CD']), % JJ?
 	maplist([(_,np:_~>np:_)]>>true, Mods),
 	maplist([L,New]>>set_type_for_tt(L, n:_~>n:_, New),
 		[ModTT | Mods], Mods1),

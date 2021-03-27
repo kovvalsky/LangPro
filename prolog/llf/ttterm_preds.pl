@@ -19,6 +19,7 @@
 		modList_be_args_to_nodeList/3,
 		modList_node_to_modNode_list/2,
 		modTTterm_with_conj_sent_head/1,
+		proper_modttTerm/1,
 		normalize_lexicon/2,
 		np_const_to_e_const/2,
 		np_mod_app_np/1,
@@ -659,6 +660,12 @@ npTTterm_unlike_constant((TTdet @ _, np:_)) :-
 modTTterm_with_conj_sent_head(((TLPconj, Ty~>Ty~>Ty) @ _, _)) :-
 	tlp_pos_in_list(TLPconj, ['CC']),
 	final_value_of_type(Ty, s:_).
+
+modttTerm_but_conj(((TLPconj, Ty~>Ty~>Ty) @ _, _)) :-
+	tlp_pos_in_list(TLPconj, ['CC']).
+
+proper_modttTerm(ModTT) :-
+	\+modttTerm_but_conj(ModTT).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % is a TTterm built with a coordination
