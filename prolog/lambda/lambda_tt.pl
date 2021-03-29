@@ -6,7 +6,7 @@
 ]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- use_module('../printer/reporting', [throw_error/2, report/1]).
+%:- use_module('../printer/reporting', [throw_error/2, report/1]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -19,13 +19,21 @@ norm_tt(TT, NormTT) :-
 	; format(atom(Message), 'norm_tt/2 failed to normalize ~w', [TT]),
 	  throw(Message).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+const_term(Tr) :-
+	nonvar(Tr),
+	Tr =.. [F|_],
+	memberchk(F, ['tlp', 't']). % t is for PMB ccg ders
+
+const_term_type((T,_Ty)) :-
+	const_term(T).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % free(TTvar, TTterm,)
 % checks if TTvar is free in TTterm
 
 free_tt( (X,Ty), (Tr,Ty) ) :-
-	(\+compound(Tr); Tr =.. [tlp|_]), !,
+	(\+compound(Tr); const_term(Tr)), !,
 	X == Tr.
 
 free_tt( (X,Ty), (FunTT@ArgTT,_) ) :-
@@ -71,7 +79,7 @@ alpha_convert_tt( (Fun1 @ Arg1, Ty1), Subs, (Fun2 @ Arg2, Ty1)) :-
 	alpha_convert_tt(Arg1, Subs, Arg2).
 
 alpha_convert_tt(X, _, X) :-
-	X = (tlp(_,_,_,_,_), _), !;
+	const_term_type(X), !;
 	X = (A,_),
 	atom(A), !.
 
@@ -100,7 +108,7 @@ alpha_eq_tt( (Fun1 @ Arg1, Ty1), Subs, (Fun2 @ Arg2, Ty1)):-
 	alpha_eq_tt(Arg1, Subs, Arg2).
 
 alpha_eq_tt( (A, T), _, (A, T)):-
-	(A = tlp(_,_,_,_,_); atom(A)), !.
+	(const_term(A); atom(A)), !.
 
 alpha_eq_tt( (abst((X,Ty),F1), Ty1), Subs, (abst((Y,Ty),F2), Ty1)):-
 	alpha_eq_tt(F1, [sub((X,Ty),(Y,Ty)) | Subs], F2), !.
@@ -126,7 +134,7 @@ beta_norm_tt(TT_alpha, Beta_Norm_TT) :-
 % removes at least one RedEx sub expression
 
 beta_red_tt((Tr,Ty), (Tr,Ty)) :-
-	(\+compound(Tr); Tr =.. [tlp|_]), !.
+	(\+compound(Tr); const_term(Tr)), !.
 
 beta_red_tt((abst(TTx, TT),_) @ TTarg, BetaTT) :-
 	!, %beta_norm_tt(TTarg, Norm_TTarg),
@@ -165,7 +173,7 @@ substitute_tt((Var,Ty1), TT, (Exp,Ty2), TT) :-
 	).
 
 substitute_tt(_VarTT, _TT, (Tr, Ty), (Tr, Ty)) :-
-	(\+compound(Tr); Tr =.. [tlp|_]), !.
+	(\+compound(Tr); const_term(Tr)), !.
 
 substitute_tt(VarTT, TT, (TT1@TT2,Ty), (R1@R2,Ty)) :-
 	!, substitute_tt(VarTT, TT, TT1, R1),
@@ -184,7 +192,7 @@ substitute_tt(VarTT, TT, (MainTT,Ty), (R_TT,Ty)) :-
 % Reduces TT to eta-normal form EtaNormTT
 
 eta_norm_tt((Tr,Ty), (Tr,Ty)) :-
-	(\+compound(Tr); Tr =.. [tlp|_]), !.
+	(\+compound(Tr); const_term(Tr)), !.
 
 eta_norm_tt((FunTT@ArgTT,Ty), (N_FunTT@N_ArgTT,Ty)) :-
 	!, eta_norm_tt(FunTT, N_FunTT),
