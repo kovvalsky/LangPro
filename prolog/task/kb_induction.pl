@@ -239,8 +239,8 @@ kb_induction_all(Config, IDALs, SolvA, Init_KB, Ind_KB) :-
 	format_list(atom(List), '    ~w~n', Cnt_KBs),
 	format('~`-t Counts of Induced Relations ~`-t~50|~n~w~n', [List]),
 	% filter out induced relations by keeping only harmless ones. Using all problems!
-	exclude(=([]), LL_KB, Non_empty_KBs),
-	list_to_ord_set(Non_empty_KBs, Potential_KBs),
+	exclude(=([]), LL_KB, LL_neKB),
+	list_to_ord_set(LL_neKB, Potential_KBs),
 	pick_harmless_KBs(Config, SolvA, IDALs, Potential_KBs, Ind_KB).
 
 
@@ -337,25 +337,40 @@ kb_induction_some(Config, Init_KB, IDAs, LL_KB, Info5) :-
 	% 	( L_KB=[] -> KB=[]; L_KB=[KB|_] ) %!!! pick only the first KB candidate
 	% 	), KBs).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge from a single problem
 % This prints rarely when the parallel mode is on
-kb_induction_prob(Config, KB0, (PrId,Ans), Learned_KBs, Info5) :-
-	( prepare_ttTerms_KB(PrId, _Config, KB0, PTT-HTT, AlPTT-AlHTT, KB1) ->
-		% print_pre_hyp(PrId),
-		% for align-both, non-aligned is built only if aligned tableau generation fails
-		get_branches(Ans, Config, KB1, PTT-HTT, AlPTT-AlHTT, TTs, Brs, St),
-		!, %!!! Another branch is not built yet
-		discover_knowledge(Config, TTs, Brs, KB1, (PrId,Ans), St, Learned_KBs, Info5)
-	; Info5 = [PrId, Ans, 'failed', 'Failed to get TT-terms', 'defected']
-	),
-	par_format('~t~w~6| [~w]-~w: ~w (~w)~n', Info5),
+kb_induction_prob(Config, KB0, (PrId,Ans), L_KB, Info) :-
+	get_value_def(Config, 'align', Align),
+	( prepare_ttTerms_KB(PrId, Align, KB0, PTT-HTT, AlPTT-AlHTT, KB1) ->
+		build_discover((PrId,Ans), Config, KB1, PTT-HTT, AlPTT-AlHTT, L_KB, Info)
+	; Info = [PrId, Ans, 'failed', 'Failed to get TT-terms', 'defected'] ),
+	par_format('~t~w~6| [~w]-~w: ~w (~w)~n', Info),
 	par_format('~`-t~50|~n', []).
 
 % HACK find out if this happens
 kb_induction_prob(_Config, _KB0, _PrIdAs, _, _Stat_Ans) :-
 	format('??? This should not happen!'),
 	fail.
+
+build_discover((PrId,Ans), Config, KB, PTT-HTT, AlPTT-AlHTT, L_KB, Info) :-
+	get_value_def(Config, 'align', 'both'), !,
+	% for both build non_align first, then align if needed
+	% note that these examples are unsolvable at this point,
+	% so proving with aligned ones first is not efficient
+	get_branches(Ans, 'no_align', KB, PTT-HTT, AlPTT-AlHTT, TTs1, Brs1, St1),
+	discover_knowledge(Config, TTs1, Brs1, KB, (PrId,Ans), St1, L_KB1, Info1),
+	Info1 = [_,_,Solved,_,_],
+	( (Solved == 'solved'; L_KB1 \= []) -> % preference to KB for non_align LLFs
+	  (L_KB, Info) = (L_KB1, Info1)
+	; get_branches(Ans, 'align', KB, PTT-HTT, AlPTT-AlHTT, TTs2, Brs2, St2),
+	  discover_knowledge(Config, TTs2, Brs2, KB, (PrId,Ans), St2, L_KB2, Info2),
+	  (L_KB, Info) = (L_KB2, Info2) ).
+
+build_discover((PrId,Ans), Config, KB, PTT-HTT, AlPTT-AlHTT, L_KB, Info) :-
+	get_value_def(Config, 'align', Align), !,
+	get_branches(Ans, Align, KB, PTT-HTT, AlPTT-AlHTT, TTs, Brs, St),
+	discover_knowledge(Config, TTs, Brs, KB, (PrId,Ans), St, L_KB, Info).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Discoveres knowledge from an open tableau (i.e. brancehs)
@@ -369,7 +384,7 @@ discover_knowledge(_Config, _TTterms, _, _KB1, (PrId,Ans), 'defected', [], Info5
 discover_knowledge(_Config, _TTterms, Branches, _KB1, (PrId,Ans), Status, [], Info5) :-
 	Branches == [], % to avoid leackage
 	!,
-	( memberchk(Ans, ['yes', 'no']) ->
+	( memberchk(Ans, ['yes', 'no']) -> %!!! what about fasle proofs?
 		Solved = 'solved'
 	;	Solved = 'failed'
 	),
@@ -438,62 +453,62 @@ discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get TTterms necessary for tableau building
 % ??? redundant
-prepare_ttTerms_KB(PrId, _Config, Init_KB, PTT-HTT, AlPTT-AlHTT, Fin_KB) :-
+prepare_ttTerms_KB(PrId, Align, Init_KB, PTT-HTT, AlPTT-AlHTT, Fin_KB) :-
 	%prepare rule list, LLFs, and KB
 	%set_rule_eff_order,
-	problem_to_ttTerms('both', PrId, PTT, HTT, AlPTT, AlHTT, KB1),
+	problem_to_ttTerms(Align, PrId, PTT, HTT, AlPTT, AlHTT, KB1),
 	append(Init_KB, KB1, KB2),
 	sort(KB2, Fin_KB).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get branch list for a specific entailment problem and its answer
-get_branches(Ans, Config, KB, PTT-HTT, AlPTT-AlHTT, TTterms, Brs, At_Status) :-
-	get_value_def(Config, 'align', Align),
-	append(PTT, HTT, TTs),
-	append(AlPTT, AlHTT, AlTTs),
-	( Align == 'align' -> P = AlPTT, H = AlHTT
-	; Align == 'no_align' -> P = PTT, H = HTT
-	; Align == 'both' ),
-	( Ans == 'yes' -> T_TTs = P, F_TTs = H, T_aTTs = AlPTT, F_aTTs = AlHTT
-	; Ans == 'no' -> append(P, H, T_TTs), F_TTs = [], T_aTTs = AlTTs, F_aTTs = [] ),
+get_branches(Ans, Align, KB, P-H, AP-AH, TTs, Brs, At_Status) :-
+	( get_branches_case(Ans, Align, KB, P-H, AP-AH, TTs, Brs, Status) -> true
 	% consistency checking
 %	( maplist(consistency_check(KB), TTs, Checks),
 %	  memberchk('Inconsistent', Checks)	->
 %	  	(TTterms, Brs, Status) = (TTs, [], 'Inconsistent sentence')
-	 % build tableau according to align value
-	% proof with alignmnet is used to close the tableau !!!
-	( generateTableau(KB-_, T_TTs, F_TTs, Brs, _, Status) ->
-	  append(T_TTs, F_TTs, TTterms)
-	; Align == 'both', generateTableau(KB-_, T_aTTs, F_aTTs, Brs, _, Status) ->
-	  % aligned TTterms
-	  TTterms = AlTTs
 	; (Brs, Status) = (['fail'], 'defected'),
-	  TTterms = TTs ),
+	  append(AP, AH, TTs) ),
 	term_to_atom(Status, At_Status).
 
-
 % get branches that keep the tableau open
-get_branches('unknown', Config, KB, PTT-HTT, AlPTT-AlHTT, _TTterms, Brs, Status) :-
-	get_value_def(Config, 'align', Align),
+get_branches('unknown', Align, KB, P-H, AP-AH, _TTs, Brs, Status) :-
 	% Doesn't matter which one closes, if one closes this might already mean a contrdictory knowledge
 	% Entail + Contradiction = Neutral Rule is not used here
-	( close_any_tableau(Align, KB, PTT-HTT, AlPTT-AlHTT, Status) ->
-		Brs = []
-	; (Brs, Status) = (['unknown'], 'all open') %!!! or defected
-	).
+	( close_any_tableau(Align, KB, P-H, AP-AH, Status) ->	Brs = []
+	; (Brs, Status) = (['unknown'], 'all open') ).%!!! or defected
+
+%-------------------------------
+get_branches_case('yes', 'align', KB, _, AP-AH, TTs, Brs, Status) :-
+	append(AP, AH, TTs),
+	generateTableau(KB-_, AP, AH, Brs, _, Status).
+
+get_branches_case('yes', 'no_align', KB, P-H, _, TTs, Brs, Status) :-
+	append(P, H, TTs),
+	generateTableau(KB-_, P, H, Brs, _, Status).
+
+get_branches_case('no', 'align', KB, _, AP-AH, TTs, Brs, Status) :-
+	append(AP, AH, TTs),
+	generateTableau(KB-_, TTs, [], Brs, _, Status).
+
+get_branches_case('no', 'no_align', KB, P-H, _, TTs, Brs, Status) :-
+	append(P, H, TTs),
+	generateTableau(KB-_, TTs, [], Brs, _, Status).
+%-------------------------------
 
 % Succeeds if one of the 4 tableaux closes for ent|cont x aligned|non-alogned
-close_any_tableau(Align, KB, PTT-HTT, AlPTT-AlHTT, Status) :-
-	append(PTT, HTT, TTs),
-	append(AlPTT, AlHTT, AlTTs),
+close_any_tableau(Align, KB, P-H, AP-AH, Status) :-
+	append(P, H, TTs),
+	append(AP, AH, ATTs),
 	( memberchk(Align, ['both', 'align']),
-	  generateTableau(KB-_, AlTTs, [], 		[], _, Status)
+	  generateTableau(KB-_, ATTs, [], 		[], _, Status)
 	; memberchk(Align, ['both', 'no_align']),
 	  generateTableau(KB-_, TTs, [], 		[], _, Status)
 	; memberchk(Align, ['both', 'align']),
-	  generateTableau(KB-_, AlPTT, AlHTT, 	[], _, Status)
+	  generateTableau(KB-_, AP, AH, 	[], _, Status)
 	; memberchk(Align, ['both', 'no_align']),
-	  generateTableau(KB-_, PTT, HTT, 		[], _, Status)
+	  generateTableau(KB-_, P, H, 		[], _, Status)
 	),
 	!.
 
