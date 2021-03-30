@@ -124,12 +124,8 @@ print_pre_hyp(PrId) :-
 % It suppresses printing is the parallel mode is on
 par_format(Source, Format, List) :-
 	current_output(Src),
-	( debMode(parallel(_)),
-	  Src = Source
-	  ->
-		true
-	; 	format(Source, Format, List)
-	).
+	( debMode(parallel(_)), Src = Source -> true
+	; format(Source, Format, List) ).
 
 par_format(Format, List) :-
 	current_output(Source),
