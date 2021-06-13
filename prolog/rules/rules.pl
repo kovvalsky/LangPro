@@ -65,7 +65,7 @@ rule_priority([
 	%mods_be, %vpMod_to_argMod,
 	%pp_attach, seems inefficenet for contradiction checking, so used as closure rule
 	a_group_of, group_of,
-	same_args, %up_mon_args, dw_mon_args,
+	same_args_tf, same_args_xx, %up_mon_args, dw_mon_args,
 	up_mon_fun_some, dw_mon_fun_few,
 	up_mon_fun, dw_mon_fun, % doesn't matter order
 	push_arg,
@@ -648,7 +648,7 @@ r(type_drop, equi:non, ([], [], _), [[pos('NNP')]], _, % doesnt work this info
 %%%%%%%%%%%%%%%%%%%%%%
 % simpler aligner rule that is more general than up and dw arg rules
 % what about same_mods rule?
-r(same_args,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % non-symetric
+r(same_args_tf,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % non-symetric
 		br([nd( M1, (G @ A, _), Args, true ),
 			nd( M2, (H @ B, _), Args, false ) ],
 		  Sig)
@@ -665,8 +665,8 @@ r(same_args,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % non-symetric
 			sub_type(Type1, Type),
 			sub_type(Type2, Type).
 
-/*
-r(same_args,  impl:non,  _, _Lexicon, KB,  % symetric
+
+r(same_args_xx,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % symetric
 		br([nd( M1, (G @ A, _), Args, TF ),
 			nd( M2, (H @ B, _), Args, TF ) ],
 		  Sig)
@@ -676,13 +676,13 @@ r(same_args,  impl:non,  _, _Lexicon, KB,  % symetric
 		  Sig) )
 :-
 			G \= H,
-			match_ttTerms(A, B, KB),
+			match_ttTerms(A, B, KB_xp),
 			Y = A,
 			A = (_, Type1),
 			B = (_, Type2),
 			sub_type(Type1, Type),
 			sub_type(Type2, Type).
-*/
+
 
 % Monotone rules when arguments are in ISA relation
 % Non-branching rule
