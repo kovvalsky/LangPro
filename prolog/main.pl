@@ -108,29 +108,31 @@ add_to_stream(DataType, Data) :-
 % 'once_solved:parser'	compare predicted problems to the list of once-solved problems
 % 'xml'					write terms or tableaux in XML
 % 'html'				write twrms and tableaux in HTML, outomatically creates XML files too
-% 'fix': 				prints fixes done on CCG trees
+% 'fix' 				prints fixes done on CCG trees
 % gtraceProb(Id)		Trigger gtrace for a particular problem
 % gtraceSen(Id)		   Trigger gtrace for a particular sentence
-% 'proof_tree': 		develope a proof tree
-% 'aall':				allows alignment of any NPs
+% 'proof_tree'   		develope a proof tree
+% 'aall'    				allows alignment of any NPs
 % cpu_count				the number of threads to use for concurrent run
 % complete_tree			Proof stopped when the RAL is reached, not when an open branch is found
-% 'prprb':				prints the problem
-%  waif(filename): 		writes answers in file in SICK style
+% latex_no_corrected    print in latex only original trees, no corrected or type-raised ones
+% latex_no_type_raised  don't print in latex type-raised tts
+% 'prprb'				prints the problem
+%  waif(filename) 		writes answers in file in SICK style
 %  waifx				writes extended answers in file
 %  output_branches([txt,json], filename)	output branches in a json or txt (human readable) format
-% 'ne':					reports MW Named Entity found
-% 'mwe':				multiword expression found
-% 'prlim':				prints when rule limit is reached
-% 'ProperNames':		consideres all bare nouns (even plurals) as proper names
-% 'the':				inserts "the" for bare nouns (even plurals) instead of "a"
+% 'ne'					reports MW Named Entity found
+% 'mwe'		   	       	multiword expression found
+% 'prlim'				prints when rule limit is reached
+% 'ProperNames' 		consideres all bare nouns (even plurals) as proper names
+% 'the'	    			inserts "the" for bare nouns (even plurals) instead of "a"
 %  a2the				replace all a,an with the
 %  s2the				replaces all plurals with definites
 %  thE					allow Existential import for the in false context
-% 'wn_ant':				uses antonym relation of Wordnet
-%  prlex:				print extracted Lexicon
-% '2class':				binary classification
-%  ral(N):				rule application limit is N
+% 'wn_ant'				uses antonym relation of Wordnet
+%  prlex				print extracted Lexicon
+% '2class'				binary classification
+%  ral(N)				rule application limit is N
 %  no_gq_llfs			dont obtain LLFs with generalized quantifiers, i.e. use fixed CCG terms
 %  gq_report			report how quantifier raising is going on
 %  pr_lex_rules			print lexical rules that are not explained
@@ -154,7 +156,7 @@ add_to_stream(DataType, Data) :-
 %  noAdmissRules		exclude admissible rules
 %  single_branch_model	Apply rules in such a way that one gets only single branches
 %  EffCr([nonBr, equi, nonProd, nonCons])	defining an effciency criterion
-%  eccg				    latex trees are probted in different tex file
+%  eccg				    latex trees are printed in different tex file
 %  ss([...])			list of frequent sysnsets to choose
 %  allInt				All noun modifeirs are intersective
 %  lab_map:mapping_name	Map labels of problems to other ones, e.g., for SICK
