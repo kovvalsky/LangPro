@@ -10,6 +10,7 @@
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('ttterm_preds', [
 	add_heads/2, set_type_for_tt/3, apply_ttMods_to_ttArg/3,
+	set_type_for_tt_of_type/4,
 	right_branch_tt_search/4, is_tlp/1, tlp_pos_in_list/2, rel_clause_ttterm/1,
 	tlp_lemma_in_list/2, tlp_pos_with_prefixes/2, red_rel_clause_ttterm/1,
 	proper_modttTerm/1
@@ -18,7 +19,6 @@
 	]).
 :- use_module('../lambda/type_hierarchy', [cat_eq/2, final_value_of_type/2]).
 
-:- dynamic debMode/1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % beginings of ccgTree to LLF convertion
@@ -73,7 +73,7 @@ fix_term(
 	( (((Be,pp~>np:Y~>s:X) @ ((PP,np:_~>pp) @ NP1, pp), np:Y~>s:X) @ NP2, s:Z) )
 ) :-
 	tlp_pos_in_list(PP, ['IN']),
-	fix_report('!!! Fix: pp_be_to_be_pp').
+	fix_report('!!! Fix: pp_be_to_be_pp (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % make the determiner ordinary that takes np~>s:adj as an argument
@@ -84,7 +84,7 @@ fix_term(
 ) :-
 	is_tlp(Det),
 	set_type_for_tt(VP_adj, n:_, Noun),
-	fix_report('!!! Fix: det_pred_adj').
+	fix_report('!!! Fix: det_pred_adj (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pull sinked determiner and put at the top of NP
@@ -97,15 +97,36 @@ fix_term(
 	ModTT = (Mod, np:_~>np:_),
 	% ModTT can be lexical, conjunction of TTs, or a TT with a modifier,...
 	%once(( is_tlp(Mod); is_cc_ttTerm(ModTT) )),
-	nonvar(NP), nonvar(Mod),
+	nonvar(Mod),
 	right_branch_tt_search(Det, (NP,np:Y), Mods, Noun),
 	Det = (DT,n:_~>np:X),
 	tlp_pos_in_list(DT, ['DT','CD']), % JJ?
-	maplist([(_,np:_~>np:_)]>>true, Mods),
-	maplist([L,New]>>set_type_for_tt(L, n:_~>n:_, New),
-		[ModTT | Mods], Mods1),
+	maplist(set_type_for_tt_of_type(np:_~>np:_, n:_~>n:_), [ModTT|Mods], Mods1),
 	apply_ttMods_to_ttArg(Mods1, Noun, Mods_N),
-	fix_report('!!! Fix: mods_det_noun').
+	fix_report('!!! Fix: mods_det_noun (NL)').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% introduce lex_rule for tlp(NN:np) and alter its np~>np modifiers accordingly
+% SICK_NL-28: (en bolnd wegvliegend) haar:NN:np --> ((en b w) (haar:NN:n)):np
+fix_term(
+	( ModTT @ (NP,np:Y), np:X ),
+	( Mods_N, np:X )
+) :-
+	proper_modttTerm(ModTT),
+	ModTT = (Mod, np:_~>np:_), nonvar(Mod),
+	right_branch_tt_search(M, (ModTT@(NP,np:Y),np:X), Mods, Noun),
+	Noun = (TLP_NN, np:_),
+	tlp_pos_in_list(TLP_NN, ['NN', 'NNS']),
+	maplist(set_type_for_tt_of_type(np:_~>np:_, n:_~>n:_), [M|Mods], Mods1),
+	apply_ttMods_to_ttArg(Mods1, (TLP_NN,n:_), Mods_N),
+	fix_report('!!! Fix: insert n~>np rule for Mods@NN(S):np (NL)').
+
+fix_term(
+	( TLP_NN, np:X ),
+	( (TLP_NN, n:_), np:X )
+) :-
+	tlp_pos_in_list(TLP_NN, ['NN', 'NNS']),
+	fix_report('!!! Fix: insert n~>np rule for NN(S):np (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Remove unnecessary type-raising for "Det N and N" with meaning "Det N and Det N"
@@ -119,7 +140,8 @@ fix_term(
 	C = (n:_~>np:_)~>np:_,
 	norm_tt( ((abst(V1,NP1),Ty1) @ D, np:X), D_NP1 ),
 	norm_tt( ((abst(V2,NP2),Ty2) @ D, np:X), D_NP2 ),
-	T = np:X.
+	T = np:X,
+	fix_report('!!! Fix: eta-reduction for Conj (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % recover [pss] feature in types from [pt] since Lassy has no info for such feature
@@ -131,7 +153,8 @@ fix_term(
 ) :-
 	tlp_pos_in_list(Worden, ['RB','AUX']),
 	tlp_lemma_in_list(Worden, ['worden','is','zijn','be']), % remove NL words?
-	set_type_for_tt(VP, np:X~>s:pss, VP_pss).
+	set_type_for_tt(VP, np:X~>s:pss, VP_pss),
+	fix_report('!!! Fix: recover :pss feature (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % n arguments of passives or verbs will use lex_rule to become np
@@ -157,7 +180,8 @@ fix_term(
 	  tlp_pos_in_list(Head, ['RB','AUX']),
 	  tlp_lemma_in_list(Head, ['worden','is','zijn','be']) % remove NL words?
 	),
-	set_type_for_tt(VP, np:Z~>VP_Ty, VP1).
+	set_type_for_tt(VP, np:Z~>VP_Ty, VP1),
+	fix_report('!!! Fix: insert n~>np rule for n args of VP (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % n argumnet of prepositions will use lex_rule to become np
@@ -176,7 +200,8 @@ fix_term( % for n~>pp case
 	( (IN,n:_~>Ty1) @ (Noun,n:X), Ty2 ),
 	( (IN,np:Y~>Ty1) @ ((Noun,n:X),np:Y), Ty2 )
 ) :-
-	tlp_pos_in_list(IN, ['IN']).
+	tlp_pos_in_list(IN, ['IN']),
+	fix_report('!!! Fix: insert n~>np rule for n args of PP (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach a VP-modifying particle to a verb
