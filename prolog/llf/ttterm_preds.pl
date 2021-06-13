@@ -33,6 +33,7 @@
 		red_rel_clause_ttterm/1,
 		set_type_for_tt/3,
 		set_type_for_tt/5,
+		set_type_for_tt_of_type/4,
 		subset_only_terms/2,
 		tlp_lemma_in_list/2,
 		tlp_pos_in_list/2,
@@ -59,9 +60,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Right branch search a TT
-right_branch_tt_search(F, (F@B,_), [], B).
+right_branch_tt_search(F, (Term,_), [], B) :-
+	nonvar(Term),
+	Term = F@B.
 
-right_branch_tt_search(F, (A@B,_), [A|L], R) :-
+right_branch_tt_search(F, (Term,_), [A|L], R) :-
+	nonvar(Term),
+	Term = A@B,
 	right_branch_tt_search(F, B, L, R).
 
 
@@ -558,6 +563,14 @@ set_type_for_tt( (abst((X,TyX), TT), _Ty), Type,  (abst((X,TyX), NewTT), Type), 
 
 set_type_for_tt( (TT, _Ty), Type, (TT, Type), _, []) :- %!!! changed variables are empty by default
 	TT = (_, _).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% set type Ty2 for a TTterm of a type Ty1
+set_type_for_tt_of_type(Ty1, Ty2, TT, NewTT) :-
+	\+ \+ TT = (_, Ty1), % avoids variable binding
+	set_type_for_tt(TT, Ty2, NewTT).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
