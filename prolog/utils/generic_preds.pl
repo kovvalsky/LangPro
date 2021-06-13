@@ -9,6 +9,7 @@
 		format_list_list/4,
 		keep_smallest_lists/2,
 		read_dict_from_json_file/2,
+		rotate_list/2,
 		sort_list_length/2,
 		sublist_of_list/2,
 		substitute_in_atom/4,
@@ -99,3 +100,19 @@ read_dict_from_json_file(JSON, Dict) :-
 substitute_in_atom(Atom, Old, New, Result) :-
 	atomic_list_concat(List, Old, Atom),
 	atomic_list_concat(List, New, Result).
+
+
+% rotate the list
+rotate_list(L, R) :-
+	rotate_list(L, R, 0).
+
+rotate_list(L, L, N) :-
+	length(L, Len),
+	N =< Len.
+
+rotate_list([H|Rest], Rotate2, N) :-
+	length([H|Rest], Len),
+	N < Len - 1,
+	append(Rest, [H], Rotate1),
+	N1 is N + 1,
+	rotate_list(Rotate1, Rotate2, N1).
