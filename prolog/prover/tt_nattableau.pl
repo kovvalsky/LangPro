@@ -17,6 +17,7 @@
 :- use_module('tableau_analysis', [stats_from_tree/2, theUsedrules_in_tree/2]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../rules/rules', [op(610, xfx, ===>), r/6, admissible_rules/1]).
+:- use_module('../utils/generic_preds', [rotate_list/2]).
 :- use_module('../utils/user_preds', [
 	ttExp_to_ttTerm/2, uList2List/2, uList_to_ord_set/2, choose/3, match_remove/3,
 	ul_append/2, patt_remove/3, add_new_elements/3, list_substitution/4
@@ -190,30 +191,28 @@ expand([Branch | RestBranches], RestBranches, Tree, UL_Closing_IDs, [const_id(E,
 	ChildList = closer(ClIDs).
 */
 
-expand(BranchList, NewBranchList, Tree, Closing_IDs, KB_XP, Count, Rules, RuleAppNum, Steps, Limit) :-
+expand(InitBrList, NewBrList, Tree, Cl_IDs, KB_XP, Count, Rules, RuleAppNum, Steps, Limit) :-
 	Limit = AppLimit-Mode,
 	%(0 is N mod 100 -> display(N), nl; true),
 	Count = [const_id(Eid1, Eid, Cid1, Cid), node_id(Nid1, Nid)],
 	Count1 = [const_id(Eid1, Eid2, Cid1, Cid2), node_id(Nid1, Nid2)],
-	( dirExpand(BranchList, TempBranchList, Tree, Closing_IDs, KB_XP, Count1, Rules, NewRules, RAppNum)
-	; Mode == 'comp',
-		select(Br, BranchList, Rest), append(Rest, [Br], RotatedBranchList),
-		dirExpand(RotatedBranchList, TempBranchList, Tree, Closing_IDs, KB_XP, Count1, Rules, NewRules, RAppNum)
+	( ( Mode == 'comp' -> rotate_list(InitBrList, BrList); BrList = InitBrList ),
+	  dirExpand(BrList, TempBrList, Tree, Cl_IDs, KB_XP, Count1, Rules, NewRules, RAppNum)
 	), !,
 	Count2 = [const_id(Eid2, Eid, Cid2, Cid), node_id(Nid2, Nid)],
 	NewRuleAppNum is RuleAppNum + RAppNum,
 	%report('Rule app: ', NewRuleAppNum),
-	( (NewRuleAppNum < AppLimit; TempBranchList = []) ->
-		expand(TempBranchList, NewBranchList, Tree, Closing_IDs, KB_XP, Count2, NewRules, NewRuleAppNum, Steps, Limit)
-	;	NewBranchList = TempBranchList,
+	( (NewRuleAppNum < AppLimit; TempBrList = []) ->
+		expand(TempBrList, NewBrList, Tree, Cl_IDs, KB_XP, Count2, NewRules, NewRuleAppNum, Steps, Limit)
+	;	NewBrList = TempBrList,
 		( debMode('prlim') -> report(['Rule application limit reached: ', AppLimit]); true),
 		Steps = ('Lim', NewRuleAppNum) %'Limited'
 	).
 
 
 % if no more rule applications is possivbel then this clause assigns Model
-expand(BranchList, BranchList, Tree, _Closing_IDs, _KB_XP,  [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, ('Ter', Steps), _Limit) :-
-	BranchList = [br([ndId(_,Id)|_], _, _) | _],
+expand(BrList, BrList, Tree, _Cl_IDs, _KB_XP,  [const_id(E,E,C,C), node_id(N,N)], _Rules, Steps, ('Ter', Steps), _Limit) :-
+	BrList = [br([ndId(_,Id)|_], _, _) | _],
 	%writeln('Model found'),
 	( debMode('proof_tree') ->
 		findSubTree(Tree, Id, tree(_, 'Model')) % marks open branch
@@ -336,9 +335,10 @@ findBestRule(RuleType, Body, Cids, Rules, RuleId, AppInfo, Head, Sig) :-
 % finds IDs of first(!) nodes of BrNodes matching to
 % the nodes of RuleHead - the head of the rule
 findHeadNodes(BrNodes, [Head | Tail], [Id | ID_tail]) :- % also usable in reverse
-	member(ndId(Head, Id), BrNodes),
+	% select guarantees that each head node will be matched different nodes
+	select(ndId(Head, Id), BrNodes, RestBrNodes),
 	\+cyclic_term(Head), % can be solved by introducing Var(x) for X
-	findHeadNodes(BrNodes, Tail, ID_tail).
+	findHeadNodes(RestBrNodes, Tail, ID_tail).
 
 findHeadNodes(_, [], []).
 
