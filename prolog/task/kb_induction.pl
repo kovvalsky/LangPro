@@ -345,6 +345,7 @@ kb_induction_prob(Config, KB0, (PrId,Ans), L_KB, Info) :-
 	( prepare_ttTerms_KB(PrId, Align, KB0, PTT-HTT, AlPTT-AlHTT, KB1) ->
 		build_discover((PrId,Ans), Config, KB1, PTT-HTT, AlPTT-AlHTT, L_KB, Info)
 	; Info = [PrId, Ans, 'failed', 'Failed to get TT-terms', 'defected'] ),
+	!,
 	par_format('~t~w~6| [~w]-~w: ~w (~w)~n', Info),
 	par_format('~`-t~50|~n', []).
 
