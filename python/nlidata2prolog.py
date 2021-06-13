@@ -36,7 +36,8 @@ def parse_arguments():
         help='Corpus to be converted')
     parser.add_argument(
     '--tokenize', default='nltk', choices=['raw', 'nltk', 'spacy', 'native'],
-        help='How to tokenize the text')
+        help='How to tokenize the text. "native" works for snli.jsonl files \
+             which comes with parsed trees.')
     parser.add_argument(
     '-v', '--verbose', dest='v', default=0, action='count',
         help='verbosity level of reporting')
@@ -47,6 +48,17 @@ def parse_arguments():
 def report(message, priority, verbosity):
     if priority <= verbosity:
         print(message)
+
+def write_nli_dict(nli_dict, out, fmt, tok='raw', v=0):
+    if fmt == 'spl':
+        cnt = nli_spl(nli_dict, out, tok, v=v)
+        report('{} sentences written for parsing'.format(cnt), 1, v)
+    elif fmt == 'sen.pl':
+        cnt = nli_prolog(nli_dict, out, cen_labs=False)
+        report('{} NLI sentences written'.format(cnt), 1, v)
+    else:
+        raise RuntimeError("Unknown format /{}/".format(fmt))
+
 
 def sick_semeval2nli(file_stream, out, fmt, tok='raw', v=0):
     '''Convert stream into prolog or spl data and write it into file
@@ -62,14 +74,7 @@ def sick_semeval2nli(file_stream, out, fmt, tok='raw', v=0):
         nli_dict[i] = {'pid':pid, 'p':pre, 'h':hyp, 'r':sco, 'g':lab.lower()}
         i += 1
     report("{} problems read".format(len(nli_dict)), 0, v)
-    if fmt == 'spl':
-        cnt = nli_spl(nli_dict, out, tok, v=v)
-        report('{} sentences written for parsing'.format(cnt), 1, v)
-    elif fmt == 'sen.pl':
-        cnt = nli_prolog(nli_dict, out, cen_labs=False)
-        report('{} NLI sentences written'.format(cnt), 1, v)
-    else:
-        raise RuntimeError("Unknown format /{}/".format(fmt))
+    write_nli_dict(nli_dict, out, fmt, tok=tok, v=v)
 
 
 ############################
@@ -91,6 +96,9 @@ def nli_spl(nli_dict, out, tok, v=0):
                     wr = " ".join([ t.text.strip() for t in tokenizer(d[k]) ])
                 elif tok == 'nltk':
                     wr = " ".join(tokenizer(d[k]))
+                elif tok == 'native' and f"{k}_btree" in d:
+                    binary_tree = d[f"{k}_btree"]
+                    wr = " ".join(binaryTree2tokens(binary_tree))
                 else:
                     wr = d[k]
                 f.write(wr + '\n')
@@ -123,67 +131,25 @@ def nli_prolog(nli_dict, out, cen_labs=True):
 
 ################################################################################
 ################################################################################
-def snlijson2nli(file_stream, probpl, splfile, v=0):
+def snlijson2nli(file_stream, out, fmt, tok='native', v=0):
     # FIXME: adapt to the global changes
-    '''From the stream of the file of NLI problems create sen.pl, .spl, and info.pl files
     '''
-    #sens = []
-    nli_probs = []
-    for pid, json_prob in enumerate(file_stream, start=1):
+    '''
+    nli_dict = defaultdict(dict)
+    i = 1
+    possible_labels = ['entailment', 'contradiction', 'neutral']
+    for json_prob in file_stream:
         p = json.loads(json_prob)
-        # prem = {'sid':len(sns)+1, 'pid':pid, 'ph':'p',
-        #         'gold':p['gold_label'], 'sen':p['sentence1'],
-        #         'comment':"captionID={}; pairID={}".format(p['captionID'], p['pairID']),
-        #         'btree':p['sentence1_binary_parse']
-        #        }
-        # hypo = {'sid':len(sns)+2, 'pid':pid, 'ph':'h',
-        #         'gold':p['gold_label'], 'sen':p['sentence2'],
-        #         'comment':"pairID={}".format(p['pairID']),
-        #         'btree':p['sentence2_binary_parse']
-        #        }
-        # problem dictionary
-        poss_labs = ['entailment', 'contradiction', 'neutral']
-        labels = [ l for l in p['annotator_labels'] if l in poss_labs ]
-        assert len(p['annotator_labels']) == len(labels), "Ill formed labels"
-        prob = {'pid':pid,
-                'pairID':p['pairID'],
-                'labels':labels,
-                'captionID':p['captionID'],
-                'gold':p['gold_label'],
-                'p':p['sentence1'],
-                'h':p['sentence2'],
-                'p_id':2*pid-1,
-                'h_id':2*pid,
-                'p_btree':p['sentence1_binary_parse'],
-                'h_btree':p['sentence2_binary_parse']
-               }
-        # sanity check
-        report_about_sen(prob['p'])
-        report_about_sen(prob['h'])
-        #
-        nli_probs.append(prob)
-        #sens += [prem, hypo]
-    #report("{} sentences read".format(len(sens)), 0, v)
-    report("{} problems read".format(len(nli_probs)), 0, v)
-    write_snli_probs(nli_probs, probpl)
-    write_sen_spl([ binaryTree2tokens(tree) for p in nli_probs for tree in [p['p_btree'], p['h_btree']] ], splfile)
-
-############################
-def write_snli_probs(snli_probs, prolog):
-    '''Write the snli problem in the prolog file
-    '''
-    lab_ord = ['entailment', 'contradiction', 'neutral']
-    with open(prolog, 'w') as f:
-        for i, p in enumerate(snli_probs, start=1):
-            #if i != 145: continue
-            p['p'] = p['p'].replace("'", r"\'")
-            p['h'] = p['h'].replace("'", r"\'")
-            p['lab_num'] = len(p['labels'])
-            c = Counter(p['labels'])
-            p['lablist'] = ', '.join(p['labels'])
-            p['dist'] =  ','.join([ str(c[i]) for i in lab_ord ])
-            f.write("prob({pid}, ('{pairID}','{captionID}'), {lab_num}, [{dist}], {gold},\n"
-                    "\t({p_id}, '{p}'),\n\t({h_id}, '{h}'),\n\t[{lablist}]).\n".format(**p))
+        if p['gold_label'] in possible_labels:
+            nli_dict[i] = {'pid':p['pairID'],
+                           'p':p['sentence1'], 'h':p['sentence2'],
+                           'g':p['gold_label'],
+                           'p_btree': p['sentence1_binary_parse'],
+                           'h_btree': p['sentence2_binary_parse']
+                          }
+            i += 1
+    report("{} problems read".format(len(nli_dict)), 0, v)
+    write_nli_dict(nli_dict, out, fmt, tok=tok, v=v)
 
 #################################
 def binaryTree2tokens(binary_tree):
