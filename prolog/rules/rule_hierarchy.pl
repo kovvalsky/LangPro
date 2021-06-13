@@ -75,20 +75,25 @@ prop_sub_rule( 	h(dw_mon_fun_few, 	[],	[T,_],	N, [[A,_,C]]), %!!!exp
 				h(dw_mon, 		[],	[X,Y],	[_,_,A,B])  %!!! before were x,
 ).*/
 
-prop_sub_rule(  h(same_args, 	O, [X,Y],	N, [[A,B]]),
-				h(same_args,	O, [Y,X],	N, [[B,A]])
+prop_sub_rule(  h(same_args_tf, O, [X,Y],	N, [[A,B]]),
+				h(same_args_tf,	O, [Y,X],	N, [[B,A]])
 ).
-
-
-prop_sub_rule(  h(same_args, 	O, [X,_],	N, [[A,_]]),
+prop_sub_rule(  h(same_args_xx, O, [X,Y],	N, [[A,B]]),
+				h(same_args_xx,	O, [Y,X],	N, [[B,A]])
+).
+prop_sub_rule(  h(same_args_tf, O, [X,_],	N, [[A,_]]),
 				h(push_arg,		O, [X],		N, [[A]])
 ).
-
-prop_sub_rule(  h(same_args, 	O, [_,Y],	N, [[_,B]]),
+prop_sub_rule(  h(same_args_tf, O, [_,Y],	N, [[_,B]]),
 				h(push_arg,		O, [Y],		N, [[B]])
 ).
-
-prop_sub_rule( 	h(same_args,	[],	[X,Y],	[], [[A,B]]),
+prop_sub_rule(  h(same_args_xx, O, [X,_],	N, [[A,_]]),
+				h(push_arg,		O, [X],		N, [[A]])
+).
+prop_sub_rule(  h(same_args_xx, O, [_,Y],	N, [[_,B]]),
+				h(push_arg,		O, [Y],		N, [[B]])
+).
+prop_sub_rule( 	h(same_args_tf,	[],	[X,Y],	[], [[A,B]]),
 				h(dw_mon, 		[],	[X,Y],	_, [[_,_], [A,B]])  %!!! before were x,
 ).
 
@@ -96,7 +101,7 @@ prop_sub_rule( 	h(same_args,	[],	[X,Y],	[], [[A,B]]),
 				h(up_mon, 		[],	[X,Y],	[_,_,A,B])
 ).*/
 
-prop_sub_rule(  h(same_args, 	[],	[X,Y],	[], [[A,B]]),
+prop_sub_rule(  h(same_args_tf, 	[],	[X,Y],	[], [[A,B]]),
 				h(up_mon, 		[],	[X,Y],	_, [[_,_], [A,B]])
 ).
 
