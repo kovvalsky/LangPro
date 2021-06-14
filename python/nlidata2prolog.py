@@ -120,12 +120,12 @@ def nli_prolog(nli_dict, out, cen_labs=True):
                   'h': d['h'].replace("'", r"\'"),
                   'p_id': 2*i-1,
                   'h_id': 2*i,
-                  'g':d['g'] if cen_labs else cen2ynu[d['g']]
+                  'g':d['g'] if cen_labs else cen2ynu[d['g']],
+                  'pid': d['pid'].replace("'", r"\'"),
                  }
-            kw = {**d, **kw}
             f.write("% problem id = {pid}\n"
-                    "sen_id({p_id}, {pid}, 'p', '{g}', '{p}').\n"
-                    "sen_id({h_id}, {pid}, 'h', '{g}', '{h}').\n".format(**kw))
+                    "sen_id({p_id}, '{pid}', 'p', '{g}', '{p}').\n"
+                    "sen_id({h_id}, '{pid}', 'h', '{g}', '{h}').\n".format(**kw))
             count += 2
     return count
 
