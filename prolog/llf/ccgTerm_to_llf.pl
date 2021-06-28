@@ -246,7 +246,7 @@ fix_term(
 	fix_report('!!! Fix: put_rel_cl_under_det').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% attach the modifier to the head of rlative clause or passive clause
+% attach the modifier to the head of relative clause or passive clause
 % (X, n~>n) @ [(who @ Z, n~>n) @ (Y,n)] ~~~> (who @ Z, n~>n) @ [(X, n~>n) @ (Y,n)]
 % (X, n~>n) @ [((VPpass:np~>s), n~>n) @ (Y,n)] ~~~>((VPpass:np~>s), n~>n) @ [(X, n~>n) @ (Y,n)]  %sick-2712, 7649
 fix_term(
@@ -334,6 +334,7 @@ fix_term(
 	( (N, n:X), np:Y ),
 	( (D,n:_~>np:_) @ (N,n:X), np:Y)
 ) :-  % +++
+	N \= (tlp(_,_,'CD',_,_),_) @ _,
 	add_heads((N,n:X), (_,_,Head)),
 	nonvar(Head),
 	Head = tlp(Cat,_,'NN',_,_),
@@ -359,6 +360,7 @@ fix_term(
 	( (NNS,n:X), np:Y ),
 	( (D,n:_~>np:_) @ (NNS,n:X), np:Y )
 ) :- % +++
+	NNS \= (tlp(_,_,'CD',_,_),_) @ _,
 	add_heads((NNS,n:X), (_,_,Head)),
 	nonvar(Head),
 	Head = tlp(Cat,_,'NNS',_,_),
@@ -371,7 +373,7 @@ fix_term(
 % type change from n to np
 % e.g. $@37,CD,n:num -> np -----> $@37,CD,np
 fix_term(
-	( (CD,n:num), np:_ ),
+	( (CD,n:_Num), np:_ ),
 	( CD, np:Feat )
 ) :-
 	is_tlp(CD),
