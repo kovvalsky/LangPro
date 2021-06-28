@@ -24,8 +24,8 @@ def parse_arguments():
     '-fp', '--first-primary', action='store_true',
         help="First system is primary and its Ent/Cont has priority")
     parser.add_argument(
-    '-ofc', '--only-first-correct', action='store_true',
-        help="Show samples for which only the first system's prediction is correct")
+    '-onc', '--only-Nth-correct', type=int,
+        help="Show samples for which only the Nth (starting from 1) system's prediction is correct")
     parser.add_argument(
     '--write-hybrid', metavar='FILE',
         help="Write hybrid predictions in a file for later use")
@@ -192,7 +192,13 @@ def calc_measures(c, labs=['ENTAILMENT', 'CONTRADICTION', 'NEUTRAL']):
 if __name__ == '__main__':
     args = parse_arguments()
     sys_id_label = read_systems_id_labels(args.sys)
-    p = args.sys[0] if args.first_primary or args.only_first_correct else None
+    # select the primary run
+    if args.first_primary:
+        p = args.sys[0]
+    elif args.only_Nth_correct:
+        p = p = args.sys[args.only_Nth_correct - 1]
+    else:
+        p = None
     print(f"{len(sys_id_label)} systems' output read")
     # compare problem num to the gold labels
     first_sys_ans = next(iter(sys_id_label.values()))
@@ -200,7 +206,7 @@ if __name__ == '__main__':
     assert len(first_sys_ans) <= len(gld_ans),\
         f"There are more predictions than referecne labels ({len(first_sys_ans)} vs {len(gld_ans)})"
     # mode selction
-    if args.only_first_correct:
+    if args.only_Nth_correct:
     # print those samples for which only the first system is correct
         selected = contrast_predictions(p, sys_id_label, gld_ans)
         for i, g, labs in selected:
