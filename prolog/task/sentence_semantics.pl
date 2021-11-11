@@ -32,6 +32,7 @@ some_sen_sem(Filename, In) :-
 all_prob_sen_sem(Filename) :-
     some_prob_sen_sem(Filename, _).
 
+% example: parList([aall, allint]), probId_branch_sem(1, P, H).
 some_prob_sen_sem(Filename, In) :-
     prob_input_to_list(In, PrIdList),
     set_rule_eff_order,

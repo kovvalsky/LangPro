@@ -73,6 +73,7 @@ fix_term(
 	( (((Be,pp~>np:Y~>s:X) @ ((PP,np:_~>pp) @ NP1, pp), np:Y~>s:X) @ NP2, s:Z) )
 ) :-
 	tlp_pos_in_list(PP, ['IN']),
+	% FIXME no constraint on BE
 	fix_report('!!! Fix: pp_be_to_be_pp (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -137,7 +137,7 @@ r(contra_there, 	closure, _, [['there', 'be']], _,
 				( atom(Term); Term=.. [tlp | _])
 			;	true.
 
-% for different analysis of expletives use by Alpino: there(be(c1))
+% for different analysis of expletives used by Alpino: there(be(c1))
 r(contra_be, 	closure, _, [['be']], _,
 		br([nd( [], (tlp(_,'be',_,_,_),np:_~>s:_) ,
 				[TT], false )],
