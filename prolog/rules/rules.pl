@@ -910,7 +910,7 @@ r(tr_a,	 impl:new,  ([], Args, Cids),  [[pos('CD')], ['a'], ['many'], ['several'
 			sub_type(Type2, Type),
 			genFreshArgs(Type, Args, Sig, Sig1, Cids), !.
 
-
+% "one" is required by SICK-1663
 r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the'], ['one']], _,  %old
 		br([nd( M, ( ( (tlp(_,Lemma,_,_,_),_) @ TT1, _ ) @ TT2, _ ),  % intro of M due to sick-4650
 				[], false )],
