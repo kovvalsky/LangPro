@@ -911,8 +911,8 @@ r(tr_a,	 impl:new,  ([], Args, Cids),  [[pos('CD')], ['a'], ['many'], ['several'
 			genFreshArgs(Type, Args, Sig, Sig1, Cids), !.
 
 
-r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the']], _,  %old
-		br([nd( M, ( ( (tlp(_,Lemma,_,_,_),_) @ TT1, _ ) @ TT2, _ ),  % inro of M due to sick-4650
+r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the'], ['one']], _,  %old
+		br([nd( M, ( ( (tlp(_,Lemma,_,_,_),_) @ TT1, _ ) @ TT2, _ ),  % intro of M due to sick-4650
 				[], false )],
 		  [H|T])
 		===>
@@ -923,7 +923,7 @@ r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the
   			  [H|T])
 		] )
 :-
-			member(Lemma, ['a', 's', 'a_few', 'another', 'the']), % the is not done by the-rule
+			member(Lemma, ['a', 's', 'a_few', 'another', 'the', 'one']), % the is not done by the-rule
 			( debMode('thE') -> Lemma \= 'the'; true ),
 			%member(Lemma, ['a', 'another', 'the']), % more strict
 			TT1 = (_, Type1),
@@ -939,7 +939,7 @@ r(fl_a,	 gamma:non,  (Args, [], _), [['a'], ['s'], ['a_few'], ['another'], ['the
 
 % !!! sc-train 1661 peel@c@c
 % a A B : F and  A:c : T  ---> B:c : F % fracas-107
-r(fl_a_c,	 impl:non, ([C], [], _), [['a'], ['a_few']], KB_xp,  %!!! ['s']  This is not a gamma rule but shoul rule out applocation of gamma rule, we need C as info
+r(fl_a_c,	 impl:non, ([C], [], _), [['a'], ['a_few'], ['one']], KB_xp,  %!!! ['s']  This is not a gamma rule but shoul rule out applocation of gamma rule, we need C as info
 		br([ nd(M, ( ( (tlp(_,Lemma,_,_,_), n:_~>(np:_~>s:_)~>s:_) @ TT1, _ ) @ TT2, _ ),    [],    false ),
 			 nd(_, TT,    [C],    true ) %non_empty modlist
 		   ],
@@ -947,7 +947,7 @@ r(fl_a_c,	 impl:non, ([C], [], _), [['a'], ['a_few']], KB_xp,  %!!! ['s']  This 
 		===>
 		br([nd(M, Other_TT, [C], false) ], Sig) )
 :-
-			member(Lemma, ['a', 'a_few']), %not 's' could be 'the' but it is done by the-rule
+			member(Lemma, ['a', 'a_few', 'one']), %not 's' could be 'the' but it is done by the-rule
 			%member(Lemma, ['a']), %more strict
 			TT1 = (_, Type1),
 			TT2 = (_, Type2),
