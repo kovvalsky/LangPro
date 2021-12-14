@@ -2619,7 +2619,7 @@
   ]
  },
  "5781": {
-  "anno": "easy+, paraphrase",
+  "anno": "easy+; paraphrase",
   "gold": "yes",
   "pred": "unknown, unknown, yes",
   "prob": [
@@ -3150,7 +3150,7 @@
   ]
  },
  "6879": {
-  "anno": "easy+, synonym",
+  "anno": "easy+; synonym",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4635,7 +4635,7 @@
   ]
  },
  "9495": {
-  "anno": "easy, disj",
+  "anno": "easy; disj",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4716,7 +4716,7 @@
   ]
  },
  "9706": {
-  "anno": "easy, disj",
+  "anno": "easy; disj",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
