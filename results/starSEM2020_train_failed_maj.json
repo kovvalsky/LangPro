@@ -2007,7 +2007,7 @@
   ]
  },
  "3924": {
-  "anno": "",
+  "anno": "paraphrase(adj,relcl)",
   "gold": "yes",
   "pred": "unknown, yes, unknown",
   "prob": [
@@ -2025,7 +2025,7 @@
   ]
  },
  "3942": {
-  "anno": "",
+  "anno": "easy; paraphrase(vp,prepv)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -2502,7 +2502,7 @@
   ]
  },
  "5466": {
-  "anno": "",
+  "anno": "easy; BareN",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -2619,7 +2619,7 @@
   ]
  },
  "5781": {
-  "anno": "",
+  "anno": "easy+, paraphrase",
   "gold": "yes",
   "pred": "unknown, unknown, yes",
   "prob": [
@@ -2691,7 +2691,7 @@
   ]
  },
  "5943": {
-  "anno": "",
+  "anno": "paraphrase(adj,relcl)",
   "gold": "yes",
   "pred": "unknown, unknown, yes",
   "prob": [
@@ -2700,7 +2700,7 @@
   ]
  },
  "6006": {
-  "anno": "",
+  "anno": "easy; passive",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -2709,7 +2709,7 @@
   ]
  },
  "6027": {
-  "anno": "",
+  "anno": "pp-transfer",
   "gold": "yes",
   "pred": "unknown, yes, unknown",
   "prob": [
@@ -2718,7 +2718,7 @@
   ]
  },
  "6045": {
-  "anno": "",
+  "anno": "easy+; passive",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -2826,7 +2826,7 @@
   ]
  },
  "6212": {
-  "anno": "",
+  "anno": "easy; noK",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3150,7 +3150,7 @@
   ]
  },
  "6879": {
-  "anno": "",
+  "anno": "easy+, synonym",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
