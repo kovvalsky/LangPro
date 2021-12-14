@@ -1,4 +1,4 @@
-Peregrine commands
+HPC commands
 
 *Cross-validation*
 ```
@@ -40,4 +40,3 @@ results/starSEM_2020/TE/ccg/TD_E/al,ch,r50,w3,-k,c20_ab,ch,cKB,cT,p123.log
 results/starSEM_2020/TE/eccg/TD_E/al,ch,r50,w3,-k,c20_ab,ch,cKB,cT,p123.log
 results/starSEM_2020/TE/depccg.trihf.sep/TD_E/al,ch,r50,w3,-k,c20_ab,ch,cKB,cT,p123.log
 ```
-

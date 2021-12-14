@@ -1,0 +1,4 @@
+starSEM2020 files are results reported in *SEM paper.
+ccg uses rebanked model. C&C tools annotations
+depccg uses trihf model.
+easyccg uses default ccgbank-based model.

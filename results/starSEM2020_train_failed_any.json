@@ -1,0 +1,4790 @@
+{
+ "2": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A group of children is playing in the house and there is no man standing in the background",
+   "A group of kids is playing in a yard and an old man is standing in the background"
+  ]
+ },
+ "3": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The young boys are playing outdoors and the man is smiling nearby",
+   "The kids are playing outdoors near a man with a smile"
+  ]
+ },
+ "30": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A man with a jersey is dunking the ball at a basketball game",
+   "The ball is being dunked by a man with a jersey at a basketball game"
+  ]
+ },
+ "77": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "People wearing costumes are gathering in a forest and are looking in the same direction",
+   "Masked people are looking in the same direction in a forest"
+  ]
+ },
+ "90": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is jumping into an empty pool",
+   "A man is jumping into a full pool"
+  ]
+ },
+ "100": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Four girls are doing backbends and playing in the garden",
+   "Four girls are doing backbends and playing outdoors"
+  ]
+ },
+ "122": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "Five kids are standing close together and one kid has a gun",
+   "Five kids are standing close together and none of the kids has a gun"
+  ]
+ },
+ "131": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A person is wearing a hat and is sitting on the grass",
+   "A person is sitting in a field and is wearing a hat"
+  ]
+ },
+ "141": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A group of friends are riding the current in a raft",
+   "A group is not riding the current in a raft"
+  ]
+ },
+ "164": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "People are walking outside the building that has several murals on it",
+   "Several people are in front of a colorful building"
+  ]
+ },
+ "219": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no girl in white dancing",
+   "A girl in white is dancing"
+  ]
+ },
+ "256": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man on a rock high above some trees standing in a strange position",
+   "A man is on a rock high above some trees and is standing in a strange position"
+  ]
+ },
+ "266": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "The brown horse is near a red barrel at the rodeo",
+   "The brown horse is far from a red barrel at the rodeo"
+  ]
+ },
+ "301": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A nude lady is walking in front of a crowd in body paint",
+   "There is no lady walking in body paint in front of a crowd"
+  ]
+ },
+ "305": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A nude lady is walking in front of a crowd in body paint",
+   "A topless girl is covered in paint"
+  ]
+ },
+ "312": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A crowd of people is near the water",
+   "A crowd of people is far from the water"
+  ]
+ },
+ "331": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A group of people is on a beach",
+   "A group of people is near the sea"
+  ]
+ },
+ "341": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no girl with a black bag on a crowded train",
+   "A girl with a black bag is on a crowded train"
+  ]
+ },
+ "344": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "An Asian woman in a crowd is not carrying a black bag",
+   "An Asian woman in a crowd is carrying a black bag"
+  ]
+ },
+ "351": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A dog is chasing another and is holding a stick in its mouth",
+   "A dog is chasing another and is holding a piece of wood in its mouth"
+  ]
+ },
+ "361": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is chasing another and is holding a stick in its mouth",
+   "Two dogs are running and carrying an object in their mouths"
+  ]
+ },
+ "373": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A man with tattoos is lounging on a couch and holding a pencil",
+   "A tattooed man is on a sofa and is holding a pencil"
+  ]
+ },
+ "390": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A white and tan dog is running through the tall and green grass",
+   "A brown and white dog is running through the tall grass"
+  ]
+ },
+ "391": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man with paint covered clothes is sitting outside in a busy area writing something",
+   "A man is wearing clothes that are covered with paint and is sitting outside in a busy area writing something"
+  ]
+ },
+ "392": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "There is no man wearing clothes that are covered with paint or is sitting outside in a busy area writing something",
+   "A man is wearing clothes that are covered with paint and is sitting outside in a busy area writing something"
+  ]
+ },
+ "395": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A man is sitting near a bike and is writing a note",
+   "There is no man writing a note near a bike"
+  ]
+ },
+ "442": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A blonds girl is surfing",
+   "A blond girl is riding the waves"
+  ]
+ },
+ "477": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A child with a gun that sprays water is laughing and getting hit by other boys",
+   "A child is holding a squirt gun"
+  ]
+ },
+ "494": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A little dog is sprinting and the person who owns it is trying to catch it",
+   "A little dog is sprinting and its owner is trying to catch it"
+  ]
+ },
+ "506": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "A man wearing a dyed black shirt is sitting at the table and laughing",
+   "There is no man wearing a shirt dyed black, sitting at the table and laughing"
+  ]
+ },
+ "529": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A biker is naked",
+   "A biker is wearing gear which is black"
+  ]
+ },
+ "530": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, unknown",
+  "prob": [
+   "A biker is wearing gear which is black",
+   "A biker wearing black is breaking the gears"
+  ]
+ },
+ "531": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black helmet is being worn by a man who is pushing a bicycle",
+   "One man is wearing a black helmet and pushing a bicycle"
+  ]
+ },
+ "542": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "The man in a grey t-shirt is sitting on a rock in front of the waterfall",
+   "There is no man in a grey t-shirt sitting on a rock in front of the waterfall"
+  ]
+ },
+ "545": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A woman is standing and is not looking at the waterfall",
+   "A woman is sitting and looking at the waterfall"
+  ]
+ },
+ "587": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A bunch of boys are playing with a ball in front of a large door made of wood",
+   "The children are playing in front of a large door"
+  ]
+ },
+ "603": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young lady with light brown hair is wearing a red necklace , a sweatshirt and earrings and is smiling",
+   "A lady of young age , with light brown hair , is wearing a red necklace , a sweatshirt and earrings and is smiling"
+  ]
+ },
+ "604": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young lady with light brown hair is wearing a red necklace , a sweatshirt and earrings and is smiling",
+   "There is no young lady with light brown hair wearing a red necklace , a sweatshirt and earrings and smiling"
+  ]
+ },
+ "645": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A rock is being climbed by a person with a rope , which is pink",
+   "One man is climbing a cliff with a rope"
+  ]
+ },
+ "648": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is climbing a rock with a rope , which is pink",
+   "One man is climbing the cliff with a rope"
+  ]
+ },
+ "680": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "Two dogs of different breeds are looking at each other across a street",
+   "There are no dogs of different breeds looking at each other across a street"
+  ]
+ },
+ "693": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog which is furry and black is in a back yard and is carrying a basket in its mouth",
+   "There is no dog which is furry and black in a back yard carrying a basket in its mouth"
+  ]
+ },
+ "703": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two large persons are sitting on a park bench and they have a bottle of soda between them",
+   "Two large persons are standing near a park bench and they have nothing between them"
+  ]
+ },
+ "704": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two large park benches have a person sitting and a bottle of soda between them",
+   "Two large persons are sitting on a park bench and they have a bottle of soda between them"
+  ]
+ },
+ "717": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A few men in a competition are running outside",
+   "A few men in a competition are running indoors"
+  ]
+ },
+ "727": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "A man with a camera is studying the subject",
+   "There is no man with a camera studying the subject"
+  ]
+ },
+ "766": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy on a hill covered in snow is wearing a red jacket and a black hat and is sliding on his knees",
+   "The kid is still in the snow"
+  ]
+ },
+ "774": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman , who is old , is near a dog that has a white coat",
+   "A woman , who is old , is near a white dog"
+  ]
+ },
+ "784": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The dog is biting some droplets of water",
+   "The dog is snapping at some droplets of water"
+  ]
+ },
+ "797": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "Nobody is in the snow wearing clothes that provide camouflage",
+   "Two people are in the snow , wearing clothes that provide camouflage"
+  ]
+ },
+ "858": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "One white dog and one black one are cheerfully running side by side on the grass",
+   "A black and a white dog are joyfully running on the grass"
+  ]
+ },
+ "860": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "One white dog and one black one are running side by side on the grass",
+   "A dog , which has a black coat , and a white dog are running on the grass"
+  ]
+ },
+ "870": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The ice skating rink placed outdoors is full of people",
+   "A lot of people are in an ice skating park"
+  ]
+ },
+ "874": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An ice skating rink placed outdoors is full of people",
+   "There are not many people in the ice skating park"
+  ]
+ },
+ "876": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An ice skating rink placed outdoors is full of people",
+   "A lot of people are in an ice skating park"
+  ]
+ },
+ "880": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The girl in the blue and white uniform is cheering",
+   "Some cheers are being performed by the girl in the blue and white uniform"
+  ]
+ },
+ "892": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "People are on a beach full of sand by the ocean and are enjoying a sunny day",
+   "People are on a beach full of sand by the ocean and are enjoying a day full of sun"
+  ]
+ },
+ "927": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The young girl is blowing a bubble that is huge",
+   "The young girl is blowing a bubble that is very small"
+  ]
+ },
+ "947": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some corndogs are being eaten by two toddlers who are in a wagon , which is really small",
+   "Two toddlers are eating corndogs in a wagon , which is really small"
+  ]
+ },
+ "961": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man in a shirt dyed purple is walking away from a man in a black shirt , who is serious",
+   "A man in a shirt dyed purple is looking at a man in a black shirt who is doing a funny face"
+  ]
+ },
+ "973": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A horse is tossing the cowboy wearing pants of blue and red color",
+   "The cowboy in blue and red pants is being tossed by a horse"
+  ]
+ },
+ "1010": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The green field for horse races is completely full of Jockeys",
+   "The Jockeys are racing horses on the field , which is completely green"
+  ]
+ },
+ "1038": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The snowboarder is leaping fearlessly over white snow",
+   "A person who is practicing snowboarding jumps into the air"
+  ]
+ },
+ "1044": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The snowboarder is leaping over white snow",
+   "A person who is practicing snowboarding jumps into the air"
+  ]
+ },
+ "1045": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is near a ball colored in red , which is in the air",
+   "A dog is near the red ball in the air"
+  ]
+ },
+ "1046": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A dog is near the red ball in the air",
+   "A dog is far from the red ball in the air"
+  ]
+ },
+ "1094": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog , which is large and gray , is carrying a ball in its mouth and running across the grass",
+   "A large dog is running on the grass with a tennis ball in its mouth"
+  ]
+ },
+ "1109": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is singing and playing the guitar",
+   "A man is singing a song and playing the guitar"
+  ]
+ },
+ "1133": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A sea turtle is hunting for fish",
+   "The turtle is not following the fish"
+  ]
+ },
+ "1165": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is cracking some eggs into a bowl",
+   "A woman is adding ingredients to a bowl"
+  ]
+ },
+ "1190": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A man and a woman are hiking through a wooded area",
+   "A man and a woman are walking together through the woods"
+  ]
+ },
+ "1195": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is speaking on a podium",
+   "A podium is where a man is speaking"
+  ]
+ },
+ "1236": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is dancing and singing alone",
+   "A woman is dancing and singing with other women"
+  ]
+ },
+ "1242": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is removing the peel of a potato",
+   "A woman is peeling a potato"
+  ]
+ },
+ "1311": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is performing a card trick",
+   "A person is doing a trick with some cards"
+  ]
+ },
+ "1321": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A boy is whacking a man with a sword",
+   "A man is being hit by a kid with a weapon"
+  ]
+ },
+ "1335": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The lady is measuring the ankle of another woman",
+   "A woman is being measured by another woman"
+  ]
+ },
+ "1342": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is talking on a cell phone",
+   "A man is making a call on a cell phone"
+  ]
+ },
+ "1361": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The machine is not shaving a pencil",
+   "The machine is shaving the end of a pencil"
+  ]
+ },
+ "1372": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is not playing the keyboard",
+   "A man is playing a keyboard"
+  ]
+ },
+ "1376": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is rinsing a large steak",
+   "A man is rinsing a large piece of meat"
+  ]
+ },
+ "1381": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Nobody is rinsing a steak with water",
+   "A man is rinsing a large steak"
+  ]
+ },
+ "1399": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "There is no man screaming",
+   "A man is crying"
+  ]
+ },
+ "1400": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A sad man is crying",
+   "A man is screaming"
+  ]
+ },
+ "1405": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A prawn is being cut by a woman",
+   "A woman is cutting shrimps"
+  ]
+ },
+ "1448": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is spreading dough",
+   "Dough is being spread by a man"
+  ]
+ },
+ "1467": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "Three men are jumping on a wall",
+   "Three men are jumping off a wall"
+  ]
+ },
+ "1481": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A deer is jumping over a wall",
+   "The deer is jumping over the fence"
+  ]
+ },
+ "1482": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A deer is standing inside a fence",
+   "The deer is jumping over the fence"
+  ]
+ },
+ "1504": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Three men are practicing karate in a field",
+   "Three men are practicing karate outdoors"
+  ]
+ },
+ "1511": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Some women are holding each other in a circle and dancing",
+   "A few women are holding each other and dancing together"
+  ]
+ },
+ "1514": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two men are playing table football",
+   "Two men are playing table tennis"
+  ]
+ },
+ "1538": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A cat is playing a piano",
+   "A cat is playing a keyboard"
+  ]
+ },
+ "1582": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A badger , which is shrewd , is digging the earth",
+   "The badger is burrowing a hole"
+  ]
+ },
+ "1584": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A hole is being burrowed by the badger",
+   "A badger is shrewdly digging the earth"
+  ]
+ },
+ "1585": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A badger is shrewdly digging the earth",
+   "The badger is not burrowing a hole"
+  ]
+ },
+ "1586": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A badger is shrewdly digging the earth",
+   "The badger is burrowing a hole"
+  ]
+ },
+ "1604": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is typing on a machine used for stenography",
+   "The man is operating a stenograph"
+  ]
+ },
+ "1606": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is operating a stenograph",
+   "A man is typing on a machine used for stenography"
+  ]
+ },
+ "1607": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A snake is being fed a mouse by a man",
+   "One man is feeding a mouse to the snake"
+  ]
+ },
+ "1612": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is carefully feeding a mouse to the snake",
+   "A snake is being fed a mouse by a man"
+  ]
+ },
+ "1615": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "No snake is being fed a mouse by a man",
+   "The man is cautiously feeding a mouse to the snake"
+  ]
+ },
+ "1646": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The girl is recklessly jumping onto a car",
+   "One young lady is jumping on the car"
+  ]
+ },
+ "1652": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The girl is recklessly jumping onto a car",
+   "One girl is jumping on the car"
+  ]
+ },
+ "1669": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The guitar is being played by the man",
+   "The man is a guitar player"
+  ]
+ },
+ "1694": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, no, unknown",
+  "prob": [
+   "A kitten is drinking fresh milk",
+   "There is no kitten drinking milk"
+  ]
+ },
+ "1753": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "One man is turning on the microwave",
+   "A man is pushing the buttons of a microwave"
+  ]
+ },
+ "1772": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "unknown, no, no",
+  "prob": [
+   "A boy is happily playing the piano",
+   "A piano isn't being played by a man"
+  ]
+ },
+ "1777": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A boy is happily playing the piano",
+   "A piano is being played by a man"
+  ]
+ },
+ "1782": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cheetah is quickly running behind its prey",
+   "A prey is quickly running behind the cheetah"
+  ]
+ },
+ "1784": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cheetah is chasing its prey across a field",
+   "There is no cheetah quickly running behind its prey"
+  ]
+ },
+ "1820": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no cook slicing some bell peppers",
+   "The person is dicing up a pepper which is orange"
+  ]
+ },
+ "1829": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some tofu is being sliced by one woman",
+   "Tofu is being sliced by a woman"
+  ]
+ },
+ "1852": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is spreading butter on a piece of bread which is big",
+   "A piece of bread , which is big , is having butter spread upon it by a man OR A piece of bread , which is big , is being spread with butter by a man"
+  ]
+ },
+ "1869": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A parrot is speaking",
+   "The parrot is silent in front of the microphone"
+  ]
+ },
+ "1879": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The food on the trays is not being eaten by the kittens",
+   "Some kittens are eating"
+  ]
+ },
+ "1935": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "The baby is being put into a trash can by a woman",
+   "A woman is putting the baby into a trash can"
+  ]
+ },
+ "1970": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "The woman is happily playing a guitar, which is acoustic, and singing",
+   "A person is playing a guitar and singing"
+  ]
+ },
+ "2058": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A lady is cutting up some meat precisely",
+   "Some meat is being cut into pieces by a woman"
+  ]
+ },
+ "2059": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no lady cutting up some meat",
+   "Some meat is being cut into pieces by a woman"
+  ]
+ },
+ "2075": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "Eggs are being strongly whisked in a bowl by a person",
+   "A person is strongly whisking eggs in a bowl"
+  ]
+ },
+ "2082": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is strongly whisking eggs in a bowl",
+   "There is no woman beating two eggs in a bowl and using a whisk made of wire"
+  ]
+ },
+ "2084": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is beating two eggs in a bowl and using a whisk made of wire",
+   "Eggs are being strongly whisked in a bowl by a person"
+  ]
+ },
+ "2087": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is beating two eggs in a bowl and using a whisk made of wire",
+   "A person is strongly whisking eggs in a bowl"
+  ]
+ },
+ "2117": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "Some milk is being hungrily drunk by a cat",
+   "The cat is hungrily drinking milk"
+  ]
+ },
+ "2166": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is sewing with a machine",
+   "A woman is using a machine made for sewing"
+  ]
+ },
+ "2167": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is sewing with a machine",
+   "There is no woman using a sewing machine"
+  ]
+ },
+ "2170": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is using a sewing machine",
+   "A woman is sewing with a machine"
+  ]
+ },
+ "2198": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is putting garlic on some slices of bread",
+   "A man is sprinkling seasoning on several sliced and buttered loaves of bread"
+  ]
+ },
+ "2222": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is being knocked off of a horse",
+   "Someone is falling off the horse"
+  ]
+ },
+ "2235": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A dog is pushing a toddler into a rain puddle",
+   "A dog is pushing a toddler into a puddle of rain"
+  ]
+ },
+ "2243": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is pushing a toddler into a puddle of rain",
+   "The dog is knocking a boy into the water"
+  ]
+ },
+ "2250": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is eating a bowl of cereal",
+   "Cereal is being eaten by the man"
+  ]
+ },
+ "2253": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is eating cereal",
+   "There is no man eating a bowl of cereal"
+  ]
+ },
+ "2309": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Someone is banging the lens of a camera against a nail",
+   "Someone is banging a camera lens against a nail"
+  ]
+ },
+ "2316": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Someone is banging a camera lens against a nail",
+   "The man is not hammering a nail with a camera"
+  ]
+ },
+ "2318": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Someone is banging the lens of a camera against a nail",
+   "The man is hammering a nail with a camera"
+  ]
+ },
+ "2363": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no person setting fire to the cameras",
+   "A person is burning some cameras with a blow torch"
+  ]
+ },
+ "2364": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some cameras are being burned by a person with a blow torch",
+   "The person is setting fire to the cameras"
+  ]
+ },
+ "2423": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The runners are racing around a track",
+   "Runners are not taking part in the race"
+  ]
+ },
+ "2426": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A man is racing",
+   "A man is running"
+  ]
+ },
+ "2455": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A baby rhino is walking around a pen with its mother",
+   "A rhino , which is little , is following an adult rhino"
+  ]
+ },
+ "2458": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A baby rhino is walking around a pen with its mother",
+   "A baby rhino is following an adult rhino"
+  ]
+ },
+ "2593": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A tiger is walking around with no aim",
+   "A tiger is walking around aimlessly"
+  ]
+ },
+ "2626": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man with a hard hat dancing",
+   "A man with a hard hat is dancing"
+  ]
+ },
+ "2627": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man with a hard hat is dancing",
+   "A man is wearing a hard hat and dancing"
+  ]
+ },
+ "2628": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is wearing a hard hat and dancing",
+   "There is no man with a hard hat dancing"
+  ]
+ },
+ "2632": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is wearing a hard hat and dancing",
+   "A man with a hard hat is dancing"
+  ]
+ },
+ "2638": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two boys on a couch are playing games on the TV",
+   "Two boys are playing a video game"
+  ]
+ },
+ "2689": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is cutting a capsicum into pieces",
+   "The person is not slicing a clove of garlic into pieces"
+  ]
+ },
+ "2715": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is kicking a boxing trainer",
+   "The man is kick boxing with a trainer"
+  ]
+ },
+ "2744": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is cracking eggs into a bowl",
+   "Eggs are being cracked into a bowl by the woman"
+  ]
+ },
+ "2748": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "The lady is breaking eggs that are raw into a bowl",
+   "The woman is cracking eggs into a bowl"
+  ]
+ },
+ "2751": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A soccer player is scoring a goal",
+   "A player of soccer is scoring a goal"
+  ]
+ },
+ "2756": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A soccer player is scoring a goal",
+   "There are no soccer players kicking a soccer ball into the goal"
+  ]
+ },
+ "2757": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A player of soccer is scoring a goal",
+   "Soccer players are kicking a soccer ball into the goal"
+  ]
+ },
+ "2763": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man and woman are talking",
+   "A man and a woman are silent"
+  ]
+ },
+ "2772": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is pouring oil for cooking into a pot",
+   "A person is pouring cooking oil into a pot"
+  ]
+ },
+ "2774": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is pouring olive oil into a pot on the stove",
+   "A person is pouring oil for cooking into a pot"
+  ]
+ },
+ "2776": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is pouring oil made with olives into a pot on the stove",
+   "A person is pouring cooking oil into a pot"
+  ]
+ },
+ "2851": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "The woman is cooking eggs",
+   "The woman is cooking something"
+  ]
+ },
+ "2853": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A woman is cooking eggs",
+   "The woman is cooking something"
+  ]
+ },
+ "2867": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "Two people are riding a bike",
+   "Two people are driving a motorcycle"
+  ]
+ },
+ "2868": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two people are stopping on a motorcycle",
+   "Two people are riding a bike"
+  ]
+ },
+ "2870": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "Two people are riding a motorcycle",
+   "Nobody is riding a bike"
+  ]
+ },
+ "2903": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A tree is being cut by a man with an axe",
+   "A man is chopping down a tree with an axe"
+  ]
+ },
+ "2913": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "A girl is applying makeup to her face",
+   "There is no woman putting on makeup"
+  ]
+ },
+ "2935": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Two men are fighting in a cattle pen",
+   "Two men are fighting in a pen for cattle"
+  ]
+ },
+ "2937": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Two men are fighting in a cow pasture",
+   "Two men are fighting in a pasture for cows"
+  ]
+ },
+ "2952": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is penciling on eyeshadow",
+   "A woman is applying cosmetics to her eyelid"
+  ]
+ },
+ "2972": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A large green ball is hitting a potato",
+   "A big green ball is missing a potato"
+  ]
+ },
+ "2977": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Different teams are playing football on a field",
+   "Different football players are teaming on a field"
+  ]
+ },
+ "2980": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two teams are enthusiastically playing soccer",
+   "Different teams are playing football on a field"
+  ]
+ },
+ "2988": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy is comfortably sitting in a room and playing a piano by a lamp",
+   "A boy is sitting in a room and playing a piano by lamp light"
+  ]
+ },
+ "3005": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man in a suit standing at a microphone and singing",
+   "A man in a suit is standing at a microphone and singing"
+  ]
+ },
+ "3014": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man in a suit is standing at a microphone and singing",
+   "The man on stage is singing into the microphone"
+  ]
+ },
+ "3015": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some teenage girls are dancing for the camera",
+   "Some girls in their teens are dancing for the camera"
+  ]
+ },
+ "3062": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is talking to the woman who is seated beside him and is driving a car",
+   "A woman is driving a car and is talking to the man who is seated beside her"
+  ]
+ },
+ "3065": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is driving a car and is talking to the man who is seated beside her",
+   "The woman and the man are travelling by automobile"
+  ]
+ },
+ "3068": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no woman driving a car and talking to the man seated beside her",
+   "The woman and the man are travelling by car"
+  ]
+ },
+ "3069": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is talking to the woman who is seated beside him and is driving a car",
+   "The woman and the man are travelling by car"
+  ]
+ },
+ "3079": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is brushing a cat",
+   "A person is combing the fur of a cat"
+  ]
+ },
+ "3092": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Three men are dancing",
+   "The men are not dancing"
+  ]
+ },
+ "3114": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is eating some food",
+   "The man is fasting"
+  ]
+ },
+ "3123": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no woman using an eye pencil and applying eye liner to her eyelid",
+   "A woman is applying cosmetics to her eyelid"
+  ]
+ },
+ "3200": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is stirring meat in a bowl",
+   "A lady is mixing a mixture of meat in a bowl"
+  ]
+ },
+ "3201": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is stirring meat in a bowl",
+   "There is no lady mixing a meat mixture in a bowl"
+  ]
+ },
+ "3208": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no woman squeezing juice out of a lemon",
+   "A woman is squeezing a lemon"
+  ]
+ },
+ "3223": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is walking slowly across a rope bridge",
+   "A man is walking slowly across a bridge made of rope"
+  ]
+ },
+ "3230": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A boy is hanging a fishing rod and running in front of a fish",
+   "A boy is hanging a rod for fishing and running in front of a fish"
+  ]
+ },
+ "3248": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is boiling eggs",
+   "Eggs are being boiled by a woman"
+  ]
+ },
+ "3272": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "The soccer player is kicking the ball between somebody's legs",
+   "A person is kicking a ball for a soccer game between somebody's feet"
+  ]
+ },
+ "3273": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no person kicking a soccer ball between somebody 's feet",
+   "The soccer player is kicking the ball between somebody 's legs"
+  ]
+ },
+ "3280": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The boy , who is young , is running through the ocean waves",
+   "A child is running in and out of the ocean waves"
+  ]
+ },
+ "3283": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The young boy is running through the ocean waves",
+   "A child is running in and out of the waves of the ocean"
+  ]
+ },
+ "3285": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The young boy is running through the ocean waves",
+   "A child is running in and out of the ocean waves"
+  ]
+ },
+ "3304": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is walking a woman through the woods",
+   "The man and woman are walking"
+  ]
+ },
+ "3314": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The south African plane is flying in a blue sky",
+   "An airplane is flying through the air"
+  ]
+ },
+ "3373": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A woman is riding a water scooter",
+   "A woman is riding a scooter for water"
+  ]
+ },
+ "3437": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is buttering a tray",
+   "A person is spreading butter on a tray"
+  ]
+ },
+ "3453": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is chopping the trunk of a tree with an axe",
+   "The man is chopping a tree trunk with an axe"
+  ]
+ },
+ "3480": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cat with a white coat , perched on a small wooden cabinet , is looking outside the window",
+   "A white cat perched on a small wooden cabinet is looking outside the window"
+  ]
+ },
+ "3486": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A white cat perched on a small wooden cabinet is looking outside the window",
+   "The cat perched on the table is looking curiously out the window"
+  ]
+ },
+ "3488": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A white cat perched on a small wooden cabinet is looking outside the window",
+   "The cat is looking out the window at the table on the perch"
+  ]
+ },
+ "3508": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is chopping up garlic",
+   "Garlic is being diced by the woman"
+  ]
+ },
+ "3536": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Someone is cooking okra in a pan",
+   "Okra is being cooked in a pan"
+  ]
+ },
+ "3547": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, no, unknown",
+  "prob": [
+   "A man is speaking",
+   "There is no man speaking"
+  ]
+ },
+ "3569": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some paper is being cut",
+   "Paper is being cut with scissors"
+  ]
+ },
+ "3580": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is playing a flute",
+   "The man is not playing the guitar"
+  ]
+ },
+ "3620": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The fish are immobile",
+   "A fish is swimming"
+  ]
+ },
+ "3629": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A woman is putting meat in a pan",
+   "Someone is dropping the meat into a pan"
+  ]
+ },
+ "3670": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "It is raining on a walking man",
+   "A man is walking in the rain"
+  ]
+ },
+ "3699": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is putting on eyeshadow",
+   "Eyeshadow is being put on by a woman"
+  ]
+ },
+ "3725": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The person is slicing onions",
+   "The person is peeling an onion"
+  ]
+ },
+ "3733": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Swimmers are racing in a lake",
+   "Some racers are swimming in a lake"
+  ]
+ },
+ "3756": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy is studying a calendar",
+   "A boy is staring at a calendar"
+  ]
+ },
+ "3774": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is picking up and holding a baby kangaroo",
+   "A woman is picking up and holding a kangaroo , which is a baby , in her arms"
+  ]
+ },
+ "3776": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is picking up and holding a baby kangaroo",
+   "A woman is picking up and holding a baby kangaroo in her arms"
+  ]
+ },
+ "3836": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A horse is being ridden in a creek by a man",
+   "The man is riding a horse by a creek"
+  ]
+ },
+ "3839": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A horse is being ridden in a creek by a man",
+   "A man is riding a horse"
+  ]
+ },
+ "3870": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is rising from a swamp",
+   "A man is coming out of the water"
+  ]
+ },
+ "3880": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is dancing on the ceiling of a room",
+   "The man is dancing upside-down on the ceiling"
+  ]
+ },
+ "3884": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is dancing upside-down on the ceiling",
+   "A man is dancing on the ceiling of a room"
+  ]
+ },
+ "3924": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "Two men are doing a funny skit with a boxer in front of a crowd of people",
+   "Two men are doing a skit , which is very funny , with a boxer in front of a crowd of people"
+  ]
+ },
+ "3940": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The boy is checking a calendar",
+   "A boy is looking at a calendar"
+  ]
+ },
+ "3942": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy is checking a calendar",
+   "A boy is looking at a calendar"
+  ]
+ },
+ "3943": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "The men are fighting with their fists in a ring",
+   "The men are fist fighting in a ring"
+  ]
+ },
+ "3949": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "The men are fighting with their fists in a ring",
+   "Two men are fist fighting in a ring"
+  ]
+ },
+ "3957": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The boy is riding a bike on the top of a fence made of metal",
+   "A biker is riding along the top of a fence"
+  ]
+ },
+ "4007": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A man is climbing a rope",
+   "The man is not climbing up a rope"
+  ]
+ },
+ "4017": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is picking up the kangaroo",
+   "The kangaroo is picking up the woman"
+  ]
+ },
+ "4043": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is riding a Seadoo",
+   "There is no person riding a jetski in the waves"
+  ]
+ },
+ "4120": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The log is lying on the panda bear",
+   "The panda bear is lying on the logs"
+  ]
+ },
+ "4125": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The panda bear is lying on the logs",
+   "A cute panda is not lying down"
+  ]
+ },
+ "4152": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is cutting meat",
+   "There is no woman cutting an onion"
+  ]
+ },
+ "4183": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is playing with a toy",
+   "A dog is having fun with a toy"
+  ]
+ },
+ "4187": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no dog playing with a toy",
+   "A dog is eating a doll"
+  ]
+ },
+ "4214": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Someone is stroking the belly of an animal",
+   "A woman is stroking a lemur"
+  ]
+ },
+ "4228": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Guitar is being played by two men",
+   "Two men are playing guitar"
+  ]
+ },
+ "4254": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A clown is singing and people are dancing",
+   "A song is being sung by a clown"
+  ]
+ },
+ "4279": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An woman that is old is shaking hands with a man",
+   "A man and a woman are shaking hands"
+  ]
+ },
+ "4280": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young woman is shaking hands with a man",
+   "A man and a woman are shaking hands"
+  ]
+ },
+ "4282": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An old woman is shaking hands with a man",
+   "A man and a woman are not shaking hands"
+  ]
+ },
+ "4283": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An old woman is shaking hands with a man",
+   "A man and a woman are shaking hands"
+  ]
+ },
+ "4344": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Someone is peeling a banana",
+   "Someone is removing the peel of a banana"
+  ]
+ },
+ "4443": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A man is singing to a girl",
+   "A man is singing to a woman"
+  ]
+ },
+ "4445": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is phoning",
+   "A man is talking on the phone"
+  ]
+ },
+ "4469": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man and a woman are running together and holding hands",
+   "A couple is running towards the ocean"
+  ]
+ },
+ "4507": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The doctors are reviving a man",
+   "The doctor is helping the patient"
+  ]
+ },
+ "4652": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is removing the peel of an onion",
+   "A man is peeling an onion"
+  ]
+ },
+ "4696": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is showing off a small monkey",
+   "A man is holding an animal , which is small , in one hand"
+  ]
+ },
+ "4701": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A group of men is playing soccer on the beach",
+   "A group of men is playing with a ball on the beach"
+  ]
+ },
+ "4716": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is cutting pieces of butter into a mixing bowl",
+   "Pieces of butter are being added to the stand mixer"
+  ]
+ },
+ "4742": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man on a motorcycle is riding on one wheel",
+   "A person is performing acrobatics on a motorcycle"
+  ]
+ },
+ "4812": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no monkey teasing a dog at the zoo",
+   "A monkey is pulling a dog 's tail"
+  ]
+ },
+ "4941": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The military officer is barking at the recruits",
+   "An officer is talking to the soldiers"
+  ]
+ },
+ "4957": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man in a car is pulling up beside a woman that is who along a road",
+   "A man in a car is not pulling up beside a woman who is walking along a road"
+  ]
+ },
+ "4963": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Garlic is being chopped by a woman",
+   "A woman is chopping garlic"
+  ]
+ },
+ "5022": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is painting a man 's face",
+   "Makeup is being put on the man by the woman"
+  ]
+ },
+ "5024": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is putting makeup on the man",
+   "A man 's face is being painted by a woman"
+  ]
+ },
+ "5027": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is putting makeup on the man",
+   "A woman is painting a man 's face"
+  ]
+ },
+ "5136": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man sprinkling shredded cheese on a pizza",
+   "A man is putting some cheese on a pizza"
+  ]
+ },
+ "5166": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man pouring cleaner into the sink",
+   "A man is pouring cleaner into the sink"
+  ]
+ },
+ "5178": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is deep frying food",
+   "Some food is being fried by a woman"
+  ]
+ },
+ "5195": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The child is silent",
+   "A boy is saying a word"
+  ]
+ },
+ "5203": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is putting pasta into a dish",
+   "Pasta is being put into a dish by a woman"
+  ]
+ },
+ "5212": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The men are playing soccer",
+   "The men are playing with a ball"
+  ]
+ },
+ "5226": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is looking at a store counter",
+   "There is no dog looking around"
+  ]
+ },
+ "5248": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "Someone is playing with a toad",
+   "Someone is playing with a frog"
+  ]
+ },
+ "5260": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A man is riding a horse",
+   "The person is not riding the horse"
+  ]
+ },
+ "5262": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "There is no man riding a horse",
+   "The person is riding the horse"
+  ]
+ },
+ "5264": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "A person is folding a sheet",
+   "A person is folding a piece of paper"
+  ]
+ },
+ "5277": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Sign language is being used by a young girl",
+   "A girl is communicating with sign language"
+  ]
+ },
+ "5324": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, yes, yes",
+  "prob": [
+   "Someone is playing piano",
+   "A keyboard is being played by a person"
+  ]
+ },
+ "5325": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "Someone is playing piano",
+   "A person is not playing a keyboard"
+  ]
+ },
+ "5397": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is removing some food from a box",
+   "The man is putting chicken into the container"
+  ]
+ },
+ "5446": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is frying fish",
+   "Fish is being fried by a woman"
+  ]
+ },
+ "5464": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Grass is being mowed by a man",
+   "A man is mowing grass"
+  ]
+ },
+ "5466": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A guy is mowing the lawn",
+   "Grass is being mowed by a man"
+  ]
+ },
+ "5468": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, unknown, yes",
+  "prob": [
+   "A boy is mowing the lawn",
+   "A man is mowing grass"
+  ]
+ },
+ "5491": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Broccoli are being cut by a woman",
+   "A woman is cutting broccoli"
+  ]
+ },
+ "5507": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Guitar is being played by a man",
+   "A man is playing guitar"
+  ]
+ },
+ "5619": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is severing the toe of an empty leather boot with a sword",
+   "A man is cutting a boot with a sword"
+  ]
+ },
+ "5620": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is severing the toe of an empty leather boot with a sword",
+   "A man is cutting a boot with a sword"
+  ]
+ },
+ "5621": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is severing the toe of an empty leather boot with a sword",
+   "A man is cutting a boot with a blade"
+  ]
+ },
+ "5623": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is severing the toe of an empty leather boot with a sword",
+   "A man is cutting a boot with a sword"
+  ]
+ },
+ "5646": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Someone is stirring a pot of chili with a spoon",
+   "Someone is stirring chili in a pot"
+  ]
+ },
+ "5680": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Tofu is being sliced by a woman",
+   "A woman is slicing tofu"
+  ]
+ },
+ "5725": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Hay is being eaten by a cow",
+   "A cow is eating hay"
+  ]
+ },
+ "5728": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A cow is eating grass",
+   "A cow is not eating hay"
+  ]
+ },
+ "5761": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is talking to a man",
+   "A man is talking to a woman"
+  ]
+ },
+ "5781": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A boy is talking to a leaf",
+   "A young man is talking to a leaf"
+  ]
+ },
+ "5855": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is boiling noodles in water",
+   "Someone is stirring food in the water"
+  ]
+ },
+ "5882": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A skateboarder is doing acrobatics on a half pipe",
+   "A man is skateboarding on a half pipe"
+  ]
+ },
+ "5886": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A skateboarder is doing tricks on a half pipe",
+   "A man is skateboarding on a half pipe"
+  ]
+ },
+ "5898": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A man and a woman are driving down the street in a jeep",
+   "Two persons are driving down the street in a jeep"
+  ]
+ },
+ "5936": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is putting vegetables into a pot",
+   "Someone is adding ingredients to a pot"
+  ]
+ },
+ "5937": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Nobody is pouring ingredients into a pot",
+   "A man is putting vegetables into a pot"
+  ]
+ },
+ "5938": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Vegetables are being put into a pot by a man",
+   "Someone is pouring ingredients into a pot"
+  ]
+ },
+ "5943": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A person with a back pack , who is topless , is in front of a pile of rocks and clouds are in the background",
+   "A topless person with a back pack is in front of a pile of rocks and clouds are in the background"
+  ]
+ },
+ "6006": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The girl is carrying a sign and a group of people is following her",
+   "The girl is carrying a sign and is being followed by a group of people"
+  ]
+ },
+ "6027": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A dog is chasing the tail of an animal in the grass",
+   "The tail of an animal is being chasing by a dog in the grass"
+  ]
+ },
+ "6045": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is looking curiously at a man",
+   "A man is being curiously looked at by a woman"
+  ]
+ },
+ "6080": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman in jeans is sitting on the saddle of a horse",
+   "A person wearing jeans is sitting on top of a horse saddle"
+  ]
+ },
+ "6082": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman in jeans is sitting on the saddle of a horse",
+   "A person wearing jeans is sitting on top of a horse saddle"
+  ]
+ },
+ "6096": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is standing beside a birdcage which is large and colorful",
+   "The man is standing next to a bird cage"
+  ]
+ },
+ "6105": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no dog in a colored coat running across the yard",
+   "A dog in a colored coat is running across the yard"
+  ]
+ },
+ "6136": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, no, unknown",
+  "prob": [
+   "A group of racing dogs is wearing striped uniforms and is running down a track",
+   "There is no group of racing dogs wearing striped uniforms and running down a track"
+  ]
+ },
+ "6145": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two people are standing in the ocean and watching the sunset",
+   "Two people are standing in the ocean and looking at the sunset"
+  ]
+ },
+ "6161": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy and a girl in swimsuits are wearing arm floats",
+   "A boy and a girl in swimsuits are wearing floats for their arms"
+  ]
+ },
+ "6171": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "A woman in a yellow shirt is surfing on a pink surfboard",
+   "There is no woman in a yellow shirt surfing on a pink surfboard"
+  ]
+ },
+ "6179": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman in a yellow dyed shirt is surfing on a pink surfboard",
+   "A surfer is riding the wave"
+  ]
+ },
+ "6186": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The group of people is sitting on a rocky ledge and a scenic view is behind them",
+   "The group of people is not sitting on a rocky ledge with a scenic view behind them"
+  ]
+ },
+ "6202": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A bicyclist is holding a bike over his head in a group of people",
+   "A lone bicyclist is putting down a bike"
+  ]
+ },
+ "6212": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is sitting peacefully on a boat in front of the sunset near a flag",
+   "A man is sitting on a boat in font of the sunset , near a flag"
+  ]
+ },
+ "6232": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A big dog and a small white dog are playing together",
+   "A big dog and a small dog with a white coat are playing together"
+  ]
+ },
+ "6253": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A policeman is sitting tiredly on a motorcycle",
+   "The cop is sitting on a police bike"
+  ]
+ },
+ "6258": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A policeman is sitting on a motorcycle",
+   "The cop is sitting on a police bike"
+  ]
+ },
+ "6266": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two women are wearing bikinis and are walking on the sand",
+   "There are no women wearing bikinis on the sandy beach"
+  ]
+ },
+ "6267": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two women are wearing bikinis and are walking on the sand",
+   "Two women are wearing bikinis on the sandy beach"
+  ]
+ },
+ "6278": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black dog is sitting in the grass and keeping its mouth closed",
+   "A black dog is running in the grass and its tongue is hanging out"
+  ]
+ },
+ "6291": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A large group of cheerleaders is walking in a parade",
+   "There is no large group of cheerleaders walking in a parade"
+  ]
+ },
+ "6297": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is sitting outside under a purple umbrella",
+   "The man is sitting outdoors under a purple umbrella"
+  ]
+ },
+ "6319": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A yellow dog is running on white snow on a sunny day",
+   "A dog , which is tan , is running through the snow"
+  ]
+ },
+ "6335": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The white dog wearing reindeer ears is close to a brown dog",
+   "The white dog wearing reindeer ears is near a brown dog"
+  ]
+ },
+ "6338": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A white dog is wearing a Christmas reindeer headband and is playing with a brown dog in the grass",
+   "A white dog is wearing a Christmas reindeer headband and is playing with a dog with a brown coat in the grass"
+  ]
+ },
+ "6345": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A white dog is wearing a Christmas reindeer headband and is playing with a brown dog in the grass",
+   "The white dog wearing reindeer ears is near a brown dog"
+  ]
+ },
+ "6370": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The child is playing with toys outdoors",
+   "There is no young child wearing a white coat and playing a game"
+  ]
+ },
+ "6429": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, no, unknown",
+  "prob": [
+   "The man is playing the guitar and has the guitar case open for donations",
+   "The man is putting away the guitar in the guitar case"
+  ]
+ },
+ "6447": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A small boy in a yellow shirt is laughing on the beach",
+   "There is no small boy in a yellow shirt laughing on the beach"
+  ]
+ },
+ "6454": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A small boy in a shirt , which is yellow , is laughing on the beach",
+   "A little boy is wearing a yellow tank top and is laughing"
+  ]
+ },
+ "6500": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is taking a picture of himself and another guy",
+   "A person is holding up an electronic device"
+  ]
+ },
+ "6535": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Several women are wearing pink bunny ears and are pointing to the right",
+   "Women are not wearing bunny ears and race numbers and are not pointing at something in the distance"
+  ]
+ },
+ "6543": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The goal is being guarded by a hockey player in a yellow jersey",
+   "The ice hockey goalkeeper is wearing a yellow jersey and is defending the goal"
+  ]
+ },
+ "6544": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The ice hockey goalkeeper is wearing a yellow jersey and is defending the goal",
+   "There is no hockey player in a yellow jersey guarding the goal"
+  ]
+ },
+ "6545": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The ice hockey goalkeeper is wearing a yellow jersey and is defending the goal",
+   "A hockey player in a yellow jersey is guarding the goal"
+  ]
+ },
+ "6550": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The small boy is standing in the forest",
+   "A young child is standing in front of some trees"
+  ]
+ },
+ "6593": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A bee is clinging to a yellow flower",
+   "A yellow flower is being clung to by a bee"
+  ]
+ },
+ "6634": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A hurdle is being leapt by a horse that has a rider on its back",
+   "A horse and its rider are leaping over a barrier"
+  ]
+ },
+ "6640": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some football players in red and white are jumping and hugging",
+   "Football players in red and white are jumping and hugging each other"
+  ]
+ },
+ "6649": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two teenage girls are wearing fancy dresses at an event",
+   "Two girls in their teens are wearing fancy dresses at an event"
+  ]
+ },
+ "6678": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy is jumping off a platform and two other boys are standing and watching",
+   "A boy is jumping off a platform and two other boys are standing and staring at him"
+  ]
+ },
+ "6695": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Four middle eastern children , three girls and one boy , are climbing on the grotto with a pink interior",
+   "A group of kids is playing on a colorful structure"
+  ]
+ },
+ "6720": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black bird is taking flight from a dead tree",
+   "The black bird is sitting in a leafless tree"
+  ]
+ },
+ "6725": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A child in orange is playing outdoors with a snowball",
+   "A kid in orange is playing outside with a snowball"
+  ]
+ },
+ "6731": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A child is making a snow ball",
+   "A child in orange is playing outdoors with a snowball"
+  ]
+ },
+ "6746": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "There is no one sitting in lawn chairs and reading books",
+   "Two people are sitting in lawn chairs and are reading books"
+  ]
+ },
+ "6813": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man on a bicycle riding on the beach",
+   "A man on a bicycle is riding on the beach"
+  ]
+ },
+ "6819": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man on a bicycle riding on the beach",
+   "A person is riding a bicycle in the sand beside the ocean"
+  ]
+ },
+ "6865": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A brown dog is running through the grass which is tall and green",
+   "A golden dog is running through a field of tall grass"
+  ]
+ },
+ "6879": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The large brown dog is running outdoors in the dirt",
+   "The large brown dog is running outside in the dirt"
+  ]
+ },
+ "6902": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no young man with brown hair and sunglasses sitting in front of some cans of soda",
+   "The man with brown hair is wearing sunglasses and is sitting at a table with cans of soda and other drinks"
+  ]
+ },
+ "6903": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man with brown hair is wearing sunglasses and is sitting listlessly at a table with cans of soda and other drinks",
+   "A young man with brown hair and sunglasses is sitting in front of some cans of soda"
+  ]
+ },
+ "6932": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The snowboarder is doing a flip over a mound of snow",
+   "Somebody is jumping in the air on a board"
+  ]
+ },
+ "6947": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, no, unknown",
+  "prob": [
+   "There is no little girl with blond hair smiling and sitting on a swing",
+   "A little girl with blond hair is smiling and sitting on a swing"
+  ]
+ },
+ "6957": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Music is being performed by four people outdoors",
+   "Four people are performing music outdoors"
+  ]
+ },
+ "6968": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is participating in a bmx race",
+   "A man is participating in a race for bmxs"
+  ]
+ },
+ "6971": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "There is no man in a red uniform making a jump in a dirt bike race",
+   "A man in a red uniform is making a jump in a dirt bike race"
+  ]
+ },
+ "7009": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "There is no white dog standing on the leaves on the ground",
+   "A white dog is standing on the leaves on the ground"
+  ]
+ },
+ "7018": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A child in clothing which is light colored is standing with his arms extended outward",
+   "A child in light colored clothing is standing with his arms extended outward"
+  ]
+ },
+ "7060": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no man drinking orange juice and walking on a sunny day",
+   "A man is drinking orange juice and walking"
+  ]
+ },
+ "7066": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man on inline skates is skating at a skate park",
+   "A man on inline skates is skating at a park built for skating"
+  ]
+ },
+ "7085": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A group of people playing football is running in the field",
+   "A group of football players is running in the field"
+  ]
+ },
+ "7094": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A group of people is standing together and looking at the camera",
+   "There is no group of people standing together and looking at the camera"
+  ]
+ },
+ "7099": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An oriental man and two women are facing a camera",
+   "The group of people is standing together and looking at the camera"
+  ]
+ },
+ "7100": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An oriental man and two women are facing a camera",
+   "There is no group of people standing together and looking at the camera"
+  ]
+ },
+ "7101": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "An oriental man and two women are facing a camera",
+   "A group of people is standing together and looking at the camera"
+  ]
+ },
+ "7121": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A child in a red outfit is jumping on a trampoline",
+   "A little boy in red clothes is jumping into the air"
+  ]
+ },
+ "7125": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A brown dog and a black dog are playing in the sand",
+   "There is no brown dog and black dog playing in the sand"
+  ]
+ },
+ "7126": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A brown dog and a black dog are frolicking in the sand",
+   "A black dog is playing with a brown dog on the sand"
+  ]
+ },
+ "7127": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A black dog is playing with a brown dog on the sand",
+   "There is no brown dog and black dog playing in the sand"
+  ]
+ },
+ "7161": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The black dog is running through the grass",
+   "The black dog is walking through the tall grass"
+  ]
+ },
+ "7224": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person with a green shirt is jumping high over the grass",
+   "A person without shirt is jumping high over the green grass"
+  ]
+ },
+ "7242": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A brown and white dog is jumping in the air with a tennis ball in its mouth",
+   "A dog is caught mid air with a ball"
+  ]
+ },
+ "7267": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no brown duck with a green head flapping its wings in the water",
+   "A brown duck with a green head is flapping its wings in the water"
+  ]
+ },
+ "7300": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no young child running outside over the fallen leaves",
+   "A young child is running down a gravel road that is covered with dead leaves"
+  ]
+ },
+ "7309": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "The man in the straw hat is smoking a cigarette",
+   "A person is wearing a straw hat and smoking a cigarette"
+  ]
+ },
+ "7311": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cigarette is being smoked by the man in the straw hat",
+   "A man is wearing a straw hat and smoking a cigarette"
+  ]
+ },
+ "7314": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is wearing a straw hat and smoking a cigarette",
+   "The man in the straw hat is smoking a cigarette"
+  ]
+ },
+ "7320": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is wearing a blue checkered shirt and riding a unicycle in the street",
+   "There is no man wearing a long sleeved blue shirt and jeans and riding a unicycle down a street"
+  ]
+ },
+ "7334": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Three men are staring at the big green hills in the distance",
+   "Three men are looking into the distance"
+  ]
+ },
+ "7397": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A yellow kayak is being ridden by a man and a young boy",
+   "A man and a young boy are riding in a yellow kayak"
+  ]
+ },
+ "7418": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is chasing a ball in the grass",
+   "A ball is being chased by a dog on the grass"
+  ]
+ },
+ "7420": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is running after a ball in the grass",
+   "A dog is chasing a ball on the grass"
+  ]
+ },
+ "7459": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A surfer is riding the wave",
+   "A rider is surfing the wave"
+  ]
+ },
+ "7471": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A man and two women in a dark room are sitting at a table with candles",
+   "The group of people is sitting in a dim room"
+  ]
+ },
+ "7474": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man and two women in a darkened room are sitting at a table with candles",
+   "The group of people is not sitting in a dim room"
+  ]
+ },
+ "7476": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man and two women in a darkened room are sitting at a table with candles",
+   "The group of people is sitting in a dim room"
+  ]
+ },
+ "7516": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, no, unknown",
+  "prob": [
+   "A girl in pink is twirling a ribbon",
+   "There is no girl in pink twirling a ribbon"
+  ]
+ },
+ "7525": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no child playing with a water spout outdoors with the rest of his family watching",
+   "A child is playing with a water spout outdoors and the rest of his family is watching"
+  ]
+ },
+ "7527": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A hose is being held by a boy next to a man and another boy is watching",
+   "A boy is holding a hose next to a man and another boy is watching"
+  ]
+ },
+ "7539": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A football player in a purple jersey is running with the ball for a touchdown",
+   "There is no football player in a purple jersey running with the ball for a touchdown"
+  ]
+ },
+ "7546": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young girl in a blue leotard is jumping in the air",
+   "A young girl in a leotard colored in blue is jumping in the air"
+  ]
+ },
+ "7549": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young girl in blue is jumping in the air",
+   "There is no girl in blue jumping in the air"
+  ]
+ },
+ "7551": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young girl in a blue leotard is jumping in the air",
+   "There is no girl in blue jumping in the air"
+  ]
+ },
+ "7569": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no person on a bike jumping through the air with the sun flaring through the bike frame",
+   "A person on a bike is jumping through the air and the sun is flaring through the bike frame"
+  ]
+ },
+ "7572": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person on a bike is jumping through the air and the sun is flaring through the bike frame",
+   "The person is flying through the air on the bicycle"
+  ]
+ },
+ "7580": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The bunch of men are playing rugby on a muddy field",
+   "Rugby is being played by some men"
+  ]
+ },
+ "7588": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person is looking at a bike designed for motocross that is lying on its side and another is racing by",
+   "A person is looking at a motocross bike that is lying on its side and another is racing by"
+  ]
+ },
+ "7608": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A tattoo is being drawn by the woman in the white sweater on the hand of a teenager",
+   "The woman in the white sweater is drawing a tattoo on the hand of a teenager"
+  ]
+ },
+ "7616": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "A woman in a purple top is walking a bicycle between two stone columns",
+   "There is no woman in a purple top walking a bicycle between two stone columns"
+  ]
+ },
+ "7639": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A tree is falling over a bridge made over the river which a dog is crossing",
+   "A dog is crossing a river on a bridge made from a fallen tree"
+  ]
+ },
+ "7641": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The black dog is walking along a tree trunk bridge over water",
+   "There is no dog crossing a river on a bridge made from a fallen tree"
+  ]
+ },
+ "7642": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The black dog is walking along a tree trunk bridge over water",
+   "A tree is falling over a bridge made over the river which a dog is crossing"
+  ]
+ },
+ "7647": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A child in a green and white sports uniform is resting on the grass",
+   "A child in a green and white sports uniform is running over the grass"
+  ]
+ },
+ "7666": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "The man is doing a handstand on the wet shore at the edge of the water at the beach",
+   "The man is doing a handstand on the wet sand at the edge of the water at the beach"
+  ]
+ },
+ "7670": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "The man is doing a handstand on the wet sand at the edge of the water at the beach",
+   "A handstand is being performed by a man on the beach"
+  ]
+ },
+ "7687": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A little boy with brown hair is jumping off of a brown chair onto the floor",
+   "There is no little boy with brown hair jumping off of a brown chair onto the floor"
+  ]
+ },
+ "7689": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A young boy is jumping off a chair",
+   "A young boy is jumping onto a chair"
+  ]
+ },
+ "7722": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is spraying a super soaker into the mouth of a dog",
+   "There is no man squirting water into the mouth of a white dog with a squirt gun"
+  ]
+ },
+ "7755": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A man and a woman are walking down the street of a city",
+   "A man and a woman are walking down a city street"
+  ]
+ },
+ "7757": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "People are walking through a crowded street",
+   "People are walking through a street which is crowded"
+  ]
+ },
+ "7769": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The surfer is riding a small wave",
+   "The surfer is riding a big wave"
+  ]
+ },
+ "7772": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A surfer is riding a big wave across dark green water",
+   "The surfer is riding a small wave"
+  ]
+ },
+ "7787": {
+  "anno": "",
+  "gold": "no",
+  "pred": "no, unknown, unknown",
+  "prob": [
+   "There is no person wearing grey pants who is airborne on a snowboard",
+   "A person wearing grey pants is airborne on a snowboard"
+  ]
+ },
+ "7808": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A man is squatting in brush and taking a photo",
+   "A man is crouching and holding a camera"
+  ]
+ },
+ "7810": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A man is squatting in brush and taking a photograph",
+   "A person is crouching and holding a camera"
+  ]
+ },
+ "7893": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two white dogs are playing with a brown dog and a ball",
+   "Two white dogs and one brown dog are chasing a toy"
+  ]
+ },
+ "7902": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A white rally car is throwing mud into the air and is approaching a bend in the track",
+   "A white racing vehicle is driving through a puddle"
+  ]
+ },
+ "7923": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is not running towards a ball",
+   "A dog is running through a field and is chasing a ball"
+  ]
+ },
+ "7946": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy in a white t-shirt is splashing in shallow water",
+   "There is no boy in a white t-shirt splashing in shallow water"
+  ]
+ },
+ "7964": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A black sheep is standing near three white dogs",
+   "A black sheep is standing close to three white dogs"
+  ]
+ },
+ "7981": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man surrounded by photographers is wearing a gray suit and glasses",
+   "The man surrounded by men with a camera is wearing a gray suit and glasses"
+  ]
+ },
+ "7987": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man surrounded by photographers is wearing a gray suit and glasses",
+   "A man in a suit is not being surrounded by photographers"
+  ]
+ },
+ "7989": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man surrounded by men with a camera is wearing a gray suit and glasses",
+   "A man in a suit is being surrounded by photographers"
+  ]
+ },
+ "8127": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A group of people is holding drinks and pointing at the camera",
+   "Drinks are being held by people pointing at the camera"
+  ]
+ },
+ "8136": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A girl with red hair and red eyebrows is talking",
+   "A girl with red hair and red eyebrows is in midspeech"
+  ]
+ },
+ "8156": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A man in a purple hat is climbing a rocky wall with bare hands",
+   "A rocky wall is climbed by a man in a purple hat with bare hands"
+  ]
+ },
+ "8158": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A rocky wall is climbed by a man in a purple hat with bare hands",
+   "The young man is rock climbing"
+  ]
+ },
+ "8163": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two people are driving a jeep and a lady is sitting on the top of it",
+   "Two people are driving a jeep and a girl is sitting on the top of it"
+  ]
+ },
+ "8165": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A blond woman is sitting on the roof of a yellow vehicle and two people are inside",
+   "A woman with blond hair is sitting on the roof of a yellow vehicle and two people are inside"
+  ]
+ },
+ "8189": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A yellow dog is drinking water from the faucet",
+   "The yellow dog is drinking water from a bottle"
+  ]
+ },
+ "8206": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A bride with a black veil is looking down",
+   "A woman is looking down and is wearing a wedding veil"
+  ]
+ },
+ "8211": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no girl with black and orange patches on the cheeks",
+   "A girl has black and orange patches on the cheeks"
+  ]
+ },
+ "8230": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black dog is running across a rocky landscape",
+   "A black dog is moving along rocky terrain"
+  ]
+ },
+ "8263": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some people and vehicles are on a crowded street",
+   "Some people and vehicles are on a almost empty street"
+  ]
+ },
+ "8266": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some people and vehicles are on a crowded street",
+   "Pedestrians and cars are moving through a traffic jam in the big city"
+  ]
+ },
+ "8327": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Some bikers are doing acrobatics on a track near water and a skyline",
+   "Some bikers are getting airborne on a track near water and a skyline"
+  ]
+ },
+ "8331": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two bmx bikers are jumping dirt ramps in front of the water",
+   "Some bikers are getting airborne on a track near water and a skyline"
+  ]
+ },
+ "8349": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A racer in full gear is wearing a helmet with sponsor logos and is riding a red sport motorcycle",
+   "A man in a motocross uniform is wearing a helmet and rides a red motorcycle"
+  ]
+ },
+ "8363": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A boy is jumping off the side of a water fountain made of stone in front of a building",
+   "A boy is jumping off the side of a stone water fountain in front of a building"
+  ]
+ },
+ "8381": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The young girl in blue is having fun on a slide",
+   "The young girl in blue is enjoying a slide"
+  ]
+ },
+ "8383": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A girl in blue is sliding down a green slide",
+   "The young girl in blue is enjoying a slide"
+  ]
+ },
+ "8407": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A black dog is jumping off a dock into a pond",
+   "A black dog is jumping on a dock into a pond"
+  ]
+ },
+ "8412": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A black dog is jumping off a dock into water",
+   "A black dog is jumping from a dock into the water"
+  ]
+ },
+ "8444": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two men are looking out and binoculars are being held by one of them",
+   "Two men are looking out and one is holding binoculars"
+  ]
+ },
+ "8446": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two men are standing together and one is looking through binoculars",
+   "Two men are looking out and binoculars are being held by one of them"
+  ]
+ },
+ "8452": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A motorcyclist on a bike is leaning into a sharp corner",
+   "There is no motorcyclist on a bike leaning into a sharp corner"
+  ]
+ },
+ "8453": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A man on a motorcycle is turning around a corner",
+   "A man on a motorcycle is going around a corner"
+  ]
+ },
+ "8455": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A motorcyclist on a bike is leaning into a sharp corner",
+   "A man on a motorcycle is turning around a corner"
+  ]
+ },
+ "8458": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man on a motorcycle is going around a corner",
+   "There is no motorcyclist on a bike leaning into a sharp corner"
+  ]
+ },
+ "8461": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A man with no hat is sitting on the ground",
+   "A man with a backwards hat is sitting on the ground"
+  ]
+ },
+ "8484": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young man on a bmx bicycle is jumping off a pyramid",
+   "A bicyclist is jumping on a pyramid-shaped ramp"
+  ]
+ },
+ "8486": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A bicyclist is jumping on a pyramid-shaped ramp",
+   "A young man on a bmx bicycle is jumping off a masonry pyramid"
+  ]
+ },
+ "8490": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A man with a shirt is holding a football",
+   "A man with no shirt is holding a football"
+  ]
+ },
+ "8501": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "The person is not going into the water",
+   "The man is going into the water"
+  ]
+ },
+ "8520": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Five people are standing with three dogs in the green field beside the road",
+   "Five people are standing in the grass with some dogs"
+  ]
+ },
+ "8521": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Five people are standing in the grass with no dogs",
+   "Five people are standing with three dogs in the green field beside the road"
+  ]
+ },
+ "8543": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A baby is splashing inside a blue paddling pool",
+   "A toddler is making a splash inside a blue paddling pool"
+  ]
+ },
+ "8571": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A large dog and a small dog are standing next to the kitchen counter and are investigating",
+   "A large dog and a small dog is standing on the kitchen counter and investigate"
+  ]
+ },
+ "8576": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black dog and a small white and black dog are looking up at a kitchen countertop",
+   "A large dog and a small dog are standing next to the kitchen counter and are investigating"
+  ]
+ },
+ "8607": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cyclist on a yellow bike is airborne",
+   "There is no cyclist on a yellow bike airborne"
+  ]
+ },
+ "8608": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A person on a yellow bike is airborne",
+   "A person on a yellow dirt bike is taking a jump"
+  ]
+ },
+ "8609": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "There is no cyclist on a yellow bike airborne",
+   "A person on a yellow dirt bike is taking a jump"
+  ]
+ },
+ "8678": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A skateboarder is jumping off a ramp",
+   "A skateboarder is making a jump off a ramp"
+  ]
+ },
+ "8689": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Three children are running down a grassy hillside",
+   "Three children are running down a hillside covered by grass"
+  ]
+ },
+ "8709": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A shirtless man is posing with a girl who is hiking in a park",
+   "A man without a shirt is posing with the arms spread near a woman"
+  ]
+ },
+ "8727": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A group of people are standing around a sound mixing table",
+   "Some people is looking at sound equipment"
+  ]
+ },
+ "8743": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "People are crossing a rope bridge over a rocky stream",
+   "People are walking across a rope bridge over a rocky stream"
+  ]
+ },
+ "8748": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Three people are walking across a rope and steel bridge over a river",
+   "People are walking across a rope bridge over a rocky stream"
+  ]
+ },
+ "8760": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, no",
+  "prob": [
+   "A young boy is jumping out of the water",
+   "A young boy is jumping into water"
+  ]
+ },
+ "8786": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A girl is skipping rope on a sidewalk",
+   "A girl is skipping rope on near a street"
+  ]
+ },
+ "8790": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A young girl is jumping rope on a sidewalk near a parking garage",
+   "A girl is skipping rope on a sidewalk"
+  ]
+ },
+ "8858": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A red sled is being held by a little girl in a green coat and a boy walking in the snow",
+   "A little girl in a green coat and a boy holding a red sled are walking in the snow"
+  ]
+ },
+ "8907": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A middle eastern man is standing against a lamp post near to other people",
+   "A man is leaning against a pole and is surrounded by people"
+  ]
+ },
+ "8913": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "no, no, no",
+  "prob": [
+   "A couple is not looking at a map",
+   "A couple is looking at a map"
+  ]
+ },
+ "8918": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A couple is looking at a street guide",
+   "A man and a woman are standing in front of an art gallery and are looking at a map"
+  ]
+ },
+ "8934": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "One boy in orange shorts is standing on a rock cliff over the water and the other boy in black shorts is jumping of it into the water",
+   "Two males are standing on a cliff edge and one is jumping into the sea"
+  ]
+ },
+ "8936": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "One boy in orange shorts is standing on a rock cliff over the water and the other boy in black shorts is diving into the water",
+   "Two males are standing on a cliff edge and one is jumping into the water"
+  ]
+ },
+ "8941": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A boy in blue shirt is looking at his hand near a stack of blocks on table",
+   "The boy in blue shirt is looking at his hand near the stack of blocks on table"
+  ]
+ },
+ "8959": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A group of five young adults are lounging in the room",
+   "A group of five young adults are lounging indoors"
+  ]
+ },
+ "8978": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cyclist is biking in a snowy forest at day",
+   "A cyclist is biking in a snowy forest at night"
+  ]
+ },
+ "9014": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A blond child is going down a slide and throwing up his arms",
+   "A child with dark hair is going down a slide and throwing up his arms"
+  ]
+ },
+ "9031": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two dogs are playing on a rocky beach",
+   "Two dogs are playing on a beach made of rocks"
+  ]
+ },
+ "9044": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A large white dog is jumping in the air over a snowy area",
+   "A large white animal is jumping up in the snow"
+  ]
+ },
+ "9046": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A large white dog is jumping in the air over an area covered by snow",
+   "A large white dog is jumping up in the snow"
+  ]
+ },
+ "9058": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is standing on the side of a mountain",
+   "A dog is standing on a mountain"
+  ]
+ },
+ "9070": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Two boys are laying in the ocean close to the beach",
+   "Two boys are laying in the ocean far to the beach"
+  ]
+ },
+ "9078": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A brown and black dog is looking upwards",
+   "A brown and black dog is pointing the nose upwards"
+  ]
+ },
+ "9095": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A grey dog is bouncing a soccer ball on its head in a grass field",
+   "A grey dog is bouncing a tennis ball on its head in a grass field"
+  ]
+ },
+ "9096": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, yes, unknown",
+  "prob": [
+   "A dog with a blue collar is playing with the ball in the garden",
+   "A dog with a blue collar is playing with the ball outside"
+  ]
+ },
+ "9148": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A lady is wearing a black dress and is carrying a white cross",
+   "A lady is dressed in black and is carrying a white cross"
+  ]
+ },
+ "9150": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A woman in a black dress is pulling a cart and is standing in front of two men who are seated on a park bench",
+   "A woman in a black dress is pulling a cart and is standing near two men who are seated on a park bench"
+  ]
+ },
+ "9177": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, yes",
+  "prob": [
+   "A distant person with a blue backpack is hiking in rocky area",
+   "A distant person with a blue backpack is hiking area full of rocks"
+  ]
+ },
+ "9193": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "A woman in blue jeans is standing in front of a group of children beside a house made of stone",
+   "A woman in blue jeans is standing in front of a group of children beside a stone built house"
+  ]
+ },
+ "9211": {
+  "anno": "",
+  "gold": "unknown",
+  "pred": "yes, unknown, yes",
+  "prob": [
+   "A guy is leaping into the air in wood",
+   "A guy is leaping into the air in a wooded area"
+  ]
+ },
+ "9213": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man with no shirt is jumping over a log",
+   "A shirtless man is jumping over a log"
+  ]
+ },
+ "9233": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A girl in a uniform is playing the flute with a band",
+   "A girl in a band is playing the flute"
+  ]
+ },
+ "9235": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A girl in a uniform is playing the flute with a marching band",
+   "A girl in a band is playing an instrument"
+  ]
+ },
+ "9285": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is skiing down a hill and over a red obstacle",
+   "A man is skiing down a hill and jumping a red obstacle"
+  ]
+ },
+ "9330": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Four people are walking along a city sidewalk and the one in the green hat is phoning someone",
+   "Four people are walking along a city sidewalk and the one in the green hat is talking on a cell phone"
+  ]
+ },
+ "9338": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "Four people are walking along a city sidewalk and the one in the green hat is talking on a cell phone",
+   "A group of people is walking down the street and a person in a green hat is on the phone"
+  ]
+ },
+ "9395": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man dressed in chaps made of leather and a purple shirt is standing in front of some onlookers",
+   "The man dressed in leather chaps and a purple shirt is standing in front of someone lookers"
+  ]
+ },
+ "9425": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "No dog is in the sand that is blowing in the wind",
+   "A dog is in a sandy area with the sand that is being stirred up into the air and several plants are in the background"
+  ]
+ },
+ "9426": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A dog is in an area full of sand , with the sand that is being stirred up into the air and several plants are in the background",
+   "A dog is in the sand that is blowing in the wind"
+  ]
+ },
+ "9433": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The black and white dog is running in a green yard",
+   "A black and white dog is running outdoors"
+  ]
+ },
+ "9434": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The black and white dog is running indoors",
+   "The black and white dog is running in a green yard"
+  ]
+ },
+ "9435": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The black and white dog is running in a field",
+   "The black and white dog is running outdoors"
+  ]
+ },
+ "9437": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The black and white dog is running in a green yard",
+   "The black and white dog is running outdoors"
+  ]
+ },
+ "9438": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A couple standing on the curb",
+   "A man and a woman are standing on the curb"
+  ]
+ },
+ "9471": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young swimmer is sitting in a bathing suit and waiting for the next race",
+   "A kid is waiting wearing swim gear"
+  ]
+ },
+ "9473": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A young boy is sitting in a bathing suit and waiting for the next race",
+   "A kid is sitting wearing swim gear"
+  ]
+ },
+ "9489": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cluster of four brown dogs are playing in a field of brown grass",
+   "Four dogs are playing in a area covered by grass"
+  ]
+ },
+ "9490": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cluster of four brown dogs are playing in a field of brown grass",
+   "Four dogs are not playing in a grassy area"
+  ]
+ },
+ "9493": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A cluster of four brown dogs are playing in a field of brown grass",
+   "Four dogs are playing in a grassy area"
+  ]
+ },
+ "9495": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The dog is having a rest in the park",
+   "The dog is having a rest in the living room"
+  ]
+ },
+ "9532": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "yes, unknown, unknown",
+  "prob": [
+   "Two race cars are on a road in front of a grassy parking area",
+   "Two cars for racing are on a road in front of a grassy parking area"
+  ]
+ },
+ "9555": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A group of children is not playing tambourines",
+   "A group of children in a church basement is playing maracas and tambourines"
+  ]
+ },
+ "9563": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A brown dog is running in the snow",
+   "A dog is running through the white snow"
+  ]
+ },
+ "9615": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "People are riding two camels at the beach",
+   "People are riding two camels on the sand"
+  ]
+ },
+ "9636": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The man is standing in the water at the base of a waterfall",
+   "The man is standing in a body of water near a waterfall"
+  ]
+ },
+ "9641": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A man is standing in the water at the base of a waterfall",
+   "The man is standing in a body of water near a waterfall"
+  ]
+ },
+ "9666": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A shirtless man is escorting a horse that is pulling a carriage along a paved road",
+   "A shirtless man is leading a carriage that is being pulled by a horse"
+  ]
+ },
+ "9689": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A bicyclist is performing a trick over a heavily graphitized wall",
+   "A bicyclist is performing a trick over wall full of graffiti"
+  ]
+ },
+ "9706": {
+  "anno": "",
+  "gold": "no",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black and white dog with a large branch is standing in the field",
+   "A black and white dog with a large branch is running in the field"
+  ]
+ },
+ "9709": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black and white dog is carrying a big stick on the green grass",
+   "A black and white dog with a large branch is running in the field"
+  ]
+ },
+ "9713": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A black and white dog is carrying a huge stick on the green grass",
+   "A black and white dog with a large branch is running in the field"
+  ]
+ },
+ "9720": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A kid wearing a striped shirt is running barefoot on the sandy hill",
+   "A boy is running through the sand"
+  ]
+ },
+ "9736": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "The woman is wearing ear protection and is firing a gun at an indoor shooting range",
+   "A woman is shooting at target practice"
+  ]
+ },
+ "9738": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A woman is wearing ear protection and is firing a gun at an indoor shooting range",
+   "A woman is firing at target practice"
+  ]
+ },
+ "9747": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A little boy is sticking his tongue out for the camera and another boy is looking on",
+   "Two kids are looking up at the camera and one is sticking out his tongue"
+  ]
+ },
+ "9749": {
+  "anno": "",
+  "gold": "yes",
+  "pred": "unknown, unknown, unknown",
+  "prob": [
+   "A little boy is sticking his tongue out for the camera and another boy is looking on",
+   "Two young boys are looking up at the camera and one is sticking out his tongue"
+  ]
+ }
+}
