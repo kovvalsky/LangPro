@@ -1,6 +1,6 @@
 {
  "2": {
-  "anno": "",
+  "anno": "grounding",
   "gold": "unknown",
   "pred": "no, no, no",
   "prob": [
@@ -9,7 +9,7 @@
   ]
  },
  "3": {
-  "anno": "",
+  "anno": "paraphrase(vp,pp)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
