@@ -3735,7 +3735,7 @@
   ]
  },
  "7808": {
-  "anno": "",
+  "anno": "typo?; diff; world",
   "gold": "yes",
   "pred": "unknown, unknown, yes",
   "prob": [
@@ -3744,7 +3744,7 @@
   ]
  },
  "7810": {
-  "anno": "",
+  "anno": "world; diff; typo?",
   "gold": "yes",
   "pred": "unknown, unknown, yes",
   "prob": [
@@ -3753,7 +3753,7 @@
   ]
  },
  "7893": {
-  "anno": "",
+  "anno": "noisy?",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3762,7 +3762,7 @@
   ]
  },
  "7902": {
-  "anno": "",
+  "anno": "diff; world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3771,7 +3771,7 @@
   ]
  },
  "7923": {
-  "anno": "",
+  "anno": "noisy+",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3780,7 +3780,7 @@
   ]
  },
  "7946": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3789,7 +3789,7 @@
   ]
  },
  "7964": {
-  "anno": "",
+  "anno": "easy; near=close_to",
   "gold": "yes",
   "pred": "unknown, yes, unknown",
   "prob": [
@@ -3798,7 +3798,7 @@
   ]
  },
  "7981": {
-  "anno": "",
+  "anno": "world; feasible",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3807,7 +3807,7 @@
   ]
  },
  "7987": {
-  "anno": "",
+  "anno": "world; paraphrase(in,wear)",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3816,7 +3816,7 @@
   ]
  },
  "7989": {
-  "anno": "",
+  "anno": "world; paraphrase(in,wear)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3825,7 +3825,7 @@
   ]
  },
  "8127": {
-  "anno": "",
+  "anno": "easy; passive",
   "gold": "yes",
   "pred": "yes, unknown, unknown",
   "prob": [
@@ -3834,7 +3834,7 @@
   ]
  },
  "8136": {
-  "anno": "",
+  "anno": "easy; paraphrase(vp,pp)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
