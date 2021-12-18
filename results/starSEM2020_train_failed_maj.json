@@ -4257,7 +4257,7 @@
   ]
  },
  "8858": {
-  "anno": "",
+  "anno": "diff; noK; pp-attach",
   "gold": "yes",
   "pred": "unknown, yes, unknown",
   "prob": [
@@ -4266,7 +4266,7 @@
   ]
  },
  "8907": {
-  "anno": "",
+  "anno": "noisy?",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4275,7 +4275,7 @@
   ]
  },
  "8913": {
-  "anno": "",
+  "anno": "noisy+; indef",
   "gold": "unknown",
   "pred": "no, no, no",
   "prob": [
@@ -4284,7 +4284,7 @@
   ]
  },
  "8918": {
-  "anno": "",
+  "anno": "noisy+",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4293,7 +4293,7 @@
   ]
  },
  "8934": {
-  "anno": "",
+  "anno": "noisy",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4302,7 +4302,7 @@
   ]
  },
  "8936": {
-  "anno": "",
+  "anno": "diff; world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4311,7 +4311,7 @@
   ]
  },
  "8941": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "yes",
   "pred": "yes, unknown, unknown",
   "prob": [
@@ -4320,7 +4320,7 @@
   ]
  },
  "8959": {
-  "anno": "",
+  "anno": "paraphrase(pp,adv)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4329,7 +4329,7 @@
   ]
  },
  "8978": {
-  "anno": "",
+  "anno": "easy; disj(pp)",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4338,7 +4338,7 @@
   ]
  },
  "9014": {
-  "anno": "",
+  "anno": "world",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4347,7 +4347,7 @@
   ]
  },
  "9031": {
-  "anno": "",
+  "anno": "paraphrase(adj,adjcl)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4356,7 +4356,7 @@
   ]
  },
  "9044": {
-  "anno": "",
+  "anno": "diff; world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4365,7 +4365,7 @@
   ]
  },
  "9046": {
-  "anno": "",
+  "anno": "diff; world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4374,7 +4374,7 @@
   ]
  },
  "9058": {
-  "anno": "",
+  "anno": "parthood",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4383,7 +4383,7 @@
   ]
  },
  "9070": {
-  "anno": "",
+  "anno": "preposition; easy",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4392,7 +4392,7 @@
   ]
  },
  "9078": {
-  "anno": "",
+  "anno": "diff; world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -4401,7 +4401,7 @@
   ]
  },
  "9095": {
-  "anno": "",
+  "anno": "easy; function(obj)",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
