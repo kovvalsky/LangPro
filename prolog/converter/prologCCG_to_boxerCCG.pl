@@ -33,7 +33,7 @@ prolog_to_boxer_id(FileName, IDs) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Convert Prolog CCG to Boxer CCG
 prologCCG_to_boxerCCG(ccg(ID, Pccg), ccg(ID, Bccg)) :-
-	writeln(ID),
+	% writeln(ID), % uncomment when debugging
 	pccg_bccg(ID, Pccg, Bccg),
 	!.
 
@@ -46,7 +46,8 @@ pccg_bccg(ID, Pccg, Bccg) :-
 		pccg_bccg(ID, P1, B1),
 		pccg_bccg(ID, P2, B2),
 		Bccg =.. [C, Cat, B1, B2];
-	Pccg = tr(_Cat1, Cat, P) ->
+	( Pccg = tr(_Cat1, Cat, P)
+	; Pccg = tr(Cat, P) ) ->
 		pccg_bccg(ID, P, B),
 		Bccg = tr(Cat, B); % type raising for new easyCCG 28aug15
 	( Pccg = lx(Cat1, Cat, P),
@@ -59,7 +60,8 @@ pccg_bccg(ID, Pccg, Bccg) :-
 	Pccg = lx(Cat1, Cat, P) ->
 		pccg_bccg(ID, P, B),
 		Bccg = lx(Cat, Cat1, B);
-	Pccg = conj(Cat, P1, P2) ->
+	( Pccg = conj(Cat, P1, P2)
+	; Pccg = conj(_, _, Cat, P1, P2) ) ->
 		pccg_bccg(ID, P1, B1),
 		pccg_bccg(ID, P2, B2),
 		B2 =.. [_, Cat1 | _],
@@ -69,6 +71,11 @@ pccg_bccg(ID, Pccg, Bccg) :-
 		pccg_bccg(ID, P1, B1),
 		pccg_bccg(ID, P2, B2),
 		Bccg =.. [C1, Cat, B1, B2];
+	Pccg =.. [TC, Cat, P1, P2],
+	  memberchk(TC, [ltc, rtc]) ->
+		pccg_bccg(ID, P1, B1),
+		pccg_bccg(ID, P2, B2),
+		Bccg =.. [TC, Cat, B1, B2];
 	term_to_atom(Pccg, Atom),
 	writeln(Atom),
 	Pccg =.. [C | _],
