@@ -3384,7 +3384,7 @@
   ]
  },
  "7309": {
-  "anno": "",
+  "anno": "paraphrase(wear,in)",
   "gold": "yes",
   "pred": "unknown, yes, unknown",
   "prob": [
@@ -3393,7 +3393,7 @@
   ]
  },
  "7311": {
-  "anno": "",
+  "anno": "paraphrase(wear,in)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3402,7 +3402,7 @@
   ]
  },
  "7314": {
-  "anno": "",
+  "anno": "paraphrase(wear,in)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3411,7 +3411,7 @@
   ]
  },
  "7320": {
-  "anno": "",
+  "anno": "noisy+",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3420,7 +3420,7 @@
   ]
  },
  "7334": {
-  "anno": "",
+  "anno": "vp_subcat; feasible",
   "gold": "yes",
   "pred": "yes, unknown, unknown",
   "prob": [
@@ -3429,7 +3429,7 @@
   ]
  },
  "7397": {
-  "anno": "",
+  "anno": "paraphrase(vppr,vp); easy",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3438,7 +3438,7 @@
   ]
  },
  "7418": {
-  "anno": "",
+  "anno": "paraphrase(prep); easy",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3447,7 +3447,7 @@
   ]
  },
  "7420": {
-  "anno": "",
+  "anno": "paraphrase(vppr,vp); paraphrase(prep)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3456,7 +3456,7 @@
   ]
  },
  "7459": {
-  "anno": "",
+  "anno": "world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
