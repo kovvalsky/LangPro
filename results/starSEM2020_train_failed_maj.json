@@ -2853,7 +2853,7 @@
   ]
  },
  "6258": {
-  "anno": "",
+  "anno": "world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -2862,7 +2862,7 @@
   ]
  },
  "6266": {
-  "anno": "",
+  "anno": "easy; noK",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -2871,7 +2871,7 @@
   ]
  },
  "6267": {
-  "anno": "",
+  "anno": "world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -2880,7 +2880,7 @@
   ]
  },
  "6278": {
-  "anno": "",
+  "anno": "easy; abduction",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
