@@ -3231,7 +3231,7 @@
   ]
  },
  "7018": {
-  "anno": "",
+  "anno": "paraphrase(adj,rcl)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3240,7 +3240,7 @@
   ]
  },
  "7060": {
-  "anno": "",
+  "anno": "scope; weather",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3249,7 +3249,7 @@
   ]
  },
  "7066": {
-  "anno": "",
+  "anno": "paraphrase(adj,rrcl)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3258,7 +3258,7 @@
   ]
  },
  "7085": {
-  "anno": "",
+  "anno": "role",
   "gold": "yes",
   "pred": "yes, unknown, unknown",
   "prob": [
@@ -3267,7 +3267,7 @@
   ]
  },
  "7094": {
-  "anno": "",
+  "anno": "easy; noK",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3276,7 +3276,7 @@
   ]
  },
  "7099": {
-  "anno": "",
+  "anno": "diff; collective",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3285,7 +3285,7 @@
   ]
  },
  "7100": {
-  "anno": "",
+  "anno": "diff; collective",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3294,7 +3294,7 @@
   ]
  },
  "7101": {
-  "anno": "",
+  "anno": "diff; collective",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3303,7 +3303,7 @@
   ]
  },
  "7121": {
-  "anno": "",
+  "anno": "gender bias; noisy+",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3312,7 +3312,7 @@
   ]
  },
  "7125": {
-  "anno": "",
+  "anno": "easy; noK",
   "gold": "no",
   "pred": "unknown, unknown, no",
   "prob": [
@@ -3321,7 +3321,7 @@
   ]
  },
  "7126": {
-  "anno": "",
+  "anno": "paraphrase(on,in); collective_vs_transitive",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3330,7 +3330,7 @@
   ]
  },
  "7127": {
-  "anno": "",
+  "anno": "easy; paraphrase(on,in)",
   "gold": "no",
   "pred": "unknown, unknown, no",
   "prob": [
@@ -3339,7 +3339,7 @@
   ]
  },
  "7161": {
-  "anno": "",
+  "anno": "easy; disj(run,walk)",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3348,7 +3348,7 @@
   ]
  },
  "7224": {
-  "anno": "",
+  "anno": "easy; disj(with,without)",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3357,7 +3357,7 @@
   ]
  },
  "7242": {
-  "anno": "",
+  "anno": "diff",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3366,7 +3366,7 @@
   ]
  },
  "7267": {
-  "anno": "",
+  "anno": "easy; noK",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3375,7 +3375,7 @@
   ]
  },
  "7300": {
-  "anno": "",
+  "anno": "noisy",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
