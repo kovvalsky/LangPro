@@ -3087,7 +3087,7 @@
   ]
  },
  "6720": {
-  "anno": "",
+  "anno": "easy; abduction; dusj(vp,lvc)",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3096,7 +3096,7 @@
   ]
  },
  "6725": {
-  "anno": "",
+  "anno": "easy; abduction",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3105,7 +3105,7 @@
   ]
  },
  "6731": {
-  "anno": "",
+  "anno": "noisy",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3114,7 +3114,7 @@
   ]
  },
  "6746": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "no",
   "pred": "unknown, unknown, no",
   "prob": [
@@ -3123,7 +3123,7 @@
   ]
  },
  "6813": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3132,7 +3132,7 @@
   ]
  },
  "6819": {
-  "anno": "",
+  "anno": "noisy?",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3141,7 +3141,7 @@
   ]
  },
  "6865": {
-  "anno": "",
+  "anno": "noisy?; color",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
