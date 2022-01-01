@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- use_module('utils/generic_preds', [ read_dict_from_json_file/2
+:- use_module('utils/generic_preds', [
+	dictList_to_dictPosition/2, read_dict_from_json_file/2
     ]).
 
 :- ensure_loaded([
@@ -15,10 +16,9 @@
 	'xml/xml_output',
 	'printer/reporting',
     'knowledge/wn_preds',
+	'latex/latex_ttterm',
 	'testing/sick_train_trial_solved'
 	]).
-
-
 
 :- multifile ccg/2, id/2.
 :- discontiguous ccg/2, id/2.
@@ -29,6 +29,7 @@
 :- dynamic debMode/1.
 :- multifile debMode/1.
 :- discontiguous debMode/1.
+%:- discontiguous assertz_debMode_list/1.
 
 %:- use_module(library(theme/dark)).
 
@@ -36,6 +37,12 @@ debMode( 'nil' ).
 debMode( ral(400) ).
 %debMode( effCr(['nonProd', 'nonBr', 'equi', 'nonCons']) ). % old one, not effcient
 debMode( effCr(['equi', 'nonBr', 'nonProd', 'nonCons']) ). % one of four effcient ones
+debMode(wn_sim).
+debMode(wn_ant).
+debMode(wn_der).
+debMode(aall).
+debMode(constchk).
+debMode(parts(['trial'])).
 
 
 reset_debMode :-
@@ -55,8 +62,11 @@ set_debMode([H | Rest]) :-
 		assertz( debMode(H) )
 	; H = ss(SS) ->
 		retractall( debMode(ss(_)) ),
-		( is_list(SS) -> List = SS; numlist(1,SS,List) ),
-		assertz( debMode(ss(List)) )
+		( is_list(SS) -> SS1 = SS
+		; integer(SS) -> numlist(1,SS,L), SS1 = L
+		; float(SS) -> SS1 = SS % in an open interval (0,1)
+		; throw_error('Unexpected parameter for wn senses: ~q', [H]) ),
+		assertz( debMode(ss(SS1)) )
 	; H = parallel(Cores) ->
 		( var(Cores) -> current_prolog_flag(cpu_count, Cores); true ),
 		assertz( debMode(parallel(Cores)) )
@@ -70,15 +80,28 @@ set_debMode([H | Rest]) :-
 	; H = anno_json(JSON) ->
 		read_dict_from_json_file(JSON, AnnoDict),
 		assertz( debMode(anno_dict(AnnoDict)) ),
+		SysOrder = AnnoDict.meta.sys_order,
+		dictList_to_dictPosition(SysOrder, AnnoSys2Idx),
+		assertz( debMode(anno_sys_idx(AnnoSys2Idx)) ),
 		assertz( debMode(anno_json(JSON)) )
 	; H = parts(_) ->
 		retractall( debMode(parts(_)) ),
 		assertz( debMode(H) )
+    ; H == wn ->
+        assertz_debMode_list([wn_sim, wn_ant, wn_der])
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).
 
 set_debMode([]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% a shortcut for asserting several items
+assertz_debMode_list([H|R]) :-
+    assertz( debMode(H) ),
+    assertz_debMode_list(R).
+
+assertz_debMode_list([]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set parameters from the scratch
@@ -88,6 +111,9 @@ parList(Parameters) :- % TODO fix the keywords and error on unknown ones
 		set_debMode(Parameters)
 	; throw_error('No list argument given to parList!', []).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+print_param :-
+	listing(debMode(_)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % add terms to a stream that usually corresponds to an open file
@@ -98,6 +124,23 @@ add_to_stream(DataType, Data) :-
 			add_branches_to_stream(S, Data, Ext)
 		)
 	), _).
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Patch: switching from /5 to /6 that has data part in it
+sen_id(SID, PID, PH, P, H) :-
+    debMode(parts(Parts)), % FIXME normally only problem selection should be parts/1-filter sensitive
+    member(Part, Parts),
+    sen_id(SID, PID, PH, Part, P, H).
+
+sen_id_general(SID, PID, PH, P, H) :- % insensitive to parts/1 filter
+	once(sen_id(SID, PID, PH, _Part, P, H)).
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Patch:
+ccg(ID, Tree) :- % FIXME integrate ccg(Parsers) in anno_sys
+	debMode(ccg(Parsers)),
+    member(P, Parsers),
+    ccg(ID, P, Tree).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 				List of Parameters
@@ -160,7 +203,7 @@ add_to_stream(DataType, Data) :-
 %  ss([...])			list of frequent sysnsets to choose
 %  allInt				All noun modifeirs are intersective
 %  lab_map:mapping_name	Map labels of problems to other ones, e.g., for SICK
-%
+% anno_sys(anno_key, list_of_sys)   Use certain system annotations for a specific annotation type. If systems are not specified, all availabel systems are used. anno_keys can be ccg,l,ppos,wn,ner
 %%%%%%%%%%%%  Ab|In-duction parameters  %%%%%%%%%%%%%%%%%
 % align-(both|no_align|both)	when building tableau for abduction use $align LLFs
 % constchk			Use consistency check of sentences to discard induced KB
