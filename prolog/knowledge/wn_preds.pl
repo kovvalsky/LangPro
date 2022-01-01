@@ -46,12 +46,8 @@ kb_from_wn(Lex, KB) :-
 */
 
 ss_type_to_num(Type, Num) :-
-	( Type == 'n' -> Num = '1'
-	; Type == 'v' -> Num = '2'
-	; Type == 'a' -> Num = '3'
-	; Type == 's' -> Num = '3'
-	; Type == 'r' -> Num = '4'
-	; fail ).
+	Mapping = ['n'-'1', 'v'-'2', 'a'-'3', 's'-'3', 'r'-'4'],
+	memberchk(Type-Num, Mapping).
 
 
 
@@ -115,6 +111,19 @@ represents_wn_rel( (Lem1,Num1)-(Lem2,Num2), Fact ) :-
 		Fact = disj(L1, L2)
 	).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% word sense satisfies the constraints
+word_sns_sat(W, Type, Num, Const) :-
+	( var(Const) -> true
+	; is_list(Const) -> memberchk(Num, Const)
+	; float(Const) -> word_sns_in_top_part(W, Type, Num, Const) ).
+
+% if Float = 0.5, it picks only first sense from 2-sense class
+% and first two senses from 3-sense class
+word_sns_in_top_part(W, Type, Num, Float) :-
+	findall(_, s(_,_,W,Type,_,_), All),
+	length(All, Total),
+	Float > (Num-1)/Total.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,6 +146,12 @@ assert_dis_wn((Lem1, Lem2, Num)) :-
 	maplist(assert_dis_wn_class(Lem1, Lem2, Num), Classes).
 */
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% shortcut predicate
+word_sns_such_that(W, Num, SuchThat, SS, Nth, Type, SN) :-
+	s(SS, Nth, W, Type, SN, _),
+	ss_type_to_num(Type, Num),
+	word_sns_sat(W, Type, SN, SuchThat).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Defining Semantic relations based on WN relations
@@ -153,28 +168,18 @@ word_hyp(W1, W2, Num) :-
 
 
 word_hyp(SNs, W1, W2, Num, SN1, SN2, Path) :-
-	( nonvar(W1), nonvar(W2) ->
-		s(SS1, _, W1, Type1, SN1, _),
-		ss_type_to_num(Type1, Num),
-		memberchk(SN1, SNs),
-		s(SS2, _, W2, _, SN2, _),
-		memberchk(SN2, SNs),
+	nonvar(W1), nonvar(W2) ->
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, SN1),
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, SN2),
 		hyp_(SS1, Path, [], SS2)
 	; nonvar(W1) ->
-		s(SS1, _, W1, Type1, SN1, _),
-		ss_type_to_num(Type1, Num),
-		memberchk(SN1, SNs),
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, SN1),
 		hyp_(SS1, Path, [], SS2),
-		s(SS2, _, W2, _, SN2, _),
-		memberchk(SN2, SNs)
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, SN2)
 	; nonvar(W2) ->
-		s(SS2, _, W2, Type2, SN2, _),
-		ss_type_to_num(Type2, Num),
-		memberchk(SN2, SNs),
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, SN2),
 		hyp_(SS1, Path, [], SS2),
-		s(SS1, _, W1, _, SN1, _),
-		memberchk(SN1, SNs)
-	; false ).
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, SN1).
 
 % print all hypernyms or hyponyms of a given word
 print_all_word_hyp(W1, W2) :-
@@ -223,29 +228,18 @@ word_sim(W1, W2, Num) :-
 
 
 word_sim(SNs, W1, W2, Num) :-
-	( nonvar(W1), nonvar(W2) ->
-		s(SS1, _, W1, Type1, SN1, _),
-		ss_type_to_num(Type1, Num),
-		memberchk(SN1, SNs),
-		s(SS2, _, W2, _, SN2, _),
-		%atom_chars(SS1, [Num |_]),
-		memberchk(SN2, SNs),
+	nonvar(W1), nonvar(W2) ->
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, _),
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, _),
 		sim(SS1, SS2)
 	; nonvar(W1) ->
-		s(SS1, _, W1, Type1, SN1, _),
-		ss_type_to_num(Type1, Num),
-		memberchk(SN1, SNs),
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, _),
 		sim(SS1, SS2),
-		s(SS2, _, W2, _, SN2, _),
-		memberchk(SN2, SNs)
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, _)
 	; nonvar(W2) ->
-		s(SS2, _, W2, Type2, SN2, _),
-		ss_type_to_num(Type2, Num),
-		memberchk(SN2, SNs),
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, _),
 		sim(SS1, SS2),
-		s(SS1, _, W1, _, SN1, _),
-		memberchk(SN1, SNs)
-	 ; false ).
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, _).
 
 /*
 %%%%%%%%%%%%%%%%%%%%
@@ -280,27 +274,18 @@ word_der(W1, W2) :-
 	; word_der(_, W1, _, W2, _).
 
 word_der(SNs, W1, N1, W2, N2) :-
-	( nonvar(W1), nonvar(W2) ->
-		s(SS1, N1, W1, _, SN1, _),
-		s(SS2, N2, W2, _, SN2, _),
-		memberchk(SN1, SNs), memberchk(SN2, SNs),
+	nonvar(W1), nonvar(W2) ->
+		word_sns_such_that(W1, _, SNs, SS1, N1, _, _),
+		word_sns_such_that(W2, _, SNs, SS2, N2, _, _),
 		der_(SS1, N1, [SS1-N1], SS2, N2)
-		%der(SS1, N1, SS2, N2)
 	; nonvar(W1) ->
-		s(SS1, N1, W1, _, SN1, _),
-		memberchk(SN1, SNs),
+		word_sns_such_that(W1, _, SNs, SS1, N1, _, _),
 		der_(SS1, N1, [SS1-N1], SS2, N2),
-		%der(SS1, N1, SS2, N2),
-		s(SS2, N2, W2, _, SN2, _),
-		memberchk(SN2, SNs)
+		word_sns_such_that(W2, _, SNs, SS2, N2, _, _)
 	; nonvar(W2) ->
-		s(SS2, N2, W2, _, SN2, _),
-		memberchk(SN2, SNs),
+		word_sns_such_that(W2, _, SNs, SS2, N2, _, _),
 		der_(SS1, N1, [SS2-N2], SS2, N2),
-		%der(SS1, N1, SS2, N2),
-		s(SS1, N1, W1, _, SN1, _),
-		memberchk(SN1, SNs)
-	; false ).
+		word_sns_such_that(W1, _, SNs, SS1, N1, _, _).
 
 /*
 derivation(SS1, N1, SS2, N2) :-
@@ -370,27 +355,18 @@ word_ant(W1, W2, Num) :-
 	; word_ant(_, W1, W2, Num).
 
 word_ant(SNs, W1, W2, Num) :-
-	( nonvar(W1), nonvar(W2)) ->
-		s(SS1, _, W1, Type1, SN1, _),
-		memberchk(SN1, SNs),
-		ss_type_to_num(Type1, Num),
-		s(SS2, _, W2, _, SN2, _),
-		memberchk(SN2, SNs),
-		ant(SS1,_, SS2,_) % relaxed
+	nonvar(W1), nonvar(W2) ->
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, _),
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, _),
+		ant(SS1,_, SS2,_) %!!! relaxed
  	; nonvar(W1) ->
-		s(SS1, _, W1, Type1, SN1, _),
-		ss_type_to_num(Type1, Num),
-		memberchk(SN1, SNs),
-		ant(SS1,_, SS2,_),  % relaxed
-		s(SS2, _, W2, _, SN2, _),
-		memberchk(SN2, SNs)
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, _),
+		ant(SS1,_, SS2,_),  %!!! relaxed
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, _)
 	; nonvar(W2) ->
-		s(SS2, _, W2, Type2, SN1, _),
-		ss_type_to_num(Type2, Num),
-		memberchk(SN1, SNs),
-		ant(SS1,_, SS2,_), % relaxed
-		s(SS1, _, W1, _, SN1, _),
-		memberchk(SN1, SNs).
+		word_sns_such_that(W2, Num, SNs, SS2, _, _, _),
+		ant(SS1,_, SS2,_), %!!! relaxed
+		word_sns_such_that(W1, Num, SNs, SS1, _, _, _).
 
 
 
