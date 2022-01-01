@@ -38,6 +38,7 @@
 		tlp_lemma_in_list/2,
 		tlp_pos_in_list/2,
 		tlp_pos_with_prefixes/2,
+		tm_anno_to_tm/3,
 		token_norm_ttTerm/3,
 		ttTerm_to_informative_tt/2,
 		ttTerms_same_type/2,
@@ -49,6 +50,7 @@
 
 :- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/3, latex_ttTerm_preambule/1]).
 :- use_module('../printer/reporting', [report/1]).
+:- use_module('../utils/user_preds', [off2anno/3]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../knowledge/lexicon', [op(640, xfy, ::), '::'/2]).
@@ -124,7 +126,7 @@ noun_node_to_isa_node_list(SrcNode, [SrcNode | Nodes], KB) :-
 	(bagof(Node,
 		 Lm^( %isa_wn(Lm, Lemma),
 			  isa(Lm, Lemma, KB), \+disjoint(Lm, Lemma, KB),
-			  Node = nd([], (tlp(Lemma,Lemma,'NN',_,_), n:_), Args, TF)
+			  Node = nd([], (tlp([0-0],Lemma,'NN',_,_), n:_), Args, TF)
 			),
 			Nodes)	-> true
 	; Nodes = []
@@ -210,11 +212,11 @@ mod_to_entity_property(Mod, Prop) :-
 
 % Converts Modifier into noun modifier
 mod_to_n_modifier(Mod, N_Mod) :-
-	Mod = ((tlp(Tk,Lm,'IN',F1,F2), np:F0~>Ty1~>Ty2) @ TT_NP, _),
+	Mod = ((tlp(Off,Lm,'IN',F1,F2), np:F0~>Ty1~>Ty2) @ TT_NP, _),
 	cat_eq(Ty1, Ty2),
 	\+atom_chars(F2, [_,_,'D','A','T']),
 	%report(Mod, 'this modifier is converted in noun modifier'),
-	N_Mod = ((tlp(Tk,Lm,'IN',F1,F2), np:F0~>n:F3~>n:F4) @ TT_NP, n:F3~>n:F4).
+	N_Mod = ((tlp(Off,Lm,'IN',F1,F2), np:F0~>n:F3~>n:F4) @ TT_NP, n:F3~>n:F4).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % checks modifier and attributes it to args
@@ -291,8 +293,8 @@ match_ttExp((TTexp1, Type1), (TTexp2, Type2), KB_XP) :-
 	match_ttExp(TTexp1, TTexp2, KB_XP).
 
 match_ttExp(TT1, TT2, KB_XP) :- % ignoring everything except lemmas
-	TT1 = tlp(_Tk1, Lemma1, _Pos1, _F11, _F12),
-	TT2 = tlp(_Tk2, Lemma2, _Pos2, _F21, _F22),
+	TT1 = tlp(_, Lemma1, _Pos1, _F11, _F12),
+	TT2 = tlp(_, Lemma2, _Pos2, _F21, _F22),
 	( Lemma1 = Lemma2
 	; word_synonyms(Lemma1, Lemma2, KB_XP) % Slows the mathcing process
 	), !.
@@ -336,7 +338,6 @@ print_ttTerms_in_latex(List) :-
 	open('latex/ttTerms.tex', write, S, [encoding(utf8), close_on_abort(true)]),
 	%asserta(latex_file_stream(S)),
 	latex_ttTerm_preambule(S),
-	write(S, '\\begin{document}\n'),
 	maplist(latex_ttTerm_print_tree(S, 0), List),
 	write(S, '\\end{document}'),
 	close(S).
@@ -612,8 +613,8 @@ conj_of_const_NNPs( (((Conj, np:_~>np:_~>np:_) @ TT1, _) @ TT2, _) ) :-
 	conj_of_const_NNPs(TT1),
 	conj_of_const_NNPs(TT2).
 
-conj_of_const_NNPs( (tlp(Tok,_,'NNP',_,_), np:_) ) :-
-	nonvar(Tok). % prevent variable matching
+conj_of_const_NNPs( (tlp(_,L,'NNP',_,_), np:_) ) :-
+	nonvar(L). % prevent variable matching
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true if TTterm is a Mod:NP~>NP @ Head:NP, where Mod is not conj@NP
@@ -738,15 +739,15 @@ normalize_lexicon([(L1,Pos1) | Lex], Lexicon) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% two atoms differ in the case of the first letter or dont differ
-% returns the canonical word - with lower letter
-% e.g. (A,A) -> A and ()
+% if two lemmas differ in the initial letter, give priority to lower cased one
+% to overriode another
+% Singular lemma overrides the plural one
 normalize_Lemma_POS((L1, P1), (L2, P2), (L, P)) :-
 	atom_chars(L1, [I1 | REST1]),
 	atom_chars(L2, [I2 | REST2]),
-	downcase_atom(I1, Si),
-	downcase_atom(I2, Si), % same letters in the begining
-	(I1 = Si -> I = I1; I = I2),
+	downcase_atom(I1, I),
+	downcase_atom(I2, I), % same letters in the begining
+	% (I1 = Si -> I = I1; I = I2),
 	maplist(downcase_atom, REST1, Rest1),
 	maplist(downcase_atom, REST2, Rest2),
 	( Rest1 = Rest2 ->
@@ -774,11 +775,11 @@ token_norm_ttTerm(Lex, (TT1 @ TT2, Type), (SimTT1 @ SimTT2, Type)) :-
 token_norm_ttTerm( Lex,  (abst(TTx, TT), Type), (abst(TTx, SimTT), Type) ) :-
 	!, token_norm_ttTerm(Lex, TT, SimTT).
 
-token_norm_ttTerm( Lex, (tlp(_Tk,Lem,Pos,F1,F2), Type),  SimTT ) :-
+token_norm_ttTerm( Lex, (tlp(Off,Lem,Pos,F1,F2), Type),  SimTT ) :-
 	member((L,P), Lex),
-	normalize_Lemma_POS((L,P), (Lem, Pos), (L, P)),
+	normalize_Lemma_POS((L,P), (Lem,Pos), (L,P)), !, % FIXME needs more control on replacement
 	%report(['Failure in normalization of lexicon: (', L, ',', P, ') vs (', Lem, ',', Pos, ')']), fail ),
-	!, SimTT = (tlp(L,L,P,F1,F2), Type).
+	SimTT = (tlp(Off,L,P,F1,F2), Type).
 
 token_norm_ttTerm(Lex, (TT, Type), (SimTT, Type) ) :-
 	!, token_norm_ttTerm(Lex, TT, SimTT).
@@ -892,3 +893,26 @@ tlp_pos_with_prefixes(TLP, Prefixes) :-
 is_tlp(TLP) :-
 	nonvar(TLP),
 	TLP =.. [tlp|_].
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% integrate annotatiosn to t/5 term format
+tm_anno_to_tm(_, X, X) :-
+	var(X), !.
+
+tm_anno_to_tm(Anno, (T1@T2,Ty), (Tm1@Tm2,Ty)) :- !,
+	tm_anno_to_tm(Anno, T1, Tm1),
+	tm_anno_to_tm(Anno, T2, Tm2).
+
+tm_anno_to_tm(Anno, (tlp(O,L,P),Ty), (TLP5,Ty)) :- !,
+	off2anno(Anno, O, A),
+	% sanity check
+	A.l == L, A.ppos == P,
+	TLP5 = tlp(A.t, L, P, O, A.ner).
+
+tm_anno_to_tm(Anno, ((T,Ty1),Ty2), (Tm,Ty2)) :- !,
+	tm_anno_to_tm(Anno, (T,Ty1), Tm).
+
+tm_anno_to_tm(Anno, (abst(X,T),Ty), (abst(X,Tm),Ty)) :- !,
+	tm_anno_to_tm(Anno, X, X),
+	tm_anno_to_tm(Anno, T, Tm).
