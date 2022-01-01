@@ -4,10 +4,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module('generic_preds',
 	[
+		all_member_zip/2,
+		dictList_to_dictPosition/2,
+		filepath_write_source/2,
 		format_list/3,
 		format_list_list/3,
 		format_list_list/4,
 		keep_smallest_lists/2,
+		member_zip/2,
 		read_dict_from_json_file/2,
 		rotate_list/2,
 		sort_list_length/2,
@@ -116,3 +120,32 @@ rotate_list([H|Rest], Rotate2, N) :-
 	append(Rest, [H], Rotate1),
 	N1 is N + 1,
 	rotate_list(Rotate1, Rotate2, N1).
+
+
+% create a source for a given filepath
+filepath_write_source(FilePath, S) :-
+    file_directory_name(FilePath, Dir),
+    ( exists_directory(Dir) -> true; make_directory(Dir) ),
+    open(FilePath, write, S, [encoding(utf8), close_on_abort(true)]).
+
+
+% convert key->list structure into key->list_el->position
+dictList_to_dictPosition(DictList, DictPos) :-
+	dict_pairs(DictList, _, Pairs),
+	maplist([K-L, K-D]>>list_to_dict(L,D), Pairs, Pairs1),
+	dict_pairs(DictPos, d, Pairs1).
+
+% convert list to a dictionary of elements to their positions
+list_to_dict(List, El_Index) :-
+	findall(E-I, nth1(I, List, E), E_I_List),
+	dict_create(El_Index, d, E_I_List).
+
+
+% member with N dimension
+member_zip(E_List, ListOfList) :-
+	maplist([L,E]>>member(E,L), ListOfList, E_List).
+
+
+% all members obtained with member_zip
+all_member_zip(ListOfList, AllMemberList) :-
+	findall(MemberList, member_zip(MemberList, ListOfList), AllMemberList).
