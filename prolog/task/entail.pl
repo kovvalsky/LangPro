@@ -4,16 +4,17 @@
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
 :- use_module('../utils/user_preds', [
 	prob_input_to_list/2, partition_list_into_N_even_lists/3,
-	at_most_n_random_members_from_list/3,  print_prob/1
+	at_most_n_random_members_from_list/3,  print_prob/1, get_toks_annos/3,
+	sen_id2anno/3
 	]).
-:- use_module('../utils/generic_preds', [ format_list/3 ]).
+:- use_module('../utils/generic_preds', [ format_list/3, member_zip/2 ]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2, draw_matrix/1]).
 :- use_module('../printer/reporting', [report/1]).
-:- use_module('../latex/latex_ttterm', [latex_probs_llfs/2]).
+:- use_module('../latex/latex_ttterm', [latex_probIDs_trees/2]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/aligner', [align_ttTerms/4]).
 :- use_module('../llf/gen_quant', [once_gen_quant_tt/2, gen_quant_tt/2]).
-:- use_module('../llf/ccg_term', [ccgIDTree_to_ccgIDTerm/2]).
+:- use_module('../llf/ccg_term', [ccgIDTree_to_ccgIDTerm/2, ccgIDTree_to_ccgIDTerm/3]).
 :- use_module('../llf/correct_term', [correct_ccgTerm/2]).
 :- use_module('../llf/ner', [ne_ccg/2]).
 :- use_module('../llf/ttterm_preds', [
@@ -155,7 +156,9 @@ solve_entailment( Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) 
 %----------------------------------------------
 % parallel version of solve_entailment
 parallel_solve_entailment(Align, ProblemIds_Answers, Results) :-
-	parallel_solve_entailment(Align, [], ProblemIds_Answers, Results).
+	% drop binning as it is not significant for performance
+	concurrent_maplist(solve_entailment(Align), ProblemIds_Answers, Results).
+	% parallel_solve_entailment(Align, [], ProblemIds_Answers, Results).
 
 parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
 	debMode(parallel(Cores)),
@@ -469,7 +472,7 @@ gentail(Align, KB0, Problem_Id) :-
 	list_to_ord_set(KB01, KB),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
-	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
+	( debMode('tex') -> latex_probIDs_trees([Problem_Id], FileName); true ),
 	( Prem_TTterms = [], Hypo_TTterms = [] ->
 		writeln('Problem with this id plausibly does not exist!')
 	; Prem_TTterms = [] ->
@@ -507,7 +510,7 @@ gentail_no_answer(Align, KB0, Problem_Id) :-
 	append(KB0, KB1, KB01),
 	list_to_ord_set(KB01, KB),
 	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
-	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
+	( debMode('tex') -> latex_probIDs_trees([Problem_Id], FileName); true ),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	( Prem_TTterms = [], Hypo_TTterms = [] ->
 		writeln('Problem with this id plausibly does not exist!')
@@ -542,7 +545,7 @@ ganalysis(Sign, Problem_Id) :-
 	%),
 	%ccgs_to_llfs_latex(CCG_IDs),
 	atomic_list_concat(['LLF_Prob-', Problem_Id], FileName),
-	( debMode('tex') -> latex_probs_llfs([Problem_Id], FileName); true ),
+	( debMode('tex') -> latex_probIDs_trees([Problem_Id], FileName); true ),
 	append(Prem_TTterms, Hypo_TTterms, TTterms),
 	( Sign = 'true' ->
 		greason(KB-XP, TTterms, [], Problem_Id)
@@ -596,7 +599,7 @@ list_greason(List_of_Lists) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Produces a single TTterm from a CCGTerm
 ccgTree_to_TTterm(CCGTree, TTterm) :-
-	ccgIDTree_to_ccgIDTerm(ccg(_,CCGTree), ccg(_,CCGTerm1)),
+	ccgIDTree_to_ccgIDTerm(ccg(Id,CCGTree), ccg(Id,CCGTerm1)),
 	ne_ccg(CCGTerm1, CCGTerm2),
 	clean_ccgTerm_once(CCGTerm2, CCGTerm3),
 	correct_ccgTerm(CCGTerm3, CCGTerm4),
@@ -605,7 +608,7 @@ ccgTree_to_TTterm(CCGTree, TTterm) :-
 
 % Produces a list of all possible TTterms from a CCGTerm
 ccgTree_to_TTterms(CCGTree, TTterms) :-
-	ccgIDTree_to_ccgIDTerm(ccg(_,CCGTree), ccg(_,CCGTerm1)),
+	ccgIDTree_to_ccgIDTerm(ccg(Id,CCGTree), ccg(Id,CCGTerm1)),
 	ne_ccg(CCGTerm1, CCGTerm2),
 	clean_ccgTerm_once(CCGTerm2, CCGTerm3),
 	correct_ccgTerm(CCGTerm3, CCGTerm4),
@@ -625,6 +628,8 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 	( Lexicon1 \= Lexicon -> report(['Difference in Lemma Lexicons after normalization']); true ),
 	maplist( token_norm_ttTerm(Lexicon), PremCCGTerms1, PremCCGTerms ),
 	maplist( token_norm_ttTerm(Lexicon), HypoCCGTerms1, HypoCCGTerms ),
+	%PremCCGTerms = PremCCGTerms1,
+	%HypoCCGTerms = HypoCCGTerms1,
 
 	%ground_ccgterms_to_lexicon(),
 	( debMode('prlex') -> report([Lexicon]); true),
@@ -656,35 +661,43 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Produces a correct CCGTerm that needs type raising of the quatifiers
 % in order to get final ttTerm
-ccgTree_to_correct_ccgTerm(CCGTree, CCGTerm) :-
-	ccgIDTree_to_ccgIDTerm(ccg(_,CCGTree), ccg(_,CCGTerm1)),
-	correct_ttterm(CCGTerm1, CCGTerm).
+ccgTree_to_correct_ccgTerm(CCGTree, Term) :-
+	ccg(Id, CCGTree),
+	sen_id_to_base_ttterm(Id, T),
+	%ccgIDTree_to_ccgIDTerm(ccg(Id,CCGTree), ccg(Id,CCGTerm1), Annos),
+	correct_ttterm(T, Term).
 
-correct_ttterm(TTTerm, Corrected) :-
-	ne_ccg(TTTerm, TTTerm1),
-	clean_ccgTerm_once(TTTerm1, TTTerm2),
-	correct_ccgTerm(TTTerm2, Corrected),
+correct_ttterm(T, CorrT) :-
+	ne_ccg(T, T1),
+	clean_ccgTerm_once(T1, T2),
+	correct_ccgTerm(T2, CorrT),
 	( debMode('pr_lex_rules') ->
-		print_used_lexical_rules('unexplained', Corrected)
+		print_used_lexical_rules('unexplained', CorrT)
 	  ; true
 	).
 
-problem_to_corrected_terms(PID, PremCorrTrees, HypoCorrTrees) :-
-	findall(Tree, (
+problem_to_corrected_terms(PID, CorrPTs, CorrHTs) :-
+	findall(T, (
 		sen_id(SID, PID, 'p', _, _),
-		sen_id_to_base_ttterm(SID, Tree)
-	), PremTrees),
-	findall(Tree, (
+		once(sen_id_to_base_ttterm(SID, T))
+	), PTs),
+	findall(T, (
 		sen_id(SID, PID, 'h', _, _),
-		sen_id_to_base_ttterm(SID, Tree)
-	), HypoTrees),
-	maplist(correct_ttterm, PremTrees, PremCorrTrees),
-	maplist(correct_ttterm, HypoTrees, HypoCorrTrees).
+		once(sen_id_to_base_ttterm(SID, T))
+	), HTs),
+	% pairs_keys_values(PTAs, PTs, PAs),
+	% pairs_keys_values(HTAs, HTs, HAs),
+	maplist(correct_ttterm, PTs, CorrPTs),
+	maplist(correct_ttterm, HTs, CorrHTs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- multifile sen_id_to_base_ttterm/2.
-:- discontiguous sen_id_to_base_ttterm/2.
+% :- multifile sen_id_to_base_ttterm/3.
+% :- discontiguous sen_id_to_base_ttterm/3.
+% :- multifile sen_id_to_base_ttterm/4.
+% :- discontiguous sen_id_to_base_ttterm/4.
 
+% Get TTterm for SIDth sentence that followws one of the available
+% annotation layer->system combinations
 sen_id_to_base_ttterm(SID, TTterm) :-
-	ccg(SID, Tree), !,
-	ccgIDTree_to_ccgIDTerm(ccg(_,Tree), ccg(_,TTterm)).
+	once(sen_id2anno(SID, Tree, DetAnno)),
+	ccgIDTree_to_ccgIDTerm(ccg(SID,Tree), ccg(SID,TTterm), DetAnno).
