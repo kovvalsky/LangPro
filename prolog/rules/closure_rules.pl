@@ -48,10 +48,10 @@ r(cl_subsumption, closure, _, _Lexicon, KB_xp,
 				not_disjoint(Term1, Term2, KB_xp) % suitable for KB induction
 				%Term1 =@= Term2 % no background knowledge
 			% for cases when tokens are the same but lemmas are different, % sick-4330
-			;   TT1 = (tlp(Tk1,_,_,_,_),_),
-				TT2 = (tlp(Tk2,_,_,_,_),_),
-				isa(Tk1, Tk2, KB_xp),
-				not_disjoint(Tk1, Tk2, KB_xp)
+			% ;   TT1 = (tlp(Tk1,_,_,_,_),_),
+			% 	TT2 = (tlp(Tk2,_,_,_,_),_),
+			% 	isa(Tk1, Tk2, KB_xp),
+			% 	not_disjoint(Tk1, Tk2, KB_xp)
 	 		%alpha(Norm1, Norm2)
 			).
 
@@ -501,6 +501,7 @@ r(cl_exact_num, 	closure, _, [['exactly'], ['just']], _,
 % not true     {"c wears a/s white cloth"=T, "d is white"=T, "c is in d"=F}
 %!!!but we allow both cases and it is interesting what type of unsoundness it will evoke
 % sick-218, sick-9136
+% despite cl_in_wear, 218 still needs this rule 
 r(cl_wear_cloth, 	closure, _, [['wear']], _,
 		br([ nd( M1, (tlp(_,'in','IN',_,_),_), [C1, C2], TF_in ),
 			 nd( M2, ((Det_TT @ TT_Cloth1, (np:_~>s:_)~>s:_) @ (abst(X, (( (tlp(_,'wear',_,_,_),_) @ X, _) @ C2, _)), _), s:_),  [], TF_wear),
@@ -512,18 +513,36 @@ r(cl_wear_cloth, 	closure, _, [['wear']], _,
 		  Sig) )
 :-
 			Det_TT = (tlp(_,Det,'DT',_,_), n:_~>(np:_~>s:_)~>s:_),
-			once(member(Det, ['a', 's', 'the'])), %!!! simplified
+			memberchk(Det, ['a', 's', 'the']), %!!! simplified
 			( (TF_in, M1, TF_wear, M2) = (true, _, false, [])
 			; (TF_in, M1, TF_wear, M2) = (false, [], true, _)
 			),
       		!,
 			( TT_Cloth1 = ((tlp(_,Cloth2,_,_,_COL),_) @ (tlp(_,Cloth,_,_,_),n:_), n:_), %sick-218
-			  ( once(member(Cloth, ['cloth', 'clothes']))
+			  ( memberchk(Cloth, ['cloth', 'clothes'])
 			  ; word_hyp(Cloth, 'clothing', _) %relaxing constraints
 			  )
 			;
 			  TT_Cloth1 = (tlp(_,Cloth2,_,_,_), _), %sick-9136
 			  word_hyp(Cloth2, 'clothing', _)
+			).
+
+r(cl_in_wear, closure, _, [['wear', 'in']], _,
+		br([nd( M1, (tlp(_,'in','IN',_,_),_), [C1, C2], TF_in ),
+			nd( M2, (tlp(_,'wear',_,_,_),_),  [C1, C2], TF_wear),
+			nd( _, (tlp(_,ColCloth,_,_,_), _), [C1],  true ) % can be color:e->t or cloth:n
+		], Sig)
+		===>
+		br([nd( [], (true, t), [], false )],
+		  Sig) )
+:-
+			( (TF_in, M1, TF_wear, M2) = (true, _, false, [])
+			; (TF_in, M1, TF_wear, M2) = (false, [], true, _)
+			), !,
+			( once(
+			  ( memberchk(ColCloth, ['cloth', 'clothes'])
+			  ; word_hyp(ColCloth, 'clothing', _)
+			  ; word_hyp(ColCloth, 'color', _) ) )
 			).
 
 % euqlity rule for closure
