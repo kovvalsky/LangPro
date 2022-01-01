@@ -108,7 +108,7 @@ print_boxerCCG(S, Tab, CCG) :-
 % splits a ccg term in two parts, atom & list, for printing
 print_split_ccg(CCG, Funct, SubCCGs) :-
 	( CCG =.. [Comb, Cat | SubCCGs],
-	memberchk(Comb, [fa, ba, rp, lp, fc, bc, fxc, bxc, tr, gfc, gbc]) ) ->
+	memberchk(Comb, [fa, ba, rp, lp, fc, bc, fxc, bxc, fx, bx, tr, gfc, gbc]) ) ->
 		term_to_atom(Cat, AtCat),
 		atomic_list_concat([Comb, '(', AtCat], Funct);
 	CCG =.. [t | _] ->
