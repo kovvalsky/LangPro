@@ -209,12 +209,12 @@ fix_term( % for n~>pp case
 % sick-192: up@stand -> stand_up
 % is this necessary after MWE look up in WN is done?
 fix_term(
- 	((tlp(TP,LP,'RP',_,_),(np:_~>s:_)~>np:_~>s:_) @ VP, _),
-	( ((tlp(T,L,POS,F1,F2),V_Ty) @ Rest), VP_Ty )
+ 	((tlp(OffP,LP,'RP',_,_),(np:_~>s:_)~>np:_~>s:_) @ VP, _),
+	( ((tlp(Off,L,POS,F1,F2),V_Ty) @ Rest), VP_Ty )
 ) :-
-	VP = ((tlp(TV,LV,POS,F1,F2),V_Ty) @ Rest, VP_Ty),
+	VP = ((tlp(OffV,LV,POS,F1,F2),V_Ty) @ Rest, VP_Ty),
 	atom_chars(POS, ['V','B'|_]),
-	atomic_list_concat([TV, '_', TP], T),
+	append(OffP, OffV, Off),
 	atomic_list_concat([LV, '_', LP], L),
 	fix_report('!!! Fix: attach_pr_to_verb').
 
@@ -290,11 +290,11 @@ fix_term(
 % south Europe ~~> the south Europe, fracas-44
 fix_term(
 	( (N, n:X), np:_),
-	( The @ (N, n:X), np:_)
+	( (The, n:_~>np:_) @ (N, n:X), np:_)
 ) :- % +++
 	add_heads((N, n:X), (_,_,Head)),
 	tlp_pos_in_list(Head, ['NNP']),
-	The = (tlp('the','the','DT','I-NP','Ins'), n:_~>np:_),
+	get_det_tlp('the', The),
 	fix_report('!!! Fix: modified proper names as np').
 
 %%%%%%%%%%%%%%%%%%% lex rule N->NP for verbs %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -402,7 +402,7 @@ fix_term(
 	((WH @ (VP,np:X~>s:Y), np:_~>np:_) @ (N,np:_), np:_)
 ) :- %+++
 	is_tlp(N),  % constraint POS = NNP,NNPS,DT,PRP
-	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:_~>s:_)~>np:_~>np:_),
+	WH = (tlp([0-0],'which','WDT','I-NP','Ins'), (np:_~>s:_)~>np:_~>np:_),
 	fix_report('!!! Fix: insert Which:vp->np->np for modifying np').
 
 %%%%%%%%%%%%%%%%%%% lex rule VP->N,N %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -413,7 +413,7 @@ fix_term(
 	( WH @ (VP,np:X~>s:F), n:_~>n:_ )
 ) :- %!!! how do you deal with the verb then? any rule fpr this? %+++
 	memberchk(F, [ng, adj, pss, dcl]), % adj: full of X:np~>s:sdj--->n~>n, relax constrain with no checking?
-	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:_~>s:_)~>n:_~>n:_),
+	WH = (tlp([0-0],'which','WDT','I-NP','Ins'), (np:_~>s:_)~>n:_~>n:_),
 	fix_report(['!!! Fix: insert Which Is for lex_rule. Feature = ', F]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -424,7 +424,7 @@ fix_term(
 	( (WH @ (VP,np:A~>s:B), np:C~>np:D) @ QNP, np:E )
 ) :- %+++
 	% define NP modifier "who", we dont use "is"
-	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:A~>s:B)~>np:C~>np:_),
+	WH = (tlp([0-0],'which','WDT','I-NP','Ins'), (np:A~>s:B)~>np:C~>np:_),
 	fix_report('!!! Fix: insert Which Is for lex_rule: vp->np->np').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -432,10 +432,10 @@ fix_term(
 % cat1=n, cat2=np, cat(Quant:JJ)=n~>n to (Quant, n~>np) @ n
 fix_term(
 	( ((Q,n:X~>n:_) @ N, n:_), np:Y ),
-	( (tlp(Tk,L,P1,F1,F2),n:X~>np:Y) @ N, np:Y )
+	( (tlp(O,L,P1,F1,NE),n:X~>np:Y) @ N, np:Y )
 ) :- %+++
 	is_tlp(Q),
-	Q = tlp(Tk,L,P,F1,F2),
+	Q = tlp(O,L,P,F1,NE),
 	( memberchk(L, ['several', 'many', 'few', 'most']) -> P1 = 'DT'
 	; P = 'CD', P1 = P ),
 	%!!! Check that this takes ito account plural cases too: several dogs
@@ -461,7 +461,7 @@ fix_term(
 	Some = tlp(_,'some','DT',_,_),
 	add_heads(TTn, (_,_,Head)),
 	tlp_pos_in_list(Head, ['NNS']),
-	Afew = tlp('a_few','a_few','DT','0','Ins').
+	Afew = tlp([0-0],'a_few','DT','0','Ins').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Change plural-the to s-morpehem
@@ -474,13 +474,13 @@ fix_term(
 	The = tlp(_,'the','DT',_,_), % different from several, some
 	add_heads(TTn, (_,_,Head)),
 	tlp_pos_in_list(Head, ['NNS']),
-	Det = tlp('s','s','DT','0','Ins').
+	Det = tlp([0-0],'s','DT','0','Ins').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % change conjunctive comma to and
 fix_term(
-	( tlp(',', ',', ',',F1,F2), Ty~>Ty~>Ty ),
-	( tlp('and','and','CC',F1,F2), Ty~>Ty~>Ty )
+	( tlp(_, ',', ',',F1,F2), Ty~>Ty~>Ty ),
+	( tlp([0-0],'and','CC',F1,F2), Ty~>Ty~>Ty )
 ) :-
 	fix_report('!!! Fix: comma replaced by and').
 
@@ -507,8 +507,8 @@ fix_term(
 	nonvar(L),
 	memberchk(POS, ['DT','PRON','PRP','PRP$']),
 	decompose_everyone(L, Q, N),
-	Quant = tlp(Q,Q,'DT','Ins','Ins'),
-	Noun = tlp(N,N,'NN','Ins','Ins'),
+	Quant = tlp([0-0],Q,'DT','Ins','Ins'),
+	Noun = tlp([0-0],N,'NN','Ins','Ins'),
 	fix_report('!!! Fix: decompose GQ').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -521,8 +521,8 @@ fix_term(
 	nonvar(L),
 	memberchk(POS, ['DT','PRON','PRP','PRP$']),
 	decompose_everyone(L, Q, N),
-	Quant = tlp(Q,Q,'DT','Ins','Ins'),
-	Noun = tlp(N,N,'NN','Ins','Ins'),
+	Quant = tlp([0-0],Q,'DT','Ins','Ins'),
+	Noun = tlp([0-0],N,'NN','Ins','Ins'),
 	fix_report('!!! Fix: decompose GQ').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -534,7 +534,7 @@ fix_term(
 ) :-
 	is_tlp(Q), Q = tlp(_,'no',_,_,_),
 	is_tlp(One), One = tlp(_,'one','NN',_,_),
-	Person = (tlp('person','person','NN','Ins','Ins'), n:F),
+	Person = (tlp([0-0],'person','NN','Ins','Ins'), n:F),
 	fix_report('!!! Fix: GQ with verb').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -545,10 +545,10 @@ fix_term(
 	( (Q,n:X~>np:Y) @ ( (Verb,n:F~>n:F) @ (N,n:F), n:F), np:Z )
 ) :-
 	is_tlp(Q), Q = tlp(_,'no',_,_,_),
-	tlp_pos_in_list(N, ['NNS', 'NN']),
-	is_tlp(V), V = tlp(TV,LV,_,_,_), %!!! multiword noun and vping?
-	atom_concat(_, 'ing', TV),
-	Verb = tlp(TV,LV,'VBG','Ins','Ins'),
+	tlp_pos_in_list(N, ['NNS', 'NN', 'JJ']), %JJ for sick-4247
+	is_tlp(V), V = tlp(OffV,LV,POSV,_,_), %!!! multiword noun and vping?
+	once((atom_concat(_, 'ing', LV); POSV == 'VBG')),   % TODO? access anno for token value
+	Verb = tlp(OffV,LV,'VBG','Ins','Ins'),
 	fix_report('!!! Fix: Verb modifying noun').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -562,8 +562,8 @@ fix_term(
 	Type = n:_~>np:_, % type before type raising
 	nonvar(Lm),
 	lemma_of_poss_pr(Lm, Lm_pr),
-	It = tlp(Lm_pr,Lm_pr,'PRP','Ins','Ins'),
-	S = tlp('\'s','\'s','POS','Ins','Ins').
+	It = tlp([0-0],Lm_pr,'PRP','Ins','Ins'),
+	S = tlp([0-0],'\'s','POS','Ins','Ins').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % N of [the] dogs,np ---> N dogs
@@ -603,8 +603,8 @@ fix_term(
 %!!! should not be "not all", "not every"
 % fracas-92
 fix_term(
-	( (tlp(T,L,'PDT',F1,F2),np:_~>np:_) @ ((DT,n:_~>np:_) @ N, np:_), np:_ ),
-	( (tlp(T,L,'DT',F1,F2),n:_~>np:_) @ N, np:_)
+	( (tlp(O,L,'PDT',F1,F2),np:_~>np:_) @ ((DT,n:_~>np:_) @ N, np:_), np:_ ),
+	( (tlp(O,L,'DT',F1,F2),n:_~>np:_) @ N, np:_)
 ) :-
 	nonvar(L),
 	tlp_pos_in_list(DT, ['DT']),
@@ -674,7 +674,7 @@ it_is_mod( A, B) :-
 	B = (A2, T2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-it_is_np( (X, np), (tlp(String,String,_,_,_),np) ) :-
+it_is_np( (X, np), (tlp([0-0],String,_,_,_),np) ) :-
 	X \= tlp(_,_,_,_,_),
 	tc_to_string((X,np), String).
 	%writeln(String)
@@ -696,7 +696,7 @@ tc_to_string( (A @ B, _), Str ) :-
 	tc_to_string(B, StrB),
 	atomic_list_concat([StrA, ' ', StrB], Str).
 
-tc_to_string( (tlp(A,_,_,_,_),_), A ).
+tc_to_string( (tlp(_,A,_,_,_),_), A ).
 
 tc_to_string( (A,_), Str ) :-
 	tc_to_string(A, Str).
@@ -720,5 +720,5 @@ fix_report(Message) :-
 
 get_det_tlp(L, D) :-
 	( debMode('the') ->
-  	  D = tlp('the','the','DT','I-NP','Ins')
-	; D = tlp(L,L,'DT','I-NP','Ins') ).
+  	  D = tlp([0-0],'the','DT','I-NP','Ins')
+	; D = tlp([0-0],L,'DT','I-NP','Ins') ).

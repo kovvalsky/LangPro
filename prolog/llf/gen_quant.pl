@@ -63,7 +63,6 @@ print_ttTerm_to_gqtTerms(List) :-
 	open('latex/gqttTerms.tex', write, S, [encoding(utf8), close_on_abort(true)]),
 	%asserta(latex_file_stream(S)),
 	latex_ttTerm_preambule(S),
-	write(S, '\\begin{document}\n'),
 	maplist(print_subTerms_of_ttTerm(S), List),
 	write(S, '\\end{document}'),
 	close(S).

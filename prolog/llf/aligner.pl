@@ -68,7 +68,7 @@ find_alignment(TTterm, List_TTterms, New_List_TTterms, CommonTTterms, KB_XP) :-
 	ttTerm_to_prettyTerm(TTterm, PrettyTerm),
 	term_to_atom(PrettyTerm, AtomTerm),
 	add_heads(TTterm, (_,_,tlp(_,_,Pos,F1,F2))), %!!! adds information from head, can give wrong information, e.g. a@man,DT,...
-	TLP = tlp(AtomTerm,AtomTerm,Pos,F1,F2),		 % shared parts are treated as TLP
+	TLP = tlp([0-0],AtomTerm,Pos,F1,F2),		 % shared parts are treated as TLP
 	( var(Pos) -> Pos = 'nil'; true),  ( var(F1) -> F1 = 'nil'; true), ( var(F2) -> F2 = 'nil'; true), %otherwiese atom_chars(POS, List) crashes
 	!,
 	ul_append(CommonTTterms, [TLP]).

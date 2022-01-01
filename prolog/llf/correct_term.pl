@@ -36,28 +36,28 @@ simplify( (abst(TTx, TT), Type), (abst(TTx, SimTT), Type) ) :-
 %	simplify( (tlp(Tk,Lem,Pos,F1,F2), e), SimTT), %e.g. people -> person
 %	!.
 
-simplify( (tlp(_Tk,Lem,'NNS',F1,F2), Type),  SimTT) :-
+simplify( (tlp(Off,Lem,'NNS',F1,F2), Type),  SimTT) :-
 %simplify( (tlp(_Tk,Lem,'NNS',F1,F2), Type),  (tlp(Lem,Lem,'NN',F1,F2), Type) ) :-
-	simplify( (tlp(Lem,Lem,'NN',F1,F2), Type), SimTT), %e.g. people -> person
+	simplify( (tlp(Off,Lem,'NN',F1,F2), Type), SimTT), %e.g. people -> person
 	!.
 
 % substitute possesive pronouns with 'the' sick-240
-simplify( (tlp(_Tk,_Lem,'PRP$',F1,F2), Type),  SimTT) :-
+simplify( (tlp(Off,_Lem,'PRP$',F1,F2), Type),  SimTT) :-
 	Type = n:_~>np:_,
-	SimTT = (tlp('the','the','DT',F1,F2), Type),
+	SimTT = (tlp(Off,'the','DT',F1,F2), Type),
 	!.
 
 % atomic PPs to atomic PR (simplier solution than changing rules and extractor)
-simplify( (tlp(Tk,Lm,IN_WDT,F1,F2), pp),  SimTT) :-
-	SimTT = (tlp(Tk,Lm,IN_WDT,F1,F2), pr),
+simplify( (tlp(Off,Lm,IN_WDT,F1,F2), pp),  SimTT) :-
+	SimTT = (tlp(Off,Lm,IN_WDT,F1,F2), pr),
 	!.
 
 % substitute relative that by who %test
-simplify( (tlp('that','that',IN_WDT,F1,F2), (np:A~>s:B)~>n:C~>n:D),  SimTT) :- % what?
-	SimTT = (tlp('who','who',IN_WDT,F1,F2), (np:A~>s:B)~>n:C~>n:D),
+simplify( (tlp(Off,'that',IN_WDT,F1,F2), (np:A~>s:B)~>n:C~>n:D),  SimTT) :- % what?
+	SimTT = (tlp(Off,'who',IN_WDT,F1,F2), (np:A~>s:B)~>n:C~>n:D), % offset mismatch
 	!.
 
-simplify( (tlp(Tk,Lem,Pos,F1,F2), Type), (tlp(Tk,Lemma,Pos,F1,F2), Type) ) :-
+simplify( (tlp(Off,Lem,Pos,F1,F2), Type), (tlp(Off,Lemma,Pos,F1,F2), Type) ) :-
 	!,
 	( Lem = 'none', Lemma = 'no';
 	  debMode('noPl'), Lem = 's' ->
