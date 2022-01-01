@@ -6,7 +6,9 @@
 :- module('user_preds',
 	[
 		add_new_elements/3,
+		add_anno_to_sen_anno/5,
 		average_list/2,
+		all_prIDs_Ans/1,
 		all_pairs_from_set/2,
 		at_most_n_random_members_from_list/3,
 		atom_char_occur/3,
@@ -17,7 +19,7 @@
 		%element_list_member/3,
 		is_greater/2,
 		get_value_def/3,
-
+		get_toks_annos/3,
 		listInt_to_id_ccgs/2,
 		list_of_tuples_to_list_of_positions/2,
 		list_substitution/4,
@@ -32,12 +34,15 @@
 		probIDs_to_senIDs/2,
 		print_prob/1,
 		match_remove/3,
+		off2tag/4,
+		off2anno/3,
 		pairwise_append/2,
 		partition_list_into_N_even_lists/3,
 		patt_remove/3,
 		prob_input_to_list/2,
 		prIDs_to_prIDs_Ans/2,
-		all_prIDs_Ans/1,
+		sen_id2anno/3,
+		sen_id2all_anno/2,
 		true_remove/3,
 		remove_adjacent_duplicates/2,
 		uList2List/2,
@@ -914,3 +919,65 @@ atom_char_occur(A1, A2, N) :-
 		member(Ch, Chars2), memberchk(Ch, Chars1)
 	), Occurs),
 	length(Occurs, N).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% getting certain annotations for tokens
+
+% Filter TokaAnnos and keep only those annotation levels and systems that are
+% encoding with Level-System pairs (pairs is mapping).
+get_toks_annos(L_S_pairs, ToksAnnos, DetAnnos) :-
+	maplist(get_tok_annos(L_S_pairs), ToksAnnos, DetAnnos).
+
+% does token annotation filtering for a singel annotated token
+get_tok_annos(L_S_pairs, TokAnno, DetAnno) :-
+	maplist(get_tok_anno(TokAnno), L_S_pairs, V_List),
+	pairs_keys(L_S_pairs, L_List),
+	pairs_keys_values(L_V_List, L_List, V_List),
+	% transfer annotation levels that are not system specific, e.g., o & t
+	dict_pairs(TokAnno, Tag, Pairs),
+	findall(K-V, ( member(K-V, Pairs), memberchk(K, [o, t])), K_Vs),
+	append(K_Vs, L_V_List, Level_Anno),
+	dict_pairs(DetAnno, Tag, Level_Anno).
+
+% get a particular annotation from a aprticular system from a token annotation
+get_tok_anno(TokAnno, Level-System, Anno) :-
+	anno_sys_position(AnnoSys2Idx),
+	Idx = AnnoSys2Idx.Level.System,
+	nth1(Idx, TokAnno.Level, Anno).
+
+% finda a token based on its offset in a sentence annotations
+% and return its tag for a particular annotation layer
+off2tag(Anno, Offset, Layer, Tag) :-
+	member(A, Anno),
+	A.o == Offset, !,
+	Tag = A.Layer.
+
+off2anno(Anno, Offset, A) :- % FIX ccg der, that doesn't have list offsets
+	member(A, Anno),
+	A.o == Offset, !.
+
+% get annotation for SIDth sentence
+% deterministic as presupposes anno_level->sys dictionary
+sen_id2anno(SID, Tree, DetAnno) :-
+	debMode(anno_sys(Anno_SysList)),
+	pairs_keys_values(Anno_SysList, Layers, ListOfSysLists),
+	( member_zip(SysList, ListOfSysLists),
+	  pairs_keys_values(Anno_Sys, Layers, SysList)
+	; Anno_Sys = Anno_SysList ),
+	once(select(ccg-Parser, Anno_Sys, Anno_Sys1)),
+	ccg(SID, Parser, Tree),
+	anno_sen(SID, Annos),
+	get_toks_annos(Anno_Sys1, Annos, DetAnno).
+
+sen_id2all_anno(SID, Anno) :-
+	anno_sen(SID, Anno).
+
+% Add value of an annotation layer to the sentence annotation based on offset
+% replace if values are atoms
+% TODO: and add if values are list? messys up the lvl-sys ordering
+add_anno_to_sen_anno(Annos, Annos1, Off, Lvl, Val) :-
+	nth1(Idx, Annos, A, Rest),
+	A.o == Off, !,
+	A1 = A.put(Lvl, Val),
+	nth1(Idx, Annos1, A1, Rest).
