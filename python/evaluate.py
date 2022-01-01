@@ -189,6 +189,23 @@ def calc_measures(c, labs=['ENTAILMENT', 'CONTRADICTION', 'NEUTRAL']):
     return m
 
 #################################
+def read_nli_sen_pl(sen_pl):
+    '''Read sen.pl file into a dictionary'''
+    nli = defaultdict(dict)
+    pattern = re.compile(r"sen_id\((\d+), (\d+), ('[ph]'), ('[^']+')?,? ?('[^']+'), ('.+')\).")
+    with open(sen_pl) as F:
+        for l in F:
+            if not l.strip(): continue # ignore empty lines
+            if l.strip().startswith('%'): continue # ignore prolog comments
+            m = pattern.match(l)
+            if m:
+                _, pid, ph, part, label, sen = m.groups()
+                nli[pid][ph.strip("'")] = sen.strip("'").replace("\\'", "'")
+                nli[pid]['l'] = canonical_label(label.strip("'"))
+                nli[pid]['part'] = part.strip("'") if part else part
+    return nli
+
+#################################
 if __name__ == '__main__':
     args = parse_arguments()
     sys_id_label = read_systems_id_labels(args.sys)
@@ -196,7 +213,7 @@ if __name__ == '__main__':
     if args.first_primary:
         p = args.sys[0]
     elif args.only_Nth_correct:
-        p = p = args.sys[args.only_Nth_correct - 1]
+        p = args.sys[args.only_Nth_correct - 1]
     else:
         p = None
     print(f"{len(sys_id_label)} systems' output read")
