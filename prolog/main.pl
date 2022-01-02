@@ -202,6 +202,8 @@ ccg(ID, Tree) :- % FIXME integrate ccg(Parsers) in anno_sys
 %  eccg				    latex trees are printed in different tex file
 %  ss([...])			list of frequent sysnsets to choose
 %  allInt				All noun modifeirs are intersective
+%  llf_norm				normalize lexicon-wise corrected ccg terms
+%  ccg_norm				normalize lexicon-wise uncorrected ccg terms
 %  lab_map:mapping_name	Map labels of problems to other ones, e.g., for SICK
 % anno_sys(anno_key, list_of_sys)   Use certain system annotations for a specific annotation type. If systems are not specified, all availabel systems are used. anno_keys can be ccg,l,ppos,wn,ner
 %%%%%%%%%%%%  Ab|In-duction parameters  %%%%%%%%%%%%%%%%%
