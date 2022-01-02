@@ -199,10 +199,12 @@ def read_nli_sen_pl(sen_pl):
             if l.strip().startswith('%'): continue # ignore prolog comments
             m = pattern.match(l)
             if m:
-                _, pid, ph, part, label, sen = m.groups()
-                nli[pid][ph.strip("'")] = sen.strip("'").replace("\\'", "'")
+                sid, pid, ph, part, label, sen = m.groups()
+                p_or_h = ph.strip("'")
+                nli[pid][p_or_h] = sen.strip("'").replace("\\'", "'")
                 nli[pid]['l'] = canonical_label(label.strip("'"))
                 nli[pid]['part'] = part.strip("'") if part else part
+                nli[pid][f"{p_or_h}_sid"] = sid
     return nli
 
 #################################
