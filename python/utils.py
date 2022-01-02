@@ -51,7 +51,7 @@ def read_t_leaf(line):
         c, t, l, p, ch, n = m.groups()
         t = t.replace("\\'", "'")
         l = l.replace("\\'", "'")
-        return OrderedDict([('t',t),('l',l),('ppos',p),('ner',n),
+        return OrderedDict([('t',t),('l',l.lower()),('ppos',p),('ner',n),
                             ('ccg',c), ('chk',ch)])
     return None
 
