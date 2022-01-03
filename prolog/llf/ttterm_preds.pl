@@ -983,10 +983,24 @@ ttterm_to_treant_json_(Ind, ((T,Ty1),Ty2)) :- !,
 	ttterm_to_treant_json_(Ind+4, (T,Ty1)),
 	format('~w]~n~w},~n', [I, I_]).
 
+% type to plain text
+type_to_atom(X, _) :-
+	var(X), !,
+	report(['Var found in type_to_atom/2', X]), fail.
 
-type_to_atom(T, A) :-
-	atom(T) -> A = T
-	; var(T) -> report(['Var found in type_to_atom/2', T]), fail
-	; T = Type:Feat -> format(atom(A), '~w:~w', [Type, Feat])
-	; T = T1 ~> T2 -> type_to_atom(T1, A1), type_to_atom(T2, A2),
-	  format(atom(A), '(~w,~w)', [A1, A2]).
+type_to_atom(A, A) :-
+	atom(A), !.
+
+type_to_atom(Type:Feat, A) :- !,
+	( var(Feat) -> A = Type
+	; format(atom(A), '~w:~w', [Type, Feat]) ).
+
+type_to_atom(np:F1~>s:F2, A) :-
+	var(F1), !,
+	( var(F2) -> A = vp
+	; format(atom(A), 'vp:~w', [F2]) ).
+
+type_to_atom(T1~>T2, A) :- !,
+	type_to_atom(T1, A1),
+	type_to_atom(T2, A2),
+	format(atom(A), '(~w,~w)', [A1, A2]).
