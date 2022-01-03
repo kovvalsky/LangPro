@@ -345,31 +345,26 @@ print_ttTerms_in_latex(List) :-
 	close(S).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TTterm is a possible collocation, return a collcoation and POS
-% !!! how to extract from "young tall woman" a "young woman"??? all combinations?
-maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), Ty1) @ (tlp(_,Lm2,Pos2,_,_), Ty2), _Type),  (Lemma, POS) ) :-
-	!,
-	nonvar(Lm1),
-	nonvar(Lm2),
-	( memberchk((Ty1, Ty2, POS),  [(n:_~>n:_, n:_, 'NN'), (_, pr, 'VB')]) %!!! adverbs, adjectives?
-    ; atom_chars(Pos1, ['N','N'| _]), atom_chars(Pos2, ['N','N'| _]), POS = 'NN'
-	; atom_chars(Pos1, ['V','B'| _]), memberchk(Pos2, ['RB', 'RP', 'IN']), POS = 'VB'
-	),
-	!,
-	atomic_list_concat([Lm1, Lm2], ' ', Lemma).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Extract Lexicon and Named entities from Nodes or TTterms
+% Lexicon is an extended lexicon is a way that it also includes
+% entries with alternative potential pos tags to make sure that
+% as much as possibel required relatiosn are pulled from WN
+extract_lex_NNPs_ttTerms(Nodes, Lexicon, Names) :-
+	extract_lex_NNPs_ttTerms(Nodes, [], Lex, [], NNPs),
+	list_to_set(Lex, Lexicon),
+	list_to_set(NNPs, Names).
 
-% TTterm includes a possible collocation on the upper level
-maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), _Ty1) @ ((tlp(_,Lm3,Pos3,_,_), _Ty3) @ _, _Ty2), _Type),  (Lemma, POS) ) :-
-	nonvar(Lm1),
-	nonvar(Lm3),
-	( atom_chars(Pos1, ['V','B'| _]), memberchk(Pos3, ['RB', 'RP', 'IN']), POS = 'VB'
-	),
+% extract Lexicon and Named Entities in a gradual way
+extract_lex_NNPs_ttTerms([Head|Rest], Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
 	!,
-	atomic_list_concat([Lm1, Lm3], ' ', Lemma).
+	once( (Head = nd(_, TT, _, _);  Head = TT) ),
+	extract_LemPos_ttNNP_ttTerm(TT, Old_Lex, Lex, Old_NNPs, NNPs),
+	extract_lex_NNPs_ttTerms(Rest, Lex, New_Lex, NNPs, New_NNPs).
 
+extract_lex_NNPs_ttTerms([], Lex, Lex, NNPs, NNPs).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extract lexical items from a ttTerm
 extract_LemPos_ttNNP_ttTerm((Term,_), Lex, Lex, NNPs, NNPs) :-
 	var(Term),
@@ -413,23 +408,31 @@ extract_LemPos_ttNNP_ttTerm(((Term,Type),_), Old_Lex, New_Lex, Old_NNPs, New_NNP
 
 extract_LemPos_ttNNP_ttTerm(_, Lex, Lex, NNPs, NNPs).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Extract lexical items from a ttTerm List
-extract_lex_NNPs_ttTerms(Nodes, Lexicon, Names) :-
-	extract_lex_NNPs_ttTerms(Nodes, [], Lex, [], NNPs),
-	list_to_set(Lex, Lexicon),
-	list_to_set(NNPs, Names).
 
-extract_lex_NNPs_ttTerms([Head|Rest], Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
+% TTterm is a possible collocation, return a collcoation and POS
+% !!! TODO how to extract from "young tall woman" a "young woman"??? all combinations?
+maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), Ty1) @ (tlp(_,Lm2,Pos2,_,_), Ty2), _Type),  (Lemma, POS) ) :-
 	!,
-	once( (Head = nd(_, TT, _, _);  Head = TT) ),
-	extract_LemPos_ttNNP_ttTerm(TT, Old_Lex, Lex, Old_NNPs, NNPs),
-	extract_lex_NNPs_ttTerms(Rest, Lex, New_Lex, NNPs, New_NNPs).
+	nonvar(Lm1),
+	nonvar(Lm2),
+	( memberchk((Ty1, Ty2, POS),  [(n:_~>n:_, n:_, 'NN'), (_, pr, 'VB')]) %!!! adverbs, adjectives?
+    ; atom_chars(Pos1, ['N','N'| _]), atom_chars(Pos2, ['N','N'| _]), POS = 'NN'
+	; atom_chars(Pos1, ['V','B'| _]), memberchk(Pos2, ['RB', 'RP', 'IN']), POS = 'VB'
+	),
+	!,
+	atomic_list_concat([Lm1, Lm2], ' ', Lemma).
 
-extract_lex_NNPs_ttTerms([], Lex, Lex, NNPs, NNPs).
+% TTterm includes a possible collocation on the upper level
+maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), _Ty1) @ ((tlp(_,Lm3,Pos3,_,_), _Ty3) @ _, _Ty2), _Type),  (Lemma, POS) ) :-
+	nonvar(Lm1),
+	nonvar(Lm3),
+	( atom_chars(Pos1, ['V','B'| _]), memberchk(Pos3, ['RB', 'RP', 'IN']), POS = 'VB'
+	),
+	!,
+	atomic_list_concat([Lm1, Lm3], ' ', Lemma).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extract (const,type)s from a ttTerm
 extract_const_ttTerm(TTterm, Const) :-
 	extract_const_ttTerm(TTterm, [], Const).
