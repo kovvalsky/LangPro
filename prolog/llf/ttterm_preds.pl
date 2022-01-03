@@ -964,7 +964,7 @@ ttterm_to_treant_json_(Ind, (T1@T2,Ty)) :- !,
 	ttterm_to_treant_json_(Ind+4, T1),
 	format('~w', [II]),
 	ttterm_to_treant_json_(Ind+4, T2),
-	format('~w]~n~w}~n', [I, I_]).
+	format('~w]~n~w},~n', [I, I_]).
 
 ttterm_to_treant_json_(Ind, (abst(X,T),Ty)) :- !,
 	ttTerm_to_prettyTerm((abst(X,T),Ty), P),
@@ -974,14 +974,14 @@ ttterm_to_treant_json_(Ind, (abst(X,T),Ty)) :- !,
 	ttterm_to_treant_json_(Ind+4, X),
 	format('~w', [II]),
 	ttterm_to_treant_json_(Ind+4, T),
-	format('~w]~n~w}~n', [I, I_]).
+	format('~w]~n~w},~n', [I, I_]).
 
 ttterm_to_treant_json_(Ind, ((T,Ty1),Ty2)) :- !,
 	type_to_atom(Ty2, ATy2),
 	indentation3(Ind, I_, I, II),
 	format('{~n~wtext: {type: "~w"}},~n~wchildren: [~n~w', [I, ATy2, I, II]),
 	ttterm_to_treant_json_(Ind+4, (T,Ty1)),
-	format('~w]~n~w}~n', [I, I_]).
+	format('~w]~n~w},~n', [I, I_]).
 
 
 type_to_atom(T, A) :-
