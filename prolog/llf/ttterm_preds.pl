@@ -979,7 +979,7 @@ ttterm_to_treant_json_(Ind, (abst(X,T),Ty)) :- !,
 ttterm_to_treant_json_(Ind, ((T,Ty1),Ty2)) :- !,
 	type_to_atom(Ty2, ATy2),
 	indentation3(Ind, I_, I, II),
-	format('{~n~wtext: {type: "~w"}},~n~wchildren: [~n~w', [I, ATy2, I, II]),
+	format('{~n~wtext: {type: "~w"},~n~wchildren: [~n~w', [I, ATy2, I, II]),
 	ttterm_to_treant_json_(Ind+4, (T,Ty1)),
 	format('~w]~n~w},~n', [I, I_]).
 
