@@ -13,6 +13,7 @@
 		feed_ttTerm_with_ttArgs/3,
 		is_tlp/1,
 		is_cc_ttTerm/1,
+		lex_norm_ttterms/4,
 		match_list_ttTerms/3,
 		match_list_only_terms/2,
 		match_ttTerms/3,
@@ -42,6 +43,7 @@
 		token_norm_ttTerm/3,
 		ttTerm_to_informative_tt/2,
 		ttTerms_same_type/2,
+		ttterm_to_treant_json/2,
 		tt_constant_to_tt_entity/2,
 		unpack_ttTerm/2,
 		wh_mod_np_to_nodes/3
@@ -717,8 +719,16 @@ np_const_to_e_const( (TT, Type), (SimTT, Type) ) :-
 	np_const_to_e_const(TT, SimTT).
 
 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% normalize lexicon and normalize terms accordingly
+lex_norm_ttterms(Stage, Tm_L, Nr_L, Lex) :-
+	extract_lex_NNPs_ttTerms(Tm_L, Lex1, _Names),
+	normalize_lexicon(Lex1, Lex),
+	( Lex1 = Lex -> true; format('Diff in Lex at ~p~n', [Stage]) ),
+	( (var(Stage); debMode(Stage)) ->
+		maplist( token_norm_ttTerm(Lex), Tm_L, Nr_L )
+	; Nr_L = Tm_L
+	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % normalize lexicon - a set(!) of (Lemma,POS) pairs
@@ -916,3 +926,67 @@ tm_anno_to_tm(Anno, ((T,Ty1),Ty2), (Tm,Ty2)) :- !,
 tm_anno_to_tm(Anno, (abst(X,T),Ty), (abst(X,Tm),Ty)) :- !,
 	tm_anno_to_tm(Anno, X, X),
 	tm_anno_to_tm(Anno, T, Tm).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ttterm to json for web display with Treant
+
+ttterm_to_treant_json(Name, TT) :-
+	pretty_vars_in_ttterm(1-1, _, TT, Pretty),
+	treant_preambule(Name),
+	ttterm_to_treant_json_(4, Pretty),
+	format('};~n', []).
+
+treant_preambule(Name) :-
+	format('var chart_config = {~n  chart: {~n    container: "#~w",~n    connector: {type: "step"},~n    node:{HTMLclass: "nodeEx"}~n  },~n  nodeStructure: ', [Name]).
+
+indentation3(Ind, I_, I, II) :-
+	with_output_to(atom(I), tab(Ind)),
+	with_output_to(atom(II), tab(Ind+2)),
+	with_output_to(atom(I_), tab(Ind-2)).
+
+ttterm_to_treant_json_(Ind, X) :-
+	once( (var(X); atomic(X)) ), !,
+	with_output_to(atom(I), tab(Ind)),
+	format('{~wtext: {name: "~w"}~n~w},~n', [I, X, I]).
+
+ttterm_to_treant_json_(Ind, (TLP,Ty)) :-
+	TLP =.. [_, Off, Lem, Pos, F1, F2], !,
+	indentation3(Ind, I_, I, II),
+	type_to_atom(Ty, ATy),
+	format('{~n~wtext: {~n~wlemma: "~w",~n~wtype: "~w",~n~wpos: "~w",~n~woffset: "~w",~n~wfeat1: "~w",~n~wfeat2: "~w"~n~w}~n~w},~n', [I, II, Lem, II, ATy, II, Pos, II, Off, II, F1, II, F2, I, I_]).
+
+ttterm_to_treant_json_(Ind, (T1@T2,Ty)) :- !,
+	ttTerm_to_prettyTerm((T1@T2,Ty), P),
+	type_to_atom(Ty, ATy),
+	indentation3(Ind, I_, I, II),
+	format('{~n~wtext: {~n~wname: "~w",~n~wtype: "~w"~n~w},~n~wchildren: [~n~w', [I, II, P, II, ATy, I, I, II]),
+	ttterm_to_treant_json_(Ind+4, T1),
+	format('~w', [II]),
+	ttterm_to_treant_json_(Ind+4, T2),
+	format('~w]~n~w}~n', [I, I_]).
+
+ttterm_to_treant_json_(Ind, (abst(X,T),Ty)) :- !,
+	ttTerm_to_prettyTerm((abst(X,T),Ty), P),
+	type_to_atom(Ty, ATy),
+	indentation3(Ind, I_, I, II),
+	format('{~n~wtext: {name: "~w",~n~wtype: "~w"~n~w},~n~wchildren: [~n~w', [I, P, II, ATy, I, I, II]),
+	ttterm_to_treant_json_(Ind+4, X),
+	format('~w', [II]),
+	ttterm_to_treant_json_(Ind+4, T),
+	format('~w]~n~w}~n', [I, I_]).
+
+ttterm_to_treant_json_(Ind, ((T,Ty1),Ty2)) :- !,
+	type_to_atom(Ty2, ATy2),
+	indentation3(Ind, I_, I, II),
+	format('{~n~wtext: {type: "~w"}},~n~wchildren: [~n~w', [I, ATy2, I, II]),
+	ttterm_to_treant_json_(Ind+4, (T,Ty1)),
+	format('~w]~n~w}~n', [I, I_]).
+
+
+type_to_atom(T, A) :-
+	atom(T) -> A = T
+	; var(T) -> report(['Var found in type_to_atom/2', T]), fail
+	; T = Type:Feat -> format(atom(A), '~w:~w', [Type, Feat])
+	; T = T1 ~> T2 -> type_to_atom(T1, A1), type_to_atom(T2, A2),
+	  format(atom(A), '(~w,~w)', [A1, A2]).

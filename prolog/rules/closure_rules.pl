@@ -109,9 +109,7 @@ r(cl_subsumption_complex, 	closure, _, _Lexicon, KB_xp,  %!!! is this rule worth
 :-
 			luc(Ty1, Ty2, _Type),
 			match_list_ttTerms(Args1, Args2, KB_xp),
-			once( ( M2 = []
-				  ; match_list_only_terms(M1, M2) )
-				),
+			once( ( M2 = []; match_list_only_terms(M1, M2) ) ),
 			match_ttTerms(TTmod1, TTmod2, KB_xp), % ignoring tokens and heads  !!! no downward monotone e.g. fracas-210
 			once(( tt_mon_up(TTmod1) %!!! fracas-211, 210, large mouse-/->large animal
 			; debMode('allInt'), TTmod1 = (tlp(_,_,'JJ',_,_),_)
@@ -501,7 +499,7 @@ r(cl_exact_num, 	closure, _, [['exactly'], ['just']], _,
 % not true     {"c wears a/s white cloth"=T, "d is white"=T, "c is in d"=F}
 %!!!but we allow both cases and it is interesting what type of unsoundness it will evoke
 % sick-218, sick-9136
-% despite cl_in_wear, 218 still needs this rule 
+% despite cl_in_wear, 218 still needs this rule
 r(cl_wear_cloth, 	closure, _, [['wear']], _,
 		br([ nd( M1, (tlp(_,'in','IN',_,_),_), [C1, C2], TF_in ),
 			 nd( M2, ((Det_TT @ TT_Cloth1, (np:_~>s:_)~>s:_) @ (abst(X, (( (tlp(_,'wear',_,_,_),_) @ X, _) @ C2, _)), _), s:_),  [], TF_wear),

@@ -18,8 +18,7 @@
 :- use_module('../llf/correct_term', [correct_ccgTerm/2]).
 :- use_module('../llf/ner', [ne_ccg/2]).
 :- use_module('../llf/ttterm_preds', [
-	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2,
-	normalize_lexicon/2, token_norm_ttTerm/3
+	ttTerms_same_type/2, lex_norm_ttterms/4
 	]).
 :- use_module('../knowledge/ind_kb', [add_ind_kb/2, induced_rel/1]).
 
@@ -620,21 +619,15 @@ ccgTree_to_TTterms(CCGTree, TTterms) :-
 problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :-
 	( debMode(gtraceProb(Prob_Id)) -> gtrace, true; true ),
 	problem_to_corrected_terms(Prob_Id, PremCCGTerms1, HypoCCGTerms1),
+
 	% extracting WN_relations for aligning
-	append(PremCCGTerms1, HypoCCGTerms1, AllCCGTerms),
+	append(PremCCGTerms1, HypoCCGTerms1, AllCCGTerms1),
+	lex_norm_ttterms(llf_norm, AllCCGTerms1, AllCCGTerms, Lex),
+	append(PremCCGTerms, HypoCCGTerms, AllCCGTerms),
+	same_length(PremCCGTerms1, PremCCGTerms),
 
-	extract_lex_NNPs_ttTerms(AllCCGTerms, Lexicon1, _Names),
-	normalize_lexicon(Lexicon1, Lexicon),
-	( Lexicon1 \= Lexicon -> report(['Difference in Lemma Lexicons after normalization']); true ),
-	maplist( token_norm_ttTerm(Lexicon), PremCCGTerms1, PremCCGTerms ),
-	maplist( token_norm_ttTerm(Lexicon), HypoCCGTerms1, HypoCCGTerms ),
-	%PremCCGTerms = PremCCGTerms1,
-	%HypoCCGTerms = HypoCCGTerms1,
-
-	%ground_ccgterms_to_lexicon(),
-	( debMode('prlex') -> report([Lexicon]); true),
-	%( debMode('subWN') -> subWN_from_wn(Lexicon); kb_from_wn(Lexicon, KB) ),
-	( debMode('no_wn') -> KB0 = []; kb_from_wn(Lexicon, KB0) ), % extract relevant semantic relations from WN
+	( debMode('prlex') -> report([Lex]); true),
+	( debMode('no_wn') -> KB0 = []; kb_from_wn(Lex, KB0) ), % extract relevant semantic relations from WN
 	( debMode('ind_kb') -> add_ind_kb(KB0,KB); KB = KB0 ),
 	( debMode('pr_kb') -> report(['KB: ', KB]); true ),
 	( debMode('no_gq_llfs') ->
@@ -685,10 +678,11 @@ problem_to_corrected_terms(PID, CorrPTs, CorrHTs) :-
 		sen_id(SID, PID, 'h', _, _),
 		once(sen_id_to_base_ttterm(SID, T))
 	), HTs),
-	% pairs_keys_values(PTAs, PTs, PAs),
-	% pairs_keys_values(HTAs, HTs, HAs),
-	maplist(correct_ttterm, PTs, CorrPTs),
-	maplist(correct_ttterm, HTs, CorrHTs).
+	append(PTs, HTs, Ts),
+	lex_norm_ttterms('ccg_norm', Ts, NormTs, _Lex),
+	append(NormPTs, NormHTs, NormTs), same_length(PTs, NormPTs),
+	maplist(correct_ttterm, NormPTs, CorrPTs),
+	maplist(correct_ttterm, NormHTs, CorrHTs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % :- multifile sen_id_to_base_ttterm/3.
