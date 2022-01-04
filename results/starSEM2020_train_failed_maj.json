@@ -3159,7 +3159,7 @@
   ]
  },
  "6902": {
-  "anno": "",
+  "anno": "world",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3168,7 +3168,7 @@
   ]
  },
  "6903": {
-  "anno": "",
+  "anno": "noisy; world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3177,7 +3177,7 @@
   ]
  },
  "6932": {
-  "anno": "",
+  "anno": "diff; world",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3186,7 +3186,7 @@
   ]
  },
  "6947": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "no",
   "pred": "unknown, no, unknown",
   "prob": [
@@ -3204,7 +3204,7 @@
   ]
  },
  "6968": {
-  "anno": "",
+  "anno": "paraphrase(x y,y for x)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3213,7 +3213,7 @@
   ]
  },
  "6971": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "no",
   "pred": "no, unknown, unknown",
   "prob": [
@@ -3222,7 +3222,7 @@
   ]
  },
  "7009": {
-  "anno": "",
+  "anno": "easy; noK",
   "gold": "no",
   "pred": "unknown, unknown, no",
   "prob": [
