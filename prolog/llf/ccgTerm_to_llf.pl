@@ -5,7 +5,6 @@
 	]).
 
 :- use_module('../knowledge/ling', [decompose_everyone/3, lemma_of_poss_pr/2]).
-:- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/3]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('ttterm_preds', [
@@ -207,15 +206,20 @@ fix_term( % for n~>pp case
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach a VP-modifying particle to a verb
 % sick-192: up@stand -> stand_up
-% is this necessary after MWE look up in WN is done?
+% helps to 1466,1558.3047,3699,4284,5899,6014,8453,9140,9146,?2916,?4007
 fix_term(
- 	((tlp(OffP,LP,'RP',_,_),(np:_~>s:_)~>np:_~>s:_) @ VP, _),
-	( ((tlp(Off,L,POS,F1,F2),V_Ty) @ Rest), VP_Ty )
+ 	((tlp(OffP,LP,IN,I,N),(np:_~>s:_)~>np:_~>s:_) @ VP, _),
+	( (VP1 @ Rest), VP_Ty )
+	% ( ((tlp(Off,L,VB,F1,F2),V_Ty) @ Rest), VP_Ty ) % before
 ) :-
-	VP = ((tlp(OffV,LV,POS,F1,F2),V_Ty) @ Rest, VP_Ty),
-	atom_chars(POS, ['V','B'|_]),
-	append(OffP, OffV, Off),
-	atomic_list_concat([LV, '_', LP], L),
+	memberchk(IN, ['IN','RP']),
+	VP = ((tlp(OffV,LV,VB,F1,F2),V_Ty) @ Rest, VP_Ty),
+	atom_prefix(VB, 'VB'),
+	% it seems more flexibel to apply VP to particle
+	VP1 = ((tlp(OffV,LV,VB,F1,F2),pr~>V_Ty) @ (tlp(OffP,LP,'IN',I,N),pr), V_Ty),
+	% before was concatenation
+	%append(OffP, OffV, Off),
+	%atomic_list_concat([LV, '_', LP], L),
 	fix_report('!!! Fix: attach_pr_to_verb').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -279,6 +283,7 @@ fix_term(
 % something, everybody, 'DT'
 % Jews, Americans, States, Airlines, 'NNPS'
 % it,PRP; then,RB; more,JJR  n -> np --------> X,PRP,np
+% but hurts 5166: cleaner:JJR:n->np
 fix_term(
 	( (TLP, n:_), np:X ),
 	( TLP, np:X )
@@ -677,9 +682,6 @@ it_is_mod( A, B) :-
 it_is_np( (X, np), (tlp([0-0],String,_,_,_),np) ) :-
 	X \= tlp(_,_,_,_,_),
 	tc_to_string((X,np), String).
-	%writeln(String)
-	%latex_file_stream(S),
-	%latex_ttTerm_print_tree(S, 6, (X, np))
 
 % TC to String
 tc_to_string(X,_) :- var(X), writeln('Variable accounted'), !, fail.
