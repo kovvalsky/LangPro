@@ -9,7 +9,7 @@
 		cc_as_fun/1,
 		conj_of_const_NNPs/1,
 		extract_const_ttTerm/2,
-		extract_lex_NNPs_ttTerms/3,
+		extract_lex_NNPs_ttTerms/4,
 		feed_ttTerm_with_ttArgs/3,
 		is_tlp/1,
 		is_cc_ttTerm/1,
@@ -21,7 +21,7 @@
 		modList_node_to_modNode_list/2,
 		modTTterm_with_conj_sent_head/1,
 		proper_modttTerm/1,
-		normalize_lexicon/2,
+		normalize_lexicon/3,
 		np_const_to_e_const/2,
 		np_mod_app_np/1,
 		npTTterm_as_constant/1,
@@ -50,9 +50,10 @@
 	]).
 
 
-:- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/3, latex_ttTerm_preambule/1]).
+:- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/2, latex_ttTerm_preambule/1]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../utils/user_preds', [off2anno/3]).
+:- use_module('../utils/generic_preds', [list_to_ord_set_variant/2]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../knowledge/lexicon', [op(640, xfy, ::), '::'/2]).
@@ -79,18 +80,16 @@ right_branch_tt_search(F, (Term,_), [A|L], R) :-
 % TTterm to expressive, informative atom
 ttTerm_to_informative_tt((TLP,Type), (Tr,Ty)) :-
 	nonvar(TLP),
-	TLP =  tlp(_,Lemma,POS,_,_),
-	!,
-	( POS = 'CD', Lemma \= 'null' ->
-		%Tr = POS
-		Tr = Lemma
-	;	Tr = Lemma
-	),
+	TLP =  tlp(_,Lemma,POS,_,_), !,
+	( POS = 'CD' ->
+		( Lemma = 'null' -> Tr = 'no'
+		; Lemma = 'one' -> Tr = 'a'
+		; Tr = 's' ) % FIXME: source of unsoundenss but solves sick-9616
+	; Tr = Lemma ),
 	general_cat(Type, Ty).
 
 ttTerm_to_informative_tt( ((TLP1,_)@(TLP2,_), Type),  (Tr, Ty) ) :-
-	nonvar(TLP1),
-	nonvar(TLP2),
+	nonvar(TLP1), nonvar(TLP2),
 	TLP1 = tlp(_,Lm1,_Pos1,_,_),
 	TLP2 = tlp(_,Lm2,_Pos2,_,_),
 	atomic_list_concat([Lm1, Lm2], ' ', Tr),
@@ -340,96 +339,89 @@ print_ttTerms_in_latex(List) :-
 	open('latex/ttTerms.tex', write, S, [encoding(utf8), close_on_abort(true)]),
 	%asserta(latex_file_stream(S)),
 	latex_ttTerm_preambule(S),
-	maplist(latex_ttTerm_print_tree(S, 0), List),
+	with_output_to(S, maplist(latex_ttTerm_print_tree(0), List)),
 	write(S, '\\end{document}'),
 	close(S).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extract Lexicon and Named entities from Nodes or TTterms
-% Lexicon is an extended lexicon is a way that it also includes
+% LPLex is an extended lexicon is a way that it also includes
 % entries with alternative potential pos tags to make sure that
 % as much as possibel required relatiosn are pulled from WN
-extract_lex_NNPs_ttTerms(Nodes, Lexicon, Names) :-
+% LPTLex is a lexicon of (lemma,pos,type) ysed to build the ttterms
+extract_lex_NNPs_ttTerms(Nodes, LPLex, LPTLex, Names) :-
 	extract_lex_NNPs_ttTerms(Nodes, [], Lex, [], NNPs),
-	list_to_set(Lex, Lexicon),
-	list_to_set(NNPs, Names).
+	findall((L,P), (
+		member(E, Lex),
+		once(( E = (L,P,_); E = (L,P) ))
+	), LPLex1), % get rid of types
+	list_to_ord_set_variant(LPLex1, LPLex),
+	findall((L,P,T), member((L,P,T),Lex), LPTLex1),
+	list_to_ord_set_variant(LPTLex1, LPTLex),
+	list_to_ord_set_variant(NNPs, Names).
 
 % extract Lexicon and Named Entities in a gradual way
-extract_lex_NNPs_ttTerms([Head|Rest], Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
-	!,
+extract_lex_NNPs_ttTerms([Head|Rest], Lex0, Lex, NEs0, NEs) :- !,
 	once( (Head = nd(_, TT, _, _);  Head = TT) ),
-	extract_LemPos_ttNNP_ttTerm(TT, Old_Lex, Lex, Old_NNPs, NNPs),
-	extract_lex_NNPs_ttTerms(Rest, Lex, New_Lex, NNPs, New_NNPs).
+	extract_LemPos_ttNNP_ttTerm(TT, Lex0, Lex1, NEs0, NEs1),
+	extract_lex_NNPs_ttTerms(Rest, Lex1, Lex, NEs1, NEs).
 
-extract_lex_NNPs_ttTerms([], Lex, Lex, NNPs, NNPs).
+extract_lex_NNPs_ttTerms([], Lex, Lex, NEs, NEs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Extract lexical items from a ttTerm
-extract_LemPos_ttNNP_ttTerm((Term,_), Lex, Lex, NNPs, NNPs) :-
-	var(Term),
-	!.
+% Extract lexical items, possibel open compounds and named entities from a ttTerm
+% lexical items come with types but potential compunds don't
+% This way real lexical term are distinguished from potential (useful for KB)
+% open compunds. The former is used for term lex-normalization
+extract_LemPos_ttNNP_ttTerm((Term,_), Lex, Lex, NEs, NEs) :-
+	var(Term), !.
 
-extract_LemPos_ttNNP_ttTerm((TT1@TT2,Type), Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
-	!,
-	( maybe_2_collocation((TT1@TT2,Type), LemPos) ->
-		Lex0 = [LemPos | Old_Lex]
-	  ; Lex0 = Old_Lex
-	),
-	extract_LemPos_ttNNP_ttTerm(TT1, Lex0, Lex1, Old_NNPs, NNPs1),
-	extract_LemPos_ttNNP_ttTerm(TT2, Lex1, New_Lex, NNPs1, New_NNPs).
-	%append([Lex1, Lex2, Old_Lex], New_Lex),
-	%append([NNPs1, NNPs2, Old_NNPs], New_NNPs).
+extract_LemPos_ttNNP_ttTerm((TT1@TT2,Type), Lex0, Lex, NEs0, NEs) :- !,
+	( maybe_2_collocation((TT1@TT2,Type), LP) -> Lex1 = [LP | Lex0]
+	; Lex1 = Lex0 ),
+	extract_LemPos_ttNNP_ttTerm(TT1, Lex1, Lex2, NEs0, NEs1),
+	extract_LemPos_ttNNP_ttTerm(TT2, Lex2, Lex, NEs1, NEs).
 
-extract_LemPos_ttNNP_ttTerm((Term,Type), Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
-	Term = tlp(_,Lemma,POS,_,_), % Lexical case
-	!,
-	Temp_Lex = [(Lemma,POS) | Old_Lex],
-	( Type = n:_~>n:_, \+atom_chars(POS, ['J','J'|_]) -> % sick-9067: dirty:NN:n->n
-		New_Lex = [(Lemma,'JJ') | Temp_Lex]
-	; New_Lex = Temp_Lex
-	),
+extract_LemPos_ttNNP_ttTerm((Term,Type), Lex0, Lex, NEs0, NEs) :-
+	Term = tlp(_,Lm,POS,_,_), !,% Lexical case
+	Lex1 = [(Lm,POS,Type) | Lex0],
+	( Type = n:_~>n:_, \+atom_prefix(POS,'JJ') -> % sick-9067: dirty:NN:n->n
+		Lex = [(Lm,'JJ') | Lex1]
+	; Lex = Lex1 ),
 	( ((Type = np:F, F \= thr); Type = e) -> %possessives are not captured
-		New_NNPs = [(Lemma,e) | Old_NNPs] % keep named entities as of type e only; optimizes aligned NPs too
-	;	New_NNPs = Old_NNPs
-	).
+		NEs = [(Lm,e) | NEs0] % keep named entities as of type e only; optimizes aligned NPs too
+	; NEs = NEs0 ).
 
-extract_LemPos_ttNNP_ttTerm((abst(_, TT),_), Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
-	!,
-	extract_LemPos_ttNNP_ttTerm(TT, [], Lex, [], NNPs),
-	append(Lex, Old_Lex, New_Lex),
-	append(NNPs, Old_NNPs, New_NNPs).
+extract_LemPos_ttNNP_ttTerm((abst(_, TT),_), Lex0, Lex, NEs0, NEs) :- !,
+	extract_LemPos_ttNNP_ttTerm(TT, [], Lex1, [], NEs1),
+	append(Lex1, Lex0, Lex),
+	append(NEs1, NEs0, NEs).
 
-extract_LemPos_ttNNP_ttTerm(((Term,Type),_), Old_Lex, New_Lex, Old_NNPs, New_NNPs) :-
-	!,
-	extract_LemPos_ttNNP_ttTerm((Term,Type), [], Lex, [], NNPs),
-	append(Lex, Old_Lex, New_Lex),
-	append(NNPs, Old_NNPs, New_NNPs).
+extract_LemPos_ttNNP_ttTerm(((Term,Type),_), Lex0, Lex, NEs0, NEs) :- !,
+	extract_LemPos_ttNNP_ttTerm((Term,Type), [], Lex1, [], NEs1),
+	append(Lex1, Lex0, Lex),
+	append(NEs1, NEs0, NEs).
 
-extract_LemPos_ttNNP_ttTerm(_, Lex, Lex, NNPs, NNPs).
+extract_LemPos_ttNNP_ttTerm(_, Lex, Lex, NNPs, NNPs). % DELETEME
 
 
 % TTterm is a possible collocation, return a collcoation and POS
 % !!! TODO how to extract from "young tall woman" a "young woman"??? all combinations?
-maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), Ty1) @ (tlp(_,Lm2,Pos2,_,_), Ty2), _Type),  (Lemma, POS) ) :-
-	!,
-	nonvar(Lm1),
-	nonvar(Lm2),
-	( memberchk((Ty1, Ty2, POS),  [(n:_~>n:_, n:_, 'NN'), (_, pr, 'VB')]) %!!! adverbs, adjectives?
-    ; atom_chars(Pos1, ['N','N'| _]), atom_chars(Pos2, ['N','N'| _]), POS = 'NN'
-	; atom_chars(Pos1, ['V','B'| _]), memberchk(Pos2, ['RB', 'RP', 'IN']), POS = 'VB'
-	),
-	!,
-	atomic_list_concat([Lm1, Lm2], ' ', Lemma).
+maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_),Ty1) @ (tlp(_,Lm2,Pos2,_,_),Ty2), _), (Lemma,POS) ) :-
+	nonvar(Lm1), nonvar(Lm2), !,
+	( memberchk((Ty1,Ty2,POS), [(n:_~>n:_,n:_,'NN'), (_,pr,'VB')]) %!!! adverbs, adjectives?
+    ; atom_prefix(Pos1,'NN'), atom_prefix(Pos2,'NN'), POS = 'NN'
+	; atom_prefix(Pos1,'VB'), memberchk(Pos2, ['RB','RP','IN']), POS = 'VB'
+	), !,
+	atomic_list_concat([Lm1,Lm2], ' ', Lemma).
 
 % TTterm includes a possible collocation on the upper level
-maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_), _Ty1) @ ((tlp(_,Lm3,Pos3,_,_), _Ty3) @ _, _Ty2), _Type),  (Lemma, POS) ) :-
-	nonvar(Lm1),
-	nonvar(Lm3),
-	( atom_chars(Pos1, ['V','B'| _]), memberchk(Pos3, ['RB', 'RP', 'IN']), POS = 'VB'
-	),
-	!,
-	atomic_list_concat([Lm1, Lm3], ' ', Lemma).
+maybe_2_collocation( ((tlp(_,Lm1,Pos1,_,_),_) @ ((tlp(_,Lm3,Pos3,_,_),_) @ _, _), _), (Lemma,POS) ) :-
+	nonvar(Lm1), nonvar(Lm3),
+	( atom_prefix(Pos1,'VB'), memberchk(Pos3, ['RB','RP','IN']), POS = 'VB'
+	), !,
+	atomic_list_concat([Lm1,Lm3], ' ', Lemma).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -724,78 +716,101 @@ np_const_to_e_const( (TT, Type), (SimTT, Type) ) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % normalize lexicon and normalize terms accordingly
-lex_norm_ttterms(Stage, Tm_L, Nr_L, Lex) :-
-	extract_lex_NNPs_ttTerms(Tm_L, Lex1, _Names),
-	normalize_lexicon(Lex1, Lex),
-	( Lex1 = Lex -> true; format('Diff in Lex at ~p~n', [Stage]) ),
+lex_norm_ttterms(Stage, Tm_L, Nr_L, LPs) :-
+	extract_lex_NNPs_ttTerms(Tm_L, LPs, LPTs, _Names),
+	normalize_lexicon(LPTs, NormLPTs, SuppMap),
+	( LPTs = NormLPTs -> true; format('Diff in Lex at ~p~n', [Stage]) ),
 	( (var(Stage); debMode(Stage)) ->
-		maplist( token_norm_ttTerm(Lex), Tm_L, Nr_L )
+		maplist( token_norm_ttTerm(SuppMap), Tm_L, Nr_L )
 	; Nr_L = Tm_L
 	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% normalize lexicon - a set(!) of (Lemma,POS) pairs
+% normalize lexicon - a set(!) of (Lemma,POS,Type) pairs
 % normalizing includes Few & few to map to one item
 % fracas-19 Europeans-European, fracas-44 few-Few
 % !!! sick-train 2205? tokkens differ in register
+normalize_lexicon(L, N, SuppMap) :-
+	findall(E1-E, (
+		nth1(I1,L,E1), nth1(I2,L,WRT), I1 \= I2,
+		normalize_LPT_wrt(E1,WRT,E)
+	), Map),
+	maplist(map_element(Map), L, V),
+	list_to_ord_set_variant(V, N),
+	findall(X-Y, (member(X-Y, Map), X \=@= Y), SuppMap).
+	% in support map, identity part is removed
 
-normalize_lexicon([], []).
-
-normalize_lexicon([(L1,Pos1) | Lex], Lexicon) :-
-	member((L2,Pos2), Lex),
-	normalize_Lemma_POS((L1,Pos1), (L2,Pos2), (L,Pos)) ->
-		Lexicon = [(L,Pos) | Lexic],
-		normalize_lexicon(Lex, Lexic)
-	; Lexicon = [(L1,Pos1) | Lexic],
-	  normalize_lexicon(Lex, Lexic).
-
-
+% if map is empty, send E to self
+map_element(Map, E, V) :-
+	findall(V, member(E-V, Map), Vs),
+	( Vs = [] -> V = E
+	; list_to_ord_set_variant(Vs, Set),
+	  Set = [V|_],
+	  ( Set = [_,_|_] -> report(['Several norm for ', E, ': ', Set]); true ) ).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % if two lemmas differ in the initial letter, give priority to lower cased one
 % to overriode another
 % Singular lemma overrides the plural one
-normalize_Lemma_POS((L1, P1), (L2, P2), (L, P)) :-
-	atom_chars(L1, [I1 | REST1]),
-	atom_chars(L2, [I2 | REST2]),
-	downcase_atom(I1, I),
-	downcase_atom(I2, I), % same letters in the begining
-	% (I1 = Si -> I = I1; I = I2),
-	maplist(downcase_atom, REST1, Rest1),
-	maplist(downcase_atom, REST2, Rest2),
-	( Rest1 = Rest2 ->
-	  	( I = I1 -> (L, P) = (L1, P1);  (L, P) = (L2, P2) )
-    ; append(Rest1, ['s'], Rest2) ->
-		atom_chars(L, [I | Rest1]),
-	  	P = P1
-    ; append(Rest2, ['s'], Rest1),
-	  atom_chars(L, [I | Rest2]),
-	  P = P2
-	). % here maybe NNP be chosen over NN if NNS vs NNP, or VBS over NN, needs syntactic category distinguishing
+
+% when difference is a plural marker
+normalize_LPT_wrt((L1,P1,T1), (L2,P2,T2), (L,P,T)) :-
+	downcase_atom(L1, D1), downcase_atom(L2, D2),
+	once(norm_LPT_wrt((D1,P1,T1), (D2,P2,T2), (L,P,T))).
+
+norm_LPT_wrt(LPT1, LPT2, LPT) :-
+	( norm_L_plural(LPT1, LPT2, LPT)
+	; norm_LP_NNP2NN(LPT1, LPT2, LPT)
+	; norm_P_JJ2NN(LPT1, LPT2, LPT)
+	).
+
+%%% cases, note the results 3rd arg is always different from 1st arg.
+% non plural lemma is preferred
+norm_L_plural((Ls,P,T), (L,P,T), (L,P,T)) :-
+	% don't make NNS NN since it prevents NNS detection for plural-s term insert
+	atomic_list_concat([L,'s'], Ls).
+
+% JJR is replaced with NN for cat=N
+% 5166 cleaner:JJR:n vs cleaner:NN:n
+% NNS and JJ cases are generalization, can be omitted
+norm_P_JJ2NN((L,JJR,n:_), (L,NN,n:F), (L,NN,n:F)) :-
+	memberchk(NN, ['NN', 'NNS']),
+	memberchk(JJR, ['JJ', 'JJR']).
+
+% NN is prefered to NNP name is lemmas are the same
+% If NNP's lemma is pluralized then repalce with singular
+% SICK-3248: Eggs:NNP vs egg:NNS
+norm_LP_NNP2NN((Ls,NNP,T), (L,NN,T), (L,P,T)) :-
+	memberchk(NN, ['NN','NNS']),
+	atom_prefix(NNP, 'NNP'),
+	( atomic_list_concat([L,'s'], Ls) -> P = 'NNS'
+	; Ls = L,
+	  ( NNP = 'NNPS' -> P = 'NNS'
+  	  ; NNP = 'NNP' -> P = 'NN' )
+	).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Normalized Tokens of TTterms based on normalized lexicon
 %!!! not completely finished, just substitutses tokens with lemma, for tokesn special procedure needed
 
-token_norm_ttTerm(_, (Var, Type), (Var, Type)) :-
+token_norm_ttTerm(_Map, (Var,Type), (Var,Type)) :-
 	var(Var), !.
 
-token_norm_ttTerm(Lex, (TT1 @ TT2, Type), (SimTT1 @ SimTT2, Type)) :-
-	!, token_norm_ttTerm(Lex, TT1, SimTT1),
-	token_norm_ttTerm(Lex, TT2, SimTT2).
+token_norm_ttTerm(Map, (TT1@TT2,Type), (SimTT1@SimTT2,Type)) :- !,
+	token_norm_ttTerm(Map, TT1, SimTT1),
+	token_norm_ttTerm(Map, TT2, SimTT2).
 
-token_norm_ttTerm( Lex,  (abst(TTx, TT), Type), (abst(TTx, SimTT), Type) ) :-
-	!, token_norm_ttTerm(Lex, TT, SimTT).
+token_norm_ttTerm(Map, (abst(TTx,TT),Type), (abst(TTx,SimTT),Type)) :- !,
+	token_norm_ttTerm(Map, TT, SimTT).
 
-token_norm_ttTerm( Lex, (tlp(Off,Lem,Pos,F1,F2), Type),  SimTT ) :-
-	member((L,P), Lex),
-	normalize_Lemma_POS((L,P), (Lem,Pos), (L,P)), !, % FIXME needs more control on replacement
-	%report(['Failure in normalization of lexicon: (', L, ',', P, ') vs (', Lem, ',', Pos, ')']), fail ),
-	SimTT = (tlp(Off,L,P,F1,F2), Type).
+token_norm_ttTerm(Map, (tlp(O,L,P,F1,F2),T), SimTT) :-
+	memberchk((L,P,T)-(L1,P1,T1), Map) ->
+		SimTT = (tlp(O,L1,P1,F1,F2),T1)
+	; SimTT = (tlp(O,L,P,F1,F2),T).
 
-token_norm_ttTerm(Lex, (TT, Type), (SimTT, Type) ) :-
-	!, token_norm_ttTerm(Lex, TT, SimTT).
+token_norm_ttTerm(Map, (TT,Type), (SimTT,Type) ) :- !,
+	token_norm_ttTerm(Map, TT, SimTT).
 
 
 

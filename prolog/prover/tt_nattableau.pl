@@ -23,7 +23,7 @@
 	ul_append/2, patt_remove/3, add_new_elements/3, list_substitution/4
 	]).
 :- use_module('../llf/ttterm_preds', [
-	ttTerms_same_type/2, extract_lex_NNPs_ttTerms/3
+	ttTerms_same_type/2, extract_lex_NNPs_ttTerms/4
 	]).
 :- use_module('tableau_utils', [
 	assignIds/4, subtract_nodes/4, select_relevant_rules/3, ttTerms_to_nodes_sig/6,
@@ -91,7 +91,7 @@ generateTableau(KB-XP1, T_TermList, F_TermList, BrList, Tree, Status) :-
 	(ttTerms_same_type(List, Type) ->
 		ttTerms_to_nodes_sig(T_TTlist, F_TTlist, Type, Nodes, Sig, (Ent_Id, Con_Id)),
 		% temporal, needs only names
-		extract_lex_NNPs_ttTerms(Nodes, Lexicon, Names), %term_to_atom(Lexicon, At), writeln(At),
+		extract_lex_NNPs_ttTerms(Nodes, Lexicon, _, Names), %term_to_atom(Lexicon, At), writeln(At),
 		append(Names, Sig, Signature), %!!! John from term, is added to Signature and doesnt have to wait for Arg push application
 		%append(Names, Sig, Signa), findall(X, (member(X, Signa), \+atomic_list_concat([_,_|_], '@', X)), Signature), % avoids 's@man'
 		nodes_to_SigBranch_tree_id(Nodes, Signature, Br, Tree, Node_Id),

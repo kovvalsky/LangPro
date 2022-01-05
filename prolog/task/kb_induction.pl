@@ -417,7 +417,7 @@ discover_knowledge(Config, TTterms, Branches, KB1, (PrId,Ans), Status, Learned_K
 % where each of the KB can close the tableau
 discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) :-
 	% Get relevant closure rules based on the lexicon extacted from Terms
-	extract_lex_NNPs_ttTerms(TTterms, Lexicon, _Names),
+	extract_lex_NNPs_ttTerms(TTterms, Lexicon, _, _Names),
 	get_closure_rules(Lexicon, ClRules),
 	% Following the patterns of nodes, find all possible KBs that closes the tableau
 	maplist( pattern_filtered_nodes(Patterns), Branches, FilteredBranches ),

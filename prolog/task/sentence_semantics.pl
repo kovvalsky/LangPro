@@ -8,6 +8,7 @@
     ]).
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
 :- use_module('../llf/ttterm_to_term', [ndId_to_pretty_atom/2]).
+:- use_module('../llf/ttterm_preds', [normalize_lexicon/3]).
 :- use_module(library(term_to_json), [term_to_json/2]).
 :- use_module(library(http/json), [json_write/2, json_write/3]).
 
@@ -83,8 +84,8 @@ probId_branch_sem(Id, (PrBrs, HyBrs), (A_PrBrs, A_HyBrs)) :-
 % OUT: A pair of branches modeling semantcis of the TT of the sentence
 senId_branch_sem(Sid, (BrsT, BrsF)) :-
     senId_to_ttterm(Sid, TTterm),
-    extract_lex_NNPs_ttTerms([TTterm], Lexicon, _Names),
-    normalize_lexicon(Lexicon, Lex),
+    extract_lex_NNPs_ttTerms([TTterm], Lexicon, _, _Names),
+    normalize_lexicon(Lexicon, Lex, _), % TOCHECK
     ( debMode('no_wn') -> KB = []; kb_from_wn(Lex, KB) ),
     ttterm_branch_sem(KB, TTterm, (BrsT, BrsF)).
 

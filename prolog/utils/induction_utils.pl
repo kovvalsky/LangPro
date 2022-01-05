@@ -348,7 +348,7 @@ add_lex_to_id_ans(ID_Ans, (ID,Ans,Lex)) :-
 	%write(ID),
 	( problem_to_ttTerms('both', ID, PTT, HTT, AlPTT, AlHTT, _KB) ->
 		append([PTT, HTT, AlPTT, AlHTT], TTterms),
-		extract_lex_NNPs_ttTerms(TTterms, LexPos, _Names),
+		extract_lex_NNPs_ttTerms(TTterms, LexPos, _, _Names),
 		findall(L, member((L,_), LexPos), LexList),
 		list_to_ord_set(LexList, Lex)
 	; Lex = []
