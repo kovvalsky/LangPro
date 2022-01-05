@@ -10,7 +10,10 @@
 		format_list/3,
 		format_list_list/3,
 		format_list_list/4,
+		get_cmd/1,
 		keep_smallest_lists/2,
+		list_to_set_variant/2,
+		list_to_ord_set_variant/2,
 		member_zip/2,
 		read_dict_from_json_file/2,
 		rotate_list/2,
@@ -31,6 +34,13 @@ true_member(E, List) :-
 	List = [Head | Rest],
 	( E == Head % fixed
 	; true_member(E, Rest) ).
+
+variant_member(E, List) :-
+	nonvar(List),
+	List = [Head | Rest],
+	( E =@= Head % fixed
+	; variant_member(E, Rest) ).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -149,3 +159,26 @@ member_zip(E_List, ListOfList) :-
 % all members obtained with member_zip
 all_member_zip(ListOfList, AllMemberList) :-
 	findall(MemberList, member_zip(MemberList, ListOfList), AllMemberList).
+
+
+% from list to set but with checking on unification
+% this is different from list_to_set that uses ==
+list_to_set_variant([], []) :- !.
+
+list_to_set_variant([H|T], S) :-
+	( variant_member(H, T) ->
+	  list_to_set_variant(T, S)
+	; list_to_set_variant(T, S1),
+	  S = [H|S1] ).
+
+
+list_to_ord_set_variant(L, S) :-
+	list_to_set_variant(L, V),
+	sort(V, S).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% get a self-command
+get_cmd(CMD) :-
+	current_prolog_flag(os_argv, Options),
+	atomic_list_concat(Options, ' ', CMD).
