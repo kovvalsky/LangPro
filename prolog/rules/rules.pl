@@ -155,19 +155,20 @@ r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB-XP, % equi
 		  Sig) )
 :-
 		TLP = tlp(_,Lem,POS,_,_),
-		( debMode('allInt')%, \+atom_chars(POS, ['N','N'|_])   % train-4020 baby kangaroo
+		( debMode('allInt')  %3344:roof top->roof; 5552:toy phone->toy; 7957:court floor->court
+		  %\+atom_prefix(POS, 'NN')   % train-4020 baby kangaroo
 		; intersective(Lem) % what happens if all are intersective?
 		%; (POS = 'JJ', \+privative(Lem)) % relaxing constraints
-		; atom_chars(POS, ['V','B'|_]) % verbs are as intersective adjectives
+		; atom_prefix(POS, 'VB') % verbs are as intersective adjectives
 		; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
 		  privative(Priv)
 		),
 		!, % detect a type
-		( atom_chars(POS, ['V','B'|_]) ->
+		( atom_prefix(POS, 'VB') ->
 			Type = np:_~>s:_
-		; atom_chars(POS, ['N','N'|_]) ->
+		; atom_prefix(POS, 'NN') ->
 			Type = n:_
-		; atom_chars(POS, ['J','J'|_]) ->
+		; atom_prefix(POS, 'JJ') ->
 			Type = np:_~>s:_
 		; Type = e~>t
 		),
