@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- use_module('utils/generic_preds', [
-	dictList_to_dictPosition/2, read_dict_from_json_file/2
+	dictList_to_dictPosition/2, read_dict_from_json_file/2, get_cmd/1
     ]).
 
 :- ensure_loaded([
@@ -89,6 +89,8 @@ set_debMode([H | Rest]) :-
 		assertz( debMode(H) )
     ; H == wn ->
         assertz_debMode_list([wn_sim, wn_ant, wn_der])
+	; H == pr_cmd ->
+		get_cmd(CMD), writeln(CMD)
 	; assertz( debMode(H) )
 	),
 	set_debMode(Rest).
@@ -183,8 +185,9 @@ ccg(ID, Tree) :- % FIXME integrate ccg(Parsers) in anno_sys
 %  disj					use hand-coded disjoint relation
 %  usedRules([rules])	print the rules if they are used
 %  parallel(CPUs)		concurrent_maplist for entail
+%  pr_cmd				print the executed command
 %  pr_kb				print knowledge base
-%  no_kb				no hand crafted lexical knowledge base will be used
+%  hk					use hand crafted lexical knowledge base
 %  no_wn				no wn knowledge will be used
 %  no_qk				no quantifier knowledge will be used
 %  singPrem				takes only single premised problems, for fracas

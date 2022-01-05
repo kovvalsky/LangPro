@@ -47,7 +47,7 @@ instance(Instance, Concept, KB-XP) :-
 	ul_append(XP, [ins(Instance, Concept)]).
 
 inst(_Inst, _Concept) :-
-	debMode('no_kb'),
+	\+debMode('hk'),
 	!, fail.
 
 inst(Inst, Concept) :-
@@ -89,7 +89,7 @@ not_disjoint(A, B, KB-_XP) :- %FIXME specify non disjointness
 
 % disjoint
 disjoint(_, _) :-
-	debMode('no_kb'),
+	\+debMode('hk'),
 	!, fail.
 
 disjoint(A, B) :-
@@ -269,6 +269,7 @@ isq_(a_few, s).
 isq_(s, both). %!!! due to generic reading, 13, wrong
 isq_('CD', a). %!!!
 isq_(one, a).
+% isq_(two, s). %9616
 isq_(a, one). %!!! no arithemtic still
 %is_(two, one). % wrong for fracas 287
 isq_(two, a).
@@ -289,9 +290,9 @@ isa(A, B, _KB_XP) :-  % variant, not matching
 	A =@= B, !.
 
 isa(A, B, _KB-XP) :-
-	( ( debMode('no_kb') -> false
-		; is_(A, B),
-		  ul_append(XP, [isa(A,B)])
+	( ( debMode('hk'), % hand crafted knowledge
+		is_(A, B),
+		ul_append(XP, [isa(A,B)])
 	  )
 	; ( debMode('no_qk') -> false
 		; isq_(A, B),
