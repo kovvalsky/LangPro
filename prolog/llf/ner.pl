@@ -15,8 +15,8 @@ test_ne :-
 	forall(ccg(Id,_), test_ne(Id)).
 
 test_ne(ID) :-
-	( sen_id_to_base_ttterm(ID, Tree-Anno),
-	  ne_ccg(Tree-Anno, _)
+	( sen_id_to_base_ttterm(ID, Tree),
+	  ne_ccg(Tree, _)
 	-> true
 	; once(sen_id(ID,_,_,_,_,Sen)),
 	  format('~w: failed ne_ccg (~w)~n', [ID, Sen]) ).
