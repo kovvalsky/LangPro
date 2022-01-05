@@ -4,7 +4,7 @@
 :- module(latex_ttterm,
 	[
 		latex_ttTerm_preambule/1,
-		latex_ttTerm_print_tree/3,
+		latex_ttTerm_print_tree/2,
 		lambdaTerm_to_latex/2,
 		latex_senIDs_trees/1,
 		latex_senIDs_trees/2,
@@ -14,8 +14,8 @@
 		latex_senID_all_ders/2
 	]).
 
-:- use_module('latex_ccgtree', [ccgTree_to_tikzpicture/2, write_tikzpicture_begin/2,
-	write_tikzpicture_end/0, ccgTree_to_latex/4]).
+:- use_module('latex_ccgtree', [ccgTree_to_tikzpicture/1, write_tikzpicture_begin/2,
+	write_tikzpicture_end/0, ccgTree_to_latex/3]).
 :- use_module('../printer/extract', [print_used_lexical_rules/2]).
 :- use_module('../utils/user_preds',
 	[probIDs_to_senIDs/2, listInt_to_id_ccgs/2, ttExp_to_ttTerm/2, sen_id2all_anno/2]
@@ -31,6 +31,7 @@
 :- use_module('../llf/ner', [ne_ccg/2]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2, ttTerm_to_norm_term/5]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
+:- use_module(library(clpfd)). % for transpose/2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -51,28 +52,53 @@ latex_probID_trees(LaTeXFile, PID) :-
 	( is_stream(LaTeXFile) -> S = LaTeXFile
 	; filepath_write_source(LaTeXFile, S) ),
 	once(sen_id(_,PID,_,_,Lab,_)),
-	findall([SID,PH,Raw],(
-		sen_id(SID,PID,PH,_,_,Raw)
-	), Info),
+	findall([SID,PH,Raw], sen_id(SID,PID,PH,_,_,Raw), Info),
 	format(S, '\\noindent\\texttt{[~w]} \\Large{\\textbf{~w}}~n~n', [PID, Lab]),
 	format(atom(F), '\\noindent(~~w):[~w]~~w \\Large{\\textbf{~~w}}~n~n ', [PID]),
-	format_list_list(S, F, Info),
-	format(S, '~n~n', []),
-	flush_output(S),
-	maplist([[SID|_],SID]>>true, Info, SIDs),
-	maplist(latex_senID_trees(S), SIDs).
+	format_list_list(S, F, Info), format(S, '~n~n', []), flush_output(S),
+	% get CCG terms and TTterms for each sentence (inc. cross normalizations)
+	probID_to_trees_terms(PID, SIDs, CCGTrees, TTs_L, Info_L),
+	with_output_to(S, maplist(latex_senID_all_trees_terms(Info_L),
+							  SIDs, CCGTrees, TTs_L) ).
+
+% auxiliary predicates for printing problesm in latex
+latex_senID_all_trees_terms(Info_L, SID, CCGTree, TTs) :-
+	sen_id_latex(SID, 'CCGTree'),
+	sen_id2all_anno(SID, Anno),
+	write_tikzpicture_begin(50, 0),
+	ccgTree_to_latex(Anno, 6, CCGTree),
+	write_tikzpicture_end,
+	maplist(latex_senID_ttterm(SID), TTs, Info_L).
+
+latex_senID_ttterm(SID, TT, Info) :-
+	sen_id_latex(SID, Info),
+	latex_ttTerm_print_tree(6, TT).
+
+probID_to_trees_terms(PID, SIDs, CCGTrees, TTs_L, Info_L) :-
+	findall(SID, sen_id(SID,PID,_,_,_,_), SIDs),
+	maplist(sen_id_to_ccgtree_base_ttterm, SIDs, CCGTrees, CCGTms),
+	lex_norm_ttterms('ccg_norm', CCGTms, NormCCGTms, _),
+	maplist(correct_ttterm, NormCCGTms, CorrTTs),
+	lex_norm_ttterms(llf_norm, CorrTTs, NormTTs, _),
+	maplist(once_gen_quant_tt, NormTTs, LLFs),
+	transpose([CCGTms, NormCCGTms, CorrTTs, NormTTs, LLFs], TTs_L),
+	Info_L = ['CCGTerm','NormCCGTerm','CorrTT','NormTT','LLF'].
+
+sen_id_to_ccgtree_base_ttterm(SID, Tree, TTterm) :-
+	once(sen_id2anno(SID, Tree, DetAnno)),
+	ccgIDTree_to_ccgIDTerm(ccg(SID,Tree), ccg(SID,TTterm), DetAnno).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 latex_senID_all_ders(SID, LaTeXFile) :-
 	filepath_write_source(LaTeXFile, S),
 	latex_ttTerm_preambule(S),
-	sen_id_latex(S, SID),
-	findall(P, (
-		ccg(SID, P, CCGTree),
-		format(S, '~n~n\\huge{~w}~n~n', [P]),
+	with_output_to(S, sen_id_latex(SID)),
+	findall(Parser, (
+		ccg(SID, Parser, CCGTree),
+		format(S, '~n~n\\huge{~w}~n~n', [Parser]),
 		with_output_to(S, write_tikzpicture_begin(50, 0)),
 		sen_id2all_anno(SID, Anno),
-		ccgTree_to_latex(S, Anno, 6, CCGTree),
+		with_output_to(S, ccgTree_to_latex(Anno, 6, CCGTree)),
 		with_output_to(S, write_tikzpicture_end)
 	), _Ps),
 	write(S, '\\end{document}'),
@@ -114,33 +140,36 @@ latex_senID_trees(S, Id) :-
 	( debMode('pr_sen') -> sen_id(SID,_,_,_,Sen), report([SID,': ',Sen]); true ),
 	report([SID]),
 	% print sentence and CCGtree
-	sen_id_latex(S, SID),
-	ccgTree_to_tikzpicture(S, SID), 				% print
+	with_output_to(S, sen_id_latex(SID)),
+	with_output_to(S, ccgTree_to_tikzpicture(SID)), 				% print
 	% CCGtree to ccgTerm
 	ccgIDTree_to_ccgIDTerm(SID, ccg(SID, CCGTerm)),
-	latex_ttTerm_print_tree(S, 2, CCGTerm), 			% print
-	ne_ccg(CCGTerm, CCGTerm_1),
+	with_output_to(S, latex_ttTerm_print_tree(2, CCGTerm)), 			% print
+	%ne_ccg(CCGTerm, CCGTerm_1),
 	%latex_ttTerm_print_tree(S, 6, CCGTerm_1), 			% print
-	clean_ccgTerm_once(CCGTerm_1, CCGTerm_2),
+	%clean_ccgTerm_once(CCGTerm_1, CCGTerm_2),
 	%latex_ttTerm_print_tree(S, 6, CCGTerm_2),			% print
-	CCGTerm_final = CCGTerm_2,
+	CCGTerm_final = CCGTerm,
 	correct_ccgTerm(CCGTerm_final, Corr_CCGTerm_final),
 	print_used_lexical_rules(SID, Corr_CCGTerm_final),	% print
-	latex_ttTerm_print_tree(S, 2, Corr_CCGTerm_final),	% print
+	with_output_to(S, latex_ttTerm_print_tree(2, Corr_CCGTerm_final)),	% print
 	%% gen_quant_tt(Corr_CCGTerm_final, GQTTs),			% sick-train 7618 loops here
 	%% maplist( latex_ttTerm_print_tree(S, 2), GQTTs ),	% print all GQ versions
 	%% GQTTs = [GQTT|_],
 	%% maplist( ttTerm_to_latexTerm, GQTTs, LatexTerms), maplist( writeln(S), LatexTerms).
 	once_gen_quant_tt(Corr_CCGTerm_final, GQTT),
 	ttTerm_to_latexTerm(GQTT, LatexTerm), writeln(S, LatexTerm), writeln(S, '\n'), % pronts first LLF as a term
-	latex_ttTerm_print_tree(S, 6, GQTT).				% print the first GQ version
-
+	with_output_to(S, latex_ttTerm_print_tree(6, GQTT)).				% print the first GQ version
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-sen_id_latex(S, Id) :-
+sen_id_latex(Id) :-
+	sen_id_latex(Id, '').
+
+sen_id_latex(Id, Info) :-
 	once( (sen_id(Id,_,_,_,Sen); sen_id(Id,_,_,_,_,Sen)) ),
-	format(S, '  \\texttt{~w: ~w}~n~n', [Id, Sen]).
+	(Info = '' -> Delim = ''; Delim = ':'),
+	format('  \\texttt{~w:} \\textbf{~w}\\texttt{~w ~w}~n~n', [Id, Info, Delim, Sen]).
 
 
 
@@ -189,76 +218,73 @@ latex_ttTerm_preambule(S) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % prints complete ttTerm in latex tikzpicture fashion
-latex_ttTerm_print_tree(S, Pos, TTterm) :-
-	with_output_to(S, write_tikzpicture_begin(25, -5)),
-	latex_ttTerm_print(S, Pos, TTterm),
-	with_output_to(S, write_tikzpicture_end).
+latex_ttTerm_print_tree(Pos, TTterm) :-
+	write_tikzpicture_begin(25, -5),
+	latex_ttTerm_print(Pos, TTterm),
+	write_tikzpicture_end.
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % prints ttTerm in latex tree fashion
-latex_ttTerm_print(S, Pos, TTterm) :-
+latex_ttTerm_print(Pos, TTterm) :-
 	TTterm = (SubTTterm, Type),
 	nonvar(SubTTterm),
 	SubTTterm = TTterm1 @ TTterm2,
 	!,
-	tab(S, Pos),
+	tab(Pos),
 	latex_type(Type, Latex_type),
 	atomic_list_concat(['[.\\node{$', Latex_type, '$};'], Node),
-	write(S, Node),
-	nl(S),
+	writeln(Node),
 	Pos2 is Pos + 1,
 	%write('intermediate none Sibl1: '), write(TTterm1), write('\n'),
 	%write('intermediate none Sibl2: '), write(TTterm2), write('\n'),
-	latex_ttTerm_print(S, Pos2, TTterm1),
+	latex_ttTerm_print(Pos2, TTterm1),
 	%write('intermediate one Sibl1: '), write(TTterm1), write('\n'),
 	%write('intermediate notyet 2nd Sibl2: '), write(TTterm2), write('\n'),
-	latex_ttTerm_print(S, Pos2, TTterm2),
+	latex_ttTerm_print(Pos2, TTterm2),
 	%write('intermediate both Sibl1: '), write(TTterm1), write('\n'),
 	%write('intermediate both Sibl2: '), write(TTterm2), write('\n'),
-	tab(S, Pos),
-	write(S, ']'), nl(S).
+	tab(Pos),
+	writeln(']').
 
-latex_ttTerm_print(S, Pos, TTterm) :-
+latex_ttTerm_print(Pos, TTterm) :-
 	TTterm = (SubTTterm, Type),
 	nonvar(SubTTterm),
 	SubTTterm = abst(X, TTterm1),
 	!,
-	tab(S, Pos),
+	tab(Pos),
 	latex_type(Type, Latex_type),
 	atomic_list_concat(['[.\\node{$', Latex_type, '$};'], Node),
-	write(S, Node),
-	nl(S),
+	writeln(Node),
 	Pos2 is Pos + 1,
 	%write('intermediate none Abst: '), write(abst(X)), write('\n'),
 	%write('intermediate none Body: '), write(TTterm1), write('\n'),
-	latex_ttTerm_print(S, Pos2, abst(X)),
+	latex_ttTerm_print(Pos2, abst(X)),
 	%write('intermediate one Abst: '), write(abst(X)), write('\n'),
 	%write('intermediate notyet Body: '), write(TTterm1), write('\n'),
-	latex_ttTerm_print(S, Pos2, TTterm1),
+	latex_ttTerm_print(Pos2, TTterm1),
 	%write('intermediate both Abst: '), write(abst(X)), write('\n'),
 	%write('intermediate both Body: '), write(TTterm1), write('\n'),
-	tab(S, Pos),
-	write(S, ']'), nl(S).
+	tab(Pos),
+	writeln(']').
 
-latex_ttTerm_print(S, Pos, TTterm) :-
+latex_ttTerm_print(Pos, TTterm) :-
 	nonvar(TTterm),
 	TTterm = (TT, Type),
 	nonvar(TT),
 	TT = (_,_),
 	!,
-	tab(S, Pos),
+	tab(Pos),
 	latex_type(Type, Latex_type),
 	atomic_list_concat(['[.\\node{$', Latex_type, '$};'], Node),
-	write(S, Node),
-	nl(S),
+	writeln(Node),
 	Pos2 is Pos + 1,
-	latex_ttTerm_print(S, Pos2, TT),
-	tab(S, Pos),
-	write(S, ']'), nl(S).
+	latex_ttTerm_print(Pos2, TT),
+	tab(Pos),
+	writeln(']').
 
-latex_ttTerm_print(S, Pos, TTterm) :-
+latex_ttTerm_print(Pos, TTterm) :-
 	nonvar(TTterm),
 	TTterm = (Term, Type),
 	nonvar(Term),
@@ -268,78 +294,78 @@ latex_ttTerm_print(S, Pos, TTterm) :-
 	latex_term(Token, Latex_Token),
 	latex_term(Lem, Latex_Lem),
 	latex_term(PosTag, Latex_PosTag),
-	tab(S, Pos),
+	tab(Pos),
 	latex_type(Type, Latex_type),
 	Pos8 is Pos,% + 8,
 	( NE == 'Ins' ->
-		write(S, '[.\\node[text=green]{\n');
+		write('[.\\node[text=green]{\n');
 	  Type = np:_ ->
-		write(S, '[.\\node[text=red]{\n');
-	  write(S, '[.\\node{\n') ),
-	tab(S, Pos8),
-	format(S, '\\scriptsize{~w}\\\\\n', [Latex_Token]),
-	tab(S, Pos8),
-	format(S, '$~w$\\\\\n', [Latex_type]),
-	tab(S, Pos8),
-	format(S, '\\textbf{~w}\\\\\n', [Latex_Lem]),
-	tab(S, Pos8),
-	format(S, '\\normalsize{~w}\\\\\n', [Latex_PosTag]),
+		write('[.\\node[text=red]{\n');
+	  write('[.\\node{\n') ),
+	tab(Pos8),
+	format('\\scriptsize{~w}\\\\\n', [Latex_Token]),
+	tab(Pos8),
+	format('$~w$\\\\\n', [Latex_type]),
+	tab(Pos8),
+	format('\\textbf{~w}\\\\\n', [Latex_Lem]),
+	tab(Pos8),
+	format('\\normalsize{~w}\\\\\n', [Latex_PosTag]),
 	% tab(S, Pos8),
 	% format(S, '\\scriptsize{~w}\\\\\n', [Feat1]),
-	tab(S, Pos8),
-	format(S, '\\scriptsize{~w} };\n', [NE]),
-	tab(S, Pos8),
-	write(S, ']\n').
+	tab(Pos8),
+	format('\\scriptsize{~w} };\n', [NE]),
+	tab(Pos8),
+	writeln(']').
 
-latex_ttTerm_print(S, Pos, TTterm) :-
+latex_ttTerm_print(Pos, TTterm) :-
 	nonvar(TTterm),
 	TTterm = (Term, Type),
 	!,
 	latex_term(Term, Latex_term),
 	%write('Atom: '), writeln(Latex_term),
 	latex_type(Type, Latex_type),
-	tab(S, Pos),
-	write(S, '[.\\node{'),
+	tab(Pos),
+	write('[.\\node{'),
 	Pos3 is Pos + 3,
 	Pos5 is Pos + 5,
 	%Pos7 is Pos + 7,
-	tab(S, Pos5),
-	write(S, '\\textbf{'),
-	write(S, Latex_term),
-	write(S, '}\\\\\n'),
-	tab(S, Pos5),
+	tab(Pos5),
+	write('\\textbf{'),
+	write(Latex_term),
+	write('}\\\\\n'),
+	tab(Pos5),
 	%write(S, '\\begin{sideways}\n'),
 	%tab(S, Pos7),
-	write(S, '$'),
-	write(S, Latex_type),
-	write(S, '$\n'),
+	write('$'),
+	write(Latex_type),
+	write('$\n'),
 	%tab(S, Pos5),
 	%write(S, '\\end{sideways}\n'),
-	tab(S, Pos3),
-	write(S, ' };\n'),
-	tab(S, Pos),
-	write(S, ']\n').
+	tab(Pos3),
+	write(' };\n'),
+	tab(Pos),
+	writeln(']').
 
-latex_ttTerm_print(S, Pos, VarTerm) :-
+latex_ttTerm_print(Pos, VarTerm) :-
 	latex_term(VarTerm, Latex_term),
 	VarTerm = abst((_Var, Type)),
 	latex_type(Type, Latex_type),
-	tab(S, Pos),
-	write(S, '[.\\node{'),
+	tab(Pos),
+	write('[.\\node{'),
 	Pos3 is Pos + 3,
 	Pos5 is Pos + 5,
-	tab(S, Pos5),
-	write(S, '\\textbf{'),
-	write(S, Latex_term),
-	write(S, '}\\\\\n'),
-	tab(S, Pos5),
-	write(S, '$'),
-	write(S, Latex_type),
-	write(S, '$\n'),
-	tab(S, Pos3),
-	write(S, ' };\n'),
-	tab(S, Pos),
-	write(S, ']\n').
+	tab(Pos5),
+	write('\\textbf{'),
+	write(Latex_term),
+	write('}\\\\\n'),
+	tab(Pos5),
+	write('$'),
+	write(Latex_type),
+	write('$\n'),
+	tab(Pos3),
+	write(' };\n'),
+	tab(Pos),
+	writeln(']').
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -458,29 +484,29 @@ ttTerm_to_latexTerm(TT, LatexTerm) :-
 % ccg_to_lambda_term_latex(S, ID_CCG, TTterm_ID)
 % converst ID_CCG pair into CCGTerm, CCGTerm into ttTerms (may fail),
 % then prints target sentence, ID_CCG, CCGterm, ttTerms in latex way on S chanelle
-ccg_to_lambda_term_latex(S, ID_CCG, TTterm_ID) :-
+ccg_to_lambda_term_latex(ID_CCG, TTterm_ID) :-
 	ID_CCG = ccg(Id, _CCGTree),
 	% print sentence and CCGtree
-	sen_id_latex(S, Id),
-	ccgTree_to_tikzpicture(S, Id),
+	sen_id_latex(Id),
+	ccgTree_to_tikzpicture(Id),
 	% CCGtree to ccgTerm
 	ccgIDTree_to_ccgIDTerm(ID_CCG, ccg(Id, CCGTerm)),
 	ne_ccg(CCGTerm, CCGTerm_1),
 	clean_ccgTerm_once(CCGTerm_1, CCGTerm_2),
 	CCGTerm_final = CCGTerm_2,
 	% print ccgTerm
-	latex_ttTerm_print_tree(S, 6, CCGTerm_final),
+	latex_ttTerm_print_tree(6, CCGTerm_final),
 	%ignore(ccgTerms_to_ttTerms([CCG_ID_term_final], [TTterm_ID])),
 	(	%getting TTterm
 		ccgTerms_to_ttTerms([ccg(Id, CCGTerm_final)], [TTterm_ID]),
 		TTterm_ID = tt_id(Id, TTterm),
 		nl, write(Id), %write(' TTterms,'),
-		latex_ttTerm_print_tree(S, 6,  TTterm_ID),
+		latex_ttTerm_print_tree(6,  TTterm_ID),
 		%greason([TTterm], []);
 		% normalization of TTterm
 		ttTerm_to_norm_term(TTterm, Normal_Term, _Sig, _Lexicon, _),
 		writeln(' yes'),
-		latex_norm_term_print(S, Normal_Term)%,
+		latex_norm_term_print(Normal_Term)%,
 		% reasoning
 		%assert_list(Sig, clean),
 		%gvalid(Normal_Term ===> '*'),
@@ -491,7 +517,7 @@ ccg_to_lambda_term_latex(S, ID_CCG, TTterm_ID) :-
 		writeln(' No')
 	).
 
-latex_norm_term_print(S, Normal_Term) :-
+latex_norm_term_print(Normal_Term) :-
 	lambdaTerm_to_latex(Normal_Term, Latex_Term),
-	write(S, Latex_Term),
-	write(S, '\\\\').
+	write(Latex_Term),
+	write('\\\\').

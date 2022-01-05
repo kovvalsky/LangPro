@@ -5,10 +5,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module(latex_ccgtree,
 	[
-		ccgTree_to_tikzpicture/2,
+		ccgTree_to_tikzpicture/1,
 		write_tikzpicture_begin/2,
 		write_tikzpicture_end/0,
-		ccgTree_to_latex/4
+		ccgTree_to_latex/3
 	]).
 
 :- use_module('latex_ttterm', [latex_term/2]).
@@ -16,12 +16,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Converts Prolog CCG tree in Tikzpicture
-ccgTree_to_tikzpicture(S, SID) :-
-	with_output_to(S, write_tikzpicture_begin(25, 0)),
+ccgTree_to_tikzpicture(SID) :-
+	write_tikzpicture_begin(25, 0),
 	( number(SID) -> sen_id2anno(SID, CCGTree, Anno) % t/3 format with ID input
 	; SID = ccg(ID, CCGTree), sen_id2anno(ID, CCGTree, Anno) ), % t/3 format with ID ccg/2 input
-	once(ccgTree_to_latex(S, Anno, 6, CCGTree)),
-	with_output_to(S, write_tikzpicture_end).
+	once(ccgTree_to_latex(Anno, 6, CCGTree)),
+	write_tikzpicture_end.
 
 % Latex related wrapper for tikzpicture
 write_tikzpicture_begin(Level, Sibling) :-
@@ -36,7 +36,7 @@ write_tikzpicture_end :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % prints Prolog CCG tree in latex tree for Tikzpicture
 % accomodates both a new offset style and old-style t/5
-ccgTree_to_latex(S, Anno, Pos, CCGTree) :-
+ccgTree_to_latex(Anno, Pos, CCGTree) :-
 	( CCGTree = t(Cat, Token, Offset) ->
 		off2anno(Anno, [Offset], A),
 		(Token, Lem, PosTag, NE) = (A.t, A.l, A.ppos, A.ner)
@@ -46,80 +46,80 @@ ccgTree_to_latex(S, Anno, Pos, CCGTree) :-
 	latex_term(Lem, Latex_Lem),
 	latex_term(PosTag, Latex_PosTag),
 	with_output_to(atom(Indent), tab(Pos)),
-	format(S, '~w[.\\node{~n', [Indent]),
-	format(S, '~w\\texttt{~w}\\\\~n', [Indent, Latex_Token]),
-	format(S, '~w$~w$\\\\~n', [Indent, CatAt]),
-	format(S, '~w\\textbf{~w}\\\\~n', [Indent, Latex_Lem]),
-	format(S, '~w\\normalsize{~w}\\\\~n', [Indent, Latex_PosTag]),
-%	format(S, '~w\\scriptsize{~w}\\\\~n', [Indent, I]),
-	format(S, '~w\\scriptsize{~w}\\\\~n', [Indent, NE]),
-	format(S, ' };~n~w]~n', [Indent]).
+	format('~w[.\\node{~n', [Indent]),
+	format('~w\\texttt{~w}\\\\~n', [Indent, Latex_Token]),
+	format('~w$~w$\\\\~n', [Indent, CatAt]),
+	format('~w\\textbf{~w}\\\\~n', [Indent, Latex_Lem]),
+	format('~w\\normalsize{~w}\\\\~n', [Indent, Latex_PosTag]),
+%	format('~w\\scriptsize{~w}\\\\~n', [Indent, I]),
+	format('~w\\scriptsize{~w}\\\\~n', [Indent, NE]),
+	format(' };~n~w]~n', [Indent]).
 
 
-ccgTree_to_latex(S, Anno,  Pos, CCGTree) :-
+ccgTree_to_latex(Anno,  Pos, CCGTree) :-
 	( CCGTree = lex(Cat, OldCat, Tree_1)
 	; CCGTree = lx(Cat, OldCat, Tree_1) ), !,
 	cat_to_latex(Cat, CatAt),
 	cat_to_latex(OldCat, OldCatAt),
 	Pos2 is Pos + 1,
-	tab(S, Pos),
+	tab(Pos),
 	atomic_list_concat(['[.\\node{${\\tt lx}[', CatAt, ', ', OldCatAt, ']$};\n'], Latex),
-	write(S, Latex),
-	ccgTree_to_latex(S, Anno, Pos2, Tree_1),
-	tab(S, Pos),
-	write(S, ']\n').
+	write(Latex),
+	ccgTree_to_latex(Anno, Pos2, Tree_1),
+	tab(Pos),
+	write(']\n').
 
-ccgTree_to_latex(S, Anno, Pos, CCGTree) :-
+ccgTree_to_latex(Anno, Pos, CCGTree) :-
 	CCGTree = conj(Cat, OldCat, Conj_Tree, Tree_1), !,
 	cat_to_latex(Cat, CatAt),
 	cat_to_latex(OldCat, OldCatAt),
 	Pos2 is Pos + 1,
-	tab(S, Pos),
+	tab(Pos),
 	atomic_list_concat(['[.\\node{${\\tt conj}[', CatAt, ', ', OldCatAt, ']$};\n'], Latex),
-	write(S, Latex),
-	ccgTree_to_latex(S, Anno, Pos2, Conj_Tree),
-	ccgTree_to_latex(S, Anno, Pos2, Tree_1),
-	tab(S, Pos),
-	write(S, ']\n').
+	write(Latex),
+	ccgTree_to_latex(Anno, Pos2, Conj_Tree),
+	ccgTree_to_latex(Anno, Pos2, Tree_1),
+	tab(Pos),
+	write(']\n').
 
-ccgTree_to_latex(S, Anno, Pos, CCGTree) :-
+ccgTree_to_latex(Anno, Pos, CCGTree) :-
 	( CCGTree = tr(Cat, Tree_1)
 	; CCGTree = tr(Cat, _, Tree_1) % for easyCCG
 	),	!,
 	cat_to_latex(Cat, CatAt),
 	Pos2 is Pos + 1,
-	tab(S, Pos),
+	tab(Pos),
 	atomic_list_concat(['[.\\node{${\\tt tr}[', CatAt, ']$};\n' ], Latex),
-	write(S, Latex),
-	ccgTree_to_latex(S, Anno, Pos2, Tree_1),
-	tab(S, Pos),
-	write(S, ']\n').
+	write(Latex),
+	ccgTree_to_latex(Anno, Pos2, Tree_1),
+	tab(Pos),
+	write(']\n').
 
-ccgTree_to_latex(S, Anno, Pos, CCGTree) :-
+ccgTree_to_latex(Anno, Pos, CCGTree) :-
 	CCGTree =.. [Funct, Cat, _, Tree_1, Tree_2 | _],
 	memberchk(Funct, [gbxc, gfxc, gfc, gbc]), !,
 	Pos2 is Pos + 1,
-	tab(S, Pos),
+	tab(Pos),
 	cat_to_latex(Cat, CatAt),
 	atomic_list_concat(['[.\\node{${\\tt ', Funct, '}[', CatAt, ']$};\n'], Latex),
-	write(S, Latex),
-	ccgTree_to_latex(S, Anno, Pos2, Tree_1),
-	ccgTree_to_latex(S, Anno, Pos2, Tree_2),
-	tab(S, Pos),
-	write(S, ']\n').
+	write(Latex),
+	ccgTree_to_latex(Anno, Pos2, Tree_1),
+	ccgTree_to_latex(Anno, Pos2, Tree_2),
+	tab(Pos),
+	write(']\n').
 
-ccgTree_to_latex(S, Anno, Pos, CCGTree) :-
+ccgTree_to_latex(Anno, Pos, CCGTree) :-
 	CCGTree =.. [Funct, Cat, Tree_1, Tree_2 | _],
 	memberchk(Funct, [fa, ba, fc, bc, fxc, bxc, fx, bx, rp, lp, rtc, ltc]), !,
 	cat_to_latex(Cat, CatAt),
 	Pos2 is Pos + 1,
-	tab(S, Pos),
+	tab(Pos),
 	atomic_list_concat(['[.\\node{${\\tt ', Funct, '}[', CatAt, ']$};\n'], Latex),
-	write(S, Latex),
-	ccgTree_to_latex(S, Anno, Pos2, Tree_1),
-	ccgTree_to_latex(S, Anno, Pos2, Tree_2),
-	tab(S, Pos),
-	write(S, ']\n').
+	write(Latex),
+	ccgTree_to_latex(Anno, Pos2, Tree_1),
+	ccgTree_to_latex(Anno, Pos2, Tree_2),
+	tab(Pos),
+	write(']\n').
 
 
 
