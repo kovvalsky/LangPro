@@ -63,18 +63,18 @@ print_ttTerm_to_gqtTerms(List) :-
 	open('latex/gqttTerms.tex', write, S, [encoding(utf8), close_on_abort(true)]),
 	%asserta(latex_file_stream(S)),
 	latex_ttTerm_preambule(S),
-	maplist(print_subTerms_of_ttTerm(S), List),
+	with_output_to(S, maplist(print_subTerms_of_ttTerm, List)),
 	write(S, '\\end{document}'),
 	close(S).
 
-print_subTerms_of_ttTerm(S, TTexp) :-
+print_subTerms_of_ttTerm(TTexp) :-
 	ttExp_to_ttTerm(TTexp, TT),
-	latex_ttTerm_print_tree(S, 6, TT),
+	latex_ttTerm_print_tree(6, TT),
 	ttTerm_to_subTerms(TT, NewTT, Vars, SubTerms),
 	findall(SubTTterm,  member(subterm(SubTTterm,_,_), SubTerms), List_SubTerm),
-	maplist(latex_ttTerm_print_tree(S, 6), List_SubTerm),
+	maplist(latex_ttTerm_print_tree(6), List_SubTerm),
 	findall(NormGQTT, (gq_join_terms(NewTT, Vars, [], SubTerms, GQTT), norm_tt(GQTT, NormGQTT)), GQTTs),
-	maplist(latex_ttTerm_print_tree(S, 6), GQTTs).
+	maplist(latex_ttTerm_print_tree(6), GQTTs).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
