@@ -117,6 +117,7 @@ fix_term(
 	right_branch_tt_search(M, (ModTT@(NP,np:Y),np:X), Mods, Noun),
 	Noun = (TLP_NN, np:_),
 	tlp_pos_in_list(TLP_NN, ['NN', 'NNS']),
+	TLP_NN =.. [_,_,L|_], \+decompose_everyone(L,_,_), % skip nobody:NN:np
 	maplist(set_type_for_tt_of_type(np:_~>np:_, n:_~>n:_), [M|Mods], Mods1),
 	apply_ttMods_to_ttArg(Mods1, (TLP_NN,n:_), Mods_N),
 	fix_report('!!! Fix: insert n~>np rule for Mods@NN(S):np (NL)').
@@ -126,6 +127,7 @@ fix_term(
 	( (TLP_NN, n:_), np:X )
 ) :-
 	tlp_pos_in_list(TLP_NN, ['NN', 'NNS']),
+	TLP_NN =.. [_,_,L|_], \+decompose_everyone(L,_,_), % skip nobody:NN:np
 	fix_report('!!! Fix: insert n~>np rule for NN(S):np (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
