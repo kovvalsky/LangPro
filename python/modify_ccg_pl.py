@@ -67,6 +67,7 @@ def get_anno(ord, idx_anno, token_anno):
 if __name__ == '__main__':
     args = parse_arguments()
 
+    cmd = ' '.join(sys.argv)
     ccg_start = 'ccg\((\d+)'
     t_start = "\s*t\("
     t_arity = None
@@ -81,6 +82,11 @@ if __name__ == '__main__':
         ccg_pl = F.readlines()
 
     O = open(args.out, 'w') if args.out else sys.stdout
+    O.write(f'% This file was generated with:\n% {cmd}\n\n')
+    O.write(':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n')
+
+    arity = 3 if args.sys else 2
+    O.write(f':- multifile ccg/{arity}.\n:- discontiguous ccg/{arity}.\n\n')
 
     for l in ccg_pl:
         if re.match(ccg_start, l):
@@ -89,9 +95,9 @@ if __name__ == '__main__':
             # modify "ccg(" part
             if args.sys is not None:
                 if args.sys == '': # remove system identifier
-                    l = re.sub(f"{ccg_start}:[^,\s]+", 'ccg(\1', l)
+                    l = re.sub(f"{ccg_start}\s*,\s*[^,\s]+", 'ccg(\1', l)
                 else: # add system identifier
-                    l = re.sub(ccg_start, f'ccg(\\1:{args.sys}', l)
+                    l = re.sub(ccg_start, f"ccg(\\1, '{args.sys}'", l)
         elif re.match(t_start, l) and args.anno_ord:
             # rearranging, changing or adding new annotatiosn to the existing
             t_prefix, t_anno, t_suffix = parse_t_term(l, arity=t_arity)
@@ -102,6 +108,8 @@ if __name__ == '__main__':
             tok_input_anno = sen_input_anno[tid-1]
             new_t_anno = [ get_anno(j, indx_anno, tok_input_anno) for j in args.anno_ord ]
             l = f"{t_prefix}{', '.join(new_t_anno)}{t_suffix}"
+        elif l.startswith('%') or l.startswith(':-'):
+            continue
         O.write(l)
 
     if args.out: O.close()
