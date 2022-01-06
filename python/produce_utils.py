@@ -3,6 +3,7 @@
 
 import re, os, sys
 from os import path as op
+from itertools import product
 
 ABBR2TOOL = {'D':'depccg', 'E':'easyccg', 'C':'cc2016.st', 'S':'spacy'}
 ABBR2MODEL = {'D':'depccg.trihf.sep', 'E':'easyccg', 'C':'cc2016.st'}
@@ -13,10 +14,20 @@ def abbr2tool(a):
 def abbr2model(a):
     return ABBR2MODEL[a]
 
-def flags2annos(a):
-    annos = re.split('[\.,]', a)
+def unfold_anno_inits(anno_inits):
+    # return a series of anno inits. Several is returned if it has
+    # underspecified components, like ?.C.C.C, here ? is underspecified
+    poss_vals = ("DCE","ESC","CS","C") # e.g., ccg can be D, C, or E
+    anno = re.split('[\.,]', anno_inits)
+    anno_vals = [ (i if a == '?' else a) for a, i in zip(anno, poss_vals) ]
+    for combi in product(*anno_vals):
+        yield '.'.join(combi)
+
+def flags2annos(anno_combi):
+    # convert anno initials to ano_sys as prolog dict
     order = 'ccg l ppos ner'.split()
-    k_sys = [ f"{k}-'{abbr2tool(sys)}'" for k, sys in zip(order, annos) ]
+    anno = re.split('[\.,]', anno_combi)
+    k_sys = [ f"{k}-'{abbr2tool(sys)}'" for k, sys in zip(order, anno) ]
     return ', '.join(k_sys)
 
 def flags2ccgfile(a):
