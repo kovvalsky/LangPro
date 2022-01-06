@@ -124,7 +124,7 @@ def aggregate_answers(sys_id_label, primary=None, out=None):
             sys_id_label[primary][p] in ('ENTAILMENT','CONTRADICTION'):
             id_ans[p] = sys_id_label[primary][p]
             continue
-        # there is no promaty system or primary says NEUTRAL
+        # there is no primary system or primary says NEUTRAL
         s = set(l)
         if len(s) == 1:
             id_ans[p] = s.pop()
@@ -134,7 +134,7 @@ def aggregate_answers(sys_id_label, primary=None, out=None):
                 id_ans[p] = s.pop()
             else:
                 id_ans[p] = 'NEUTRAL'
-                print(f"Disagreement: {l}")
+                print(f"Disagreement ({p}): {l}")
         else:
             id_ans[p] = 'NEUTRAL'
     # write aggregated answers in a file if requested
