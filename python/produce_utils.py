@@ -87,3 +87,12 @@ def get_part(p):
         return d[p]
     else:
         return '_'.join([ d[c] for c in p ])
+
+def prove_type(key, pids):
+    pid_list = ','.join(re.split('[\.,]', pids))
+    if key == 'prove':
+        return f"entail_some([{pid_list}])"
+    if key == 'gprove' or key == 'gaprove':
+        if ',' in pid_list: raise RuntimeError("gprove expects a single problem")
+        align = 'align, ' if key == 'gaprove' else ''
+        return f"gentail({align}{pids})"
