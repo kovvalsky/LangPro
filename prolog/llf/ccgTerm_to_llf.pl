@@ -510,7 +510,7 @@ fix_term(
 	( (Quant,n:F2~>np:F1) @ (Mod @ (Noun,n:F2), n:F2), np:F1)
 ) :-
 	nonvar(L),
-	memberchk(POS, ['DT','PRON','PRP','PRP$']),
+	memberchk(POS, ['DT','PRON','PRP','PRP$','NN','NNS']), % spacy uses NN
 	decompose_everyone(L, Q, N),
 	Quant = tlp([0-0],Q,'DT','Ins','Ins'),
 	Noun = tlp([0-0],N,'NN','Ins','Ins'),
@@ -524,7 +524,7 @@ fix_term(
 	( (Quant,n:F2~>np:F1) @ (Noun,n:F2), np:F1 )
 ) :-
 	nonvar(L),
-	memberchk(POS, ['DT','PRON','PRP','PRP$']),
+	memberchk(POS, ['DT','PRON','PRP','PRP$','NN','NNS']), % spacy uses NN
 	decompose_everyone(L, Q, N),
 	Quant = tlp([0-0],Q,'DT','Ins','Ins'),
 	Noun = tlp([0-0],N,'NN','Ins','Ins'),
