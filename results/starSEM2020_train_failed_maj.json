@@ -3564,7 +3564,7 @@
   ]
  },
  "7572": {
-  "anno": "",
+  "anno": "pp-move",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3573,7 +3573,7 @@
   ]
  },
  "7580": {
-  "anno": "",
+  "anno": "abduction; group",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3582,7 +3582,7 @@
   ]
  },
  "7588": {
-  "anno": "",
+  "anno": "paraphrase(oc;gen)",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3591,7 +3591,7 @@
   ]
  },
  "7608": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "yes",
   "pred": "unknown, yes, unknown",
   "prob": [
@@ -3600,7 +3600,7 @@
   ]
  },
  "7616": {
-  "anno": "",
+  "anno": "easy+; noK",
   "gold": "no",
   "pred": "no, unknown, unknown",
   "prob": [
@@ -3609,7 +3609,7 @@
   ]
  },
  "7639": {
-  "anno": "",
+  "anno": "noisy+",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3618,7 +3618,7 @@
   ]
  },
  "7641": {
-  "anno": "",
+  "anno": "diff; world",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3627,7 +3627,7 @@
   ]
  },
  "7642": {
-  "anno": "",
+  "anno": "noisy+",
   "gold": "yes",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3636,7 +3636,7 @@
   ]
  },
  "7647": {
-  "anno": "",
+  "anno": "easy?; abduction(vp,vp)",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3645,7 +3645,7 @@
   ]
  },
  "7666": {
-  "anno": "",
+  "anno": "easy; abduction(n,n)",
   "gold": "yes",
   "pred": "unknown, yes, unknown",
   "prob": [
@@ -3654,7 +3654,7 @@
   ]
  },
  "7670": {
-  "anno": "",
+  "anno": "easy; abduction; paraphrase(pp)",
   "gold": "yes",
   "pred": "yes, unknown, unknown",
   "prob": [
@@ -3663,7 +3663,7 @@
   ]
  },
  "7687": {
-  "anno": "",
+  "anno": "easy; noK",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
@@ -3672,7 +3672,7 @@
   ]
  },
  "7689": {
-  "anno": "",
+  "anno": "easy; disj(prep)",
   "gold": "no",
   "pred": "unknown, unknown, no",
   "prob": [
@@ -3681,7 +3681,7 @@
   ]
  },
  "7722": {
-  "anno": "",
+  "anno": "noisy+",
   "gold": "no",
   "pred": "unknown, unknown, unknown",
   "prob": [
