@@ -93,7 +93,7 @@ def read_id_labels(filepath):
                     else:
                         id_labels[pid] = pred
     if not id_labels:
-        raise RuntimeError("No predictions retrieved")
+        raise RuntimeError(f"No predictions retrieved from {filepath}")
     return id_labels
 
 #################################
