@@ -4,6 +4,7 @@
 import re, os, sys
 from os import path as op
 from itertools import product
+from collections import defaultdict
 
 ABBR2TOOL = {'D':'depccg', 'E':'easyccg', 'C':'cc2016.st', 'S':'spacy'}
 ABBR2MODEL = {'D':'depccg.trihf.sep', 'E':'easyccg', 'C':'cc2016.st'}
@@ -107,3 +108,22 @@ def prove_type(key, pids):
         if ',' in pid_list: raise RuntimeError("gprove expects a single problem")
         align = 'align, ' if key == 'gaprove' else ''
         return f"gentail({align}{pids})"
+
+def pid2sids(fn, pid):
+    pid2sid = read_pid_sid(fn)
+    return pid2sid[pid]
+
+def read_pid_sid(fn):
+    '''read pid to sid mapping from _sen.pl file'''
+    pid2sid = defaultdict(list)
+    with open(fn) as F:
+        for l in F:
+            if l.startswith('sen_id'):
+                m = re.match('sen_id\((\d+)\s*,\s*([^,]+)', l)
+                sid, pid = m.groups()
+                pid2sid[pid].append(sid)
+    return pid2sid
+
+def r_i2r(r_suffix):
+    '''Rule number with suffix to rule number. Suffic is used for versioning'''
+    return re.match('\d+', r_suffix).group()
