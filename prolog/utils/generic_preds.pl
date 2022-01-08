@@ -24,6 +24,7 @@
 	]).
 
 :- use_module(library(http/json)).
+:- use_module(library(yall)). % added as conccurent runs sometimes throw errors 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true_member(Element, List)
