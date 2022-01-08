@@ -719,7 +719,9 @@ np_const_to_e_const( (TT, Type), (SimTT, Type) ) :-
 lex_norm_ttterms(Stage, Tm_L, Nr_L, LPs) :-
 	extract_lex_NNPs_ttTerms(Tm_L, LPs, LPTs, _Names),
 	normalize_lexicon(LPTs, NormLPTs, SuppMap),
-	( LPTs = NormLPTs -> true; format('Diff in Lex at ~p~n', [Stage]) ),
+	( LPTs = NormLPTs -> true
+	; ord_symdiff(LPTs, NormLPTs, Diff),
+	  format('Diff in Lex at ~p: ~w~n', [Stage, Diff]) ),
 	( (var(Stage); debMode(Stage)) ->
 		maplist( token_norm_ttTerm(SuppMap), Tm_L, Nr_L )
 	; Nr_L = Tm_L
