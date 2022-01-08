@@ -1294,7 +1294,8 @@ r(abst_dist, 	equi:non,  ([], [], _), _Lexicon, _,  %maybe impl?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % verb phrase modifier and pp complement
 
-% pp complement as modifier: kick@(near@John) ~> (near@John)@kick, sick-1469,44 needs it
+% pp complement as modifier: VP@PP [Args] => PP@VP [Args]
+% kick@(near@John) ~> (near@John)@kick, sick-1469,44 needs it
 r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _,
 		br([nd( M, ((VP,Ty) @ (PP, pp), Type), %!!! before was only np:_~>s:_
 				Args, TF )],
@@ -1309,37 +1310,39 @@ r(vp_pp, 	impl:non,  ([], [], _),  [[ty(pp)]], _,
 		set_type_for_tt((VP,Ty), Type, VP1).	% change s:pss to s:dcl?
 
 
-
-% Verb @ PR [NP..] => (PR @ NP) @ Verb [..]
-% jump over c1 <=> jump (over c1)
-% sick-150, 1480, 1483, 7755, wrong-1481
-r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,   %sick-150
-		br([nd( M, ( VP @ (tlp(Tk,Over,_,F1,F2), pr), TyS), [C, D | Rest], TF )],
+% Next two rules makes equivalence: (jump over) c1 <=> (over c1) jump
+% VP@Prep [NP,Args] => (Prep@NP)@VP [Args]
+% sick-150, 1480, 1483, 7755, 6045, wrong-1481
+r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
+		br([nd( M, ( VP @ (tlp(Tk,Over,POS,F1,F2),_), TyS), [C, D | Rest], TF )],
 			Sig) % why C, D? why not only C?
 		===>
 		br([nd( M, ((Prep @ C, TyVP~>TyVP) @ VP1, TyVP), [D | Rest], TF )],
 			Sig) )
 :-
+			memberchk(POS, ['RP','IN','TO','RB']),
 			final_value_of_type(TyS, s:_),
 			TyS = np:_~>TyVP,
 			set_type_for_tt(VP, TyVP, VP1),
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-8091 accidentally
+% Prep@VP [NP,Args] => Prep@NP@VP [Args]
 r(pr_v_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
-		br([nd( M, ( (tlp(Tk,Over,_POS,F1,F2), (np:_~>_)~>np:_~>_) @ VP, TyS ),  [C, D | Rest], TF )],
+		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), (np:_~>_)~>np:_~>_) @ VP, TyS ),  [C, D | Rest], TF )],
 			Sig)
 		===>
 		br([nd( M, ((Prep @ C, TyVP~>TyVP) @ VP1, TyVP), [D | Rest], TF )],
 			Sig) )
 :-
+			memberchk(POS, ['RP','IN','TO','RB']),
 			final_value_of_type(TyS, s:_),
 			TyS = np:_~>TyVP,
 			set_type_for_tt(VP, TyVP, VP1),
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-3561, 4117
-% PR @ V [C] => V @ PR [C]
+% Prep@VP [C] => VP@Prep [C]  % TODO is this necessary?
 r(pr_v_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), (np:_~>s:_)~>np:_~>s:_) @ VP, TyVP),  [C], TF )],
 			Sig)
@@ -1351,7 +1354,7 @@ r(pr_v_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			set_type_for_tt(VP, pr~>TyVP, VP1).
 
 % sick-3702
-% V @ NP @ PP/PR [C] => V @ PP/PR @ NP [C]
+% VP@NP@Prep [C] => VP@Prep@NP [C]
 r(v__pr_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (VP @ NP, _) @ (tlp(Tk,Over,POS,F1,F2),TyP), TyVP ), [C], TF )],
 			Sig)
