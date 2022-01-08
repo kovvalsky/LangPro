@@ -4,12 +4,12 @@ See the [online demo](https://naturallogic.pro/LangPro/) (not the latest version
 <!-- (http://naturallogic.pro/langpro). -->
 
 Given a set of premises and a hypothesis in natural language, LangPro tries to find out semantic relation between them: `entailment` (i.e. `yes`), `contradiction` (i.e. `no`) or `neutral` (i.e. `unknown`).  
-For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicted below: 
+For this, LangPro needs CCG (Combinatory Categorial Grammar) derivations of the linguistic expressions in order to obtain Lambda Logical Forms (LLFs) from them via the LLFgen (LLF generator) component. The architecture is depicted below:
 ```
-____________    ________             ___________      ________________________    __________ 
+____________    ________             ___________      ________________________    __________
 |Premises &|    | CCG  | derivations |   LLF   | LLFs |Tableau Theorem Prover|    |Semantic|
 |Hypothesis|--->|Parser|------------>|Generator|----->|  for Natural Logic   |--->|relation|
-‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾ 
+‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ‾‾‾‾‾‾‾‾‾‾
 ```
 If you use the theorem prover, please cite [Abzianidze (2017)](https://www.aclweb.org/anthology/D17-2020):
 ```
@@ -27,7 +27,7 @@ If you use the theorem prover, please cite [Abzianidze (2017)](https://www.aclwe
 }
 ```
 
-For the manual on how to use the prover or how to obtain reported results, consult the [wiki](https://github.com/kovvalsky/LangPro/wiki). 
+For the manual on how to use the prover or how to obtain reported results, consult the [wiki](https://github.com/kovvalsky/LangPro/wiki).
 
 # Quick links to the [wiki pages](https://github.com/kovvalsky/LangPro/wiki):
 
