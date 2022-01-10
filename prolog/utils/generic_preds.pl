@@ -17,6 +17,7 @@
 		member_zip/2,
 		read_dict_from_json_file/2,
 		rotate_list/2,
+		symmdiff_variant/3,
 		sort_list_length/2,
 		sublist_of_list/2,
 		substitute_in_atom/4,
@@ -24,7 +25,7 @@
 	]).
 
 :- use_module(library(http/json)).
-:- use_module(library(yall)). % added as conccurent runs sometimes throw errors 
+:- use_module(library(yall)). % added as conccurent runs sometimes throw errors
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true_member(Element, List)
@@ -177,6 +178,17 @@ list_to_ord_set_variant(L, S) :-
 	list_to_set_variant(L, V),
 	sort(V, S).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% variant based subtraction and symmetric difference
+
+% delete from L elements that are variant to some element in D, result is R
+subtract_variant(L, D, R) :-
+	include({D}/[E]>>(\+variant_member(E,D)), L, R).
+
+symmdiff_variant(A, B, D) :-
+	subtract_variant(A, B, A_B),
+	subtract_variant(B, A, B_A),
+	append(A_B, B_A, D).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get a self-command

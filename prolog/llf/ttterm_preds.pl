@@ -53,7 +53,7 @@
 :- use_module('../latex/latex_ttterm', [latex_ttTerm_print_tree/2, latex_ttTerm_preambule/1]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../utils/user_preds', [off2anno/3]).
-:- use_module('../utils/generic_preds', [list_to_ord_set_variant/2]).
+:- use_module('../utils/generic_preds', [list_to_ord_set_variant/2, symmdiff_variant/3]).
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../knowledge/lexicon', [op(640, xfy, ::), '::'/2]).
@@ -720,7 +720,7 @@ lex_norm_ttterms(Stage, Tm_L, Nr_L, LPs) :-
 	extract_lex_NNPs_ttTerms(Tm_L, LPs, LPTs, _Names),
 	normalize_lexicon(LPTs, NormLPTs, SuppMap),
 	( LPTs = NormLPTs -> true
-	; ord_symdiff(LPTs, NormLPTs, Diff),
+	; symmdiff_variant(LPTs, NormLPTs, Diff),
 	  format('Diff in Lex at ~p: ~w~n', [Stage, Diff]) ),
 	( (var(Stage); debMode(Stage)) ->
 		maplist( token_norm_ttTerm(SuppMap), Tm_L, Nr_L )
