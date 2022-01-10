@@ -156,9 +156,13 @@ solve_entailment( Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) 
 % parallel version of solve_entailment
 parallel_solve_entailment(Align, ProblemIds_Answers, Results) :-
 	% drop binning as it is not significant for performance
-	concurrent_maplist(solve_entailment(Align), ProblemIds_Answers, Results).
-	% parallel_solve_entailment(Align, [], ProblemIds_Answers, Results).
+	% concurrent_maplist(solve_entailment(Align), ProblemIds_Answers, Results).
+	parallel_solve_entailment(Align, [], ProblemIds_Answers, Results).
 
+parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
+	concurrent_maplist(solve_entailment(Align, KB), ProblemIds_Answers, Results).
+
+/*
 parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
 	debMode(parallel(Cores)),
 	partition_list_into_N_even_lists(ProblemIds_Answers, Cores, JobList),
@@ -170,7 +174,8 @@ parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
 	report(['Length of jobs: ', JobMessage]),
 	% Run concurrent solver for all jobs at the same time and collect all the results in the end
 	concurrent_maplist(solve_accu_job(Align, KB), JobList, ResultList),
-	partition_list_into_N_even_lists(Results, _, ResultList).
+	partition_list_into_N_even_lists(Results, _, ResultList)
+*/
 
 solve_accu_job(Align, KB, ProblemIds_Answers, Results) :-
 	maplist(solve_entailment(Align, KB), ProblemIds_Answers, Results).

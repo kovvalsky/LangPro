@@ -11,7 +11,7 @@
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
-	concurrent_maplist_n_jobs/3, %element_list_member/3,
+	%concurrent_maplist_n_jobs/3, %element_list_member/3,
 	list_to_freqList/2, shared_members/2,
 	sym_rels_to_canonical/2, prob_input_to_list/2,
 	partition_list_into_N_even_lists/3,
@@ -34,6 +34,8 @@
 	print_learning_stages/2, write_induced_kb_in_file/3, waif_cv3/3
 	]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2]).
+
+:- use_module(library(yall)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,11 +83,7 @@ load_ccg_sen_probs(Parts, _, PIDAs) :-
 	assertz( debMode(parts(Parts)) ),
 	all_prIDs_Ans(PIDAs).
 
-
-load_ccg_sen_probs(CCG, SEN, PIDAs) :-
-	ensure_loaded(CCG),
-	ensure_loaded(SEN),
-	%all_prIDs_Ans(PIDAs1), findall(P-A, (member(P-A, PIDAs1), between(1495,1500,P)), PIDAs).
+load_ccg_sen_probs(_, _, PIDAs) :-
 	all_prIDs_Ans(PIDAs).
 %------------------------------------
 
@@ -147,7 +145,8 @@ train_test(Config, TrainPIDA, TestPIDA, TrainScores, TestScores, TrAcc, TsAcc) :
 % Induce knowledge as long as it boosts the performace
 train_with_abduction(Config, TrainIDA, Induced_KB, TrainScores, TrAcc) :-
 	% base case: evaluate the prover on the data without any induced knowledge
-	concurrent_maplist_n_jobs(add_lex_to_id_ans, TrainIDA, TrainIDAL),
+	% concurrent_maplist_n_jobs(add_lex_to_id_ans, TrainIDA, TrainIDAL),
+	concurrent_maplist(add_lex_to_id_ans, TrainIDA, TrainIDAL),
 	predict_with_iKB(Config, [], TrainIDAL, _, _Acc, SolvA0, FailA0),
 	% Try now if knowledge induction improves over the base case. Start with no initial KB
 	while_improve_induce_prove(TrainIDAL, FailA0-FailA, SolvA0-SolvA, Config, [], Induced_KB0),
@@ -248,7 +247,8 @@ kb_induction_all(Config, IDALs, SolvA, Init_KB, Ind_KB) :-
 % Pick only those KBs that doesn't hurt performance
 pick_harmless_KBs(Config, SolvA, IDALs, L_KBs, Harmless_KB) :-
 	% maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
-	concurrent_maplist_n_jobs(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
+	% concurrent_maplist_n_jobs(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
+	concurrent_maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
 	sort([1,1,2], @>=, L_Best_KB_Score_SU, Ord_L_Best_KB_Score_SU),
 	findall(KB, (
 		member(KB-Sc-S-U, Ord_L_Best_KB_Score_SU),
@@ -318,24 +318,24 @@ estimate_kb_wrt_prob(_Config, _IKB, _L_KB_Lex_Units, (_,_,_Lex), [], []).
 
 % Parallel mode
 par_kb_induction_some(Config, Init_KB, IDAs, KBs, Info5) :-
-	debMode(parallel(Cores)),
-	!,
-	partition_list_into_N_even_lists(IDAs, Cores, JobList),
-	concurrent_maplist(kb_induction_some(Config,Init_KB), JobList, List_of_KBs, List_of_Stats_Ans),
-	partition_list_into_N_even_lists(KBs, Cores, List_of_KBs),
-	partition_list_into_N_even_lists(Info5, Cores, List_of_Stats_Ans).
+	debMode(parallel(_)), !,
+	concurrent_maplist(kb_induction_prob(Config,Init_KB), IDAs, KBs, Info5).
+	%partition_list_into_N_even_lists(IDAs, Cores, JobList),
+	%concurrent_maplist(kb_induction_some(Config,Init_KB), JobList, List_of_KBs, List_of_Stats_Ans).
+	%partition_list_into_N_even_lists(KBs, Cores, List_of_KBs),
+	%partition_list_into_N_even_lists(Info5, Cores, List_of_Stats_Ans).
 
 % Non-parallel mode
 par_kb_induction_some(Config, Init_KB, IDAs, KBs, Info5) :-
-	kb_induction_some(Config, Init_KB, IDAs, KBs, Info5).
+	maplist(kb_induction_prob(Config,Init_KB), IDAs, KBs, Info5).
 
 % Auxiliary for maplist
-kb_induction_some(Config, Init_KB, IDAs, LL_KB, Info5) :-
-	maplist(kb_induction_prob(Config,Init_KB), IDAs, LL_KB, Info5).
-	% findall(KB, (
-	% 	member(L_KB, LL_KB),
-	% 	( L_KB=[] -> KB=[]; L_KB=[KB|_] ) %!!! pick only the first KB candidate
-	% 	), KBs).
+% kb_induction_some(Config, Init_KB, IDAs, LL_KB, Info5) :-
+% 	maplist(kb_induction_prob(Config,Init_KB), IDAs, LL_KB, Info5).
+% 	% findall(KB, (
+% 	% 	member(L_KB, LL_KB),
+% 	% 	( L_KB=[] -> KB=[]; L_KB=[KB|_] ) %!!! pick only the first KB candidate
+% 	% 	), KBs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge from a single problem

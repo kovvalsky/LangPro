@@ -68,7 +68,9 @@ set_debMode([H | Rest]) :-
 		; throw_error('Unexpected parameter for wn senses: ~q', [H]) ),
 		assertz( debMode(ss(SS1)) )
 	; H = parallel(Cores) ->
-		( var(Cores) -> current_prolog_flag(cpu_count, Cores); true ),
+		% TODO use set_prolog_flag(cpu_count,Cores).
+		( var(Cores) -> current_prolog_flag(cpu_count, Cores)
+		; set_prolog_flag(cpu_count, Cores) ),
 		assertz( debMode(parallel(Cores)) )
 	; H = output_branches(Exts, Filename) ->
 		findall(_, (
