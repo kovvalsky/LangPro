@@ -53,6 +53,7 @@ def flag2par(flag):
                'ai': 'allInt',
                'common': 'aall, allInt, constchk, wn, llf_norm, ccg_norm',
                # induction parameters
+               'abduce': 'align-both, constchk, constKB, compTerms, patterns-([_,_@_,(_@_)@_, _@(_@_)])',
                'ab': 'align-both',
                'an': 'align-no_align',
                'aa': 'align-align',
@@ -98,7 +99,7 @@ def get_part(p):
     if p in d:
         return d[p]
     else:
-        return '_'.join([ d[c] for c in p ])
+        return ','.join([ d[c] for c in p ])
 
 def prove_type(key, pids):
     pid_list = ','.join(re.split('[\.,]', pids))
