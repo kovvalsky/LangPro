@@ -12,6 +12,7 @@
 		format_list_list/4,
 		get_cmd/1,
 		keep_smallest_lists/2,
+		list_product/3,
 		list_to_set_variant/2,
 		list_to_ord_set_variant/2,
 		member_zip/2,
@@ -195,3 +196,11 @@ symmdiff_variant(A, B, D) :-
 get_cmd(CMD) :-
 	current_prolog_flag(os_argv, Options),
 	atomic_list_concat(Options, ' ', CMD).
+
+
+% cartesian product of two lists
+list_product(L1, L2, Prod) :-
+	findall(E1-E2, (
+		member(E1, L1),
+		member(E2, L2)
+	), Prod).

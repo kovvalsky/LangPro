@@ -32,7 +32,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Partition problems in N parts and print label distribution of the parts
 % Seed 990 gives the smallest cumDiff from 0 to 1000
-partition_as_prIDs_Ans(Problems, Answers, Seed, N, Parts, CumDiff) :-
+partition_as_prIDs_Ans(Problems, Answers, Seed, N, OrdParts, CumDiff) :-
 	prob_input_to_list(Problems, PrIDs),
 	prIDs_to_prIDs_Ans(PrIDs, PrIDs_Ans1),
 	filterAns_prIDs_Ans(PrIDs_Ans1, Answers, PrIDs_Ans),
@@ -42,7 +42,8 @@ partition_as_prIDs_Ans(Problems, Answers, Seed, N, Parts, CumDiff) :-
 	stratified_partition_of_list(PrIDs_Ans, Seed, N, Parts),
 	maplist(print_prID_Ans_dist, Parts, Parts_Dist),
 	mismatch_rate(AllDist, Parts_Dist, 0, CumDiff),
-	format('Cummulative Difference: ~1f%~n', [CumDiff]).
+	format('Cummulative Difference: ~1f%~n', [CumDiff]),
+	maplist(sort(1, @=<), Parts, OrdParts).
 
 %---------------------------------
 % Print label distribution (%) from the problem-ans list

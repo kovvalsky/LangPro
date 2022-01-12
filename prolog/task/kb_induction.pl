@@ -7,7 +7,8 @@
 
 :- use_module('../rules/rules', [op(610, xfx, ===>)]).
 :- use_module('../printer/reporting', [
-	report/1, par_format/2, print_pre_hyp/2, report/2, print_pre_hyp/1
+	report/1, par_format/2, print_pre_hyp/2, report/2, print_pre_hyp/1,
+	pid_to_print_prob/2
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
@@ -18,11 +19,11 @@
 	uList2List/2, prIDs_to_prIDs_Ans/2, get_value_def/3,
 	average_list/2, all_prIDs_Ans/1]).
 :- use_module('../utils/generic_preds', [
- 	format_list/3, format_list_list/3, format_list_list/4, keep_smallest_lists/2,
+ 	format_list/3, format_list_list/3, format_list_list/4,
+	keep_smallest_lists/2, list_product/3,
 	sublist_of_list/2, sort_list_length/2
 	]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
-:- use_module(library(pairs)).
 :- use_module('../prover/tableau_utils', [
 	get_closure_rules/2
 	]).
@@ -36,6 +37,8 @@
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2]).
 
 :- use_module(library(yall)).
+:- use_module(library(pairs)).
+:- use_module(library(clpfd), [transpose/2]). % for transpose/2
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,7 +132,8 @@ fold_induce_knowledge(Config, PrIDs, Answers, Index, Detailed, TrAcc, TsAcc) :-
 	partition_as_prIDs_Ans(PrIDs, Answers, 990, N, AllParts, _CumDiff),
 	select(Test, AllParts, TrainParts), % Leaves the choice point
 	nth1(Index, AllParts, Test),
-	append(TrainParts, Train),
+	append(TrainParts, Train0),
+	sort(1, @=<, Train0, Train),
 	%while_improve_induce_prove(Train, _UnSolved, Align, Check, [], _List_of_Cnt_KB). % with no init KB
 	train_test(Config, Train, Test, TrainInfo, TestInfo, TrAcc, TsAcc),
 	Detailed = ['train'-TrainInfo, 'test'-TestInfo].
@@ -146,7 +150,9 @@ train_test(Config, TrainPIDA, TestPIDA, TrainScores, TestScores, TrAcc, TsAcc) :
 train_with_abduction(Config, TrainIDA, Induced_KB, TrainScores, TrAcc) :-
 	% base case: evaluate the prover on the data without any induced knowledge
 	% concurrent_maplist_n_jobs(add_lex_to_id_ans, TrainIDA, TrainIDAL),
-	concurrent_maplist(add_lex_to_id_ans, TrainIDA, TrainIDAL),
+	( debMode(parallel(_)) ->
+		concurrent_maplist(add_lex_to_id_ans, TrainIDA, TrainIDAL)
+	; maplist(add_lex_to_id_ans, TrainIDA, TrainIDAL) ),
 	predict_with_iKB(Config, [], TrainIDAL, _, _Acc, SolvA0, FailA0),
 	% Try now if knowledge induction improves over the base case. Start with no initial KB
 	while_improve_induce_prove(TrainIDAL, FailA0-FailA, SolvA0-SolvA, Config, [], Induced_KB0),
@@ -240,16 +246,106 @@ kb_induction_all(Config, IDALs, SolvA, Init_KB, Ind_KB) :-
 	% filter out induced relations by keeping only harmless ones. Using all problems!
 	exclude(=([]), LL_KB, LL_neKB),
 	list_to_ord_set(LL_neKB, Potential_KBs),
-	pick_harmless_KBs(Config, SolvA, IDALs, Potential_KBs, Ind_KB).
+	pick_non_harming_KBs(Config, SolvA, IDALs, Potential_KBs, Ind_KB).
+	%pick_harmless_KBs(Config, SolvA, IDALs, Potential_KBs, Ind_KB).
 
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pick only those KBs that doesn't hurt performance
+% C is abduction configuration;
+pick_non_harming_KBs(C, SolvA, IDALs, L_KBs, Harmless_KB) :-
+	length(L_KBs, Num_KBs),
+	format('~`-t Detecting ~w best KBs ~`-t~50|~n~n', [Num_KBs]),
+	% merge all potentail KB and sort to remove duplicates
+	append(L_KBs, AllKBs), sort(AllKBs, Sorted_SetKBs),
+	maplist(lexicalize_kb, Sorted_SetKBs, L_KBLex),
+	% get all combinatiosn of potential kb and problem and do proving
+	list_product(IDALs, L_KBLex, IDALxKBLex),
+	( debMode(parallel(_)) ->
+	  concurrent_maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U)
+	; maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U) ),
+	aggregate_kb_scores(KB__Sc_S_U, L_Sc_SU_KB),
+	maplist(pick_best_kb(L_Sc_SU_KB), L_KBs, L_Best_KB_Score_SU_),
+	list_to_set(L_Best_KB_Score_SU_, L_Best_KB_Score_SU), % remove dups
+	% sort according to the score
+	sort([1,1,2], @>=, L_Best_KB_Score_SU, Ord_L_Best_KB_Score_SU),
+	format('~`-t Score ~t KB ~t Affected problems ~`-t~50|~n~n', []),
+	findall(KB, (
+		member(KB-Sc-S-U, Ord_L_Best_KB_Score_SU),
+		( Sc > 0 -> Ast = '+ '; Ast = '- '),
+		format('~t~w~5| ~w ~w ~t~40+ Solved: ~w; Unsolved: ~w~n', [Sc, Ast, KB, S, U]),
+		Ast == '+ ' % filter out harmful ones
+	), KBs),
+	append(KBs, Harmless_KB0),
+	list_to_ord_set(Harmless_KB0, Harmless_KB).
+
+% 1 keeps scores fpr each kb, 2 is KBs from which best needs to be picked
+pick_best_kb(L_Sc_SU_KB, KBs, Best_KB-Score-S-U) :-
+	%maplist({L_Sc_SU_KB}/[K,Sc_SU-K]>>memberchk(Sc_SU-K,L_Sc_SU_KB), KBs, L_Sc_SU_K), % no idea why this doesn't work,
+	% FIXME maybe maplist under maplist with unbound vars doen't work
+	findall(Sc_SU-K, (
+	 	member(K, KBs),
+		memberchk(Sc_SU-K,L_Sc_SU_KB)
+	), L_Sc_SU_K),
+	sort(0, @>=, L_Sc_SU_K, Ord_L_Sc_SU_K),
+	Ord_L_Sc_SU_K = [MaxSc-_-_-_|_],
+	% keep KBs with max score & pick those with shortest relations
+	findall(X, (member(X, Ord_L_Sc_SU_K), X = MaxSc-_-_-_), L_MaxSc_SU_K),
+	maplist([H-K,H-K-L]>>kb_length(K,L), L_MaxSc_SU_K, L_MaxSc_SU_K_Len),
+	sort(2, @=<, L_MaxSc_SU_K_Len, [Score-S-U-Best_KB-_L | _]).
+
+% 1 is list of pairs KB-[Score, [slved_pid], [unsolved_pid]]
+% and 2 is 1 with values aggregated with sum and union
+aggregate_kb_scores(KB__Sc_S_U, L_Score_SU_KB) :-
+	%!!! the keys needs to be sorted for proper grouping
+	sort(1, @=<, KB__Sc_S_U, Sorted_KB__Sc_S_U),
+	group_pairs_by_key(Sorted_KB__Sc_S_U, KB__L_Sc_S_U),
+	findall(Sc-Sol-Uns-K, (
+		member(K-L, KB__L_Sc_S_U),
+		transpose(L, [L_Sc, L_S, L_U]),
+		append(L_S, Sol), append(L_U, Uns),
+		sum_list(L_Sc, Sc)
+	), L_Score_SU_KB).
+
+% 1 is augmented with lexical info distilled from KB
+lexicalize_kb(KB, KB-Lex) :-
+	findall(List_AB, (
+		member(Rel,KB), Rel=..[_,A,B],
+		atomic_list_concat(List_A, ' ', A),
+		atomic_list_concat(List_B, ' ', B),
+		append(List_A, List_B, List_AB)
+	), Lex).
+
+% check if KB solves or unsolves a problem
+% 1 is abduction config, 2 solved problem-Answers,
+prove_idal_with_kb(C, SolvA, (ID,Ans,Lexicon)-(KB-Lex), KB-[Sc,Solv,Unsolv]) :-
+	% check if KB is lexically relevant for the problem
+	member(L, Lex), sublist_of_list(L, Lexicon), !,
+	get_value_def(C, 'align', Align),
+	entail(Align, KB, ID, Ans, Pred, _, _, _),
+	( Ans == Pred ->
+	  ( memberchk((ID,Ans), SolvA) -> (Sc,Solv,Unsolv) = (0,[],[])
+	  ; (Sc,Solv,Unsolv) = (1,[ID],[]) )
+	; ( memberchk((ID,Ans), SolvA) -> (Sc,Solv,Unsolv) = (-1,[],[ID])
+	  ; (Sc,Solv,Unsolv) = (0,[],[]) ) ).
+
+% if KB is irrelevant to the problem, nothing new is solved or unsolved
+prove_idal_with_kb(_, _, _-(KB-_), KB-[0,[],[]]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Pick only those KBs that doesn't hurt performance
 pick_harmless_KBs(Config, SolvA, IDALs, L_KBs, Harmless_KB) :-
 	% maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
 	% concurrent_maplist_n_jobs(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
-	concurrent_maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
+	length(L_KBs, Num_KBs),
+	format('~`-t Detecting ~w best KBs ~`-t~50|~n~n', [Num_KBs]),
+	( debMode(parallel(_)) ->
+		concurrent_maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU)
+	; maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU) ),
 	sort([1,1,2], @>=, L_Best_KB_Score_SU, Ord_L_Best_KB_Score_SU),
+	format('~`-t Score ~t KB ~t Affected problems ~`-t~50|~n~n', []),
 	findall(KB, (
 		member(KB-Sc-S-U, Ord_L_Best_KB_Score_SU),
 		( Sc > 0 -> Ast = '+ '; Ast = '- '),
@@ -298,6 +394,7 @@ estimate_kb_wrt_data(Config, SolvA, IDALs, IKB, Score-Solv-Unsolv-IKB) :-
 
 % Evaluate KB wrt a single problem
 estimate_kb_wrt_prob(Config, IKB, L_KB_Lex_Units, (ID,Ans,Lex), Solv, Unsolv) :-
+	% check if KB is lexically relevant fro the problem
 	member(KB_Lex_Units, L_KB_Lex_Units),
 	sublist_of_list(KB_Lex_Units, Lex),
 	!,
@@ -309,7 +406,7 @@ estimate_kb_wrt_prob(Config, IKB, L_KB_Lex_Units, (ID,Ans,Lex), Solv, Unsolv) :-
 	).
 
 estimate_kb_wrt_prob(_Config, _IKB, _L_KB_Lex_Units, (_,_,_Lex), [], []).
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
@@ -346,8 +443,11 @@ kb_induction_prob(Config, KB0, (PrId,Ans), L_KB, Info) :-
 		build_discover((PrId,Ans), Config, KB1, PTT-HTT, AlPTT-AlHTT, L_KB, Info)
 	; Info = [PrId, Ans, 'failed', 'Failed to get TT-terms', 'defected'] ),
 	!,
-	par_format('~t~w~6| [~w]-~w: ~w (~w)~n', Info),
-	par_format('~`-t~50|~n', []).
+	format_list_list(atom(KBprint), '    ~w~n', '~w  ', L_KB),
+	print_pre_hyp(atom(Problem), PrId),
+	format(atom(Pr_KB), '~w!!! Possible KBs:~n~w', [Problem, KBprint]),
+	format(atom(Status), '~t~w~6| [~w]-~w: ~w (~w)', Info),
+	format('~w~w~n~`-t~50|~n', [Pr_KB, Status]).
 
 % HACK find out if this happens
 kb_induction_prob(_Config, _KB0, _PrIdAs, _, _Stat_Ans) :-
@@ -391,7 +491,6 @@ discover_knowledge(_Config, _TTterms, Branches, _KB1, (PrId,Ans), Status, [], In
 	),
 	Info5 = [PrId, Ans, Solved, 'closed', Status].
 
-
 % When gold label is unknown, do nothing
 discover_knowledge(_Config, _TTterms, [_|_], _KB1, (PrId,'unknown'), Status, [], Info5) :-
 	!,
@@ -406,11 +505,7 @@ discover_knowledge(Config, TTterms, Branches, KB1, (PrId,Ans), Status, Learned_K
 	discover_patterned_knw(Config, TTterms, Branches, KB1, Patterns, Learned_KBs),
 	( Learned_KBs = []
 	->	Info5 =  [PrId, Ans, 'failed', 'open', Status]
-	; 	Info5 =  [PrId, Ans, 'solved', 'closed', Status],
-		format_list_list(atom(KBprint), '    ~w~n', '~w  ', Learned_KBs),
-		print_pre_hyp(atom(Problem), PrId),
-		format('~w!!! Possible KBs:~n~w~t~w~8| [~w]-~w: ~w (~w)~n', [Problem, KBprint | Info5])
-	).
+	; 	Info5 =  [PrId, Ans, 'solved', 'closed', Status] ).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Learned_KBs is a list of KBs (sorted according to the size asc)
