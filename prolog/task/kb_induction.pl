@@ -168,7 +168,8 @@ train_with_abduction(Config, TrainIDA, Induced_KB, TrainScores, TrAcc) :-
 predict_with_iKB(Config, IKB, IDALs, Score_List, Acc, SolvedA, FailedA) :-
 	get_value_def(Config, 'align', Align),
 	get_IDAs(IDALs, IDAs),
-	( debMode(parallel(_)) -> parallel_solve_entailment(Align, IKB, IDAs, Results)
+	( debMode(parallel(_)) ->
+	  parallel_solve_entailment(Align, IKB, IDAs, Results)
 	; maplist(solve_entailment(Align, IKB), IDAs, Results)),
 	findall((ID,A), member((ID,A,A,_,_), Results), SolvedA),
 	findall((ID,A), ( member((ID,A,P,_,_), Results), A \= P ), FailedA),
@@ -259,12 +260,35 @@ pick_non_harming_KBs(C, SolvA, IDALs, L_KBs, Harmless_KB) :-
 	% merge all potentail KB and sort to remove duplicates
 	append(L_KBs, AllKBs), sort(AllKBs, Sorted_SetKBs),
 	maplist(lexicalize_kb, Sorted_SetKBs, L_KBLex),
-	% get all combinatiosn of potential kb and problem and do proving
-	list_product(IDALs, L_KBLex, IDALxKBLex),
+
+
+	% % get all combinatiosn of potential kb and problem and do proving
+	% surprisingly requires much time and memory
+	% set_prolog_flag(stack_limit, 8_147_483_648),
+	% list_product(IDALs, L_KBLex, IDALxKBLex),
+	% ( debMode(parallel(_)) ->
+	%   concurrent_maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U)
+	% ; maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U) ),
+	% format('Aggregating scores for each KB~n', []),
+	% aggregate_kb_scores(KB__Sc_S_U, L_Sc_SU_KB),
+
+	% % for each KB, go through all data and evaluate KB's imapct
+	% ( debMode(parallel(_)) ->
+	%   concurrent_maplist(prove_all_with_kb(C, SolvA, IDALs), L_KBLex, L_Sc_SU_KB)
+	% ; maplist(prove_all_with_kb(C, SolvA, IDALs), L_KBLex, L_Sc_SU_KB) ),
+
+	% for each problem, go through all KBs and evaluate KB's imapcts
+	% Good balance of time (fastest, 2x faster than above one) and memory
+	set_prolog_flag(stack_limit, 4_147_483_648),
 	( debMode(parallel(_)) ->
-	  concurrent_maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U)
-	; maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U) ),
+	  concurrent_maplist(prove_idal_with_all_kb(C, SolvA, L_KBLex), IDALs, L_KB__Sc_S_U)
+	; maplist(prove_idal_with_all_kb(C, SolvA, L_KBLex), IDALs, L_KB__Sc_S_U) ),
+	append(L_KB__Sc_S_U, KB__Sc_S_U),
+	format('Aggregating scores for each KB~n', []),
 	aggregate_kb_scores(KB__Sc_S_U, L_Sc_SU_KB),
+
+
+	format('Picking the best KBs~n', []),
 	maplist(pick_best_kb(L_Sc_SU_KB), L_KBs, L_Best_KB_Score_SU_),
 	list_to_set(L_Best_KB_Score_SU_, L_Best_KB_Score_SU), % remove dups
 	% sort according to the score
@@ -315,6 +339,22 @@ lexicalize_kb(KB, KB-Lex) :-
 		atomic_list_concat(List_B, ' ', B),
 		append(List_A, List_B, List_AB)
 	), Lex).
+
+% takes a particular kb and evaluate it wrt all problems
+% this predicate will be run N times, where N = number of KBs
+prove_all_with_kb(C, SolvA, IDALs, KBLex, Sc-Solv-Unsolv-KB) :-
+	KBLex = KB-_,
+	maplist({KBLex}/[IDAL,IDAL-KBLex]>>true, IDALs, L_IDAL_KBLex),
+	maplist(prove_idal_with_kb(C, SolvA), L_IDAL_KBLex, L_KB_Sc_SU),
+	pairs_values(L_KB_Sc_SU, L_Sc_SU),
+	transpose(L_Sc_SU, [L_Sc, L_S, L_U]),
+	append(L_S, Solv), append(L_U, Unsolv), sum_list(L_Sc, Sc).
+
+% evaluate all potential KB wrt to a single prob
+% this predicate will be run N times, where N = number of problems
+prove_idal_with_all_kb(C, SolvA, L_KBLex, IDAL, L_KB_Sc_SU) :-
+	maplist({IDAL}/[KBLex,IDAL-KBLex]>>true, L_KBLex, L_IDAL_KBLex),
+	maplist(prove_idal_with_kb(C, SolvA), L_IDAL_KBLex, L_KB_Sc_SU).
 
 % check if KB solves or unsolves a problem
 % 1 is abduction config, 2 solved problem-Answers,
@@ -537,14 +577,23 @@ discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) 
 	( ConstCheck ->
 		findall(K, (
 			member(K, Abduced_L_KB),
-			maplist(consistency_check(K-_XP), TTterms, Checks),
-			\+memberchk('Inconsistent', Checks)
+			%maplist(consistency_check(K-_XP), TTterms, Checks),
+			%maplist({K}/[T,Ch]>>consistency_check(K-_XP,T,Ch), TTterms, Checks),
+			%\+memberchk('Inconsistent', Checks)
+			consistent_with_tts(K, TTterms)
 		), Cnst_Abd_L_KB)
 	; Cnst_Abd_L_KB = Abduced_L_KB
 	),
 	sort_list_length(Cnst_Abd_L_KB, Learned_KBs).
 	%term_to_atom(IniKB, At_KB3),
 
+
+consistent_with_tts(KB, [TT|Terms]) :- !,
+	consistency_check(KB-_XP, TT, Check),
+	Check \= 'Inconsistent',
+	consistent_with_tts(KB, Terms).
+
+consistent_with_tts(_KB, []).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get TTterms necessary for tableau building
