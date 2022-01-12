@@ -111,19 +111,26 @@ def prove_type(key, pids):
         return f"gentail({align}{pids})"
 
 def pid2sids(fn, pid):
-    pid2sid = read_pid_sid(fn)
+    pid2sid, _ = read_sen_pl(fn)
     return pid2sid[pid]
 
-def read_pid_sid(fn):
-    '''read pid to sid mapping from _sen.pl file'''
+def pids_labs(fn, pids):
+    pid_list = re.split('[\.,]', pids)
+    _, pid2lab = read_sen_pl(fn)
+    return ','.join([ f"{pid}-{pid2lab[pid]}" for pid in pid_list ])
+
+def read_sen_pl(fn):
+    '''read pid to sid mapping and pis to lab from _sen.pl file'''
     pid2sid = defaultdict(list)
+    pid2lab = dict()
     with open(fn) as F:
         for l in F:
             if l.startswith('sen_id'):
-                m = re.match('sen_id\((\d+)\s*,\s*([^,]+)', l)
-                sid, pid = m.groups()
+                m = re.match("sen_id\((\d+)\s*,\s*([^,]+).+'(yes|unknown|no)'", l)
+                sid, pid, lab = m.groups()
                 pid2sid[pid].append(sid)
-    return pid2sid
+                pid2lab[pid] = lab
+    return pid2sid, pid2lab
 
 def r_i2r(r_suffix):
     '''Rule number with suffix to rule number. Suffic is used for versioning'''
