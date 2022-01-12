@@ -15,6 +15,7 @@
 	write_parList/1,
 	print_pre_hyp/2, print_pre_hyp/1,
 	par_format/2, par_format/3,
+	pid_to_print_prob/2,
 	test_true/3
 	%debMode/1
 ]).
@@ -29,7 +30,7 @@
 % 	ttTerm_to_pretty_ttTerm/2, ndId_to_pretty_atom/2]).
 
 % :- dynamic debMode/1. % this blocks user:debMode
-:- dynamic sen_id/5.
+% :- dynamic sen_id/5. % this blocks user:debMode
 :- dynamic sick_solved/2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -109,7 +110,7 @@ write_id_answer(S, Results)  :-
 % print premise(s) and hypothesis (parallel aware)
 print_pre_hyp(Source, PrId) :-
 	findall(Sen, (
-		sen_id(_, PrId, PH, _, Sent),
+		sen_id(_, PrId, PH, _, _, Sent), % FINDOUT: why sen_id/2 doesnt work here
 		atomic_list_concat([PH, Sent], ': ', Sen)
 		), Sentences),
 	atomic_list_concat(Sentences, '\n', Problem),
@@ -121,7 +122,7 @@ print_pre_hyp(PrId) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % parallel processing aware format.
-% It suppresses printing is the parallel mode is on
+% It suppresses printing to STDOUT if the parallel mode is on
 par_format(Source, Format, List) :-
 	current_output(Src),
 	( debMode(parallel(_)), Src = Source -> true
@@ -170,3 +171,8 @@ compare_to_once_solved(_).
 test_true(Goal, Format, Values) :-
     ( call(Goal) -> true
     ; throw_error(Format, Values) ).
+
+
+pid_to_print_prob(Id, Prob) :-
+	findall(Sen, sen_id(_,Id,_,_,Sen), Sentences),
+	format_list(atom(Prob), '~n      ~w', Sentences).

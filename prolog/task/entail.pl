@@ -9,7 +9,7 @@
 	]).
 :- use_module('../utils/generic_preds', [ format_list/3, member_zip/2 ]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2, draw_matrix/1]).
-:- use_module('../printer/reporting', [report/1]).
+:- use_module('../printer/reporting', [report/1, pid_to_print_prob/2]).
 :- use_module('../latex/latex_ttterm', [latex_probIDs_trees/2]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/aligner', [align_ttTerms/4]).
@@ -143,8 +143,7 @@ solve_entailment(Align, IKB, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status
 	),
 	term_to_atom(Status, AtomStatus),
 	( ( debMode('prprb'); Provers_Ans \= Ans ) ->
-		findall(Sen, sen_id(_,Id,_,_,Sen), Sentences),
-		format_list(atom(Prob), '~n      ~w', Sentences)
+		pid_to_print_prob(Id, Prob)
 	; Prob = '' ),
 	format('~t~w:~5+~t [~w],~11+~t~w,~9+~t~w,~9+ ~w~t~12+ XP: ~w~w~n', [Id, Ans, Provers_Ans, Closed, AtomStatus, XP, Prob]).
 
