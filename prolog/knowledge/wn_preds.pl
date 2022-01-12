@@ -584,3 +584,9 @@ alone_ss(Alone, Num) :-
 	ss_type_to_num(Type, Num),
 	\+hyp(Alone, _),
 	\+hyp(_, Alone).
+
+
+% synset to all lemmas, more human readable way
+ss2hum(SS, Lemmas) :-
+	findall(Lm, s(SS,_,Lm,_,_,_), Lms),
+	atomic_list_concat(Lms, ', ', Lemmas).
