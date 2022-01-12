@@ -421,7 +421,7 @@ fix_term(
 ) :- %!!! how do you deal with the verb then? any rule fpr this? %+++
 	memberchk(F, [ng, adj, pss, dcl]), % adj: full of X:np~>s:sdj--->n~>n, relax constrain with no checking?
 	WH = (tlp([0-0],'which','WDT','I-NP','Ins'), (np:_~>s:_)~>n:_~>n:_),
-	fix_report(['!!! Fix: insert Which Is for lex_rule. Feature = ', F]).
+	fix_report(['!!! Fix: insert Which for lex_rule. Feature = ', F]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % explain lex_rule vp --> np~>np
@@ -432,7 +432,20 @@ fix_term(
 ) :- %+++
 	% define NP modifier "who", we dont use "is"
 	WH = (tlp([0-0],'which','WDT','I-NP','Ins'), (np:A~>s:B)~>np:C~>np:_),
-	fix_report('!!! Fix: insert Which Is for lex_rule: vp->np->np').
+	fix_report('!!! Fix: insert Which for lex_rule: vp=>np->np').
+
+%%%%%%%%%%%%%%% Lex rule: vp --> (vp,vp) %%%%%%%%%%%%%%%%%%%%%%
+% insert conjunction that explains type-change. Abstract from vp:feats
+% there is no man (dressed:vp_pss) ((sleeping:vp_ng)vp_pss,vp_pss)
+% sick-6784 cc2016.st
+fix_term(
+	( ((VP1,np:A~>s:B), VPTy~>VPTy) @ VP2, VPTy ),
+	( (And @ (VP1,np:A~>s:B), VPTy~>VPTy) @ VP2, VPTy )
+) :- %+++
+	% define NP modifier "who", we dont use "is"
+	VPTy = np:_~>s:_,
+	And = (tlp([0-0],'and','CC','Ins','Ins'), VPTy~>VPTy~>VPTy),
+	fix_report('!!! Fix: insert and for lex_rule: vp=>vp->vp').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % change type n~>n to n~>np for JJ(S) words like many, several, most, few, etc
