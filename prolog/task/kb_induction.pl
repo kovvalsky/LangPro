@@ -481,32 +481,52 @@ kb_induction_prob(Config, KB0, (PrId,Ans), L_KB, Info) :-
 	get_value_def(Config, 'align', Align),
 	( prepare_ttTerms_KB(PrId, Align, KB0, PTT-HTT, AlPTT-AlHTT, KB1) ->
 		build_discover((PrId,Ans), Config, KB1, PTT-HTT, AlPTT-AlHTT, L_KB, Info)
-	; Info = [PrId, Ans, 'failed', 'Failed to get TT-terms', 'defected'] ),
-	!,
-	format_list_list(atom(KBprint), '    ~w~n', '~w  ', L_KB),
-	print_pre_hyp(atom(Problem), PrId),
-	format(atom(Pr_KB), '~w!!! Possible KBs:~n~w', [Problem, KBprint]),
-	format(atom(Status), '~t~w~6| [~w]-~w: ~w (~w)', Info),
-	format('~w~w~n~`-t~50|~n', [Pr_KB, Status]).
+	; Info = [PrId, Ans, 'failed', 'Failed to get TT-terms', 'defected'],
+	  L_KB = [] ), !,
+	( L_KB == [] -> true
+	; format_list_list(atom(KBprint), '    ~w~n', '~w  ', L_KB),
+	  print_pre_hyp(atom(Problem), PrId),
+	  format(atom(Pr_KB), '~w!!! Possible KBs:~n~w', [Problem, KBprint]),
+	  format(atom(Status), '~t~w~6| [~w]-~w: ~w (~w)', Info),
+	  format('~w~w~n~`-t~50|~n', [Pr_KB, Status]) ).
 
 % HACK find out if this happens
 kb_induction_prob(_Config, _KB0, _PrIdAs, _, _Stat_Ans) :-
 	format('??? This should not happen!'),
 	fail.
 
-build_discover((PrId,Ans), Config, KB, PTT-HTT, AlPTT-AlHTT, L_KB, Info) :-
+% % preferecne for non_align.
+% build_discover((PrId,Ans), Config, KB, PTT-HTT, AlPTT-AlHTT, L_KB, Info) :-
+% 	get_value_def(Config, 'align', 'both'), !,
+% 	% for both build non_align first, then align if needed
+% 	% note that these examples are unsolvable at this point,
+% 	% so proving with aligned ones first is not efficient
+% 	get_branches(Ans, 'no_align', KB, PTT-HTT, AlPTT-AlHTT, TTs1, Brs1, St1),
+% 	discover_knowledge(Config, TTs1, Brs1, KB, (PrId,Ans), St1, L_KB1, Info1),
+% 	Info1 = [_,_,Solved,_,_],
+% 	( (Solved == 'solved'; L_KB1 \= []) -> % prefer KB for non_align LLFs
+% 	% ( (Solved \= 'solved'; L_KB1 = []) -> format('!!!WTF ~w',[PrId]); true ),
+% 	  (L_KB, Info) = (L_KB1, Info1)
+% 	; get_branches(Ans, 'align', KB, PTT-HTT, AlPTT-AlHTT, TTs2, Brs2, St2),
+% 	  discover_knowledge(Config, TTs2, Brs2, KB, (PrId,Ans), St2, L_KB2, Info2),
+% 	  (L_KB, Info) = (L_KB2, Info2) ).
+
+% no preferecne for non_align.
+build_discover((PrId,Ans), Config, KB, PTT-HTT, AlPTT-AlHTT, Set_KB, Info) :-
 	get_value_def(Config, 'align', 'both'), !,
-	% for both build non_align first, then align if needed
-	% note that these examples are unsolvable at this point,
-	% so proving with aligned ones first is not efficient
+	% use abduced knowledge from both, aligned & non_aligned
 	get_branches(Ans, 'no_align', KB, PTT-HTT, AlPTT-AlHTT, TTs1, Brs1, St1),
 	discover_knowledge(Config, TTs1, Brs1, KB, (PrId,Ans), St1, L_KB1, Info1),
-	Info1 = [_,_,Solved,_,_],
-	( (Solved == 'solved'; L_KB1 \= []) -> % preference to KB for non_align LLFs
-	  (L_KB, Info) = (L_KB1, Info1)
-	; get_branches(Ans, 'align', KB, PTT-HTT, AlPTT-AlHTT, TTs2, Brs2, St2),
-	  discover_knowledge(Config, TTs2, Brs2, KB, (PrId,Ans), St2, L_KB2, Info2),
-	  (L_KB, Info) = (L_KB2, Info2) ).
+	Info1 = [_,_,Solved1,_,_],
+	%( (Solved1 == 'solved'; L_KB1 \= []) -> (L_KB0, Info0) = (L_KB1, Info1) ),
+	% now try with aligned ones
+	get_branches(Ans, 'align', KB, PTT-HTT, AlPTT-AlHTT, TTs2, Brs2, St2),
+	discover_knowledge(Config, TTs2, Brs2, KB, (PrId,Ans), St2, L_KB2, Info2),
+	Info2 = [_,_,Solved2,_,_],
+	% combine answers
+	append(L_KB1, L_KB2, L_KB), list_to_set(L_KB, Set_KB),
+	( memberchk(Info-'solved', [Info1-Solved1, Info2-Solved2]) -> true
+	; Info = Info1 ).
 
 build_discover((PrId,Ans), Config, KB, PTT-HTT, AlPTT-AlHTT, L_KB, Info) :-
 	get_value_def(Config, 'align', Align), !,
@@ -523,9 +543,10 @@ discover_knowledge(_Config, _TTterms, _, _KB1, (PrId,Ans), 'defected', [], Info5
 
 % When tableau is closed, do nothing
 discover_knowledge(_Config, _TTterms, Branches, _KB1, (PrId,Ans), Status, [], Info5) :-
-	Branches == [], % to avoid leackage
+	Branches == [], % to avoid leackage (but such PrIds shouldn't reach here)
 	!,
-	( memberchk(Ans, ['yes', 'no']) -> %!!! what about fasle proofs?
+	( memberchk(Ans, ['yes', 'no']) ->
+		%!!! what about fasle proofs? Ans: probably correct tableau is used
 		Solved = 'solved'
 	;	Solved = 'failed'
 	),
