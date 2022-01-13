@@ -47,10 +47,24 @@ write_token_anno_list([TA]) :- !,
 % Convert offsets into a list of pairs
 write_token_anno(TokenAnnos, NewAnno) :-
 	dict_pairs(TokenAnnos, Tag, Pairs),
-	once(nth1(Ind, Pairs, 'o'-Offset, RestPairs)),
-	term_to_atom(Start-End, Offset),
-	nth1(Ind, NewPairs, 'o'-[Start-End], RestPairs),
+	offset_as_list(Pairs, Pairs1),
+	downcase_lemmas(Pairs1, NewPairs),
 	dict_pairs(NewAnno, Tag, NewPairs).
+
+% Convert offsets into a list of pairs: 0-7 ==> [0-7]
+offset_as_list(Key_Val, Key_Val1) :-
+	once(nth1(Ind, Key_Val, 'o'-Offset, Rest)),
+	term_to_atom(Start-End, Offset),
+	nth1(Ind, Key_Val1, 'o'-[Start-End], Rest).
+
+% lowercase all lemmas
+downcase_lemmas(Key_Val, Key_Val1) :-
+	once(nth1(Ind, Key_Val, 'l'-Lemmas, Rest)),
+	findall(Dw, (
+		member(L, Lemmas),
+		( L == 'NULL' -> Dw = L; downcase_atom(L, Dw) )
+	), DwLemmas),
+	nth1(Ind, Key_Val1, 'l'-DwLemmas, Rest).
 
 % convert key->list structure into key->list_el->position
 dictList_to_dictPosition(DictList, DictPos) :-
