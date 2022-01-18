@@ -40,6 +40,11 @@
 :- use_module(library(pairs)).
 :- use_module(library(clpfd), [transpose/2]). % for transpose/2
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Train & evaluation on sick parts (without (un)loading files)
+train_eval_sick_parts((TParts, EParts), Config) :-
+	
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % when development or evaluation sets are unspecified they will be ignored
@@ -247,14 +252,15 @@ kb_induction_all(Config, IDALs, SolvA, Init_KB, Ind_KB) :-
 	% filter out induced relations by keeping only harmless ones. Using all problems!
 	exclude(=([]), LL_KB, LL_neKB),
 	list_to_ord_set(LL_neKB, Potential_KBs),
-	pick_non_harming_KBs(Config, SolvA, IDALs, Potential_KBs, Ind_KB).
-	%pick_harmless_KBs(Config, SolvA, IDALs, Potential_KBs, Ind_KB).
+	% Init_KB also is taken into account
+	pick_non_harming_KBs(Config, SolvA, Init_KB, IDALs, Potential_KBs, Ind_KB).
+	%pick_harmless_KBs(Config, SolvA, Init_KB, IDALs, Potential_KBs, Ind_KB).
 
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Pick only those KBs that doesn't hurt performance
 % C is abduction configuration;
-pick_non_harming_KBs(C, SolvA, IDALs, L_KBs, Harmless_KB) :-
+pick_non_harming_KBs(C, SolvA, IKB, IDALs, L_KBs, Harmless_KB) :-
 	length(L_KBs, Num_KBs),
 	format('~`-t Detecting ~w best KBs ~`-t~50|~n~n', [Num_KBs]),
 	% merge all potentail KB and sort to remove duplicates
@@ -267,22 +273,22 @@ pick_non_harming_KBs(C, SolvA, IDALs, L_KBs, Harmless_KB) :-
 	% set_prolog_flag(stack_limit, 8_147_483_648),
 	% list_product(IDALs, L_KBLex, IDALxKBLex),
 	% ( debMode(parallel(_)) ->
-	%   concurrent_maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U)
-	% ; maplist(prove_idal_with_kb(C, SolvA), IDALxKBLex, KB__Sc_S_U) ),
+	%   concurrent_maplist(prove_idal_with_kb(C,SolvA,IKB), IDALxKBLex, KB__Sc_S_U)
+	% ; maplist(prove_idal_with_kb(C,SolvA,IKB), IDALxKBLex, KB__Sc_S_U) ),
 	% format('Aggregating scores for each KB~n', []),
 	% aggregate_kb_scores(KB__Sc_S_U, L_Sc_SU_KB),
 
 	% % for each KB, go through all data and evaluate KB's imapct
 	% ( debMode(parallel(_)) ->
-	%   concurrent_maplist(prove_all_with_kb(C, SolvA, IDALs), L_KBLex, L_Sc_SU_KB)
-	% ; maplist(prove_all_with_kb(C, SolvA, IDALs), L_KBLex, L_Sc_SU_KB) ),
+	%   concurrent_maplist(prove_all_with_kb(C,SolvA,IKB,IDALs), L_KBLex, L_Sc_SU_KB)
+	% ; maplist(prove_all_with_kb(C,SolvA,IKB,IDALs), L_KBLex, L_Sc_SU_KB) ),
 
 	% for each problem, go through all KBs and evaluate KB's imapcts
 	% Good balance of time (fastest, 2x faster than above one) and memory
 	set_prolog_flag(stack_limit, 4_147_483_648),
 	( debMode(parallel(_)) ->
-	  concurrent_maplist(prove_idal_with_all_kb(C, SolvA, L_KBLex), IDALs, L_KB__Sc_S_U)
-	; maplist(prove_idal_with_all_kb(C, SolvA, L_KBLex), IDALs, L_KB__Sc_S_U) ),
+	  concurrent_maplist(prove_idal_with_all_kb(C,SolvA,IKB,L_KBLex), IDALs, L_KB__Sc_S_U)
+	; maplist(prove_idal_with_all_kb(C,SolvA,IKB,L_KBLex), IDALs, L_KB__Sc_S_U) ),
 	append(L_KB__Sc_S_U, KB__Sc_S_U),
 	format('Aggregating scores for each KB~n', []),
 	aggregate_kb_scores(KB__Sc_S_U, L_Sc_SU_KB),
@@ -312,6 +318,7 @@ pick_best_kb(L_Sc_SU_KB, KBs, Best_KB-Score-S-U) :-
 		memberchk(Sc_SU-K,L_Sc_SU_KB)
 	), L_Sc_SU_K),
 	sort(0, @>=, L_Sc_SU_K, Ord_L_Sc_SU_K),
+	( debMode(v(indKB_scores)) -> maplist(writeln, Ord_L_Sc_SU_K); true ),
 	Ord_L_Sc_SU_K = [MaxSc-_-_-_|_],
 	% keep KBs with max score & pick those with shortest relations
 	findall(X, (member(X, Ord_L_Sc_SU_K), X = MaxSc-_-_-_), L_MaxSc_SU_K),
@@ -342,27 +349,29 @@ lexicalize_kb(KB, KB-Lex) :-
 
 % takes a particular kb and evaluate it wrt all problems
 % this predicate will be run N times, where N = number of KBs
-prove_all_with_kb(C, SolvA, IDALs, KBLex, Sc-Solv-Unsolv-KB) :-
+prove_all_with_kb(C, SolvA, IKB, IDALs, KBLex, Sc-Solv-Unsolv-KB) :-
 	KBLex = KB-_,
 	maplist({KBLex}/[IDAL,IDAL-KBLex]>>true, IDALs, L_IDAL_KBLex),
-	maplist(prove_idal_with_kb(C, SolvA), L_IDAL_KBLex, L_KB_Sc_SU),
+	maplist(prove_idal_with_kb(C, SolvA, IKB), L_IDAL_KBLex, L_KB_Sc_SU),
 	pairs_values(L_KB_Sc_SU, L_Sc_SU),
 	transpose(L_Sc_SU, [L_Sc, L_S, L_U]),
 	append(L_S, Solv), append(L_U, Unsolv), sum_list(L_Sc, Sc).
 
 % evaluate all potential KB wrt to a single prob
 % this predicate will be run N times, where N = number of problems
-prove_idal_with_all_kb(C, SolvA, L_KBLex, IDAL, L_KB_Sc_SU) :-
+prove_idal_with_all_kb(C, SolvA, IKB, L_KBLex, IDAL, L_KB_Sc_SU) :-
 	maplist({IDAL}/[KBLex,IDAL-KBLex]>>true, L_KBLex, L_IDAL_KBLex),
-	maplist(prove_idal_with_kb(C, SolvA), L_IDAL_KBLex, L_KB_Sc_SU).
+	maplist(prove_idal_with_kb(C, SolvA, IKB), L_IDAL_KBLex, L_KB_Sc_SU).
 
 % check if KB solves or unsolves a problem
 % 1 is abduction config, 2 solved problem-Answers,
-prove_idal_with_kb(C, SolvA, (ID,Ans,Lexicon)-(KB-Lex), KB-[Sc,Solv,Unsolv]) :-
+% 3 is already induced and good knowledge that is used as initial KB
+prove_idal_with_kb(C, SolvA, IKB, (ID,Ans,Lexicon)-(KB-Lex), KB-[Sc,Solv,Unsolv]) :-
 	% check if KB is lexically relevant for the problem
 	member(L, Lex), sublist_of_list(L, Lexicon), !,
 	get_value_def(C, 'align', Align),
-	entail(Align, KB, ID, Ans, Pred, _, _, _),
+	append(IKB, KB, AllKB),
+	entail(Align, AllKB, ID, Ans, Pred, _, _, _),
 	( Ans == Pred ->
 	  ( memberchk((ID,Ans), SolvA) -> (Sc,Solv,Unsolv) = (0,[],[])
 	  ; (Sc,Solv,Unsolv) = (1,[ID],[]) )
@@ -370,20 +379,20 @@ prove_idal_with_kb(C, SolvA, (ID,Ans,Lexicon)-(KB-Lex), KB-[Sc,Solv,Unsolv]) :-
 	  ; (Sc,Solv,Unsolv) = (0,[],[]) ) ).
 
 % if KB is irrelevant to the problem, nothing new is solved or unsolved
-prove_idal_with_kb(_, _, _-(KB-_), KB-[0,[],[]]).
+prove_idal_with_kb(_, _, _, _-(KB-_), KB-[0,[],[]]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Pick only those KBs that doesn't hurt performance
-pick_harmless_KBs(Config, SolvA, IDALs, L_KBs, Harmless_KB) :-
+pick_harmless_KBs(Config, SolvA, IKB, IDALs, L_KBs, Harmless_KB) :-
 	% maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
 	% concurrent_maplist_n_jobs(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU),
 	length(L_KBs, Num_KBs),
 	format('~`-t Detecting ~w best KBs ~`-t~50|~n~n', [Num_KBs]),
 	( debMode(parallel(_)) ->
-		concurrent_maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU)
-	; maplist(best_kb_wrt_data(Config, SolvA, IDALs), L_KBs, L_Best_KB_Score_SU) ),
+		concurrent_maplist(best_kb_wrt_data(Config,SolvA,IKB,IDALs), L_KBs, L_Best_KB_Score_SU)
+	; maplist(best_kb_wrt_data(Config,SolvA,IKB,IDALs), L_KBs, L_Best_KB_Score_SU) ),
 	sort([1,1,2], @>=, L_Best_KB_Score_SU, Ord_L_Best_KB_Score_SU),
 	format('~`-t Score ~t KB ~t Affected problems ~`-t~50|~n~n', []),
 	findall(KB, (
@@ -397,8 +406,8 @@ pick_harmless_KBs(Config, SolvA, IDALs, L_KBs, Harmless_KB) :-
 
 %--------------------------------------------------
 % Pick the best among the KB candidates induced from the same problem
-best_kb_wrt_data(Config, SolvA, IDALs, KBs, Best_KB-Score-S-U) :-
-	maplist(estimate_kb_wrt_data(Config, SolvA, IDALs), KBs, L_Score_SU_KB),
+best_kb_wrt_data(Config, SolvA, IKB, IDALs, KBs, Best_KB-Score-S-U) :-
+	maplist(estimate_kb_wrt_data(Config,SolvA,IKB,IDALs), KBs, L_Score_SU_KB),
 	sort(0, @>=, L_Score_SU_KB, Ord_L_Score_SU_KB),
 	Ord_L_Score_SU_KB = [MaxSc-_-_-_|_],
 	% keep KBs with max score & pick those with shortest relations
@@ -413,19 +422,19 @@ best_kb_wrt_data(Config, SolvA, IDALs, KBs, Best_KB-Score-S-U) :-
 
 %---------------------------------------------------
 % Evaluate KB wrt data in terms of how many proofs it helps minus how many it harms
-estimate_kb_wrt_data(Config, SolvA, IDALs, IKB, Score-Solv-Unsolv-IKB) :-
+estimate_kb_wrt_data(Config, SolvA, IKB, IDALs, KB, Score-Solv-Unsolv-KB) :-
 	% get word involved in KB
 	maplist([(ID,_), ID]>>true, SolvA, SolvIDs_),
 	list_to_ord_set(SolvIDs_, SolvIDs),
 	% get lexical units for each rel of each KB: [disj('black dog', 'white cat')] -> [black,...,cat]
 	findall(List_AB, (
-		member(Rel,IKB), Rel=..[_,A,B],
+		member(Rel,KB), Rel=..[_,A,B],
 		atomic_list_concat(List_A, ' ', A),
 		atomic_list_concat(List_B, ' ', B),
 		append(List_A, List_B, List_AB)
 	), L_KB_Lex_Units),
 	% verify KB's contribution for each problem in data and calculate overall contribution
-	maplist(estimate_kb_wrt_prob(Config, IKB, L_KB_Lex_Units), IDALs, L_Solv, L_Unsolv),
+	maplist(estimate_kb_wrt_prob(Config,IKB,KB,L_KB_Lex_Units), IDALs, L_Solv, L_Unsolv),
 	append(L_Solv, Solv0), list_to_ord_set(Solv0, Solv1),
 	append(L_Unsolv, Unsolv0), list_to_ord_set(Unsolv0, Unsolv1),
 	ord_subtract(Solv1, SolvIDs, Solv),
@@ -433,19 +442,20 @@ estimate_kb_wrt_data(Config, SolvA, IDALs, IKB, Score-Solv-Unsolv-IKB) :-
 	length(Solv, S), length(Unsolv, U), Score is S - U.
 
 % Evaluate KB wrt a single problem
-estimate_kb_wrt_prob(Config, IKB, L_KB_Lex_Units, (ID,Ans,Lex), Solv, Unsolv) :-
+estimate_kb_wrt_prob(Config, IKB, KB, L_KB_Lex_Units, (ID,Ans,Lex), Solv, Unsolv) :-
 	% check if KB is lexically relevant fro the problem
 	member(KB_Lex_Units, L_KB_Lex_Units),
 	sublist_of_list(KB_Lex_Units, Lex),
 	!,
 	get_value_def(Config, 'align', Align),
-	entail(Align, IKB, ID, Ans, Pred, _, _, _),
+	append(IKB, KB, AllKB),
+	entail(Align, AllKB, ID, Ans, Pred, _, _, _),
 	( Ans == Pred ->
 		(Solv, Unsolv) = ([ID], [])
 	; (Solv, Unsolv) = ([], [ID])
 	).
 
-estimate_kb_wrt_prob(_Config, _IKB, _L_KB_Lex_Units, (_,_,_Lex), [], []).
+estimate_kb_wrt_prob(_Config, _IKB, _KB, _L_KB_Lex_Units, (_,_,_Lex), [], []).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

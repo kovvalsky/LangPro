@@ -218,3 +218,5 @@ ccg(ID, Tree) :- % FIXME integrate ccg(Parsers) in anno_sys
 % constKB			abduced KB should be consistent with initial KB
 % compTerms			abduced KB should contain relations over compatible terms
 % patterns-[pat]	list of patterns, e.g., _@_, etc
+% v(VAR)			verbosity flag for particular procedures
+%	indKB_scores	before selecting best KB, print the scores of all
