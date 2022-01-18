@@ -1024,3 +1024,20 @@ type_to_atom(T1~>T2, A) :- !,
 	type_to_atom(T1, A1),
 	type_to_atom(T2, A2),
 	format(atom(A), '(~w,~w)', [A1, A2]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% get all constituent subterms from corrected ttterm
+% ttTerm_to_subTerm_lex(TT, TTLex) :-
+% 	ttTerm_to_subTerm_lex(TT, [], TTLex).
+%
+% ttTerm_to_subTerm_lex((X,_), []) :-
+% 	var(X), !.
+%
+% ttTerm_to_subTerm_lex((TT1@TT2,Ty), Lex) :- !,
+% 	ttTerm_to_subTerm_lex(TT1, Lex1),
+% 	ttTerm_to_subTerm_lex(TT2, Lex2),
+% 	append(Lex1, Lex2, Lex).
+%
+% ttTerm_to_subTerm_lex((abst(_,TT),Ty), Lex) :- !,
+% 	ttTerm_to_subTerm_lex(TT, Lex).

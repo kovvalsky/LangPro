@@ -21,6 +21,7 @@
 	ttTerms_same_type/2, lex_norm_ttterms/4
 	]).
 :- use_module('../knowledge/ind_kb', [add_ind_kb/2, induced_rel/1]).
+:- use_module('../knowledge/knowledge', [close_kb/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % entailment with the first GQTT
@@ -632,8 +633,9 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 
 	( debMode('prlex') -> report([Lex]); true),
 	( debMode('no_wn') -> KB0 = []; kb_from_wn(Lex, KB0) ), % extract relevant semantic relations from WN
-	( debMode('ind_kb') -> add_ind_kb(KB0,KB); KB = KB0 ),
-	( debMode('pr_kb') -> report(['KB: ', KB]); true ),
+	( debMode('ind_kb') -> add_ind_kb(KB0,KB1); KB1 = KB0 ),
+	close_kb(Lex, KB1, KB),
+	( debMode('pr_kb') -> report(['KB: ', KB1]); true ),
 	( debMode('no_gq_llfs') ->
 		(Prems, Hypos) = (PremCCGTerms, HypoCCGTerms)
 	; findall(Y, 	(member(X, PremCCGTerms), once_gen_quant_tt(X, Y)), 	Prems),

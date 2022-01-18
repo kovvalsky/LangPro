@@ -166,7 +166,7 @@ r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB-XP, % equi
 		!, % detect a type
 		( atom_prefix(POS, 'VB') ->
 			Type = np:_~>s:_
-		; atom_prefix(POS, 'NN') ->
+		; atom_prefix(POS, 'NN') -> %6096 !!!bird@cage
 			Type = n:_
 		; atom_prefix(POS, 'JJ') ->
 			Type = np:_~>s:_
