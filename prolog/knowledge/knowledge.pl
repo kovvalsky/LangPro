@@ -5,31 +5,66 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module(knowledge,
 	[
-		disjoint/3,
-		word_synonyms/3,
-		isa/3,
 		ant_wn/3,
+		close_kb/3,
 		derive/3,
+		disjoint/3,
+		not_disjoint/3,
 		instance/3,
 		not_instance/3,
-		not_disjoint/3,
+		isa/3,
 		not_isa/3,
-		positional_isa/3
+		positional_isa/3,
+		word_synonyms/3
 	]).
 
 :- multifile is_/2.
 :- discontiguous is_/2.
 
-:- ensure_loaded([
-	'my_word_net'
-	]).
+% :- ensure_loaded([
+% 	'my_word_net'
+% 	]).
 
 :- use_module('disjoint', [disj_/2]).
-:- use_module('../utils/user_preds', [match_lowerCase/2, is_uList/1, ul_member/2]).
+:- use_module('../utils/user_preds', [match_lowerCase/2, is_uList/1, ul_member/2, all_pairs_from_set/2]).
+:- use_module('../utils/generic_preds', [ substitute_in_atom/4 ]).
 :- use_module('../printer/reporting', [report/1]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           	ISA Network
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% closure of KB
+close_kb(_Lex, KB0, KB) :-
+	KB = KB0.
+
+
+% augment_kb(Lex, KB0, KB) :-
+%
+%
+% symetric_augment(Lex, KB0, KB) :-
+% 	findall(
+% 		nth1(N1, Lex, E1), nth1(N2, Lex, E2), N1 < N2,
+% 		( close_open_compound(E1, E2),
+% 		)
+% 	)
+%
+%
+% 	close_open_compound(X, Y, isa)
+
+
+% symmetric predciate, true when L1 and L2 differ only in spaces
+close_open_compound((L1,P1), (L2,P2)) :-
+	substitute_in_atom(L1, ' ', '', W),
+	substitute_in_atom(L2, ' ', '', W),
+	( ( atom_prefix(P1, 'NN'),
+	    atom_prefix(P2, 'NN') ) -> true
+	; report(['WARNING:', L1, '&', L2, 'space-equi but not same POS: ', P1, '=\\=', P2, '\n']) ).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ext( man,
 	[['john'],['sam']] ).
 ext( woman,
@@ -288,6 +323,11 @@ isa(A, B, _KB-XP) :-
 
 isa(A, B, _KB_XP) :-  % variant, not matching
 	A =@= B, !.
+
+isa(A, B, _KB-XP) :- % bird cage = birdcage
+	substitute_in_atom(A, ' ', '', W),
+	substitute_in_atom(B, ' ', '', W),
+	ul_append(XP, [isa(A,B)]).
 
 isa(A, B, _KB-XP) :-
 	( ( debMode('hk'), % hand crafted knowledge
