@@ -107,6 +107,7 @@ r(cl_subsumption_complex, 	closure, _, _Lexicon, KB_xp,  %!!! is this rule worth
 		br([nd( [], (true, t), [], false )],
 		  Sig) )
 :-
+			cl_subsumption_complex, % as a breakpoint for debuging
 			luc(Ty1, Ty2, _Type),
 			match_list_ttTerms(Args1, Args2, KB_xp),
 			once( ( M2 = []; match_list_only_terms(M1, M2) ) ),
@@ -553,3 +554,8 @@ r(cl_equal, 	closure, _, [['be']], _,
 		  Sig) )
 :-
 			true.
+
+
+
+cl_subsumption_complex :-
+	true.
