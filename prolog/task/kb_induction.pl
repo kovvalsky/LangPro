@@ -17,10 +17,10 @@
 	sym_rels_to_canonical/2, prob_input_to_list/2,
 	partition_list_into_N_even_lists/3,
 	uList2List/2, prIDs_to_prIDs_Ans/2, get_value_def/3,
-	average_list/2, all_prIDs_Ans/1]).
+	average_list/2, all_prIDs_Ans/1, parts_to_pids/2]).
 :- use_module('../utils/generic_preds', [
  	format_list/3, format_list_list/3, format_list_list/4,
-	keep_smallest_lists/2, list_product/3,
+	keep_smallest_lists/2, list_product/3, scalar_x_list/3,
 	sublist_of_list/2, sort_list_length/2
 	]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
@@ -42,9 +42,28 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Train & evaluation on sick parts (without (un)loading files)
-train_eval_sick_parts((TParts, EParts), Config) :-
-	
-
+train_eval_sick_parts(TrainParts, EvalParts, Config) :-
+	log_parameters(Config),
+	parts_to_pids(TrainParts, TrainPIDs),
+	prIDs_to_prIDs_Ans(TrainPIDs, TrainPIDAs),
+	train_with_abduction(Config, TrainPIDAs, KB, AbdAcc),
+	format('~`=t Learned Knowledge ~`=t~80|~n', []),
+	maplist([R]>>format('~q.~n', [R]), KB),
+	% write knowledge
+	( debMode(waif(FileName)) ->
+		write_induced_kb_in_file(KB, [FileName,'_KB.pl'], Config)
+	; true ),
+	% predict on train set (santy check)
+	predict_with_iKB(Config, KB, TrainPIDAs, [_|TrSc], _, _, _),
+	% predict on evaluation set (santy check)
+	parts_to_pids(EvalParts, EvalPIDs),
+	prIDs_to_prIDs_Ans(EvalPIDs, EvalPIDAs),
+	predict_with_iKB(Config, KB, EvalPIDAs, [_|EvSc], _, _, _),
+	% quick results
+	scalar_x_list(100, TrSc, TrScores), scalar_x_list(100, EvSc, EvScores),
+	format('Abduction fit::: Acc: ~2f~n', [AbdAcc]),
+	format('Scores on Train::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', TrScores),
+	format('Scores on Eval ::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', EvScores).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % when development or evaluation sets are unspecified they will be ignored
@@ -54,13 +73,12 @@ train_dev_eval_sick_parts((Tccg,Tsen), (Dccg,Dsen), (Eccg,Esen), Config) :-
 	% load and train on train set
 	load_ccg_sen_probs(Tccg, Tsen, TPIDA),
 	%retractall(debMode('ind_kb')),
-	train_with_abduction(Config, TPIDA, KB, T_Scores, T_Acc),
+	train_with_abduction(Config, TPIDA, KB, T_Acc),
 	format('~`=t Learned Knowledge ~`=t~80|~n', []),
 	maplist(writeln, KB),
 	% write knowledge
 	( debMode(waif(FileName)) ->
-		format(atom(KBFile), '~w_KB.pl', [FileName]),
-		write_induced_kb_in_file(KB, KBFile, Config)
+		write_induced_kb_in_file(KB, [FileName,'_KB.pl'], Config)
 	; true ),
 	(atom(Tccg), atom(Tsen) -> unload_file(Tccg), unload_file(Tsen); true ),
 	% pedict on train set
@@ -76,7 +94,7 @@ train_dev_eval_sick_parts((Tccg,Tsen), (Dccg,Dsen), (Eccg,Esen), Config) :-
 	; 	EAPR = [0,0,0]
 	),
 	% quick results
-	format('Train on Train::: ~w; Acc: ~2f~n', [T_Scores, T_Acc]),
+	format('Score on Train::: Acc: ~2f~n', [T_Acc]),
 	format('Predict on Train::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', TAPR),
 	format('Predict on Dev  ::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', DAPR),
 	format('Predict on Eval ::: Acc: ~2f; Prec: ~2f; Rec: ~2f~n', EAPR).
@@ -118,7 +136,7 @@ evaluate_on_portion(Config, KB, (CCG,SEN), File, APR) :-
 cv_induce_knowledge(PrIDs, Answers, Config) :-
 	log_parameters(Config),
 	findall(TrAcc-TsAcc, (
-		fold_induce_knowledge(Config, PrIDs, Answers, Index, _D, TrAcc, TsAcc),
+		fold_induce_knowledge(Config, PrIDs, Answers, Index, TrAcc, TsAcc),
 		format('~n~n~t End of fold ~w ~t~50|~n', [Index]),
 		format('~`=t~50|~n Train: ~2f; Test: ~2f ~n~`=t~50|~n~n', [TrAcc, TsAcc])
 		), TrTsAs),
@@ -132,7 +150,7 @@ cv_induce_knowledge(PrIDs, Answers, Config) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % One fold, Index tracks the number of the fold
-fold_induce_knowledge(Config, PrIDs, Answers, Index, Detailed, TrAcc, TsAcc) :-
+fold_induce_knowledge(Config, PrIDs, Answers, Index, TrAcc, TsAcc) :-
 	get_value_def(Config, 'fold', N),
 	partition_as_prIDs_Ans(PrIDs, Answers, 990, N, AllParts, _CumDiff),
 	select(Test, AllParts, TrainParts), % Leaves the choice point
@@ -140,19 +158,19 @@ fold_induce_knowledge(Config, PrIDs, Answers, Index, Detailed, TrAcc, TsAcc) :-
 	append(TrainParts, Train0),
 	sort(1, @=<, Train0, Train),
 	%while_improve_induce_prove(Train, _UnSolved, Align, Check, [], _List_of_Cnt_KB). % with no init KB
-	train_test(Config, Train, Test, TrainInfo, TestInfo, TrAcc, TsAcc),
-	Detailed = ['train'-TrainInfo, 'test'-TestInfo].
+	train_test(Config, Train, Test, TrAcc, TsAcc).
+	%Detailed = ['train'-TrainInfo, 'test'-TestInfo].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Train on the training set with abduction and use abduced knowledge for testing
-train_test(Config, TrainPIDA, TestPIDA, TrainScores, TestScores, TrAcc, TsAcc) :-
-	train_with_abduction(Config, TrainPIDA, KB, TrainScores, TrAcc),
-	predict_with_iKB(Config, KB, TestPIDA, [_Total, Acc, Prec, Rec], TsAcc, _, _),
-	format(atom(TestScores), '~2f ~2f ~2f', [Acc, Prec, Rec]).
+train_test(Config, TrainPIDA, TestPIDA, TrAcc, TsAcc) :-
+	train_with_abduction(Config, TrainPIDA, KB, TrAcc),
+	predict_with_iKB(Config, KB, TestPIDA, _Scores, TsAcc, _, _).
+	%format(atom(TestScores), '~2f ~2f ~2f', [Acc, Prec, Rec]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge as long as it boosts the performace
-train_with_abduction(Config, TrainIDA, Induced_KB, TrainScores, TrAcc) :-
+train_with_abduction(Config, TrainIDA, Induced_KB, TrAcc) :-
 	% base case: evaluate the prover on the data without any induced knowledge
 	% concurrent_maplist_n_jobs(add_lex_to_id_ans, TrainIDA, TrainIDAL),
 	( debMode(parallel(_)) ->
@@ -161,8 +179,8 @@ train_with_abduction(Config, TrainIDA, Induced_KB, TrainScores, TrAcc) :-
 	predict_with_iKB(Config, [], TrainIDAL, _, _Acc, SolvA0, FailA0),
 	% Try now if knowledge induction improves over the base case. Start with no initial KB
 	while_improve_induce_prove(TrainIDAL, FailA0-FailA, SolvA0-SolvA, Config, [], Induced_KB0),
-	maplist(length, [TrainIDAL, FailA, SolvA], [A, F, S]),
-	format(atom(TrainScores), '~2f ~2f', [100*S/A, 100*F/A]), % Accuracy and error rate
+	maplist(length, [TrainIDAL, FailA, SolvA], [A, _F, S]),
+	%format(atom(TrainScores), '~2f ~2f', [100*S/A, 100*F/A]), % Accuracy and error rate
 	%append(List_of_Cnt_KB, Cnt_KB),
 	%maplist([X,Y,X-Y]>>true, _, KB0, Cnt_KB),
 	sort(0, @>, Induced_KB0, Induced_KB),

@@ -38,6 +38,7 @@
 		off2anno/3,
 		pairwise_append/2,
 		partition_list_into_N_even_lists/3,
+		parts_to_pids/2,
 		patt_remove/3,
 		prob_input_to_list/2,
 		prIDs_to_prIDs_Ans/2,
@@ -711,6 +712,14 @@ listInt_to_id_ccgs(List_Int, CCGs) :-
 	; report(["Error: Wrong format of the argument: ", List_Int]),
 	  fail
 	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% parts to problem ids. Preserves original order of problems
+parts_to_pids(Parts, PIDs) :-
+	findall( PID, (
+		sen_id(_, PID, 'h', Part, _, _),
+		memberchk(Part, Parts)
+	), PIDs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Various input for problem IDs to list of problem IDs

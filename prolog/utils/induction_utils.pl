@@ -111,7 +111,8 @@ print_learning_stages(_, []).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % write induced knowledge in file that is readable by prolog
-write_induced_kb_in_file(KB_cnt_srt, FileName, Config) :-
+write_induced_kb_in_file(KB_cnt_srt, FN, Config) :-
+	( is_list(FN) -> atomic_list_concat(FN, FileName); FileName = FN ),
 	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
 	% parlist parameters and config
 	log_parameters(S, Config),

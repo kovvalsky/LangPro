@@ -18,6 +18,7 @@
 		member_zip/2,
 		read_dict_from_json_file/2,
 		rotate_list/2,
+		scalar_x_list/3,
 		symmdiff_variant/3,
 		sort_list_length/2,
 		sublist_of_list/2,
@@ -204,3 +205,7 @@ list_product(L1, L2, Prod) :-
 		member(E1, L1),
 		member(E2, L2)
 	), Prod).
+
+% multiply list elements on a scalar
+scalar_x_list(Scalar, List, Result) :-
+	maplist([L,R]>>(R is Scalar*L), List, Result).
