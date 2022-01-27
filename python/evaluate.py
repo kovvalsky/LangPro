@@ -103,9 +103,9 @@ def read_systems_id_labels(filepaths):
     for sysfile in filepaths:
         sys_id_label[sysfile] = read_id_labels(sysfile)
     # all should have the same size of predictions
-    if len(set(len(d) for d in sys_id_label.values())) != 1:
-        raise RuntimeError('The number of predictions is varying: {}'.format(\
-            [ s, v in sys_id_label.items() ]))
+    sys_len = { s:len(l) for (s, l) in sys_id_label.items() }
+    if len(set(sys_len.values())) != 1:
+        raise RuntimeError('The number of predictions is varying:\n{}'.format('\n'.join([f"{l}:{s}" for (s, l) in sys_len.items()])))
     return sys_id_label
 
 # #################################
