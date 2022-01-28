@@ -15,6 +15,7 @@
 		list_product/3,
 		list_to_set_variant/2,
 		list_to_ord_set_variant/2,
+		list_atom/2,
 		member_zip/2,
 		read_dict_from_json_file/2,
 		rotate_list/2,
@@ -136,10 +137,15 @@ rotate_list([H|Rest], Rotate2, N) :-
 	rotate_list(Rotate1, Rotate2, N1).
 
 
+list_atom(List_or_Atom, Atom) :-
+	is_list(List_or_Atom) ->
+		atomic_list_concat(List_or_Atom, Atom)
+	; Atom = List_or_Atom.
+
 % create a source for a given filepath
 filepath_write_source(FilePath, S) :-
     file_directory_name(FilePath, Dir),
-    ( exists_directory(Dir) -> true; make_directory(Dir) ),
+    ( exists_directory(Dir) -> true; make_directory_path(Dir) ),
     open(FilePath, write, S, [encoding(utf8), close_on_abort(true)]).
 
 
@@ -208,4 +214,4 @@ list_product(L1, L2, Prod) :-
 
 % multiply list elements on a scalar
 scalar_x_list(Scalar, List, Result) :-
-	maplist([L,R]>>(R is Scalar*L), List, Result).
+	maplist({Scalar}/[L,R]>>(R is Scalar*L), List, Result).

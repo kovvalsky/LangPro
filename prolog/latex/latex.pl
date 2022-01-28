@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Description: Creates Latex File of Tableau Proof
 %     Version: 12.06.12
-%      Author: lasha.abzianidze{at}gmail.com 
+%      Author: lasha.abzianidze{at}gmail.com
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- module(latex, 
+:- module(latex,
 	[
 		drawInLatex/1,
 		tree_structure/1
@@ -12,18 +12,18 @@
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('latex_ttterm', [lambdaTerm_to_latex/2]).
+:- use_module('../utils/generic_preds', [filepath_write_source/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % drawInLatex(Tree)
-% Creates a latex file, writes preamble, 
+% Creates a latex file, writes preamble,
 % imports packages and writes beginings of Tree
 :- dynamic tree_structure/1.
 tree_structure(nil).
-	
+
 drawInLatex(Style) :-
 	tree_structure(Tree),
-	(exists_directory('latex') -> true; make_directory('latex')),
-	open('latex/tree.tex', write, S, [encoding(utf8)]),
+	filepath_write_source('latex/tree.tex', S),
 	% Latex code
 	write(S, '\\documentclass{article}\n'),
 	write(S, '\\usepackage{tikz-qtree-compat}\n\\usepackage{amssymb}\n\\usepackage{environ}\n\\usepackage{amsmath}\n'),
@@ -49,29 +49,29 @@ drawInLatex(Style) :-
 	write(S, '\\newcommand{\\rulen}[1]{{\\normalfont\\textsc{#1}}}\n\\newcommand{\\ruleApp}[2][]{{\\normalfont\\textsc{#2}}\\scalebox{.6}{[#1]}}\n'),
 	write(S, '\n\\begin{document}\n\n'),
 	write(S, '\\begin{scaletikzpicturetowidth}{\\textwidth}\n'),
-	( Style = 'tikzpicture' ->	
+	( Style = 'tikzpicture' ->
 		write(S, '\\begin{tikzpicture}[scale=\\tikzscale, baseline=0pt, grow=down]\n'),
 		write(S, '\\tikzset{level distance = 30pt}\n'),
 		write(S, '\\tikzset{every tree node/.style={align=center,anchor=north}}\n'),
 		write(S, '\\Tree\n'),
 		drawTree_as_tikzpicture(Tree, S, 0, (1,_)), % ide of first variable
 		write(S, '\\end{tikzpicture}\n')
-	; Style = 'forest' ->	
+	; Style = 'forest' ->
 		write(S, '\\scalebox{\\tikzscale}{\n\\begin{forest}\n'),
 		write(S, 'for tree={align=center, parent anchor=south, child anchor=north, l sep=5mm}\n'),
 		drawTree_as_forest(Tree, S, 0, (1,_)), % ide of first variable
 		write(S, '\\end{forest}\n}\n')
 	; report('Error: Unknown latex style tree'), fail
-	), 
+	),
 	write(S, '\\end{scaletikzpicturetowidth}\n'),
-	write(S, '\\end{document}'),		
+	write(S, '\\end{document}'),
 	close(S).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % drawTree_as_tikzpicture(Tree, S, Tabs)
 % writes a latex code for the essential part of Tree
-% in source S and traks the indentation by Tabs  
+% in source S and traks the indentation by Tabs
 
 drawTree_as_tikzpicture(Tree, S, Tabs, (VC1, VC)) :-
 	Tree = tree(Node, ChildList),
@@ -82,35 +82,35 @@ drawTree_as_tikzpicture(Tree, S, Tabs, (VC1, VC)) :-
 	maplist(ttterm_to_tabLLF, Mods, LatexMods),
 	( LatexMods = [] ->  AtomMods = ''
 	; atomic_list_concat(LatexMods, ', ', AtMods),
-	  atomic_list_concat(['[', AtMods, '] : '], AtomMods) 
+	  atomic_list_concat(['[', AtMods, '] : '], AtomMods)
 	),
 	maplist(ttterm_to_tabLLF, Args, LatexArgs),
 	atomic_list_concat(LatexArgs, ', ', AtomArgs),
 	(Sign == true -> AtomSign = '\\T'; AtomSign = '\\F'),
 	term_to_atom(Id, AtomId),
-	rule_app_superscript(Note, RuleApp), 
+	rule_app_superscript(Note, RuleApp),
 	Tab2 is Tabs + 2,
 	Tab1 is Tabs + 1,
 	tab(S, Tabs), write(S, '[.\\node{ '),  %\\begin{tabular}{c}
 	atomic_list_concat(['\\lab{', AtomId, '}~', RuleApp, '  '], Label),
-	write(S, Label), write(S,'\n'), 
+	write(S, Label), write(S,'\n'),
 	atomic_list_concat(['$', AtomMods, PrLLF, ' : [', AtomArgs, '] : ', AtomSign, '$'], Formula),
-	tab(S, Tab2), write(S, Formula), 
-	( nonvar(ChildList), ChildList = closer([ClIDs, Rule]) -> 
+	tab(S, Tab2), write(S, Formula),
+	( nonvar(ChildList), ChildList = closer([ClIDs, Rule]) ->
 		write(S, '\\\\[2mm]\n'),
 		term_to_atom(ClIDs, AtClIDs),
 		lambdaTerm_to_latex(Rule, RuleLatex),
 		atomic_list_concat(['\\lab{\\phantom{0}}~$^{\\ruleApp', AtClIDs, '{', RuleLatex, '}}$  $\\btimes$'], ClNode),
 		tab(S, Tab2),  write(S, ClNode)
 	; true
-	),	
-	write(S, ' };\n'),  %\\end{tabular}
-	( 	nonvar(ChildList), ChildList = [Node1|_], Node1 = tree(_,_) -> 
-		drawTree_as_tikzpicture(Node1, S, Tab1, (VC2, VC3)); 
-		VC3 = VC2 
 	),
-	( 	nonvar(ChildList), ChildList = [_,Node2], Node2 = tree(_,_) -> 
-		drawTree_as_tikzpicture(Node2, S, Tab1, (VC3, VC)); 
+	write(S, ' };\n'),  %\\end{tabular}
+	( 	nonvar(ChildList), ChildList = [Node1|_], Node1 = tree(_,_) ->
+		drawTree_as_tikzpicture(Node1, S, Tab1, (VC2, VC3));
+		VC3 = VC2
+	),
+	( 	nonvar(ChildList), ChildList = [_,Node2], Node2 = tree(_,_) ->
+		drawTree_as_tikzpicture(Node2, S, Tab1, (VC3, VC));
 		VC = VC3
 	),
 	tab(S, Tabs), write(S, ']\n').
@@ -121,7 +121,7 @@ drawTree_as_tikzpicture(Tree, S, Tabs, (VC1, VC)) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % drawTree_as_forest(Tree, S, Tabs)
 % writes a latex code for the essential part of Tree
-% in source S and traks the indentation by Tabs  
+% in source S and traks the indentation by Tabs
 
 drawTree_as_forest(Tree, S, Tabs, (VC1, VC)) :-
 	Tree = tree(Node, ChildList),
@@ -132,21 +132,21 @@ drawTree_as_forest(Tree, S, Tabs, (VC1, VC)) :-
 	maplist(ttterm_to_tabLLF, Mods, LatexMods),
 	( LatexMods = [] ->  AtomMods = ''
 	; atomic_list_concat(LatexMods, ', ', AtMods),
-	  atomic_list_concat(['[', AtMods, '] : '], AtomMods) 
+	  atomic_list_concat(['[', AtMods, '] : '], AtomMods)
 	),
 	maplist(ttterm_to_tabLLF, Args, LatexArgs),
 	atomic_list_concat(LatexArgs, ', ', AtomArgs),
 	(Sign == true -> AtomSign = '\\T'; AtomSign = '\\F'),
 	term_to_atom(Id, AtomId),
-	rule_app_superscript(Note, RuleApp), 
+	rule_app_superscript(Note, RuleApp),
 	Tab2 is Tabs + 2,
 	Tab1 is Tabs + 1,
 	tab(S, Tabs), write(S, '[{'),  %\\begin{tabular}{c}
 	atomic_list_concat(['\\lab{', AtomId, '}~', RuleApp, '  '], Label),
-	write(S, Label), write(S,'\n'), 
+	write(S, Label), write(S,'\n'),
 	atomic_list_concat(['$', AtomMods, PrLLF, ' : [', AtomArgs, '] : ', AtomSign, '$'], Formula),
-	tab(S, Tab2), write(S, Formula), 
-	( nonvar(ChildList), ChildList = closer([ClIDs, Rule]) -> 
+	tab(S, Tab2), write(S, Formula),
+	( nonvar(ChildList), ChildList = closer([ClIDs, Rule]) ->
 		write(S, '\\\\[2mm]\n'),
 		term_to_atom(ClIDs, AtClIDs),
 		lambdaTerm_to_latex(Rule, RuleLatex),
@@ -154,13 +154,13 @@ drawTree_as_forest(Tree, S, Tabs, (VC1, VC)) :-
 		tab(S, Tab2),  write(S, ClNode)
 	; true
 	),
-	write(S, '}\n'),	
-	( 	nonvar(ChildList), ChildList = [Node1|_], Node1 = tree(_,_) -> 
-		drawTree_as_forest(Node1, S, Tab1, (VC2, VC3)); 
-		VC3 = VC2 
+	write(S, '}\n'),
+	( 	nonvar(ChildList), ChildList = [Node1|_], Node1 = tree(_,_) ->
+		drawTree_as_forest(Node1, S, Tab1, (VC2, VC3));
+		VC3 = VC2
 	),
-	( 	nonvar(ChildList), ChildList = [_,Node2], Node2 = tree(_,_) -> 
-		drawTree_as_forest(Node2, S, Tab1, (VC3, VC)); 
+	( 	nonvar(ChildList), ChildList = [_,Node2], Node2 = tree(_,_) ->
+		drawTree_as_forest(Node2, S, Tab1, (VC3, VC));
 		VC = VC3
 	),
 	tab(S, Tabs), write(S, ']\n').
@@ -175,22 +175,22 @@ rule_app_superscript([], '').
 
 rule_app_superscript(Note, RApp) :-
 	Note =.. [F, List | Rest],
-	( Rest = [CnstList] -> 
+	( Rest = [CnstList] ->
       maplist(ttterm_to_tabLLF, CnstList, AtCnstList),
 	  atomic_list_concat(AtCnstList, ', ', Cnst1),
 	  atomic_list_concat(['~$', Cnst1, '$'] , Cnst)
-	; Cnst = ''	
+	; Cnst = ''
 	),
 	term_to_atom(List, AtomList),
 	lambdaTerm_to_latex(F, LatexF),
-	atomic_list_concat(['$^{\\ruleApp', AtomList, '{', LatexF, Cnst, '}}$'], RApp). 
+	atomic_list_concat(['$^{\\ruleApp', AtomList, '{', LatexF, Cnst, '}}$'], RApp).
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TTterm into a tableau llf term
 ttterm_to_tabLLF((Term, _Ty), Latex) :-
-	var(Term),	
+	var(Term),
 	!,
 	term_to_atom(Term, Atom_term),
 	atom_chars(Atom_term, [_, _ | Index_List]),
@@ -219,7 +219,7 @@ ttterm_to_tabLLF( ((Term, Ty), _Type), Latex) :-
 
 ttterm_to_tabLLF( (tlp(_,Term,_,_,_), Type), Latex ) :-
 	!,
-	( memberchk(Term, ['$','%','#']) -> 
+	( memberchk(Term, ['$','%','#']) ->
 		atomic_list_concat(['\\', Term], LatexTerm)
 	; atomic_list_concat(Parts1, '&', Term),
 	  atomic_list_concat(Parts1, '\\&', Temp1),
@@ -262,8 +262,8 @@ test_atom_to_term :-
 % instantiate vars in tt Term to print nice variables
 instantiate_vars_in_ttterm( (T,_Ty), C1, C2 ) :-
 	var(T), !,
-	term_to_atom(C1, Ind),  
-	atomic_list_concat(['x', Ind], T), 
+	term_to_atom(C1, Ind),
+	atomic_list_concat(['x', Ind], T),
 	C2 is C1 + 1.
 
 instantiate_vars_in_ttterm( (TT1 @ TT2,_Ty), C1, C2 ) :-
@@ -271,10 +271,10 @@ instantiate_vars_in_ttterm( (TT1 @ TT2,_Ty), C1, C2 ) :-
 	instantiate_vars_in_ttterm(TT2, C, C2).
 
 instantiate_vars_in_ttterm( (abst((X,_), TT), _Ty), C1, C2 ) :-
-	!, 
-	( var(X)  ->  
-		term_to_atom(C1, Ind),  
-		atomic_list_concat(['x', Ind], X), 
+	!,
+	( var(X)  ->
+		term_to_atom(C1, Ind),
+		atomic_list_concat(['x', Ind], X),
 		C is C1 + 1
 	; C = C1
 	),
@@ -291,13 +291,3 @@ instantiate_vars_in_ttterm_list([], C1, C1).
 instantiate_vars_in_ttterm_list([H|Rest], C1, C2) :-
 	instantiate_vars_in_ttterm(H, C1, C),
 	instantiate_vars_in_ttterm_list(Rest, C, C2).
-
-
-
-
-
-
-	
-
-
-

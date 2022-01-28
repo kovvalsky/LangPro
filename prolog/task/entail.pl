@@ -9,7 +9,8 @@
 	]).
 :- use_module('../utils/generic_preds', [ format_list/3, member_zip/2 ]).
 :- use_module('../printer/conf_matrix', [draw_extended_matrix/2, draw_matrix/1]).
-:- use_module('../printer/reporting', [report/1, pid_to_print_prob/2]).
+:- use_module('../printer/reporting', [report/1, pid_to_print_prob/2,
+	write_predictions_in_file/1]).
 :- use_module('../latex/latex_ttterm', [latex_probIDs_trees/2]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/aligner', [align_ttTerms/4]).
@@ -40,6 +41,7 @@ entail_all(Align) :-
 		parallel_solve_entailment(Align, ProblemIds_Answers, Results)
 	; maplist(solve_entailment(Align), ProblemIds_Answers, Results)
 	),
+	write_predictions_in_file(Results),
 	draw_extended_matrix(Results, _Scores).
 
 
@@ -70,7 +72,7 @@ entail_some(Align, List_Int) :-
 	),
 	( debMode('fracFilter') ->
 		findall(X, (member(X,L2), \+member(X, [12,16,61,62,77,78,213,276,305,308,309,310])), List )
-      ; List = L2
+	; List = L2
 	),
 	set_rule_eff_order, % defines an effciency order of rules
 	findall((Problem_Id, Answer), (

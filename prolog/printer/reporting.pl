@@ -12,6 +12,8 @@
 	report/1,
 	report/2,
 	write_predictions_in_file/1,
+	write_predictions_in_file/2,
+	write_ext_predictions_in_file/2,
 	write_parList/1,
 	print_pre_hyp/2, print_pre_hyp/1,
 	par_format/2, par_format/3,
@@ -24,7 +26,8 @@
 
 
 :- use_module('../utils/generic_preds', [
-	format_list_list/3, format_list_list/4, format_list/3
+	format_list_list/3, format_list_list/4, format_list/3,
+	filepath_write_source/2
 	]).
 % :- use_module('../llf/ttterm_to_term', [
 % 	ttTerm_to_pretty_ttTerm/2, ndId_to_pretty_atom/2]).
@@ -74,13 +77,19 @@ write_parList(S) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % write prediction if a file is given
+write_ext_predictions_in_file(Ext, Results) :-
+	debMode(waif(FileName)) ->
+		atomic_list_concat([FileName, '.', Ext], FN),
+		write_predictions_in_file(FN, Results)
+	; true.
+
 write_predictions_in_file(Results) :-
 	debMode(waif(FileName)) ->
 		write_predictions_in_file(FileName, Results)
 	; true.
 
 write_predictions_in_file(FileName, Results) :-
-	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
+	filepath_write_source(FileName, S),
 	write(S, '=== Parameters ===\n%%% '),
 	write_parList(S), nl(S),
 	write(S, '=== LangPro ===\n'),

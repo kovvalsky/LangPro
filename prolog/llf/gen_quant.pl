@@ -11,7 +11,7 @@
 	choose/3
 	]).
 :- use_module('../utils/generic_preds', [
-	true_member/2
+	true_member/2, filepath_write_source/2
 	]).
 :- use_module('../lambda/type_hierarchy', [final_value_of_type/2]).
 :- use_module('../lambda/lambda_tt', [
@@ -59,9 +59,7 @@ once_gen_quant_tt(TTexp, NormGQTT) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % For printing and testing purposes
 print_ttTerm_to_gqtTerms(List) :-
-	(exists_directory('latex') -> true; make_directory('latex')),
-	open('latex/gqttTerms.tex', write, S, [encoding(utf8), close_on_abort(true)]),
-	%asserta(latex_file_stream(S)),
+	filepath_write_source('latex/gqttTerms.tex', S),
 	latex_ttTerm_preambule(S),
 	with_output_to(S, maplist(print_subTerms_of_ttTerm, List)),
 	write(S, '\\end{document}'),

@@ -8,7 +8,7 @@
 :- use_module('../rules/rules', [op(610, xfx, ===>)]).
 :- use_module('../printer/reporting', [
 	report/1, par_format/2, print_pre_hyp/2, report/2, print_pre_hyp/1,
-	pid_to_print_prob/2
+	pid_to_print_prob/2, write_ext_predictions_in_file/2
 	]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @)]).
 :- use_module('../utils/user_preds', [
@@ -42,11 +42,11 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Train & evaluation on sick parts (without (un)loading files)
-train_eval_sick_parts(TrainParts, EvalParts, Config) :-
+train_eval_sick_parts(TrParts, EvParts, Config) :-
 	log_parameters(Config),
-	parts_to_pids(TrainParts, TrainPIDs),
-	prIDs_to_prIDs_Ans(TrainPIDs, TrainPIDAs),
-	train_with_abduction(Config, TrainPIDAs, KB, AbdAcc),
+	parts_to_pids(TrParts, TrPIDs),
+	prIDs_to_prIDs_Ans(TrPIDs, TrPIDAs),
+	train_with_abduction(Config, TrPIDAs, KB, AbdAcc),
 	format('~`=t Learned Knowledge ~`=t~80|~n', []),
 	maplist([R]>>format('~q.~n', [R]), KB),
 	% write knowledge
@@ -54,11 +54,13 @@ train_eval_sick_parts(TrainParts, EvalParts, Config) :-
 		write_induced_kb_in_file(KB, [FileName,'_KB.pl'], Config)
 	; true ),
 	% predict on train set (santy check)
-	predict_with_iKB(Config, KB, TrainPIDAs, [_|TrSc], _, _, _),
+	predict_with_iKB(Config, KB, TrPIDAs, [_|TrSc], _, _, _, TrRes),
+	write_ext_predictions_in_file('T.ans', TrRes),
 	% predict on evaluation set (santy check)
-	parts_to_pids(EvalParts, EvalPIDs),
-	prIDs_to_prIDs_Ans(EvalPIDs, EvalPIDAs),
-	predict_with_iKB(Config, KB, EvalPIDAs, [_|EvSc], _, _, _),
+	parts_to_pids(EvParts, EvPIDs),
+	prIDs_to_prIDs_Ans(EvPIDs, EvPIDAs),
+	predict_with_iKB(Config, KB, EvPIDAs, [_|EvSc], _, _, _, EvRes),
+	write_ext_predictions_in_file('E.ans', EvRes),
 	% quick results
 	scalar_x_list(100, TrSc, TrScores), scalar_x_list(100, EvSc, EvScores),
 	format('Abduction fit::: Acc: ~2f~n', [AbdAcc]),
@@ -125,7 +127,7 @@ evaluate_on_portion(Config, KB, (CCG,SEN), File, APR) :-
 	load_ccg_sen_probs(CCG, SEN, PIDA),
 	retractall(debMode(waif(_))),
 	assertz(debMode(waif(File))),
-	predict_with_iKB(Config, KB, PIDA, [_, AccE, PrecE, RecE], _, _, _),
+	predict_with_iKB(Config, KB, PIDA, [_, AccE, PrecE, RecE], _, _, _, _),
 	(atom(CCG), atom(SEN) -> unload_file(CCG), unload_file(SEN); true ),
 	APR = [100*AccE, 100*PrecE, 100*RecE].
 
@@ -165,7 +167,7 @@ fold_induce_knowledge(Config, PrIDs, Answers, Index, TrAcc, TsAcc) :-
 % Train on the training set with abduction and use abduced knowledge for testing
 train_test(Config, TrainPIDA, TestPIDA, TrAcc, TsAcc) :-
 	train_with_abduction(Config, TrainPIDA, KB, TrAcc),
-	predict_with_iKB(Config, KB, TestPIDA, _Scores, TsAcc, _, _).
+	predict_with_iKB(Config, KB, TestPIDA, _Scores, TsAcc, _, _, _).
 	%format(atom(TestScores), '~2f ~2f ~2f', [Acc, Prec, Rec]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,7 +178,7 @@ train_with_abduction(Config, TrainIDA, Induced_KB, TrAcc) :-
 	( debMode(parallel(_)) ->
 		concurrent_maplist(add_lex_to_id_ans, TrainIDA, TrainIDAL)
 	; maplist(add_lex_to_id_ans, TrainIDA, TrainIDAL) ),
-	predict_with_iKB(Config, [], TrainIDAL, _, _Acc, SolvA0, FailA0),
+	predict_with_iKB(Config, [], TrainIDAL, _, _Acc, SolvA0, FailA0, _),
 	% Try now if knowledge induction improves over the base case. Start with no initial KB
 	while_improve_induce_prove(TrainIDAL, FailA0-FailA, SolvA0-SolvA, Config, [], Induced_KB0),
 	maplist(length, [TrainIDAL, FailA, SolvA], [A, _F, S]),
@@ -188,7 +190,7 @@ train_with_abduction(Config, TrainIDA, Induced_KB, TrAcc) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Evaluate prover on the list of pID,Ans[,Lex] using the induced knowledge
-predict_with_iKB(Config, IKB, IDALs, Score_List, Acc, SolvedA, FailedA) :-
+predict_with_iKB(Config, IKB, IDALs, Score_List, Acc, SolvedA, FailedA, Results) :-
 	get_value_def(Config, 'align', Align),
 	get_IDAs(IDALs, IDAs),
 	( debMode(parallel(_)) ->
@@ -235,7 +237,7 @@ while_improve_induce_prove(IDALs, FailA0-FailA, SolvA0-SolvA, Config, Init_KB, I
 	kb_induction_all(Config, IDALs, SolvA0, Init_KB, Ind_KB),
 	( Ind_KB == [] -> Gain = 0
 	; append(Init_KB, Ind_KB, Init_KB1),
-		predict_with_iKB(Config, Init_KB1, IDALs, _, _, SolvA1, FailA1),
+		predict_with_iKB(Config, Init_KB1, IDALs, _, _, SolvA1, FailA1, _),
 		print_learning_phase_stats(FailA0-FailA1, SolvA0-SolvA1, Ind_KB),
 		length(SolvA1, S1),
 		Gain is S1 - S0 ),

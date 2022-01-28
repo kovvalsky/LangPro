@@ -21,11 +21,13 @@
 :- use_module(library(pairs)).
 :- use_module(library(random)).
 :- use_module('../utils/user_preds.pl', [
-	atom_char_occur/3, partition_list_into_N_even_lists/3, prob_input_to_list/2,
-	prIDs_to_prIDs_Ans/2, diff/3,
+	atom_char_occur/3, partition_list_into_N_even_lists/3,
+	prob_input_to_list/2, prIDs_to_prIDs_Ans/2, diff/3,
 	freqList_subtract/3, list_to_freqList/2, last_member/2, pairwise_append/2
 	]).
-%:- use_module('../printer/reporting', [write_parList/1]).
+:- use_module('../utils/generic_preds', [list_atom/2,
+	filepath_write_source/2
+	]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                Partitioning data
@@ -112,8 +114,8 @@ print_learning_stages(_, []).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % write induced knowledge in file that is readable by prolog
 write_induced_kb_in_file(KB_cnt_srt, FN, Config) :-
-	( is_list(FN) -> atomic_list_concat(FN, FileName); FileName = FN ),
-	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
+	list_atom(FN, FileName),
+	filepath_write_source(FileName, S),
 	% parlist parameters and config
 	log_parameters(S, Config),
 	% induced knowledge
