@@ -5,6 +5,7 @@
 		ttTerm_to_prettyTerm/2,
 		ttTerm_to_norm_term/5,
 		type_to_prettyType/2,
+		ttTerm_to_pretty_atom/2,
 		ttTerm_to_pretty_ttTerm/2,
 		write_pretty_ttTerm/3
 	]).
@@ -95,6 +96,11 @@ ttvarsApp_to_term_list(TTvarApp, Term, List) :-
 		append(List1, List2, List),
 		Term = Term1 @ Term2).
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ttTerm_to_pretty_atom(TT, Atom) :-
+	ttTerm_to_prettyTerm(TT, Pretty),
+	term_to_atom(Pretty, Atom).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TTterm or TCterm expression to lambda term

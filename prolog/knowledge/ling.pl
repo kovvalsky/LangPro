@@ -4,10 +4,11 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module(ling, [
-	lemma_of_poss_pr/2,
+	a_list_of_colors/1,
 	decompose_everyone/3,
-	text_to_number/2,
-	a_list_of_colors/1
+	lemma_of_poss_pr/2,
+	pos2s_feat/2,
+	text_to_number/2
 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,3 +66,12 @@ a_list_of_colors([
 'white',
 'yellow'
 ]).
+
+
+pos2s_feat(POS, Feat) :-
+	memberchk(POS, ['VBD','VBP','VBZ']) -> Feat = 'dcl'
+	; memberchk(POS, ['VB']) -> Feat = 'b'
+	; memberchk(POS, ['VBG']) -> Feat = 'ng'
+	; memberchk(POS, ['VBN']) -> Feat = 'pss'
+	; atom_prefix(POS, 'JJ') -> Feat = 'adj'
+	; fail. % what about s:pt?

@@ -172,7 +172,8 @@ train_test(Config, TrainPIDA, TestPIDA, TrAcc, TsAcc) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Induce knowledge as long as it boosts the performace
-train_with_abduction(Config, TrainIDA, Induced_KB, TrAcc) :-
+train_with_abduction(Config, TrainID, Induced_KB, TrAcc) :-
+	prIDs_to_prIDs_Ans(TrainID, TrainIDA),
 	% base case: evaluate the prover on the data without any induced knowledge
 	% concurrent_maplist_n_jobs(add_lex_to_id_ans, TrainIDA, TrainIDAL),
 	( debMode(parallel(_)) ->

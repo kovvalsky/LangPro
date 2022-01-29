@@ -869,10 +869,11 @@ concurrent_maplist_n_jobs(Functor, Inputs, Outputs) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Given a list of Problem IDs, return a list of Problem ID and answer pairs
+% it can deal with partially paired IDs too
 prIDs_to_prIDs_Ans(PrIDs, PrIDs_Ans) :-
-	findall(PrID-Ans, (
+	findall(ID-Ans, (
 		member(PrID, PrIDs),
-		sen_id(_, PrID, 'h', Ans, _)
+		( PrID = ID-Ans -> true; PrID = ID, sen_id(_, ID, 'h', Ans, _) )
 		), PrIDs_Ans).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

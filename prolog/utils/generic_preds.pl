@@ -12,6 +12,7 @@
 		format_list_list/4,
 		get_cmd/1,
 		keep_smallest_lists/2,
+		last_member/2,
 		list_product/3,
 		list_to_set_variant/2,
 		list_to_ord_set_variant/2,
@@ -215,3 +216,7 @@ list_product(L1, L2, Prod) :-
 % multiply list elements on a scalar
 scalar_x_list(Scalar, List, Result) :-
 	maplist({Scalar}/[L,R]>>(R is Scalar*L), List, Result).
+
+% last member of teh list
+last_member(E, L) :-
+	append(_, [E], L).

@@ -559,7 +559,8 @@ fix_term(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % no,n~>np (one:n~>n typing:n) -> no,n~>np (typing:n~>n person:n)
-% sick-2937, 3353, 3439
+% 1417 there is no (man@sawing)
+% sick-2937, 3353, 3439, 1417
 fix_term(
 	( (Q,n:X~>np:Y) @ ((N,n:_~>n:_) @ (V,n:_), n:F), np:Z ),
 	( (Q,n:X~>np:Y) @ ( (Verb,n:F~>n:F) @ (N,n:F), n:F), np:Z )

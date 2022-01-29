@@ -9,7 +9,8 @@
 
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('annotate', [cf_annotation/2]).
-:- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
+:- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2,
+	ttTerm_to_pretty_atom/2]).
 :- use_module('ttterm_preds', [unpack_ttTerm/2, set_type_for_tt/3,
 	tlp_pos_with_prefixes/2, tlp_lemma_in_list/2, tlp_pos_in_list/2
 	]).
@@ -42,7 +43,7 @@ loc_fix_ccgTerm((TC_term, Cat), Clean) :-
 
 loc_fix_ccgTerm(App_TC, Fixed) :-
 	once(detect_mwe(App_TC, PreFixed)),
-	( debMode('mwe') -> ttTerm_to_prettyTerm(PreFixed, Pr), term_to_atom(Pr, At),  report(['!!! MWE: ', At]); true ),
+	( debMode('mwe') -> ttTerm_to_pretty_atom(PreFixed, At), report(['!!! MWE: ', At]); true ),
   	loc_fix_ccgTerm(PreFixed, Fixed).
 
 loc_fix_ccgTerm(App_TC, Fixed) :-
