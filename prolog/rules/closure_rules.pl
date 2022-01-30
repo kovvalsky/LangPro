@@ -4,9 +4,11 @@
 :- use_module('../utils/user_preds',
 	[tt_mon_up/1, tt_atomList_to_atomList/2, is_greater/2]
 	).
-:- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
+:- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2,
+	ttTerm_to_pretty_atom/2]).
 %:- use_module('../knowledge/wn_preds', [word_hyp/3]).
-:- use_module('../lambda/type_hierarchy', [cat_eq/2, final_value_of_type/2, luc/3]).
+:- use_module('../lambda/type_hierarchy', [cat_eq/2, final_value_of_type/2,
+	luc/3]).
 :- use_module('../llf/ttterm_preds', [
 	match_list_ttTerms/3, match_list_only_terms/2, match_ttTerms/3,
 	subset_only_terms/2, ttTerm_to_informative_tt/2
@@ -16,6 +18,12 @@
 	not_disjoint/3, not_isa/3, positional_isa/3
 	]).
 
+:- use_module('../utils/generic_preds', [last_member/2]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% For debugging particular closure rules
+cl_subsumption_complex :- true.
+cl_redRelCl :- true.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 		       Closure Rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -154,37 +162,61 @@ r(contra_be, 	closure, _, [['be']], _,
 % closure related to verb subcategorization
 %sick-trial-1881, sick-train-1358, 1417, 1878, 1884, 3571, 4090, 4094, 4246, 4320, 4329, 6288
 r(cl_subcat, 	closure, _, _Lexicon, KB_xp,
-		br([nd( M1, (Tr1, np:_~>TyS1), Args1, true ),  % why not subsumption over Modifiers?
-			nd( M2, (Tr2, np:_~>TyS2), Args2, false )
-		   ],
-		  Sig)
-		===>
-		br([nd( [], (true, t), [], false )],
-		  Sig) )
+	br([nd( M1, (Tr1, np:_~>TyS1), Args1, true ),  % why not subsumption over Modifiers?
+		nd( M2, (Tr2, np:_~>TyS2), Args2, false )
+	   ],
+	  Sig)
+	===>
+	br([nd( [], (true, t), [], false )],
+	  Sig) )
 :-
-			final_value_of_type(TyS1, s:F1),
-			final_value_of_type(TyS2, s:F2),
-			once( ( M2 = [] ; match_list_only_terms(M1, M2) ) ),
-			( append(_, Args2, Args1) -> % subcategorization
-				( Tr1 =@= Tr2 % avoids matching variable to term, var(X) for variables can slove the global problem
-				; %Tr1 = tlp(_,Lm1,Pos1,_,_), Tr2 = tlp(_,Lm2,Pos2,_,_),
-				  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp),
-				  %\+memberchk('VBN', [Pos1, Pos2])
-				  Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_),
-				  isa(Lm1,Lm2,KB_xp), not_disjoint(Lm1,Lm2,KB_xp), % for sick-4320,4329 but excidental
-				  %Lm1 == Lm2,
-				  F1 \= 'pss', F2 \= 'pss'
-				)
-			; append(Args2, _, Args1), % passivization, maybe constratin S:F=S:pss %sick-3626
-			  %Tr1 = tlp(_,Lm1,_,_,_),  % saves sick-4322, 4328
-			  %Tr2 = tlp(_,Lm2,'VBN',_,_),
-			  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp) % fails-1756
-			  F2 == 'pss',
-			  ( Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_),
-				Lm1 == Lm2
-			  ; Tr1 =@= Tr2
-			  )
-			).
+	% TODO can be about e~>t vs vp too
+	final_value_of_type(TyS1, s:F1),
+	final_value_of_type(TyS2, s:F2),
+	subset_only_terms(M2, M1),
+	%once( ( M2 = [] ; match_list_only_terms(M1, M2) ) ),
+	( append(_, Args2, Args1) -> % subcategorization
+		( Tr1 =@= Tr2 % avoids matching variable to term, var(X) for variables can slove the global problem
+		; %Tr1 = tlp(_,Lm1,Pos1,_,_), Tr2 = tlp(_,Lm2,Pos2,_,_),
+		  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp),
+		  %\+memberchk('VBN', [Pos1, Pos2])
+		  Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_),
+		  isa(Lm1,Lm2,KB_xp), not_disjoint(Lm1,Lm2,KB_xp), % for sick-4320,4329 but excidental
+		  %Lm1 == Lm2,
+		  F1 \== 'pss', F2 \== 'pss'
+		)
+	; append(Args2, _, Args1), % passivization, maybe constratin S:F=S:pss %sick-3626
+	  %Tr1 = tlp(_,Lm1,_,_,_),  % saves sick-4322, 4328
+	  %Tr2 = tlp(_,Lm2,'VBN',_,_),
+	  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp) % fails-1756
+	  F2 == 'pss',
+	  ( Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_),
+		Lm1 == Lm2
+	  ; Tr1 =@= Tr2
+	  )
+	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rules for fixing terrible analysis of reduced rel cluase
+% a N is Ving vs. no N Ving
+% used for SICK-EN 6205,8317,5753,5085,254
+r(cl_redRelCl,  closure,  _, _Lexicon, KB_xp,
+	% nouns usually don't have mod list, so assume []
+	br([nd( [], (N1, n:_), 						[C], 		TF ),
+		nd( M,  (V1, np:_~>s:_),				[A|Args], 	TF ),
+		nd( [], ((N2,n:_~>n:_)@(V2,n:_), n:_), 	[C], 		FT )],
+	  Sig)
+	===>
+	br([nd( [], (true, t), [], false )], Sig)
+) :-
+	( TF = true -> FT = false; FT = true, M = [] ),
+	last_member(C, [A|Args]),
+	cl_redRelCl,
+	ttTerm_to_pretty_atom((N1,_), PN1), ttTerm_to_pretty_atom((N2,_), PN2),
+	ttTerm_to_pretty_atom((V1,_), PV1), ttTerm_to_pretty_atom((V2,_), PV2),
+	( TF = true -> isa(PN1, PN2, KB_xp), isa(PV1, PV2, KB_xp)
+	; isa(PN2, PN1, KB_xp), isa(PV2, PV1, KB_xp) ).
+
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % closure about PP-attachment, taken from rules
@@ -554,8 +586,3 @@ r(cl_equal, 	closure, _, [['be']], _,
 		  Sig) )
 :-
 			true.
-
-
-
-cl_subsumption_complex :-
-	true.

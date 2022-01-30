@@ -32,6 +32,7 @@
 :- use_module('../prover/tableau_utils', [
 	genOldArgs/3, genFreshArgs/5
 	]).
+:- use_module('../knowledge/ling', [pos2s_feat/2]).
 
 :- ensure_loaded([
 	'closure_rules',
@@ -177,27 +178,30 @@ r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB-XP, % equi
 % intersective noun modifier in false context
 %branching could be in different way too
 r(int_mod_fl, impl:non, ([], [], _), _Lexicon, _KB-XP,
-		br([nd( M, ((TLP, n:_~>n:_) @ TTn, n:_),
-				[(C,e)], false )],
+	br([nd( M, ((TLP, n:_~>n:_) @ TTn, n:_),
+			[(C,e)], false )],
+	  Sig)
+	===>
+	[ 	br([nd( M, TTn, [(C,e)], false )],
+		  Sig),
+		% TODO: in gentail show terms with semantic types differently
+		br([nd( [], (TLP, Ty), [(C,e)], false ), % Ty was e~>t
+		    nd( M,  TTn, [(C,e)], true ) ],
 		  Sig)
-		===>
-		[ 	br([nd( M, TTn, [(C,e)], false )],
-			  Sig),
-			br([nd( [], (TLP, e~>t), [(C,e)], false ),
-			    nd( M,  TTn, [(C,e)], true ) ],
-			  Sig)
-		] )
+	] )
 :-
-
-		TLP = tlp(_,Lem,POS,_,_),
-		%!!! what about allInt here?
-		( intersective(Lem)
-		; POS = 'JJ', debMode('allInt') % relaxing constraints sick-2791, 5671
-		; atom_chars(POS, ['V','B'|_]) % verbs are as intersective adjectives sick-2722
-		; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
-		  privative(Priv)
-		), !,
-		ul_append(XP, [int(Lem)]).
+	TLP = tlp(_,Lem,POS,_,_),
+	( pos2s_feat(POS, SFeat) -> Ty = np:_~>s:SFeat
+	; atom_prefix(POS, 'NN') -> Ty = n:_
+	; Ty = e~>t ),
+	% conditions that allow branching in F
+	( intersective(Lem)
+	; atom_prefix(POS, 'JJ'), debMode('allInt') % relaxing constraints sick-2791, 5671
+	; atom_prefix(POS, 'VB') % verbs are as intersective adjectives sick-2722
+	; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
+	  privative(Priv)
+	), !,
+	ul_append(XP, [int(Lem)]).
 
 
 % non-intersective noun modifier in true context
