@@ -965,10 +965,12 @@ indentation3(Ind, I_, I, II) :-
 	with_output_to(atom(II), tab(Ind+2)),
 	with_output_to(atom(I_), tab(Ind-2)).
 
-ttterm_to_treant_json_(Ind, X) :-
+ttterm_to_treant_json_(Ind, (X,Ty)) :-
 	once( (var(X); atomic(X)) ), !,
+	type_to_atom(Ty, ATy),
+	indentation3(Ind, I_, I, II),
 	with_output_to(atom(I), tab(Ind)),
-	format('{~wtext: {name: "~w"}~n~w},~n', [I, X, I]).
+	format('{~n~wtext: {~n~wname: "~w",~n~wtype: "~w"~n~w}~n~w},~n', [I, II, X, II, ATy, I, I_]).
 
 ttterm_to_treant_json_(Ind, (TLP,Ty)) :-
 	TLP =.. [_, Off, Lem, Pos, F1, F2], !,
