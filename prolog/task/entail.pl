@@ -21,6 +21,7 @@
 :- use_module('../llf/ttterm_preds', [
 	ttTerms_same_type/2, lex_norm_ttterms/4
 	]).
+:- use_module('../llf/ttterm_to_term', [ttTerm_to_pretty_atom/2]).
 :- use_module('../knowledge/ind_kb', [add_ind_kb/2, induced_rel/1]).
 :- use_module('../knowledge/knowledge', [close_kb/3]).
 
@@ -331,13 +332,28 @@ entail(Problem_Id, Answer, Provers_Answer, Closed, FinalStatus) :-
 	),	!.
 */
 
-% checks an LLF on consistency, faisl if it is not consistent
+% checks an LLF on contingency: whether it can be true or false
+contingency_check(TF, KB, LLF) :-
+	contingency_check(false, TF, KB, LLF, _Closed).
+
+contingency_check(Verbose, TF, KB, LLF, Closed) :-
+	memberchk(TF-P-H-Status, [true-[LLF]-[]-inconsistent, false-[]-[LLF]-valid]),
+	check_problem(KB-_, P, H, 'yes', _, Closed, _, _, _),
+	( Closed == 'closed' ->
+		( Verbose ->
+			ttTerm_to_pretty_atom(LLF, Term),
+			report(['Warning: ', Status, ' LLF ', Term, '\n']),
+			fail
+		; fail )
+	; true ).
+	% memberchk((Closed, Answer), [('open','Consistent'), ('closed','Inconsistent'), ('NA', 'Defected')]).
+
+% Depreciated. checks an LLF on consistency, faisl if it is not consistent
 consistency_check(KB_XP, LLF, Answer) :-
 	check_problem(KB_XP, [LLF], [], 'yes', _PrAns, Closed, _Status, _BrList, _Tree),
 	%ignore(greason(KB, [LLF], [], 1)), % testing sentences separetly
 	% add_to_stream(branches, (PrId-'consistency', BrList)),
 	memberchk((Closed, Answer), [('open','Consistent'), ('closed','Inconsistent'), ('NA', 'Defected')]).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 entail(Align, Id, Answer, Provers_Answer, XP, Closed, FinalStatus) :-
@@ -355,14 +371,10 @@ entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
 		append(IKB, OKB, KB), % merge initial and obtained KBs
 		append(P_TTs, H_TTs, LLFs),
 		( ttTerms_same_type(LLFs, _Type) ->
-			( debMode('constchk') ->
-				maplist(consistency_check(KB-[]), LLFs, Checks)
-			; Checks = []
-			),
-			( memberchk('Inconsistent', Checks) ->
-				atomic_list_concat(Checks, ', ', Text),
-				report(['Warning: CONTRADICTION found in an LLF:\n', Text]),
-				% no explanation from consistency checking
+			( debMode('constchk'),
+			  \+( ( maplist(contingency_check(true, KB), LLFs)
+				  %; maplist(contingency_check(false, KB), LLFs)
+				  ) ) ->
 				(Pred, Cl, Status, XP) = ('unknown', 'NA', 'Defected', [])
 			; align_solve_problem(Align, KB, Id, Prem_Hyp, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP, Cl, Status)
 			)

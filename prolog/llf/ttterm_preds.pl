@@ -8,6 +8,7 @@
 		apply_ttMods_to_ttArg/3,
 		cc_as_fun/1,
 		conj_of_const_NNPs/1,
+		constant_prettyTerm/1,
 		extract_const_ttTerm/2,
 		extract_lex_NNPs_ttTerms/4,
 		feed_ttTerm_with_ttArgs/3,
@@ -1043,3 +1044,11 @@ type_to_atom(T1~>T2, A) :- !,
 %
 % ttTerm_to_subTerm_lex((abst(_,TT),Ty), Lex) :- !,
 % 	ttTerm_to_subTerm_lex(TT, Lex).
+
+
+% true when atom of pretty term corresponds to a lexical constant
+constant_prettyTerm(PrT) :-
+	atom(PrT), % sanity check
+	\+sub_atom(PrT, _, 1, _, '@'),
+	\+sub_atom(PrT, _, 5, _, 'abst('),
+	\+(( atom_concat(c, N, PrT), atom_number(N, _) )).

@@ -24,6 +24,7 @@
 	sublist_of_list/2, sort_list_length/2
 	]).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
+:- use_module('../llf/ttterm_preds', [constant_prettyTerm/1]).
 :- use_module('../prover/tableau_utils', [
 	get_closure_rules/2
 	]).
@@ -632,7 +633,10 @@ discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) 
 			%maplist(consistency_check(K-_XP), TTterms, Checks),
 			%maplist({K}/[T,Ch]>>consistency_check(K-_XP,T,Ch), TTterms, Checks),
 			%\+memberchk('Inconsistent', Checks)
-			consistent_with_tts(K, TTterms)
+			%consistent_with_tts(K, TTterms)
+			% cheks that all LLFs are contingent
+			maplist(contingency_check(false, false, K), TTterms, _),
+			maplist(contingency_check(false, true, K), TTterms, _)
 		), Cnst_Abd_L_KB)
 	; Cnst_Abd_L_KB = Abduced_L_KB
 	),
@@ -644,8 +648,6 @@ consistent_with_tts(KB, [TT|Terms]) :- !,
 	consistency_check(KB-_XP, TT, Check),
 	Check \= 'Inconsistent',
 	consistent_with_tts(KB, Terms).
-
-consistent_with_tts(_KB, []).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get TTterms necessary for tableau building
@@ -759,7 +761,8 @@ ndId_of_patterns(ndId(Node,_), Patterns) :-
 	member(Pat, Patterns),
 	term_variables(Pat, PatVars), % get all variables of pattern
 	ttTerm_to_prettyTerm(TT, Pat),
-	maplist(atom, PatVars).
+	maplist(atom, PatVars),
+	maplist(constant_prettyTerm, PatVars), !. % exclude aligned terms
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
