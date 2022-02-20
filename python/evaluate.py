@@ -75,33 +75,38 @@ def canonical_label(label):
 
 #################################
 def read_id_labels(filepath):
-    '''Read a list of (ID, label) pairs from the file.
+    '''Read a list of (ID, label) pairs from the file or a string.
        Rename labels with the canonical names
     '''
     id_labels = {}
-    with open(filepath) as f:
-        pattern = None # yet unknown
-        for line in f:
-            line = line.strip()
-            if not pattern: pattern = detect_prediction_format(line)
-            if pattern:
-                m = re.match(pattern, line)
-                if m:
-                    pid, pred = m.group(1), canonical_label(m.group(2))
-                    if pid in id_labels:
-                        assert pred == id_labels[pid], f"two diff predictions for {pid}"
-                    else:
-                        id_labels[pid] = pred
+    if op.isfile(filepath):
+        F = open(filepath)
+    else:
+        F = re.split('\n+', filepath)
+    # start reading a lines
+    pattern = None # yet unknown
+    for line in F:
+        line = line.strip()
+        if not pattern: pattern = detect_prediction_format(line)
+        if pattern:
+            m = re.match(pattern, line)
+            if m:
+                pid, pred = m.group(1), canonical_label(m.group(2))
+                if pid in id_labels:
+                    assert pred == id_labels[pid], f"two diff predictions for {pid}"
+                else:
+                    id_labels[pid] = pred
+    if op.isfile(filepath): F.close()
     if not id_labels:
         raise RuntimeError(f"No predictions retrieved from {filepath}")
     return id_labels
 
 #################################
-def read_systems_id_labels(filepaths):
+def read_systems_id_labels(filepaths, read_fun=read_id_labels):
     '''Read a list of (ID, label) pairs from the files'''
     sys_id_label = dict()
     for sysfile in filepaths:
-        sys_id_label[sysfile] = read_id_labels(sysfile)
+        sys_id_label[sysfile] = read_fun(sysfile)
     # all should have the same size of predictions
     sys_len = { s:len(l) for (s, l) in sys_id_label.items() }
     if len(set(sys_len.values())) != 1:
