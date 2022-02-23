@@ -96,7 +96,8 @@ ccgTree_to_latex(Anno, Pos, CCGTree) :-
 	write(']\n').
 
 ccgTree_to_latex(Anno, Pos, CCGTree) :-
-	CCGTree =.. [Funct, Cat, _, Tree_1, Tree_2 | _],
+	( CCGTree =.. [Funct, Cat, _, Tree_1, Tree_2]
+	; CCGTree =.. [Funct, Cat, Tree_1, Tree_2] ),
 	memberchk(Funct, [gbxc, gfxc, gfc, gbc]), !,
 	Pos2 is Pos + 1,
 	tab(Pos),
