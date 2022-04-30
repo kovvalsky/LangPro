@@ -27,45 +27,17 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % entailment with the first GQTT
-entail_all :- entail_all('both').
+prove_nli :- prove_nli(_).
 
-entail_all(Align) :-
-	findall((Problem_Id, Answer), (
-		sen_id(_, Problem_Id, h, Answer, _),
-		memberchk(Answer, ['yes', 'no', 'unknown'])
-	), ProblemIds_Answers),% to descard ill-problems of SNLI
-	% list_to_set(ProbIds_Answers, ProblemIds_Answers),
-	set_rule_eff_order, % defines an effciency order of rules
-	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
-	( debMode(parallel(_)) ->
-		%concurrent_maplist(solve_entailment(Align), ProblemIds_Answers, Results)
-		parallel_solve_entailment(Align, ProblemIds_Answers, Results)
-	; maplist(solve_entailment(Align), ProblemIds_Answers, Results)
-	),
-	write_predictions_in_file(Results),
-	draw_extended_matrix(Results, _Scores).
+prove_nli(PIDs) :- prove_nli(PIDs, 'both').
 
+prove_nli(PIDs, Align) :- prove_nli(PIDs, Align, []).
 
-%(Id, Ans, Provers_Ans, Closed, Status)
+prove_nli(PIDs, Align, IKB) :-
+		prove_nli(PIDs, Align, IKB, ['yes', 'no', 'unknown']).
 
-% Consideres only problems with specific answers
-entail_all([Ans | Rest]) :- entail_all('both', [Ans | Rest]).
-
-entail_all(Align, List_of_Answers) :-
-	findall((Problem_Id, Answer), (
-		sen_id(_, Problem_Id, h, Answer, _),
-		memberchk(Answer, List_of_Answers)
-	), ProblemIds_Answers),
-	%list_to_set(ProbIds_Answers, ProblemIds_Answers),
-	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
-	maplist(solve_entailment(Align), ProblemIds_Answers, Results),
-	draw_extended_matrix(Results, _Scores).
-
-
-entail_some(List_Int) :-
-	entail_some('both', List_Int).
-
-entail_some(Align, List_Int) :-
+prove_nli(List_Int, Align, IKB, List_of_Answers) :-
+	% detecting problem IDs
 	prob_input_to_list(List_Int, L1),
 	( debMode('singPrem') ->
 		findall(X, (member(X,L1), \+findall(_, sen_id(_,X,'p',_,_),[_,_|_])), L2 )
@@ -75,21 +47,22 @@ entail_some(Align, List_Int) :-
 		findall(X, (member(X,L2), \+member(X, [12,16,61,62,77,78,213,276,305,308,309,310])), List )
 	; List = L2
 	),
+	% further filtering problem IDs
+	findall((PID, Answer), (
+		member(PID, List),
+		sen_id(_, PID, h, Answer, _),
+		memberchk(Answer, List_of_Answers)
+	), PID_Ans),% to descard ill-problems of SNLI
+	% list_to_set(ProbIds_Answers, PID_Ans),
 	set_rule_eff_order, % defines an effciency order of rules
-	findall((Problem_Id, Answer), (
-		member(Problem_Id, List),
-		sen_id(_, Problem_Id, h, Answer, _)
-	), ProblemIds_Answers),
-	%list_to_set(ProbIds_Answers, ProblemIds_Answers),
 	( debMode('proof_tree') -> true; retractall(debMode('proof_tree'))),
 	( debMode(parallel(_)) ->
-		%concurrent_maplist(solve_entailment(Align), ProblemIds_Answers, Results)
-		parallel_solve_entailment(Align, ProblemIds_Answers, Results)
-	; maplist(solve_entailment(Align), ProblemIds_Answers, Results)
+		%concurrent_maplist(solve_entailment(Align), PID_Ans, Results)
+		parallel_solve_entailment(Align, IKB, PID_Ans, Results)
+	; maplist(solve_entailment(Align, IKB), PID_Ans, Results)
 	),
-	%maplist(solve_entailment(Align), ProblemIds_Answers, Results),
+	write_predictions_in_file(Results),
 	draw_extended_matrix(Results, _Scores).
-
 
 % bad fracas 12,16,61,62,77,78,213,276,305,308,309,310
 
