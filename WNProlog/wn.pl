@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- ensure_loaded([
-	'WNProlog/wn_hyp',
+	'wn_hyp',
 	%'wn_h_',
- 	'WNProlog/wn_sim',
-	'WNProlog/wn_ant',
-	'WNProlog/wn_der',
-	'WNProlog/wn_s'
+ 	'wn_sim',
+	'wn_ant',
+	'wn_der',
+	'wn_s'
 	]).
