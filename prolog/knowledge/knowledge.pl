@@ -5,10 +5,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module(knowledge,
 	[
-		ant_wn/3,
+		dis_kb/3,
 		close_kb/3,
-		derive/3,
-		disjoint/3,
+		der_kb/3,
 		not_disjoint/3,
 		instance/3,
 		not_instance/3,
@@ -26,7 +25,8 @@
 % 	]).
 
 :- use_module('disjoint', [disj_/2]).
-:- use_module('../utils/user_preds', [match_lowerCase/2, is_uList/1, ul_member/2, all_pairs_from_set/2]).
+:- use_module('../utils/user_preds', [match_lowerCase/2, is_uList/1,
+	ul_member/2, all_pairs_from_set/2, sym_rel_to_canonical/2]).
 :- use_module('../utils/generic_preds', [ substitute_in_atom/4 ]).
 :- use_module('../printer/reporting', [report/1]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -36,22 +36,40 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % closure of KB
+% KB is ord set with canonical-ordered arg sym relations
 close_kb(_Lex, KB0, KB) :-
 	KB = KB0.
 
+% close_kb(Lex, KB0, KB2) :-
+% 	step_expand_kb(KB0, KB1) ->
+% 		close_kb(Lex, KB1, KB2)
+% 	; KB2 = KB0.
+%
+% %%%%%%%%%%%%%%%%%%%%%%%
+% % single expansion step
+% step_expand_kb(KB, KB1) :-
+% 	( expand_kb_transitive_isa(KB, Rels),
+% 	; expand_kb_dis_isa(KB, Rels) ),
+% 	list_to_ord_set(Rels, OrdSet),
+% 	ord_union(KB, OrdSet, KB1)
+%
+% % A<B & B<C => A<C
+% expand_kb_transitive_isa(KB, [R]) :-
+% 	member(isa(A,B), KB),
+% 	member(isa(B,C), KB),
+% 	R = isa(A,C),
+% 	\+ord_memberchk(R, KB).
+%
+% % A<B & B|C
+% expand_kb_dis_isa(KB, [R]) :-
+% 	member(isa(A,B), KB),
+% 	( member(dis_wn(B,C), KB);
+% 	; member(dis_wn(C,B), KB)
+% 	), !,
+% 	sym_rel_to_canonical(dis_wn(A,C), R)
+% 	\+ord_memberchk(R, KB).
 
-% augment_kb(Lex, KB0, KB) :-
-%
-%
-% symetric_augment(Lex, KB0, KB) :-
-% 	findall(
-% 		nth1(N1, Lex, E1), nth1(N2, Lex, E2), N1 < N2,
-% 		( close_open_compound(E1, E2),
-% 		)
-% 	)
-%
-%
-% 	close_open_compound(X, Y, isa)
+
 
 
 % symmetric predciate, true when L1 and L2 differ only in spaces
@@ -61,8 +79,6 @@ close_open_compound((L1,P1), (L2,P2)) :-
 	( ( atom_prefix(P1, 'NN'),
 	    atom_prefix(P2, 'NN') ) -> true
 	; report(['WARNING:', L1, '&', L2, 'space-equi but not same POS: ', P1, '=\\=', P2, '\n']) ).
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ext( man,
@@ -94,28 +110,24 @@ inst(Inst, Concept) :-
 % not instance
 not_instance(Inst, Concept, KB-XP) :-
 	inst(Inst, Inst_Concept),
-	disjoint(Inst_Concept, Concept, KB-XP),
+	dis_kb(Inst_Concept, Concept, KB-XP),
 	ul_append(XP, [ins(Inst, Inst_Concept)]).
 
 
-ant_wn(A, B, KB-XP) :-
-	memberchk(ant_wn(A, B), KB),
-	ul_append(XP, [ant(A, B)]).
+dis_kb(A, B, KB-XP) :-
+	sym_rel_to_canonical(dis(A,B), CR),
+	( memberchk(CR, KB)
+	; CR =.. [_,X,Y], disjoint(X, Y)
+	),
+	ul_append(XP, [CR]).
 
 
-% capyures deriavtional morphology
-derive(A, B, KB-XP) :-
-	memberchk(der_wn(A, B), KB),
-	ul_append(XP, [der(A,B)]).
+% captures deriavtional morphology
+der_kb(A, B, KB-XP) :-
+	sym_rel_to_canonical(der(A,B), CR),
+	memberchk(CR, KB),
+	ul_append(XP, [CR]).
 
-
-% disjoint based on KB
-disjoint(A, B, KB-XP) :-
-	once(( 	memberchk(disj(A, B), KB)
-		;	memberchk(disj(B, A), KB)
-		; 	disjoint(A, B)
-		)),
-	ul_append(XP, [dis(A,B)]).
 
 not_disjoint(A, B, KB-_XP) :- %FIXME specify non disjointness
 	\+ul_member(disj(A, B), KB),
@@ -123,65 +135,20 @@ not_disjoint(A, B, KB-_XP) :- %FIXME specify non disjointness
 	\+disjoint(A, B).
 
 % disjoint
-disjoint(_, _) :-
-	\+debMode('hk'),
-	!, fail.
-
 disjoint(A, B) :-
-	disjoint_sym(A, B).
-/* allows weird contradictions: e.g. card trick is person, person disj trick therfore disj
-disjoint(A, B) :-
-	isa(A, A1),
-	disjoint_sym(A1, B).
-
-disjoint(A, B) :-
-	isa(B, B1),
-	disjoint_sym(A, B1).
-
-disjoint(A, B) :-
-	isa(A, A1),
-	isa(B, B1),
-	disjoint_sym(A1, B1).
-*/
-disjoint_sym(A, B) :-
-	( disjoint_(A, B)
-	; disjoint_(B, A)
-	; (debMode('disj') ->  ( disj_(A, B) ; disj_(B, A) ); false )
-	), !.
-
-% simplification
-/*disjoint(A, B) :-
-	\+isa(A, B),
-	\+isa(B, A).
-*/
-%disj_(woman, man).
+	debMode('hk') ->
+		( disjoint_(A, B)
+		; debMode('disj'), ( disj_(A, B) ; disj_(B, A) ), ! )
+	; fail.
 
 disjoint_(delegate, survey).
 disjoint_(delegate, result).
 disjoint_(book, person).
-disjoint_(book, person).
-disjoint_(contract, chairman).
-
-
+disjoint_(chairman, contract).
 
 %special classes, all semses should be under them
-disjoint_('physical entity', 'abstract entity').
+disjoint_('abstract entity', 'physical entity').
 %disjoint_(survey, result).
-
-
-disjoint_(A, B, KB) :-
-	memberchk(dis_wn(A, B), KB).
-/*
-disjoint_(A, B) :-
-	A \= B,
-	disjoint_list(List),
-	memberchk(A, List),
-	memberchk(B, List),
-	!,
-	%\+isa(A, B),
-	%\+isa(B, A).
-	( (isa(A, B); isa(B,A)) -> report(['Error: ', A, ' and ', B, ' are in isa and disjoint rels']); true ).
-*/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % is_/2 direct isa relation, atomic facts
@@ -342,20 +309,22 @@ isa(A, B, _KB-XP) :-
 
 % KB without assertions
 isa(W1, W2, KB-XP) :- % CHECK
-	\+is_uList(KB), !,
-	( 	memberchk(isa_wn(W1, W2), KB),
+	%\+is_uList(KB), !,
+	( 	memberchk(isa(W1, W2), KB),
 	  	ul_append(XP, [isa(W1, W2)])
-	; 	memberchk(sim_wn(W1, W2), KB),
-		ul_append(XP, [sim(W1, W2)])
+	; 	sym_rel_to_canonical(sim(W1, W2), CR),
+		memberchk(CR, KB),
+		ul_append(XP, [CR])
 	), !.
 
-isa(W1, W2, KB_-XP) :-
-	is_uList(KB_),
-	memberchk(isa_wn(W1, W2), KB_),
-	ul_append(XP, [isa(W1, W2)]).
+%% This seems redundant given above one
+% isa(W1, W2, KB_-XP) :-
+% 	is_uList(KB_),
+% 	memberchk(isa(W1, W2), KB_),
+% 	ul_append(XP, [isa(W1, W2)]).
 
 not_isa(A, B, KB-_XP) :- %FIXME specify negative info
-	\+ul_member(isa_wn(A, B), KB).
+	\+ul_member(isa(A, B), KB).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

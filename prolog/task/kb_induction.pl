@@ -14,7 +14,7 @@
 :- use_module('../utils/user_preds', [
 	%concurrent_maplist_n_jobs/3, %element_list_member/3,
 	list_to_freqList/2, shared_members/2,
-	sym_rels_to_canonical/2, prob_input_to_list/2,
+	sym_rel_to_canonical/2, prob_input_to_list/2,
 	partition_list_into_N_even_lists/3,
 	uList2List/2, prIDs_to_prIDs_Ans/2, get_value_def/3,
 	average_list/2, all_prIDs_Ans/1, parts_to_pids/2]).
@@ -29,7 +29,7 @@
 	get_closure_rules/2
 	]).
 :- use_module('../utils/induction_utils', [
-	add_lex_to_id_ans/2, filterAns_prIDs_Ans/3, format_pairs/2, get_IDAs/2,
+	add_lex_to_id_ans/2, filterAns_prIDs_Ans/3, format_pairs/2, get_IDA/2,
 	has_rel_against_kb/3, has_rel_incomparables/2, kb_length/2,
 	log_parameters/1, print_learning_phase_stats/3,
 	print_kb_learning_stages/3, print_phase_stats/4, partition_as_prIDs_Ans/6,
@@ -194,7 +194,7 @@ train_with_abduction(Config, TrainID, Induced_KB, TrAcc) :-
 % Evaluate prover on the list of pID,Ans[,Lex] using the induced knowledge
 predict_with_iKB(Config, IKB, IDALs, Score_List, Acc, SolvedA, FailedA, Results) :-
 	get_value_def(Config, 'align', Align),
-	get_IDAs(IDALs, IDAs),
+	maplist(get_IDA, IDALs, IDAs),
 	( debMode(parallel(_)) ->
 	  parallel_solve_entailment(Align, IKB, IDAs, Results)
 	; maplist(solve_entailment(Align, IKB), IDAs, Results)),
@@ -258,7 +258,7 @@ while_improve_induce_prove(IDALs, FailA0-FailA, SolvA0-SolvA, Config, Init_KB, I
 % Induce knowledge
 kb_induction_all(Config, IDALs, SolvA, Init_KB, Ind_KB) :-
 	% for effciency solved examples can be omitted for induction
-	get_IDAs(IDALs, IDAs),
+	maplist(get_IDA, IDALs, IDAs),
 	subtract(IDAs, SolvA, Unsolv_IDAs),
 	par_kb_induction_some(Config, Init_KB, Unsolv_IDAs, LL_KB, Info5),
 	% Get a new list of failed problems
@@ -608,7 +608,8 @@ discover_patterned_knw(Config, TTterms, Branches, IniKB, Patterns, Learned_KBs) 
 	extract_lex_NNPs_ttTerms(TTterms, Lexicon, _, _Names),
 	get_closure_rules(Lexicon, ClRules),
 	% Following the patterns of nodes, find all possible KBs that closes the tableau
-	maplist( pattern_filtered_nodes(Patterns), Branches, FilteredBranches ),
+	%maplist( pattern_filtered_nodes(Patterns), Branches, FilteredBranches ),
+	FilteredBranches = Branches, Patterns = Patterns,
 	findall(L_KB, ( % a list of sets of facts, that can close Branch
 		member(Br, FilteredBranches),
 		all_closing_KB(ClRules, Br, IniKB, L_KB) % K is a list of lists (of relations)
@@ -731,7 +732,7 @@ closing_rule_knowledge(br(Nodes,_,_), Rule, KB0, NewKB) :-
 	append(KB0, _, KB0_X),
 	r(Rule, closure, _, _, KB0_X-_XP, br(HeadNodes, _) ===> _),
 	uList2List(KB0_X, KB_All),
-	sym_rels_to_canonical(KB_All, Cano_KB_All),
+	maplist(sym_rel_to_canonical, KB_All, Cano_KB_All), %not needed? knowledge.pl also orders them
 	sort(Cano_KB_All, KB_All_Sorted),
 	subtract(KB_All_Sorted, KB0, NewKB).
 

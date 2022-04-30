@@ -4,7 +4,7 @@
 		add_lex_to_id_ans/2,
 		filterAns_prIDs_Ans/3,
 		format_pairs/2,
-		get_IDAs/2,
+		get_IDA/2,
 		has_rel_against_kb/3,
 		has_rel_incomparables/2,
 		kb_length/2,
@@ -23,7 +23,8 @@
 :- use_module('../utils/user_preds.pl', [
 	atom_char_occur/3, partition_list_into_N_even_lists/3,
 	prob_input_to_list/2, prIDs_to_prIDs_Ans/2, diff/3,
-	freqList_subtract/3, list_to_freqList/2, last_member/2, pairwise_append/2
+	freqList_subtract/3, list_to_freqList/2, last_member/2, pairwise_append/2,
+	sym_rel_to_canonical/2
 	]).
 :- use_module('../utils/generic_preds', [list_atom/2,
 	filepath_write_source/2
@@ -144,34 +145,35 @@ has_rel_against_kb(List, Lex, KB) :-
 % identifies bad/nonsensical facts
 bad_fact(Fact, _Lex, KB) :-
 	Fact =.. [F, A, B],
-	memberchk(F, ['disj', 'ant_wn']),
+	memberchk(F, ['dis']),
 	positively_rel_p_p(KB, A, B).
 
-% isa_wn(full, empty)	for SICK-train-90
-% are isa_wn relations added during abduction?
-bad_fact(isa_wn(A, B), _Lex, KB) :-
-	  memberchk(ant_wn(A, B), KB)
-	; memberchk(disj(A, B), KB).
+% isa(full, empty)	for SICK-train-90
+% are isa relations added during abduction?
+bad_fact(isa(A,B), _Lex, KB) :-
+	sym_rel_to_canonical(dis(A,B), CR),
+	memberchk(CR, KB).
 
 % don't learn knowkedge about determiners
-% avoid learning isa_wn(a, s) from 3122
+% avoid learning isa(a, s) from 3122
+% how does thsi treat !!! sick-9530?
 bad_fact(Fact, Lex, _KB) :-
 	Fact =.. [_, A, B],
-	member((A, Pos), Lex),
-	member((B, Pos), Lex),
+	member((A,Pos), Lex),
+	member((B,Pos), Lex),
 	memberchk(Pos, ['DT']).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % every word in A is positively related to some word in B
 % symmetric
 positively_rel_w_w(KB, A, B) :-
+	msort([A,B], [X,Y]), % for symetric rels
 	( A = B
-	; memberchk(isa_wn(A, B), KB)
-	; memberchk(isa_wn(B, A), KB)
-	; memberchk(sim_wn(A, B), KB)
-	; memberchk(sim_wn(B, A), KB)
+	; memberchk(isa(A,B), KB)
+	; memberchk(isa(B,A), KB)
+	; memberchk(sim(X,Y), KB)
 	), !.
-	%! der_wn?
+	%! der/2?
 
 % Word is positively related to some word in a phrase
 % non-symmetric,
@@ -361,11 +363,25 @@ add_lex_to_id_ans(ID_Ans, (ID,Ans,Lex)) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get IDAs from IDAs or IDALs
-get_IDAs(IDALs, IDAs) :-
-	findall((ID,A), (
-		member(E, IDALs),
-		once((E = (ID,A,_); E = (ID,A); E = (ID-A-_); E = (ID-A)))
-	), IDAs).
+% get_IDAs(IDALs, IDAs) :-
+% 	findall((ID,A), (
+% 		member(E, IDALs),
+% 		once((E = (ID,A,_)
+% 			; E = (ID,A)
+% 			; E = (ID-A-_)
+% 			; E = (ID-A)
+% 			; atom(E), ID=E, sen_id(_,ID,_,A,_)
+% 		))
+% 	), IDAs).
+
+get_IDA(E, (ID,A)) :-
+	( E = (ID,A,_)
+	; E = (ID,A)
+	; E = (ID-A-_)
+	; E = (ID-A)
+	; atomic(E), ID=E, sen_id(_,ID,_,A,_)
+	), !.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculate length of KB as a sum of lengths of its relations

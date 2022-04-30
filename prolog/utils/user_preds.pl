@@ -52,7 +52,7 @@
 
 		shared_members/2,
 
-		sym_rels_to_canonical/2,
+		sym_rel_to_canonical/2,
 		term_list_concat/2,
 		ttExp_to_ttTerm/2,
 		ttExp_to_ttTerm_info/3,
@@ -811,14 +811,12 @@ rm_sym_preds_from_ord([H1|Rest], [H1|List]) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % for a list of relations, set a canonical order for symetric relations
-sym_rels_to_canonical([], []) :- !.
-
-sym_rels_to_canonical([R | Rels], [C | Cano_Rels]) :-
+sym_rel_to_canonical(R, C) :-
 	R =.. [Pred, Arg1, Arg2],
-	( memberchk(Pred, [disj, ant_wn]), Arg2 @=< Arg1 -> % list of symmetric predicates
+	( memberchk(Pred, [sim, dis, der]), % list of symmetric predicates
+	  Arg2 @=< Arg1 ->
 		C =.. [Pred, Arg2, Arg1]
-	; C = R ),
-	sym_rels_to_canonical(Rels, Cano_Rels).
+	; C = R ).
 
 
 

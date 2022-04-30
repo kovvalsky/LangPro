@@ -8,6 +8,7 @@
 :- use_module('disjoint', [disj_/2]).
 :- use_module('../utils/generic_preds', [substitute_in_atom/4]).
 :- use_module('../printer/reporting', [report/1]).
+:- use_module('../utils/user_preds.pl', [sym_rel_to_canonical/2]).
 
 :- dynamic debMode/1.
 
@@ -99,16 +100,16 @@ represents_wn_rel( (Lem1,Num1)-(Lem2,Num2), Fact ) :-
 	substitute_in_atom(Lem1, '_', ' ', L1),
 	substitute_in_atom(Lem2, '_', ' ', L2),
 	( Num1 = Num2, word_hyp(L1, L2, Num1) ->
-	  	Fact = isa_wn(L1, L2)
+	  	Fact = isa(L1, L2)
 	; debMode('wn_ant'), Num1 = Num2, word_ant(L1, L2, Num1) ->
 	  	%assert(ant_wn(Lemma1, Lemma2)), %since paits are symetric
-	  	Fact = ant_wn(L1, L2)
+		sym_rel_to_canonical(dis(L1,L2), Fact)
 	; debMode('wn_der'), word_der(L1, L2) ->
-		Fact = der_wn(L1, L2)
+		sym_rel_to_canonical(der(L1,L2), Fact)
 	; debMode('wn_sim'), Num1 = Num2, word_sim(L1, L2, Num1) ->
-		Fact = sim_wn(L1, L2)
+		sym_rel_to_canonical(sim(L1,L2), Fact)
 	; debMode('disj'), disj_(L1, L2) ->
-		Fact = disj(L1, L2)
+		sym_rel_to_canonical(dis(L1,L2), Fact)
 	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
