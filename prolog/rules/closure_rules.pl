@@ -14,7 +14,7 @@
 	subset_only_terms/2, ttTerm_to_informative_tt/2
 	]).
 :- use_module('../knowledge/knowledge', [
-	disjoint/3, isa/3, ant_wn/3, derive/3, instance/3, not_instance/3,
+	isa/3, dis_kb/3, der_kb/3, instance/3, not_instance/3,
 	not_disjoint/3, not_isa/3, positional_isa/3
 	]).
 
@@ -24,6 +24,7 @@
 % For debugging particular closure rules
 cl_subsumption_complex :- true.
 cl_redRelCl :- true.
+cl_vp_pp_vs_vp :- true.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 		       Closure Rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,11 +75,12 @@ r(vp_pp_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]]
 		br([nd( [], (true, t), [], false )],
 		  Sig) )
 :-
-			cat_eq(Type1, Type2), % because sick-2388: slice of y: x & slice y: x
-			match_list_ttTerms(Args1, Args2, KB_xp),
-			once(( M2 = []; match_list_only_terms(M1, M2) )),
-	 		atom(VP1), atom(VP2),
-			isa(VP1, VP2, KB_xp).
+	cl_vp_pp_vs_vp, % for debuging
+	cat_eq(Type1, Type2), % because sick-2388: slice of y: x & slice y: x
+	match_list_ttTerms(Args1, Args2, KB_xp),
+	once(( M2 = []; match_list_only_terms(M1, M2) )),
+		atom(VP1), atom(VP2),
+	isa(VP1, VP2, KB_xp).
 
 
 % doen@op => opdoen sicknl-2911, beklimmen => klimmen@op sicknl-4006/11
@@ -366,7 +368,7 @@ r(cl_ant_n_mod, 		closure, _, _Lexicon, KB_xp,  %fracas-204,205
 :-
 			F1 \= 'COL', F2 \= 'COL',
 			Lm1 \= Lm2,
-			ant_wn(Lm1, Lm2, KB_xp).
+			dis_kb(Lm1, Lm2, KB_xp).
 
 /*
 % body (of X):Y:False && Lake:Y:True  && Water:X:True  % sick-9631, wrong 338 shows it
@@ -406,7 +408,7 @@ r(cl_do_vp, 	closure, _, [['do'], ['doen']], KB_xp,
 		  Sig) )
 :-
 			( debMode(lang('nl')) -> Do = 'doen'; Do = 'do' ),
-			once(( Dance1 = Dance2; derive(Dance1, Dance2, KB_xp))),
+			once(( Dance1 = Dance2; der_kb(Dance1, Dance2, KB_xp))),
 			(	(TF1, TF2, TF3) = (true, true, false),
              	subset_only_terms(M3, M1)
 			;	(TF1, TF2, TF3) = (false, true, true),
@@ -428,7 +430,7 @@ r(cl_noun_adj_comp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('R
 		  Sig) )
 :-
 			OF = (tlp(_,_Of,'IN',_,_), np:_~>pp),
-			once( (Beerly = Beer; derive(Beer, Beerly, KB_xp)) ),
+			once( (Beerly = Beer; der_kb(Beer, Beerly, KB_xp)) ),
 			(	(TF1, TF2, TF3) = (true,  true, false), M3 = []
 			;	(TF1, TF2, TF3) = (false, true, true),  M1 = []
 			).
@@ -465,7 +467,7 @@ r(cl_disjoint, 	closure, _, _Lexicon, KB_xp,
 			atom(Term1),
 			atom(Term2),
 			Term1 \= Term2,
-			disjoint(Term1, Term2, KB_xp),%; % gives weird results with subWN: disjoint(frog,hold), disjoint(reserve,reserve)
+			dis_kb(Term1, Term2, KB_xp),%; % gives weird results with subWN: disjoint(frog,hold), disjoint(reserve,reserve)
 			not_isa(Term1, Term2, KB_xp),
 			not_isa(Term2, Term1, KB_xp).
 

@@ -404,6 +404,15 @@ align_solve_problem('both', KB, Id, P_H, P_TTs, H_TTs, AP_TTs, AH_TTs, Pred, XP,
 	; (Pred, XP, Cl, Status)   =  (Pred_N, XP_N, Cl_N, Status_N)
 	).
 
+
+
+% true if TTs are compatible
+% Helps to guess the kind of conjunction duirng proving
+compatible_TTconcepts(TTs, KB) :-
+	generateTableau(KB-_, TTs, [], BrList, _, _) ->
+		BrList \= []
+	; format('WARNING: compatibility check failed: ~w~n', [TTs]).
+
 %*/
 
 % entailment for binary classification

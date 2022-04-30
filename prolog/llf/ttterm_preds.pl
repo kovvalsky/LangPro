@@ -13,7 +13,8 @@
 		extract_lex_NNPs_ttTerms/4,
 		feed_ttTerm_with_ttArgs/3,
 		is_tlp/1,
-		is_cc_ttTerm/1,
+		is_cc_ttTerm/1, %1 duplicate?
+		is_tt_conj/3,   %1
 		lex_norm_ttterms/4,
 		match_list_ttTerms/3,
 		match_list_only_terms/2,
@@ -58,9 +59,9 @@
 :- use_module('ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../knowledge/lexicon', [op(640, xfy, ::), '::'/2]).
-:- use_module('../knowledge/knowledge', [disjoint/3, word_synonyms/3, isa/3]).
+:- use_module('../knowledge/knowledge', [dis_kb/3, word_synonyms/3, isa/3]).
 :- use_module('../lambda/type_hierarchy', [
-	cat_eq/2, final_value_of_type/2, luc/3, general_cat/2
+	cat_eq/2, final_value_of_type/2, luc/3, general_cat/2, match_arg_type/3
 	]).
 
 
@@ -127,7 +128,7 @@ noun_node_to_isa_node_list(SrcNode, [SrcNode | Nodes], KB) :-
 	!,
 	(bagof(Node,
 		 Lm^( %isa_wn(Lm, Lemma),
-			  isa(Lm, Lemma, KB), \+disjoint(Lm, Lemma, KB),
+			  isa(Lm, Lemma, KB), \+dis_kb(Lm, Lemma, KB),
 			  Node = nd([], (tlp([0-0],Lemma,'NN',_,_), n:_), Args, TF)
 			),
 			Nodes)	-> true
@@ -576,9 +577,14 @@ set_type_for_tt_of_type(Ty1, Ty2, TT, NewTT) :-
 % applies tt function to list of tt arguments
 apply_ttFun_to_ttArgs(TTFun, [], TTFun).
 
-apply_ttFun_to_ttArgs((Fun,Ty1~>Ty2), [(H,Ty1) | TTRest], TTApp) :-
-	TT = ((Fun,Ty1~>Ty2) @ (H,Ty1), Ty2),
+apply_ttFun_to_ttArgs((Fun,Ty1), [(H,Ty2) | TTRest], TTApp) :-
+	match_arg_type(Ty1, Ty2, Ty3),
+	TT = ((Fun,Ty1) @ (H,Ty2), Ty3),
 	apply_ttFun_to_ttArgs(TT, TTRest, TTApp).
+
+% apply_ttFun_to_ttArgs((Fun,Ty1~>Ty2), [(H,Ty1) | TTRest], TTApp) :-
+% 	TT = ((Fun,Ty1~>Ty2) @ (H,Ty1), Ty2),
+% 	apply_ttFun_to_ttArgs(TT, TTRest, TTApp).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % apply a list of modifier terms to an argument
@@ -613,6 +619,21 @@ conj_of_const_NNPs( (((Conj, np:_~>np:_~>np:_) @ TT1, _) @ TT2, _) ) :-
 
 conj_of_const_NNPs( (tlp(_,L,'NNP',_,_), np:_) ) :-
 	nonvar(L). % prevent variable matching
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% is a TTterm built with a coordination
+is_cc_ttTerm(((Conj @ _A, _) @ _B, _)) :-
+	Conj = (TLPconj, Ty~>Ty~>Ty),
+	tlp_pos_in_list(TLPconj, ['CC']).
+
+%%%%%%%%
+is_tt_conj(Conj, TT1, TT2) :-
+	nonvar(Conj),
+	Conj = (((TLP, Ty~>Ty~>Ty) @ TT1, Ty~>Ty) @ TT2, Ty),
+	TLP = tlp(_, 'and', _CC, _, _).
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % true if TTterm is a Mod:NP~>NP @ Head:NP, where Mod is not conj@NP
@@ -678,12 +699,6 @@ modttTerm_but_conj(((TLPconj, Ty~>Ty~>Ty) @ _, _)) :-
 
 proper_modttTerm(ModTT) :-
 	\+modttTerm_but_conj(ModTT).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% is a TTterm built with a coordination
-is_cc_ttTerm(((Conj @ _A, _) @ _B, _)) :-
-	Conj = (TLPconj, Ty~>Ty~>Ty),
-	tlp_pos_in_list(TLPconj, ['CC']).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

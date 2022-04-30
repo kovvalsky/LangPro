@@ -23,7 +23,7 @@
 	).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../llf/ttterm_preds', [
-	adjuncted_ttTerm/1, modList_node_to_modNode_list/2,
+	adjuncted_ttTerm/1, modList_node_to_modNode_list/2, is_tt_conj/3,
 	tt_constant_to_tt_entity/2, modList_be_args_to_nodeList/3,
 	match_ttTerms/3, match_list_ttTerms/3, proper_tt_isa/3, extract_const_ttTerm/2,
 	set_type_for_tt/3, is_tlp/1, tlp_pos_in_list/2, tlp_lemma_in_list/2,
@@ -147,33 +147,47 @@ r(not_quant,  equi:non,  ([], [], _), [['not']], _,
 
 % intersective noun modifier in true context
 r(int_mod_tr, impl:non, ([], [], _), _Lexicon, _KB-XP, % equi
-		br([nd( M,  ((TLP, n:_~>n:_) @ TTn, n:_),
-				[(C,e)], true )],
-		  Sig)
-		===>
-		br([nd( M,  TTn, [(C,e)], true ),
-			nd( [], (TLP, Type), [(C,e)], true )],
-		  Sig) )
+	br([nd( M,  ((TLP, n:_~>n:_) @ TTn, n:_),
+			[(C,e)], true )],
+	  Sig)
+	===>
+	br([nd( M,  TTn, [(C,e)], true ),
+		nd( [], (TLP, Type), [(C,e)], true )],
+	  Sig) )
 :-
-		TLP = tlp(_,Lem,POS,_,_),
-		( debMode('allInt')  %3344:roof top->roof; 5552:toy phone->toy; 7957:court floor->court
-		  %\+atom_prefix(POS, 'NN')   % train-4020 baby kangaroo
-		; intersective(Lem) % what happens if all are intersective?
-		%; (POS = 'JJ', \+privative(Lem)) % relaxing constraints
-		; atom_prefix(POS, 'VB') % verbs are as intersective adjectives
-		; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
-		  privative(Priv)
-		),
-		!, % detect a type
-		( atom_prefix(POS, 'VB') ->
-			Type = np:_~>s:_
-		; atom_prefix(POS, 'NN') -> %6096 !!!bird@cage
-			Type = n:_
-		; atom_prefix(POS, 'JJ') ->
-			Type = np:_~>s:_
-		; Type = e~>t
-		),
-		ul_append(XP, [int(Lem)]).
+	TLP = tlp(_,Lem,POS,_,_), %!!! relax this by allowing compunds?
+	( debMode('allInt')  %3344:roof top->roof; 5552:toy phone->toy; 7957:court floor->court
+	  %\+atom_prefix(POS, 'NN')   % train-4020 baby kangaroo
+	; intersective(Lem) % what happens if all are intersective?
+	%; (POS = 'JJ', \+privative(Lem)) % relaxing constraints
+	; atom_prefix(POS, 'VB') % verbs are as intersective adjectives
+	; TTn = ((tlp(_,Priv,_,_,_), n:_~>n:_) @ _, _), % successful former N -> successful fr-199
+	  privative(Priv)
+	), !, % detect a type
+	( atom_prefix(POS, 'VB') ->
+		Type = np:_~>s:_
+	; atom_prefix(POS, 'NN') -> %6096 !!!bird@cage
+		Type = n:_
+	; atom_prefix(POS, 'JJ') ->
+		Type = np:_~>s:_
+	; Type = e~>t ),
+	ul_append(XP, [int(Lem)]).
+
+% for cases like sick-491: (black&white)@dog
+r(int_mod_tr, equi:non, ([], [], _), _Lexicon, KB-XP, % equi
+	br([nd( M,  ((Conj, n:_~>n:_) @ TTn, n:_),
+			[(C,e)], true )],
+	  Sig)
+	===>
+	br([nd( M,  TTn, [(C,e)], true ),
+		nd( [], NewConj, [(C,e)], true )],
+	  Sig) )
+:-
+	is_tt_conj((Conj, n:_~>n:_), TT1, TT2),
+	\+compatible_TTconcepts([TT1, TT2], KB),
+	ttTerm_to_prettyTerm((Conj,_), PrConj),
+	set_type_for_tt((Conj, n:_~>n:_), np:_~>s:_, NewConj),
+	ul_append(XP, [int(PrConj)]).
 
 % intersective noun modifier in false context
 %branching could be in different way too
@@ -203,6 +217,25 @@ r(int_mod_fl, impl:non, ([], [], _), _Lexicon, _KB-XP,
 	), !,
 	ul_append(XP, [int(Lem)]).
 
+% for cases like: (black&white)@dog
+r(int_mod_fl, impl:non, ([], [], _), _Lexicon, KB-XP,
+	br([nd( M, ((Conj, n:_~>n:_) @ TTn, n:_),
+			[(C,e)], false )],
+	  Sig)
+	===>
+	[ 	br([nd( M, TTn, [(C,e)], false )],
+		  Sig),
+		% TODO: in gentail show terms with semantic types differently
+		br([nd( [], NewConj, [(C,e)], false ), % Ty was e~>t
+		    nd( M,  TTn, [(C,e)], true ) ],
+		  Sig)
+	] )
+:-
+	is_tt_conj((Conj, n:_~>n:_), TT1, TT2),
+	\+compatible_TTconcepts([TT1, TT2], KB),
+	ttTerm_to_prettyTerm((Conj,_), PrConj),
+	set_type_for_tt((Conj, n:_~>n:_), np:_~>s:_, NewConj),
+	ul_append(XP, [int(PrConj)]).
 
 % non-intersective noun modifier in true context
 r(mod_n_tr, impl:non, ([], [], _), _Lexicon, _KB-XP,
@@ -447,7 +480,7 @@ r(mods_be,  impl:non,  _, [['be']], _KB, % this rule is not used! I guess mods_n
 %		Rules for Boolean operators
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-r(tr_conj_and,	equi:non,  ([], [], _), [['and']], _,
+r(tr_conj_and,	equi:non,  ([], [], _), [['and']], KB-_XP,
 		br([nd( [], ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, true )],
 		  Sig)
@@ -456,10 +489,12 @@ r(tr_conj_and,	equi:non,  ([], [], _), [['and']], _,
 			nd( [], TT2, Args, true )],
 		  Sig) )
 :-
-			cat_eq(Ty1, Ty2),
-			cat_eq(Ty1, Ty).
+			cat_eq(Ty1, Ty2), cat_eq(Ty1, Ty),
+			( \+memberchk(Ty, [n:_, np:_~>s:_])
+			; compatible_TTconcepts([TT1, TT2], KB) ).
 
-r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], _,
+
+r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], KB-_XP,
 		br([nd( [], ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
 		  Sig)
@@ -468,8 +503,9 @@ r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], _,
 		 	br([nd([], TT2, Args, false )], Sig)
 		] )
 :-
-			cat_eq(Ty1, Ty2),
-			cat_eq(Ty1, Ty).
+			cat_eq(Ty1, Ty2), cat_eq(Ty1, Ty),
+			( \+memberchk(Ty, [n:_, np:_~>s:_])
+			; compatible_TTconcepts([TT1, TT2], KB) ).
 
 
 r(tr_conj_who,	equi:non,  ([], [], _), [['who']], _,
@@ -1216,7 +1252,9 @@ r(the,  impl:new,  ([], Args, Cids), [['the']], _,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % conjunction rules
-r(arg_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %maybe impl?  this rule needed by sick-7889
+% exception: (black & white)@dog =/= black@dog & white@dog
+r(arg_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB-_XP,  %maybe impl?  this rule needed by sick-7889
+
 		br([nd( M, ( ( ( (TLP_CC, Ty~>Ty~>Ty) @ TT1, _ ) @ TT2, _ ) @ TTArg, Type),
 				Args, TF )],
 		  Sig)
@@ -1227,8 +1265,9 @@ r(arg_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %maybe impl?  this rule n
 :-
 			tlp_pos_in_list(TLP_CC, ['CC']),
 			\+cc_as_fun(TTArg),
-			%TTArg = (_, _ArgType). % check typing!!!
-			TT1 = (_, _Ty1~>Ty2).
+			TT1 = (_, _Ty1~>Ty2),
+			( Args = [] -> true % for exception case
+			; compatible_TTconcepts([TT1, TT2], KB) ).
 
 % distribute function only over entity arguments, sleep (and John Sam) -> (sleep John) and (sleep Sam)
 r(fun_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %!!! equi
@@ -1240,9 +1279,9 @@ r(fun_dist,	equi:non,  ([], [], _), [[pos('CC')]], _,  %!!! equi
 				Args, TF )],
 		  Sig) )
 :-
+			memberchk(Ty, [np:_, e]),
 			\+cc_as_fun(Fun),
-			tlp_pos_in_list(TLP_CC, ['CC']),
-			memberchk(Ty, [np:_, e]).
+			tlp_pos_in_list(TLP_CC, ['CC']).
 
 r(det_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB_xp,  %!!! equi
 		br([nd( M,
@@ -1257,7 +1296,7 @@ r(det_dist,	equi:non,  ([], [], _), [[pos('CC')]], KB_xp,  %!!! equi
 :-
 			tlp_lemma_in_list(A, [Lm_A]),
 			tlp_lemma_in_list(B, [Lm_B]),
-			disjoint(Lm_A, Lm_B, KB_xp), !,
+			dis_kb(Lm_A, Lm_B, KB_xp), !,
 			tlp_lemma_in_list(Det, ['a','the','s','a_few','many']),
 			tlp_pos_in_list(TLP_CC, ['CC']).
 
