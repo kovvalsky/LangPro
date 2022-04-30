@@ -276,7 +276,11 @@ write_source_element(_S, []) :-
 
 write_source_element(S, RuleApp) :-
 	( RuleApp =.. [RuleId, Ids];
-	  RuleApp =.. [RuleId, Ids, Olds]
+	  %RuleApp =.. [RuleId, Ids, NewArgs]
+	  RuleApp =.. [RuleId, Info1, Info2],
+	  ( maplist(integer, Info2) ->
+		  Olds = Info1, Ids = Info2
+	  ; Ids = Info1 )
 	), !,
 	term_to_atom(RuleApp, RuleAppAtom),
 	atomic_list_concat(['<source rule="', RuleId, '" ruleApp="', RuleAppAtom, '" >\n'], SourceBegTag),
