@@ -256,12 +256,20 @@ check_problem(KB-XP, Prem_TTterms, Hypo_TTterms, 'unknown', Provers_Ans, Closed,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solves a problem vs check
-solve_problem(PrId_Al, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, Status) :-
+solve_problem(PrId-Al, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, Status) :-
 	check_problem(KB-XP_yes, Prem_TTterms, Hypo_TTterms, 'yes', _, Closed_yes, Status_yes, Br_yes, Tree_yes),
 	check_problem(KB-XP_no, Prem_TTterms, Hypo_TTterms, 'no', _,  Closed_no, Status_no, Br_no, Tree_no),
+	% write tableu proofs in files if needed
+	atomic_list_concat(['tableau', PrId, yes, Al], '-', FN_yes),
+	atomic_list_concat(['tableau', PrId, no, Al], '-', FN_no),
+	( debMode('proof_tree'), ( debMode('xml'); debMode('html') ) ->
+	  output_XML(Tree_yes, PrId, FN_yes),
+	  output_XML(Tree_no, PrId, FN_no)
+	; true 
+	),
 	% write tableau proofs if needed
-	add_to_stream('branches', ([PrId_Al, 'yes'], Br_yes)),
-	add_to_stream('branches', ([PrId_Al, 'no'], Br_no)),
+	add_to_stream('branches', ([PrId-Al, 'yes'], Br_yes)),
+	add_to_stream('branches', ([PrId-Al, 'no'], Br_no)),
 	( (Closed_yes, Closed_no) == ('closed', 'closed') ->
 		report(['Warning: CONTRADICTION and ENTAILMENT at the same time: so NEUTRAL']),
 		append(XP_yes, XP_no, XP),
@@ -270,10 +278,10 @@ solve_problem(PrId_Al, KB-XP, Prem_TTterms, Hypo_TTterms, Prover_Ans, Closed, St
 		%report_theUsedrules_in_tree(Tree_no)
 	; (Closed_yes, Closed_no) == ('closed', 'open') ->
 		(Prover_Ans, Closed, Status, XP)  = ('yes', Closed_yes, Status_yes, XP_yes),
-		( theUsedrules_in_tree(Tree_yes, [H|T]) -> report([PrId_Al, ': ', [H|T]]); true )
+		( theUsedrules_in_tree(Tree_yes, [H|T]) -> report([PrId-Al, ': ', [H|T]]); true )
 	; (Closed_yes, Closed_no) == ('open', 'closed') ->
 		(Prover_Ans, Closed, Status, XP)  = ('no', Closed_no, Status_no, XP_no),
-		( theUsedrules_in_tree(Tree_no, [H|T]) -> report([PrId_Al, ': ', [H|T]]); true )
+		( theUsedrules_in_tree(Tree_no, [H|T]) -> report([PrId-Al, ': ', [H|T]]); true )
 	; (Closed_yes, Closed_no) == ('open', 'open') ->
 		Status_yes = (_,Steps1),
 		Status_no  = (_,Steps2),
