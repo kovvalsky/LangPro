@@ -3,6 +3,7 @@
 	text-align:center;
 	display:block;
 	/*background-color: rgb(250, 230, 180);*/
+	color: #000;
 }
 
 
@@ -22,17 +23,17 @@
 /*We will use ::before and ::after to draw the connectors*/
 .tree::before{
 	content: '';
-	position: absolute; top: 0;  
+	position: absolute; top: 0;
 	border-top: 2px solid #ccc;
 	width: 50%; height: 15px; right: 50%;
 }
 .tree::after{
     content: '';
-    position: absolute; top: 0; 
+    position: absolute; top: 0;
     border-top: 2px solid #ccc;
 	width: 50%; height: 15px; left: 50%;
 }
-/*We need to remove left-right connectors from elements without 
+/*We need to remove left-right connectors from elements without
 any siblings*/
 .tree:only-of-type::after, .tree:only-of-type::before {
     display:none;
@@ -41,7 +42,7 @@ any siblings*/
 /*Remove space from the top of single children*/
 .tree:only-child{ padding-top: 0;}
 
-/*Remove left connector from first child and 
+/*Remove left connector from first child and
 right connector from last child*/
 .tree:first-child::before, .tree:last-child::after{
 	border: 0 none;
@@ -82,8 +83,8 @@ right connector from last child*/
 	border-radius: 3px; border: 1px solid #aaa;
 }
 .node_id {
-    font-family:"Courier New", Courier, monospace; color: white;
-    padding-left: 2px; background-color: #aaa; 
+    font-family:"Courier New", Courier, monospace; color: #fff;
+    padding-left: 2px; background-color: #555;
     border-radius: 3px 0px 0px 3px;
 }
 .modList, .argList, .llf {
@@ -98,17 +99,18 @@ right connector from last child*/
 
 .source > span.source {
     display: inline;
-	font-size:60%; color: #aaa;
+	font-size:85%; color: #fff;
 	border: 1px solid #aaa;
 	padding: 0px 2px 2px 2px;
 	font-family: "Courier New", Courier, monospace;
 	border-radius: 0px 0px 5px 5px;
+	background-color:#555;
 }
 
 /************* Open branch and Closure ********************/
 .open_branch > i.fa.fa-unlock{
-   color: rgb(190,15,20); 
-   font-size: 200%; 
+   color: rgb(190,15,20);
+   font-size: 200%;
    padding-left: 4px; display: block;
 }
 
@@ -119,12 +121,12 @@ div.open_branch {
 
 .closure > i.fa.fa-times-circle{
    color: rgb(190,15,20);
-   font-size: 170%; 
+   font-size: 170%;
    padding-left: 4px;
 }
 .closer{
-  font-size:80%; 
-  color: #aaa; 
+  font-size:80%;
+  color: #aaa;
   font-weight: bold;
   border: 1px solid #aaa;
   padding: 0px 3px 3px 3px;
@@ -158,8 +160,3 @@ div.open_branch {
 	background-color:rgb(250,210,200);
 	padding: 3px;
 }
-
-
-
-
-
