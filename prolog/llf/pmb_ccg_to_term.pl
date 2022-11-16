@@ -25,7 +25,10 @@
 main(Fmt, DocIDList) :-
 	error_if_no_ccgs,
 	forall(
-		( ccg(ID, CCG), ID = DocID-_, memberchk(DocID, DocIDList) ),
+		( ccg(ID, CCG),
+		  get_id(ID, DocID),
+		  memberchk(DocID, DocIDList)
+		),
 		( ccgIDTree_to_ccgIDTerm(ccg(ID, CCG), ccg(ID, TTterm)) ->
 		  pretty_vars_in_ttterm(1-1, _, TTterm, PrettyTT),
 		  print_ccg_term(Fmt, ID, PrettyTT)
@@ -38,6 +41,9 @@ main(Fmt) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_id(ID1, ID2) :-
+	once(( ID1 = ID2-_; ID1 = ID2 )).
+
 error_if_no_ccgs :-
 	ccg(_,_) -> true;
 	format(user_error, 'Error: No CCG derivation was found', []),
@@ -85,6 +91,9 @@ ccgIDTree_to_ccgIDTerm(ccg(ID, Tree), ccg(ID, NormTT)) :-
 % ccgTree_to_ccgTerm(Tree, tcTree))
 % Converts CCG Tree into CCG term: a pair of term and type
 ccgTree_to_ccgTerm( t(Cat, Tok, Tags), (t(Tok, Tags), Type) ) :- !,
+	cat2type(Cat, Type).
+
+ccgTree_to_ccgTerm( t(Cat, Tok, Lem, Pos, Chunk, NER), (t(Tok, [lem:Lem, pos:Pos, chk:Chunk, ner:NER]), Type) ) :- !,
 	cat2type(Cat, Type).
 
 ccgTree_to_ccgTerm( lx(Cat, _, Tree), (TermType, Type) ) :- !,
@@ -184,7 +193,7 @@ cat2type(Conj, A ~> A ~> A) :-
 	Conj == conj, !.
 
 cat2type(Punct, Type) :-
-	memberchk(Punct, ['.','rrb','lrb','lqu','rqu',':',';',',','"','#','$','`','(',')','\'','LQU','RQU']),
+	memberchk(Punct, ['.', 'rrb', 'lrb', 'lqu', 'rqu', ':', ';', ',', 'comma', '"', '#', '$', '`', '(',')' ,'\'', 'LQU', 'RQU']),
 	!,
 	( var(Type) -> Type = Punct
 	; \+grounded_type(Type) -> Type = A ~> A % treat as a modifier
@@ -294,7 +303,7 @@ pretty_vars_in_ttterm(A, Z, TT, Pretty) :-
 
 pretty_vars_in_ttterm_(X-P, Z, (Exp, _)) :-
 	var(Exp) ->
-		report('Error: unexpected free variable found in pretty_vars_in_ttterms', [])
+		format(user_error, 'Error: unexpected free variable found in pretty_vars_in_ttterms~n', [])
 	; atom(Exp) ->
 		Z = X-P
 	; Exp =.. [t | _] ->
