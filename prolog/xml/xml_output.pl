@@ -20,7 +20,8 @@
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/ccg_term', [
-	ccgIDTree_to_ccgIDTerm/2, op(601, xfx, (/)), op(601, xfx, (\))
+	ccgIDTree_to_ccgIDTerm/2, ccgTree_to_tokenAnnos/3,
+	op(601, xfx, (/)), op(601, xfx, (\))
 	]).
 :- use_module('../llf/correct_term', [correct_ccgTerm/2]).
 :- use_module('../llf/ner', [ne_ccg/2]).
@@ -69,9 +70,7 @@ xml_senIDs_llfs(List_Int, XMLFile) :-
 xml_senIDs_llfs(List_Int, XMLFile, AnswerList) :-
 	listInt_to_id_ccgs(List_Int, CCG_IDs),
 	% filter CCG_IDs based on the gold labels
-	findall( ccg(ID, CCG),
-		( member(ccg(ID,CCG), CCG_IDs), sen_id(ID, _, _, Answer, _), memberchk(Answer, AnswerList) ),
-		Filt_CCG_IDs),
+	filter_idccgs_with_labels(CCG_IDs, AnswerList, Filt_CCG_IDs),
 	( exists_directory('xml') -> true; make_directory('xml') ),
 	atomic_list_concat(['xml/', XMLFile, '.xml'], FullFileName),
 	open(FullFileName, write, S, [encoding(utf8)]),
@@ -87,6 +86,15 @@ xml_senIDs_llfs(List_Int, XMLFile, AnswerList) :-
 		shell(ShellCommand)
 	;  true
 	).
+
+filter_idccgs_with_labels(ID_CCGs, Labels, Filtered_ID_CCGs) :-
+	var(Labels) ->
+		Filtered_ID_CCGs = ID_CCGs;
+	findall( ccg(ID, CCG),
+		( member(ccg(ID,CCG), ID_CCGs), sen_id(ID,_,_,Label,_), memberchk(Label, Labels) ),
+		Filtered_ID_CCGs
+	).
+
 
 
 
@@ -333,10 +341,11 @@ write_old_consts(_, []).
 
 
 write_parsed_problem_as_xml(S, Align, ProbID) :-
-	findall( X, sen_id(X, ProbID, _, _, _), IDs),
+	findall( X, sen_id(X,ProbID,_,_,_), IDs),
 	format(S, '<parsed_problem probID="~w">\n', [ProbID]),
 	%free_vars_to_indexed_atoms('x', TTterms, PrettyTTterms),
 	findall(ccg(X, CCG), (member(X, IDs), ccg(X, CCG)), CCG_IDs),
+	findall(PH, ( member(ccg(ID,_),CCG_IDs), sen_id(ID,ProbID,PH,_,_) ), PHs),
 	maplist(ccgIDTree_to_ccgIDTerm, CCG_IDs, CCGTerms_IDs),
 	maplist(nth1_projection(2), CCGTerms_IDs, CCGTerms),
 	maplist(ne_ccg, CCGTerms, CCGTerms_ne),
@@ -349,42 +358,41 @@ write_parsed_problem_as_xml(S, Align, ProbID) :-
 		append(Al_PremLLFs, Al_HypLLF, FinLLFs)
 	; 	append(PremLLFs, HypLLF, FinLLFs)
 	),
-	all_terms_per_sentence(IDs, CCG_IDs, CCGTerms, CCGTerms_corr, FinLLFs, List),
+	all_terms_per_sentence(PHs, CCG_IDs, CCGTerms, CCGTerms_corr, FinLLFs, List),
 	maplist(parsed_sen_to_xml_format(S), List),
 	write(S, '</parsed_problem>\n\n').
 	%close(S).
 
 xml_ccgIDs_to_llfs(S, CCG_IDs) :-
 	maplist(ccgIDTree_to_ccgIDTerm, CCG_IDs, CCGTerms_IDs),
-	maplist(nth1_projection(1), CCGTerms_IDs, IDs),
+	% maplist(nth1_projection(1), CCGTerms_IDs, IDs),
 	maplist(nth1_projection(2), CCGTerms_IDs, CCGTerms),
 	maplist(ne_ccg, CCGTerms, CCGTerms_ne),
 	maplist(clean_ccgTerm_once, CCGTerms_ne, CCGTerms_clean),
 	maplist(correct_ccgTerm, CCGTerms_clean, CCGTerms_corr),
 	maplist(once_gen_quant_tt, CCGTerms_corr, LLFs),
-	all_terms_per_sentence(IDs, CCG_IDs, CCGTerms, CCGTerms_corr, LLFs, List),
+	findall('s', member(_, CCG_IDs), PHs),
+	all_terms_per_sentence(PHs, CCG_IDs, CCGTerms, CCGTerms_corr, LLFs, List),
 	maplist(parsed_sen_to_xml_format(S), List).
 
 
 
-% given IDs, CCG tems, ... LLFs return a list per sentence
-all_terms_per_sentence([ID | Rest], CCG_IDs, CCGTerms, CCGTerms_corr, LLFs, List) :-
+% given prefic atoms p|h|s, CCG tems with IDs, ... LLFs return a list per sentence
+all_terms_per_sentence([PH | PH_R], [ccg(ID, CCG) | CCG_IDs_R], CCGTerms, CCGTerms_corr, LLFs, List) :-
 	!,
-	sen_id(ID, _, PHdw, _, Sent),
-	upcase_atom(PHdw, PH),
-	atomic_list_concat([PH,'<sub>',ID,'</sub>'], PHID),
-	( nth1(I, CCG_IDs, ccg(ID, CCG)) ->
-		nth1(I, CCGTerms, CCGTerm),
-		nth1(I, CCGTerms_corr, CCGTerm_corr),
-		nth1(I, LLFs, LLF),
-		Term_List = [CCG, CCGTerm, CCGTerm_corr, LLF]
-	; Term_List = []
+	( 	sen_id(ID,_,_,_,Sent) -> true;
+		ccgTree_to_tokenAnnos(2, CCG, Toks), atomic_list_concat(Toks, ' ', Sent) 
 	),
+	upcase_atom(PH, UpPH),
+	atomic_list_concat([UpPH,'<sub>',ID,'</sub>'], PHID),
+	CCGTerms = [ CCGTerm | CCGTerms_R ],
+	CCGTerms_corr = [ CCGTerm_corr | CCGTerms_corr_R ],
+	LLFs = [ LLF | LLFs_R ],
+	Term_List = [CCG, CCGTerm, CCGTerm_corr, LLF],
 	List = [[PHID, Sent | Term_List] | Rest_List],
-	all_terms_per_sentence(Rest, CCG_IDs, CCGTerms, CCGTerms_corr, LLFs, Rest_List).
+	all_terms_per_sentence(PH_R, CCG_IDs_R, CCGTerms_R, CCGTerms_corr_R, LLFs_R, Rest_List).
 
-
-all_terms_per_sentence([], _, _, _, _, []).
+all_terms_per_sentence([], [], _, _, _, []).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

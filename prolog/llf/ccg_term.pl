@@ -3,6 +3,7 @@
 	ccgIDTree_to_ccgIDTerm/2,
 	ccgTree_to_ccgTerm/2,
 	dirCat_to_undirCat/2,
+	ccgTree_to_tokenAnnos/3,
 	op(601, xfx, (/)),
 	op(601, xfx, (\))
 ]).
@@ -81,7 +82,7 @@ ccgTree_to_ccgTerm(Tree, (Term, UndirCat)) :-
 		( UndirCat1 = UndirCat ->
 			Term = Term1 % punctuation can be omitted as it acts as identity term
 		; P =.. ['t', _PunctCat | TLPCN ],
-		  TP =.. ['t', UndirCat1~>UndirCat | TLPCN ], 
+		  TP =.. ['t', UndirCat1~>UndirCat | TLPCN ],
 		  ccgTree_to_ccgTerm(TP, TP_C),
 		  Term = TP_C @ (Term1, UndirCat1)
 		);
@@ -122,3 +123,25 @@ dirCat_to_undirCat(DirCat, UndirCat) :-
 	((DirCat = s; DirCat = n; DirCat = np) ->
 		UndirCat = DirCat : _Feat;
 	 UndirCat = DirCat ).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Extract annotations per token from CCG trees
+ccgTree_to_tokenAnnos(AnnoPos, Tree, List) :-
+	nonvar(Tree),
+	Tree =.. [ Funct | Args ],
+	Funct \= 't', Args \= [],
+	!,
+	maplist(ccgTree_to_tokenAnnos(AnnoPos), Args, L_List),
+	append(L_List, List).
+
+% Annotation from a specific position
+ccgTree_to_tokenAnnos(AnnoPos, Tree, [Anno]) :-
+	nonvar(Tree),
+	Tree =.. [ 't' | Args ],
+	nth1(AnnoPos, Args, Anno),
+	atomic(Anno),
+	!.
+
+ccgTree_to_tokenAnnos(_AnnoPos, _Tree, []).
