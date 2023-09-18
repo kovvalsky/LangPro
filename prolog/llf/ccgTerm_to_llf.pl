@@ -115,10 +115,11 @@ fix_term(
 ) :-
 	proper_modttTerm(ModTT),
 	ModTT = (Mod, np:_~>np:_), nonvar(Mod),
-	right_branch_tt_search(M, (ModTT@(NP,np:Y),np:X), Mods, Noun),
+	right_branch_tt_search(M, (ModTT@(NP,np:Y),np:X), Ms, Noun),
 	Noun = (TLP_NN, np:_),
 	tlp_pos_in_list(TLP_NN, ['NN', 'NNS']),
-	maplist(set_type_for_tt_of_type(np:_~>np:_, n:_~>n:_), [M|Mods], Mods1),
+	append(Ms, [M], Mods),
+	maplist(set_type_for_tt_of_type(np:_~>np:_, n:_~>n:_), Mods, Mods1),
 	apply_ttMods_to_ttArg(Mods1, (TLP_NN,n:_), Mods_N),
 	fix_report('!!! Fix: insert n~>np rule for Mods@NN(S):np (NL)').
 
@@ -212,6 +213,7 @@ fix_term(
  	((tlp(TP,LP,'RP',_,_),(np:_~>s:_)~>np:_~>s:_) @ VP, _),
 	( ((tlp(T,L,POS,F1,F2),V_Ty) @ Rest), VP_Ty )
 ) :-
+	nonvar(TP),
 	VP = ((tlp(TV,LV,POS,F1,F2),V_Ty) @ Rest, VP_Ty),
 	atom_chars(POS, ['V','B'|_]),
 	atomic_list_concat([TV, '_', TP], T),
@@ -309,6 +311,33 @@ fix_term(
 	%(Cat = n:_; Cat = pp~>n:_), %why constraining category?
 	get_det_tlp('a', D),
 	fix_report('!!! Fix: insert DT for n:VB* complex term').
+
+
+%%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%%%
+% change type n~>n to n~>np for DT & JJ(S) words like many, several, most, few, etc
+% cat1=n, cat2=np, cat(Quant:JJ)=n~>n to (Quant, n~>np) @ n
+% SICKNL-88: ((no@(that...)@biker:n),np) --> (no:n~>np)@((that...)@biker:n)
+fix_term(
+	( ((Q,n:X~>n:_) @ N, n:_), np:Y ),
+	( (tlp(Tk,L,P1,F1,F2),n:X~>np:Y) @ N, np:Y )
+) :- %+++
+	is_tlp(Q),
+	Q = tlp(Tk,L,P,F1,F2),
+	( memberchk(L, ['several', 'many', 'few', 'most']) -> P1 = 'DT'
+	; memberchk(P, ['CD', 'DT']), P1 = P ),
+	%!!! Check that this takes ito account plural cases too: several dogs
+	fix_report('!!! Fix: identify modifiers as quantifiers').
+
+% exactly,(n~>n)~>n~>n @ two,n~>n @ N,n : np ~~> exactly,(n~>np)~>n~>np @ two,n~>np @ N,n - fracas-85
+fix_term(
+	( (((RB,_) @ (CD,n:_~>n:_), n:X~>n:_) @ N, n:_), np:Y ),
+	( ((RB, Ty~>Ty) @ (CD, Ty), Ty) @ N, np:Y )
+) :- %+++
+	tlp_pos_in_list(RB, ['RB']),
+	tlp_pos_in_list(CD, ['CD']),
+	Ty = n:X~>np:Y,
+	fix_report('!!! Fix: change type to correct one').
+
 
 %%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % tlp NN of cat1=n, cat2=np convert to tlp of cat=np
@@ -427,29 +456,6 @@ fix_term(
 	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:A~>s:B)~>np:C~>np:_),
 	fix_report('!!! Fix: insert Which Is for lex_rule: vp->np->np').
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% change type n~>n to n~>np for JJ(S) words like many, several, most, few, etc
-% cat1=n, cat2=np, cat(Quant:JJ)=n~>n to (Quant, n~>np) @ n
-fix_term(
-	( ((Q,n:X~>n:_) @ N, n:_), np:Y ),
-	( (tlp(Tk,L,P1,F1,F2),n:X~>np:Y) @ N, np:Y )
-) :- %+++
-	is_tlp(Q),
-	Q = tlp(Tk,L,P,F1,F2),
-	( memberchk(L, ['several', 'many', 'few', 'most']) -> P1 = 'DT'
-	; P = 'CD', P1 = P ),
-	%!!! Check that this takes ito account plural cases too: several dogs
-	fix_report('!!! Fix: identify modifiers as quantifiers').
-
-% exactly,(n~>n)~>n~>n @ two,n~>n @ N,n : np ~~> exactly,(n~>np)~>n~>np @ two,n~>np @ N,n - fracas-85
-fix_term(
-	( (((RB,_) @ (CD,n:_~>n:_), n:X~>n:_) @ N, n:_), np:Y ),
-	( ((RB, Ty~>Ty) @ (CD, Ty), Ty) @ N, np:Y )
-) :- %+++
-	tlp_pos_in_list(RB, ['RB']),
-	tlp_pos_in_list(CD, ['CD']),
-	Ty = n:X~>np:Y,
-	fix_report('!!! Fix: change type to correct one').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Change plural-some to several
@@ -483,6 +489,18 @@ fix_term(
 	( tlp('and','and','CC',F1,F2), Ty~>Ty~>Ty )
 ) :-
 	fix_report('!!! Fix: comma replaced by and').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fix a weird type of a conjunction that is under a relative pronoun
+% SICKNL-372: die:s~>np~>np @ (en:vp~->vp~>s @ VP @ VP) --> die:vp~>np~>np @ (en:vp~->vp~>vp @ VP @ VP) 
+fix_term(
+	((WH_TLP,s:_~>Ty~>Ty) @ (((CC_TLP,_) @ (C1,Ty1), _) @ (C2,Ty2), _), _),
+	((WH_TLP,Ty1~>Ty~>Ty) @ (((CC_TLP,Ty1~>Ty1~>Ty1) @ (C1,Ty1), Ty1~>Ty1) @ (C2,Ty2), Ty1), Ty~>Ty)
+) :-
+	tlp_pos_with_prefixes(WH_TLP, ['PRP', 'W']),
+	tlp_pos_in_list(CC_TLP, ['CC']),
+	\+ Ty1 \= Ty2. % unifiable but without binding variables
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % attach remote DT to the head of NP
