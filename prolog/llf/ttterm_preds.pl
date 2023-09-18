@@ -60,6 +60,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Right branch search a TT
+% arg2 = arg3_elemenst @ (arg1 @ arg4)
 right_branch_tt_search(F, (Term,_), [], B) :-
 	nonvar(Term),
 	Term = F@B.
@@ -494,7 +495,7 @@ abst_ttTerm_with_ttArgs(TT, TT, []).
 ttTerms_same_type(List, Type) :-
 	ttTerms_same_type(List, _, Type).
 
-ttTerms_same_type([], Type, Type) :-
+ttTerms_same_type([], Type, Type) :- %!!! TODO remove unification
 	nonvar(Type),
 	!.
 

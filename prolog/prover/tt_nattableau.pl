@@ -58,8 +58,8 @@ reason(KB_XP, T_TermList, F_TermList, Status) :-
 % and branch list, and checks the input on closure
 % with GUI
 greason(KB_XP, T_TermList, F_TermList, Info) :- % remove problem ID from arg list
-	Info = [Problem_Id, Mode, Align],
 	( debMode('proof_tree') -> true; assertz(debMode('proof_tree')) ),
+	Info = [Problem_Id, Mode, Align],
 	generateTableau(KB_XP, T_TermList, F_TermList, BrList, Tree, Status), !,
 	( theUsedrules_in_tree(Tree, [H|T]) -> report([Problem_Id, ': ', [H|T]]); true ),
 	%length(BrList, BrNumber), write('# Branches: '), write(BrNumber),
@@ -191,19 +191,18 @@ expand([Branch | RestBranches], RestBranches, Tree, UL_Closing_IDs, [const_id(E,
 	ChildList = closer(ClIDs).
 */
 
-expand(InitBrList, NewBrList, Tree, Cl_IDs, KB_XP, Count, Rules, RuleAppNum, Steps, Limit) :-
-	Limit = AppLimit-Mode,
+expand(InitBrList, NewBrList, Tree, Cl_IDs, KB_XP, Count, Rules, RuleAppNum, Steps, AppLimit-Mode) :-
 	%(0 is N mod 100 -> display(N), nl; true),
+	( Mode == 'comp' -> rotate_list(InitBrList, BrList); BrList = InitBrList ),
 	Count = [const_id(Eid1, Eid, Cid1, Cid), node_id(Nid1, Nid)],
 	Count1 = [const_id(Eid1, Eid2, Cid1, Cid2), node_id(Nid1, Nid2)],
-	( ( Mode == 'comp' -> rotate_list(InitBrList, BrList); BrList = InitBrList ),
-	  dirExpand(BrList, TempBrList, Tree, Cl_IDs, KB_XP, Count1, Rules, NewRules, RAppNum)
-	), !,
+	dirExpand(BrList, TempBrList, Tree, Cl_IDs, KB_XP, Count1, Rules, NewRules, RAppNum), 
+	!,
 	Count2 = [const_id(Eid2, Eid, Cid2, Cid), node_id(Nid2, Nid)],
 	NewRuleAppNum is RuleAppNum + RAppNum,
 	%report('Rule app: ', NewRuleAppNum),
 	( (NewRuleAppNum < AppLimit; TempBrList = []) ->
-		expand(TempBrList, NewBrList, Tree, Cl_IDs, KB_XP, Count2, NewRules, NewRuleAppNum, Steps, Limit)
+		expand(TempBrList, NewBrList, Tree, Cl_IDs, KB_XP, Count2, NewRules, NewRuleAppNum, Steps, AppLimit-Mode)
 	;	NewBrList = TempBrList,
 		( debMode('prlim') -> report(['Rule application limit reached: ', AppLimit]); true),
 		Steps = ('Lim', NewRuleAppNum) %'Limited'
@@ -227,10 +226,9 @@ dirExpand([ br([],_,_) | Tail], Tail, _, _Closing_IDs, _KB_XP, [const_id(E,E,C,C
 
 
 
-dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB_XP, Count, (Rules,ClRules), (NewRules,ClRules), RAppNum) :-
-	Branch = br(BrNodes, _Hist, _Sig),
-	Count = [ConstId, NodeId],
+dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB_XP, [ConstId, NodeId], (Rules,ClRules), (NewRules,ClRules), RAppNum) :-
 	findRule(Branch, RuleType, IDs, Body, ConstId, Rules, RuleApp, NewHistory, KB_XP), %!!! _RuleId
+	Branch = br(BrNodes, _Hist, _Sig),
 	%(member(RuleId, [abst_dist, arg_dist]) -> report('New rule used: ', RuleId); true),
 	%remove_first(RuleId, Rules, SubtrRules), append(SubtrRules, [RuleId], NewRules), % priority of rules change
 	NewRules = Rules, % priority of rules doent change
@@ -282,8 +280,7 @@ dirExpand([Branch | RestBranches], NewBranchList, Tree, Closing_IDs, KB_XP, Coun
 %dirExpand([Branch | Tail], [Branch | NewTail], Tree) :-
 %	dirExpand(Tail, NewTail, Tree).
 
-findRule(Branch, RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB_XP) :-
-	Branch = br(BrNodes, Hist, Sig),
+findRule(br(BrNodes, Hist, Sig), RuleType, IDs, Body, Cids, Rules, RuleApp, NewHist, KB_XP) :-
 	%Cids = const_id(_,Eid,_,_),
 	%BrHead = br(Head, Sig),
 	%!!! no preference to equivalent rules wrt impl and gamma rules?
