@@ -20,6 +20,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extract semantic relations for KB from WordNet
 kb_from_wn(Lex, KB) :-
+	%!!! filtering should be made more robust.
+	% sick_nl-3953's 'motor rijder' doesn't match 'motorrijder' in WODWN 
 	findall(Lem_Num,
 		( member(Lem_Pos, Lex), lemPos_in_WordNet(Lem_Pos, Lem_Num) ),
 		Lem_Nums),
@@ -100,12 +102,12 @@ pos_to_cat_num(POS, Num) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Takes a pair and checks what relation holds on them
 represents_wn_rel( (Lem1,Num1)-(Lem2,Num2), Fact ) :-
-	substitute_in_atom(Lem1, '_', ' ', L1),
-	substitute_in_atom(Lem2, '_', ' ', L2),
+	substitute_in_atom(Lem1, '_', ' ', L1), % remove later?
+	substitute_in_atom(Lem2, '_', ' ', L2), % remove later?
 	( Num1 = Num2, word_hyp(L1, L2, Num1) ->
 	  	Fact = isa_wn(L1, L2)
 	; debMode('wn_ant'), Num1 = Num2, word_ant(L1, L2, Num1) ->
-	  	%assert(ant_wn(Lemma1, Lemma2)), %since paits are symetric
+	  	%assert(ant_wn(Lemma1, Lemma2)), %since pairs are symetric
 	  	Fact = ant_wn(L1, L2)
 	; debMode('wn_der'), word_der(L1, L2) ->
 		Fact = der_wn(L1, L2)
