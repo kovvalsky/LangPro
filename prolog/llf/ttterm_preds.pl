@@ -844,6 +844,7 @@ add_heads((TLP,Ty), (TLP,Ty,H)) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %detect_head( (Ty~>Ty, _), (Ty, H2), H2 ) :- !.
+% !!! not used, delete?
 
 detect_head( (Ty2~>Ty1, _), (Ty2, H2), H2 ) :-
 	cat_eq(Ty1, Ty2), !.  % binds category features

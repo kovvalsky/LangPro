@@ -415,11 +415,10 @@ growBranches(Brs, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB_XP, ClRs,
 %growBranches(br([], _), CutBranch, [CutBranch], _SubTree, _RuleApp, node_id(Nid, Nid)) :- % when there are no nodes for addition
 %	!.
 
-growBranches(Br, CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, [New_Node_IDs]) :-
-	Br = br(NewNodes, _),
+growBranches(br(NewNodes, Hist), CutBranch, NewBranches, SubTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, [New_Node_IDs]) :-
 	is_list(NewNodes), !,
 	SubTree = tree(_, [LeftTree]),
-	growBranch(Br, CutBranch, NewBranch, LeftTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs),
+	growBranch(br(NewNodes, Hist), CutBranch, NewBranch, LeftTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs),
 	NewBranches = [NewBranch].
 
 
@@ -437,9 +436,7 @@ growBranch_list([], _CutBranch, [], [], _RuleApp, node_id(Nid, Nid), _KB_XP, _Cl
 % growBranch(NodeList, CutBranch, NewBranch, SubTree, SourceIDs)
 % NewBranch is produced from CutBranch by adding NodeList,
 % SubTree is updated and new nodes are notated by SourceIDs
-growBranch(Br, CutBranch, NewBranch, SubTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs) :-
-	Br = br(NodeList, Sig),
-	CutBranch = br(CutBrNodes, History, _),
+growBranch(br(NodeList, Sig), br(CutBrNodes, History, _), NewBranch, SubTree, RuleApp, NodeId, KB_XP, ClRs, Closing_IDs, New_Node_IDs) :-
 	is_list(NodeList),
 	% deletes new redundant nodes
 	once(subtract_nodes(NodeList, CutBrNodes, FilteredCutBrNodes, NodeList_pId)), % iff branching adds nothing dont branch
@@ -518,8 +515,7 @@ remove_be_node_from_branch(Branch, Branch).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checks if Branch is closed and returns IDs of closing nodes
 
-apply_closure_rules(IdList, Branch, ClRs, Cl_IDs, ClRule, KB_XP) :-
-	Branch = br(BrNodes, _Hist, Sig),
+apply_closure_rules(IdList, br(BrNodes, _Hist, Sig), ClRs, Cl_IDs, ClRule, KB_XP) :-
 	member(Id, IdList),
 	member(ClRule, ClRs),
 	clause( r(ClRule, closure, _, _Lex, _KB_XP, br(Head, Sig) ===> Body), _Constraints ),

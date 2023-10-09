@@ -170,7 +170,7 @@ genFreshArgs(Type, Args, Sig, NewSig, const_id(Eid1, Eid2, Cid1, Cid2)) :-
 % Extract relevant closure rules
 get_closure_rules(Lexicon, ClRules) :-
 	findall(RuleN, clause(r(RuleN,closure,_,_,_,_),_), ListClRules),
-	list_to_ord_set(ListClRules, SetClRules),
+	list_to_set(ListClRules, SetClRules), % list_to_ord_set changes ordering, while this preserves rule priority
 	select_relevant_rules(Lexicon, SetClRules, ClRules).
 
 
