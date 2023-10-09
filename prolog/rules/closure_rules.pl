@@ -155,7 +155,7 @@ r(contra_be, 	closure, _, [['be']], _,
 % closure related to verb subcategorization
 %sick-trial-1881, sick-train-1358, 1417, 1878, 1884, 3571, 4090, 4094, 4246, 4320, 4329, 6288
 r(cl_subcat, 	closure, _, _Lexicon, KB_xp,
-		br([nd( M1, (Tr1, np:_~>TyS1), Args1, true ),  % why not subsumption over Modifiers?
+		br([nd( M1, (Tr1, TyPP_NP~>TyS1), Args1, true ),  % why not subsumption over Modifiers?
 			nd( M2, (Tr2, np:_~>TyS2), Args2, false )
 		   ],
 		  Sig)
@@ -166,7 +166,7 @@ r(cl_subcat, 	closure, _, _Lexicon, KB_xp,
 			final_value_of_type(TyS1, s:F1),
 			final_value_of_type(TyS2, s:F2),
 			once( ( M2 = [] ; match_list_only_terms(M1, M2) ) ),
-			( append(_, Args2, Args1) -> % subcategorization
+			( append([_|_], Args2, Args1) -> % subcategorization
 				( Tr1 =@= Tr2 % avoids matching variable to term, var(X) for variables can slove the global problem
 				; %Tr1 = tlp(_,Lm1,Pos1,_,_), Tr2 = tlp(_,Lm2,Pos2,_,_),
 				  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp),
@@ -176,11 +176,12 @@ r(cl_subcat, 	closure, _, _Lexicon, KB_xp,
 				  %Lm1 == Lm2,
 				  F1 \= 'pss', F2 \= 'pss'
 				)
-			; append(Args2, _, Args1), % passivization, maybe constratin S:F=S:pss %sick-3626
+			; append(Args2, [_|_], Args1), % passivization, maybe constratin S:F=S:pss %sick-3626
 			  %Tr1 = tlp(_,Lm1,_,_,_),  % saves sick-4322, 4328
 			  %Tr2 = tlp(_,Lm2,'VBN',_,_),
 			  %isa(Lm1,Lm2), \+disjoint(Lm1,Lm2,KB_xp) % fails-1756
 			  F2 == 'pss',
+			  TyPP_NP = np:_,
 			  ( Tr1 = tlp(_,Lm1,_,_,_), Tr2 = tlp(_,Lm2,_,_,_),
 				Lm1 == Lm2
 			  ; Tr1 =@= Tr2
