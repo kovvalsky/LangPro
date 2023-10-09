@@ -23,7 +23,7 @@
 	).
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2]).
 :- use_module('../llf/ttterm_preds', [
-	adjuncted_ttTerm/1, modList_node_to_modNode_list/2,
+	add_heads/2, adjuncted_ttTerm/1, modList_node_to_modNode_list/2,
 	tt_constant_to_tt_entity/2, modList_be_args_to_nodeList/3,
 	match_ttTerms/3, match_list_ttTerms/3, proper_tt_isa/3, extract_const_ttTerm/2,
 	set_type_for_tt/3, is_tlp/1, tlp_pos_in_list/2, tlp_lemma_in_list/2,
@@ -45,7 +45,8 @@
 rule_priority([
 	%cl_subcat, cl_ant,
 	pull_arg, beta_red, type_drop,
-	tr_conj_and, fl_conj_and, tr_conj_who, fl_conj_who, fl_disj_or, tr_disj_or, neg_not, fl_if, tr_if,
+	tr_conj_and, fl_conj_and, tr_conj_who, fl_conj_who, fl_disj_or, tr_disj_or, 
+	neg_not, mod_neg_not, fl_if, tr_if,
 	there_trans, det_dist,
 	empty_mod, ho_verb,
 	poss_tr, cardinal_mod, not_quant,
@@ -235,8 +236,12 @@ r(push_mod,  impl:non,  ([], [], _), _Lexicon, _, % why not equivalent?
 			%TF = true, % for mode(no_mod_set)
 			cat_eq(Ty1, Ty),  %cat_eq(Ty2, Ty),
 			%TTexp \= tlp(_,'not',_,_,_),
-			\+(( TTexp = (tlp(_,Con,_,_,_),_) @ _,  member(Con, [if, and, or, who]) )), % exclude 'not'?
-			( ( adjuncted_ttTerm(TT)
+			\+( ( TTexp = (tlp(_,Con,_,_,_),_) @ _,  
+			      member(Con, [if, and, or, who]) )
+			  ; ( add_heads((TTexp,Ty1~>Ty1), (_,_,H_TT)), 
+			      H_TT = tlp(_,'not',_,_,_) ) % head TTs have cat instead of tok
+			), % excludes 'not' for cases
+			( ( adjuncted_ttTerm(TT) % is this necessary constraint?
 			  ; memberchk(Ty1, [s:_, np:_~>s:_, np:_~>np:_~>s:_])
 			  ) ->
 				append(M, [(TTexp,Ty1~>Ty1)], M1)
@@ -351,7 +356,7 @@ r(mods_vp,  impl:non,  ([], [], _), _Lexicon, _KB-_XP, % sick 1754, 8714, 4054, 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Prep@NP@VP:NP:F ---> Prep@NP@NP:F  OR  VP@NP:F, sick-254
-% maybe not really sound rule, for amboguity with PPs
+% maybe not really sound rule, for ambiguity with PPs
 r(pp_mod_vp_fl,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, (((tlp(Tk,Lm,'IN',F1,F2), np:_~>_) @ NP, (np:_~>s:_)~>np:_~>s:_) @ TTvp, _), 	[(C,Ty)], false )],
 		  Sig)
@@ -363,7 +368,7 @@ r(pp_mod_vp_fl,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')],
 			true.
 
 % Prep@NP@VP:NP:T ---> Prep@NP@NP:T  AND  VP@NP:T,
-% maybe not really sound rule, for amboguity with PPs
+% maybe not really sound rule, for ambiguity with PPs
 r(pp_mod_vp_tr,  equi:non,  ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, (((tlp(Tk,Lm,'IN',F1,F2), np:_~>_) @ NP, (np:_~>s:_)~>np:_~>s:_) @ TTvp, _), 	[(C,Ty)], true )],
 		  Sig)
@@ -526,6 +531,16 @@ r(neg_not,  equi:non,  ([], [], _), [['not']], _,
 		br([nd( M, TT, Args, Y )], Sig) )
 :-
 			cat_eq(Ty1, Ty2),
+			neg(X, Y).
+
+r(mod_neg_not,  impl:non,  ([], [], _), [['not']], _,
+		br([nd( M,  ( ((tlp(_,_,_,_,_), Ty~>Ty) @ (tlp(_,'not',_,_,_), Ty), Ty) @ TT, _ ),  %!!! added nonempty modifier
+				Args, X )],
+		  Sig)
+		===>
+		br([nd( M, TT, Args, Y )], Sig) )
+:-
+			Ty = Ty1~>Ty1,
 			neg(X, Y).
 
 

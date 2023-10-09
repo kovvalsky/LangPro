@@ -74,6 +74,8 @@
 :- use_module('../knowledge/knowledge', [isa/3]).
 :- use_module('../printer/reporting', [report/1]).
 
+:- use_module('../llf/ttterm_preds', [add_heads/2]).
+
 :- op(640, xfy, ::).
 :- op(605, xfy, ~>). 	% more than : 600
 :- op(605, yfx, @).   	% more than : 600
@@ -216,6 +218,8 @@ tt_mon_up((Term,Type)) :-
 tt_mon_up(TT) :- % too relaxed e.g. 'many':non,up passes this
 	\+tt_mon(TT, dw),
 	\+tt_mon(TT, non), % 'many' fails this. fracas-56,58
+	\+(( add_heads(TT, (_,_,H_TT)), 
+		 H_TT \= (tlp(_,'not',_,_,_),_) )),
 	!.
 
 tt_mon_up(TT) :-
