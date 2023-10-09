@@ -656,6 +656,20 @@ fix_term(
 	;	fail
 	).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% not/niet @ anymore/veel -> anymore/veel @ not/niet
+% MED-NL-3278
+fix_term(
+	((Not,_) @ (Anymore,_), TyS),
+	((Anymore,TyS~>TyS) @ (Not,TyS), TyS)
+) :-
+	final_value_of_type(TyS, s:_),
+	tlp_lemma_in_list(Not, ['not']),
+	is_tlp(Anymore),
+	fix_report('!!! Fix: not/niet @ anymore/veel -> anymore/veel @ not/niet').
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % make pp the most outter modifier of the head (pp is kinda intersective):
