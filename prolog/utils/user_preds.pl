@@ -219,7 +219,7 @@ tt_mon_up(TT) :- % too relaxed e.g. 'many':non,up passes this
 	\+tt_mon(TT, dw),
 	\+tt_mon(TT, non), % 'many' fails this. fracas-56,58
 	\+(( add_heads(TT, (_,_,H_TT)), 
-		 H_TT \= (tlp(_,'not',_,_,_),_) )),
+		 H_TT = tlp(_,'not',_,_,_) )),
 	!.
 
 tt_mon_up(TT) :-
