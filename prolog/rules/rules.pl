@@ -673,7 +673,8 @@ r(same_args_tf,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % non-symetric
 		  Sig) )
 :-
 			match_ttTerms(A, B, KB_xp),
-			%match_list_ttTerms(M1, M2, KB_xp), %why not?
+			% extra constraint limits to structurally similar nodes
+			match_list_ttTerms(M1, M2, KB_xp), 
 			Y = A,
 			A = (_, Type1),
 			B = (_, Type2),
@@ -692,6 +693,8 @@ r(same_args_xx,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % symetric
 :-
 			G \= H,
 			match_ttTerms(A, B, KB_xp),
+			% extra constraint limits to structurally similar nodes
+			match_list_ttTerms(M1, M2, KB_xp), 
 			Y = A,
 			A = (_, Type1),
 			B = (_, Type2),
