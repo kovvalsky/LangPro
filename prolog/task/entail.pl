@@ -20,7 +20,7 @@
 	extract_lex_NNPs_ttTerms/3, ttTerms_same_type/2,
 	normalize_lexicon/2, token_norm_ttTerm/3
 	]).
-:- use_module('../knowledge/ind_kb', [add_ind_kb/2, induced_rel/1]).
+% :- use_module('../knowledge/ind_kb', [add_ind_kb/2, induced_rel/1]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % entailment with the first GQTT
@@ -630,7 +630,7 @@ problem_to_ttTerms(Align, Prob_Id, Prems, Hypos, Align_Prems, Align_Hypos, KB) :
 	( debMode('prlex') -> report([Lexicon]); true),
 	%( debMode('subWN') -> subWN_from_wn(Lexicon); kb_from_wn(Lexicon, KB) ),
 	( debMode('no_wn') -> KB0 = []; kb_from_wn(Lexicon, KB0) ), % extract relevant semantic relations from WN
-	( debMode('ind_kb') -> add_ind_kb(KB0,KB); KB = KB0 ),
+	( debMode('ind_kb') -> add_ind_kb(Lexicon, KB0, KB); KB = KB0 ),
 	( debMode('pr_kb') -> report(['KB: ', KB]); true ),
 	( debMode('no_gq_llfs') ->
 		(Prems, Hypos) = (PremCCGTerms, HypoCCGTerms)
@@ -688,3 +688,28 @@ problem_to_corrected_terms(PID, PremCorrTrees, HypoCorrTrees) :-
 sen_id_to_base_ttterm(SID, TTterm) :-
 	ccg(SID, Tree), !,
 	ccgIDTree_to_ccgIDTerm(ccg(_,Tree), ccg(_,TTterm)).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add new induced relations to KB while filtering with relevant lexicon 
+add_ind_kb(LexPos, KB0, KB) :-
+	maplist([(L,_), L]>>true, LexPos, Lex0), 
+	list_to_ord_set(Lex0, Lex),
+    findall(Rel, ( ind_rel(Rel), 
+				 rel_to_lex(Rel, Rel_Lex),
+				 ord_subset(Rel_Lex, Lex)
+			), New_Rels),
+	ord_union(KB0, New_Rels, KB). 
+
+rel_to_lex(Rel, Lexicon) :-
+	Rel =.. [_, Phrase1, Phrase2],
+	phrase_to_lex(Phrase1, Lex1),
+	phrase_to_lex(Phrase2, Lex2),
+	append([Lex1, Lex2], Lex),
+	list_to_ord_set(Lex, Lexicon).
+
+% sends 'wear@(a@beret) ride the@bicycle' to [wear, a, beret, ride, the, bicycle]
+phrase_to_lex(Phrase, Lex) :-
+	re_replace("[@() ]+"/g, " ", Phrase, P0),
+	re_replace("(^[@() ]+|[@() ]+$)"/g, "", P0, P1),
+	atomic_list_concat(Lex, ' ', P1).

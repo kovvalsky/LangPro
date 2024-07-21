@@ -29,7 +29,8 @@ kb_from_wn(Lex, KB) :-
 	findall_pairs(Lexicon, Pairs),
 	findall(Fact,
 		( member(X, Pairs), represents_wn_rel(X, Fact) ),
-		KB).
+		KB0),
+	list_to_ord_set(KB0, KB).
 
 % extract relations from WordNet
 % extract these antonyms and those hypernyms and hyponyms that are found in Lexicon

@@ -20,7 +20,7 @@
 
 
 
-:- multifile ccg/2, id/2.
+:- multifile ccg/2, id/2, ind_rel/1.
 :- discontiguous ccg/2, id/2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
