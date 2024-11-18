@@ -155,7 +155,8 @@ beta_red_tt( (TT, Ty), BetaTT) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% substitute_tt(Var, TTerm, MainTTterm, TTterm_after_substitution)
+% substitute_tt(Var, TTterm, MainTTterm, MainTTterm_after_substitution)
+% Var in MainTTterm is substituted with TTterm and MainTTterm_after_substitution is obtained
 
 substitute_tt((Var,Ty1), TT, (Exp,Ty2), TT) :-
 	Var == Exp,

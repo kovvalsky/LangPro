@@ -7,6 +7,7 @@
 		apply_ttFun_to_ttArgs/3,
 		apply_ttMods_to_ttArg/3,
 		cc_as_fun/1,
+		change_np_to_s/4,
 		conj_of_const_NNPs/1,
 		extract_const_ttTerm/2,
 		extract_lex_NNPs_ttTerms/3,
@@ -53,6 +54,7 @@
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 :- use_module('../knowledge/lexicon', [op(640, xfy, ::), '::'/2]).
 :- use_module('../knowledge/knowledge', [disjoint/3, word_synonyms/3, isa/3]).
+:- use_module('../utils/user_preds', [ttExp_to_ttTerm/2]).
 :- use_module('../lambda/type_hierarchy', [
 	cat_eq/2, final_value_of_type/2, luc/3, general_cat/2
 	]).
@@ -230,6 +232,42 @@ modList_be_args_to_nodeList( [M | Mods], [Arg1, Arg2], Nodes ) :-
 modList_be_args_to_nodeList( [_ | Mods], [Arg1, Arg2], Nodes ) :-
 	modList_be_args_to_nodeList( Mods, [Arg1, Arg2], Nodes).
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% when there are np-type terms with s-type terms,
+% modify np-type terms by inserting be@there so that they become s-type
+change_np_to_s(T_List0, F_List0, T_List, F_List) :-
+	append(T_List0, F_List0, List),
+	only_np_and_s_terms(List), !,
+	maplist(apply_term_to_there_is, T_List0, T_List),
+	maplist(apply_term_to_there_is, F_List0, F_List).
+
+change_np_to_s(T_List, F_List, T_List, F_List).
+
+
+% if the term has np type, appy be@term@there to it 
+apply_term_to_there_is(NP, Be_NP_There) :-
+	NP = (_, np:_), !,
+	Be = (tlp(be,be,'VB','Ins','Ins'),np:_~>np:_~>s:dcl),
+	There = (tlp('there','there','EX','Ins','Ins'),np:_),
+	ttExp_to_ttTerm(Be@NP@There, Be_NP_There).
+
+apply_term_to_there_is(T, T).
+
+% checks whether terms have np and s types, and nothing else 
+only_np_and_s_terms(List) :-
+	findall(M, ( 
+		member(M, List),
+		M = (_, np:_) % here we are not dealing with type-raised NPs yet
+	), NPs),
+	NPs = [_|_], 
+ 	findall(M, ( 
+		member(M, List),
+		M = (_, s:_)
+  	), Ss),
+	Ss = [_|_],
+	append(NPs, Ss, NPSs),
+	same_length(List, NPSs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unpacks ttTerm from the sequence of type changing rules
