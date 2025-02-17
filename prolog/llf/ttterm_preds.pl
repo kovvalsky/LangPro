@@ -833,7 +833,11 @@ token_norm_ttTerm(Map, (TT,Type), (SimTT,Type) ) :- !,
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% pretty variables instead of _G23
+%! pretty_vars_in_ttterm(+StartIndexEntity-+StartIndexPred, -StartIndexEntity--StartIndexPred, +TTterm, -PrettyTerm)
+% Replaces ugly prolog variables _G23 with pretty atom variables (e.g., x4, p2).
+% It distinguishes two types of vars: for entities (e|np) and for the rest.
+% The index counters for these types are maintained separately.
+
 pretty_vars_in_ttterm(A, Z, TT, Pretty) :-
 	copy_term(TT, Pretty),
 	pretty_vars_in_ttterm_(A, Z, Pretty).
