@@ -674,10 +674,12 @@ problem_to_corrected_terms(PID, PremCorrTrees, HypoCorrTrees) :-
 		sen_id(SID, PID, 'p', _, _),
 		sen_id_to_base_ttterm(SID, Tree)
 	), PremTrees),
+	( PremTrees = [] -> report(['No premise terms obtained for problem ', PID]), false; true),
 	findall(Tree, (
 		sen_id(SID, PID, 'h', _, _),
 		sen_id_to_base_ttterm(SID, Tree)
 	), HypoTrees),
+	( HypoTrees = [] -> report(['No hypothesis term obtained for problem ', PID]), false; true),
 	% match sentence categories if possible with inserting there_is
 	change_np_to_s(PremTrees, HypoTrees, PremTrees_S, HypoTrees_S),
 	% (PremTrees_S, HypoTrees_S) = (PremTrees, HypoTrees),
