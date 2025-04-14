@@ -89,8 +89,8 @@ admissible_rules(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % remove "do", "will" modifying verb phrase
-r(empty_mod,  equi:non,  ([], [], _), [['do'], ['will'], ['be'], ['become'], ['to'], ['that'], ['have'], ['there']], _,
-		br([nd( M, ( (tlp(_,Aux,_,_,_), Type1~>Type2) @ TT1, _ ),
+r(empty_mod,  equi:non,  ([], [], _), [['do'], ['will'], ['be'], ['become'], ['to'], ['that'], ['have'], ['there'], [pos('NIL')]], _,
+		br([nd( M, ( (tlp(_,Aux,Pos,_,_), Type1~>Type2) @ TT1, _ ),
 				Args, TF )],
 		  Sig)
 		===>
@@ -99,7 +99,9 @@ r(empty_mod,  equi:non,  ([], [], _), [['do'], ['will'], ['be'], ['become'], ['t
 :-
 		cat_eq(Type1, Type2),
 		final_value_of_type(Type1, s:_),
-		member(Aux, ['do', 'will', 'be', 'become', 'to', 'that', 'have', 'there']), !.
+		( memberchk(Pos, ['NIL'])
+		; memberchk(Aux, ['do', 'will', 'be', 'become', 'to', 'that', 'have', 'there'])
+		), !.
 % 'there' is for NL:er:s~>s
 % maybe "become" in false context is not correct
 % it is true THAT ...
