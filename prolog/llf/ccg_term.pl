@@ -3,6 +3,7 @@
 	ccgIDTree_to_ccgIDTerm/2,
 	ccgTree_to_ccgTerm/2,
 	dirCat_to_undirCat/2,
+	get_lex_categories/2,
 	op(601, xfx, (/)),
 	op(601, xfx, (\))
 ]).
@@ -122,3 +123,29 @@ dirCat_to_undirCat(DirCat, UndirCat) :-
 	((DirCat = s; DirCat = n; DirCat = np) ->
 		UndirCat = DirCat : _Feat;
 	 UndirCat = DirCat ).
+
+
+%--------------------------------------
+% get lexical categories from CCG der tree
+%--------------------------------------
+get_lex_categories(X, _) :-
+	var(X), !, fail.
+
+get_lex_categories(Leaf, [Cat]) :-
+	Leaf =.. [t, Cat | _], !.
+	
+get_lex_categories(Tree, Cats) :-
+	Tree =.. [UnaryRule | Rest],
+	memberchk(UnaryRule, [lx, lex, tr]), !,
+	append(_, [SubTree], Rest),
+	get_lex_categories(SubTree, Cats).
+
+get_lex_categories(Tree, Cats) :-
+	Tree =.. [BinaryRule | Rest],
+	memberchk(BinaryRule, 
+		[fa, ba, fc, bc, fxc, bxc, lp, rp, conj, ltc, rtc, gbxc, gfxc]), !,
+	append(_, [Tree1, Tree2], Rest),
+	get_lex_categories(Tree1, Cats1),
+	get_lex_categories(Tree2, Cats2),
+	append([Cats1, Cats2], Cats).
+%--------------------------------------
