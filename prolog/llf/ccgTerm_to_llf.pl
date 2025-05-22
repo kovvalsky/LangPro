@@ -73,7 +73,7 @@ fix_term(
 	( (((Be,pp~>np:Y~>s:X) @ ((PP,np:_~>pp) @ NP1, pp), np:Y~>s:X) @ NP2, s:Z) )
 ) :-
 	tlp_pos_in_list(PP, ['IN']),
-	% FIXME no constraint on BE
+	tlp_lemma_in_list(Be, ['be']),
 	fix_report('!!! Fix: pp_be_to_be_pp (NL)').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,7 +108,7 @@ fix_term(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % introduce lex_rule for tlp(NN:np) and alter its np~>np modifiers accordingly
-% SICK_NL-28: (en bolnd wegvliegend) haar:NN:np --> ((en b w) (haar:NN:n)):np
+% SICK_NL-28: (en blond wegvliegend) haar:NN:np --> ((en b w) (haar:NN:n)):np
 fix_term(
 	( ModTT @ (NP,np:Y), np:X ),
 	( Mods_N, np:X )
@@ -147,7 +147,7 @@ fix_term(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % recover [pss] feature in types from [pt] since Lassy has no info for such feature
-% SICKNL:1333 (worden,vp[pt]~>vp[dcl]) ((door NP,vp[pt]~>vp[pt]) (gemeten,vp[pt])) ->
+% SICK_NL:1333 (worden,vp[pt]~>vp[dcl]) ((door NP,vp[pt]~>vp[pt]) (gemeten,vp[pt])) ->
 %             (worden,vp[pss]~>vp[dcl]) ((door NP,vp[pss]~>vp[pss]) (gemeten,vp[pss]))
 fix_term(
 	( (Worden,(np:X~>s:pt)~>TyVP) @ VP, TyVP ),
@@ -175,9 +175,9 @@ fix_term(
 	final_value_of_type(VP_Ty, s:_),
 	add_heads(VP, (_,_,Head)),
 	% should there be a constraint that VP has only applications?
-	( % SICKNL:3598 doet:n~>vp oefeningen:n -> doet:np~>vp ((oefeningen:n),np)
+	( % SICK_NL:3598 doet:n~>vp oefeningen:n -> doet:np~>vp ((oefeningen:n),np)
 	  tlp_pos_with_prefixes(Head, ['VB'])
-	; % SICKNL:2704 (worden,vp[pt]~>n~>s:dcl) VP_pt n ->
+	; % SICK_NL:2704 (worden,vp[pt]~>n~>s:dcl) VP_pt n ->
 	  %             (worden,vp[pss]~>vp[dcl]) VP_pt ((n),np)
 	  tlp_pos_in_list(Head, ['RB','AUX']),
 	  tlp_lemma_in_list(Head, ['worden','is','zijn','be']) % remove NL words?
@@ -188,7 +188,7 @@ fix_term(
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % n argumnet of prepositions will use lex_rule to become np
 % and will be later processed again by lex_rule elimination rule
-% SICKNL:2704 ('IN',n~>vp~>vp) n --> ('IN',np~>vp~>vp) ((n),np)
+% SICK_NL:2704 ('IN',n~>vp~>vp) n --> ('IN',np~>vp~>vp) ((n),np)
 
 % Note that this rule is applied to larger phrase with Head because, fixing earlier
 % is better as other fixing rules (e.g., put pp modifier under det) depend on this
@@ -196,12 +196,15 @@ fix_term( % for n~>vp~>vp, n~>np~>np, n~>n~>n cases
 	( ((IN,n:_~>ModTy) @ (Noun,n:X), _) @ Head, Ty ),
 	( ((IN,np:Y~>ModTy) @ ((Noun,n:X),np:Y), ModTy) @ Head, Ty )
 ) :-
+	% FIXME add constraint on ModTy that it is a modifier type
+	ModTy \= n:_,
 	tlp_pos_in_list(IN, ['IN']).
 
 fix_term( % for n~>pp case
 	( (IN,n:_~>Ty1) @ (Noun,n:X), Ty2 ),
 	( (IN,np:Y~>Ty1) @ ((Noun,n:X),np:Y), Ty2 )
 ) :-
+	Ty1 \= n:_, % IN shouldn't be a modifier, likely it should be RB
 	tlp_pos_in_list(IN, ['IN']),
 	fix_report('!!! Fix: insert n~>np rule for n args of PP (NL)').
 
@@ -316,7 +319,7 @@ fix_term(
 %%%%%%%%%%%%%%%%% lex rule N->NP %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % change type n~>n to n~>np for DT & JJ(S) words like many, several, most, few, etc
 % cat1=n, cat2=np, cat(Quant:JJ)=n~>n to (Quant, n~>np) @ n
-% SICKNL-88: ((no@(that...)@biker:n),np) --> (no:n~>np)@((that...)@biker:n)
+% SICK_NL-88: ((no@(that...)@biker:n),np) --> (no:n~>np)@((that...)@biker:n)
 fix_term(
 	( ((Q,n:X~>n:_) @ N, n:_), np:Y ),
 	( (tlp(Tk,L,P1,F1,F2),n:X~>np:Y) @ N, np:Y )
@@ -431,7 +434,7 @@ fix_term(
 	((WH @ (VP,np:X~>s:Y), np:_~>np:_) @ (N,np:_), np:_)
 ) :- %+++
 	is_tlp(N),  % constraint POS = NNP,NNPS,DT,PRP
-	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:_~>s:_)~>np:_~>np:_),
+	WH = (tlp('which','which','WDT','Ins','Ins'), (np:_~>s:_)~>np:_~>np:_),
 	fix_report('!!! Fix: insert Which:vp->np->np for modifying np').
 
 %%%%%%%%%%%%%%%%%%% lex rule VP->N,N %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -442,7 +445,7 @@ fix_term(
 	( WH @ (VP,np:X~>s:F), n:_~>n:_ )
 ) :- %!!! how do you deal with the verb then? any rule fpr this? %+++
 	memberchk(F, [ng, adj, pss, dcl]), % adj: full of X:np~>s:sdj--->n~>n, relax constrain with no checking?
-	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:_~>s:_)~>n:_~>n:_),
+	WH = (tlp('which','which','WDT','Ins','Ins'), (np:_~>s:_)~>n:_~>n:_),
 	fix_report(['!!! Fix: insert Which Is for lex_rule. Feature = ', F]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -453,8 +456,24 @@ fix_term(
 	( (WH @ (VP,np:A~>s:B), np:C~>np:D) @ QNP, np:E )
 ) :- %+++
 	% define NP modifier "who", we dont use "is"
-	WH = (tlp('which','which','WDT','I-NP','Ins'), (np:A~>s:B)~>np:C~>np:_),
+	WH = (tlp('which','which','WDT','Ins','Ins'), (np:A~>s:B)~>np:C~>np:_),
 	fix_report('!!! Fix: insert Which Is for lex_rule: vp->np->np').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% explain how VP acts as N-modifier
+% (V @ NP, n~>n) --> (which,vp~>(n~>n)) @ (V @ NP, vp)
+% originates for SICK_FR-3720
+fix_term(
+	( (VP,np:A~>N_N) @ NP, n:F1~>n:F2 ),
+	( WH @ NewVP_NP, n:F1~>n:F2 )
+) :- 
+	N_N = n:_~>n:_,
+	add_heads((VP,np:A~>N_N), (_,_,VP_Head)),
+	tlp_pos_with_prefixes(VP_Head, ['VB']),
+	set_type_for_tt((VP,np:A~>N_N), np:A~>np:F~>s:dcl, NewVP),
+	NewVP_NP = (NewVP @ NP, np:F~>s:dcl),
+	WH = (tlp('which','which','WDT','Ins','Ins'), (np:F~>s:dcl)~>n:F1~>n:F2),
+	fix_report('!!! Fix: insert Which for a verb of type vp->n->n (FR)').
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -492,7 +511,7 @@ fix_term(
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fix a weird type of a conjunction that is under a relative pronoun
-% SICKNL-372: die:s~>np~>np @ (en:vp~->vp~>s @ VP @ VP) --> die:vp~>np~>np @ (en:vp~->vp~>vp @ VP @ VP) 
+% SICK_NL-372: die:s~>np~>np @ (en:vp~->vp~>s @ VP @ VP) --> die:vp~>np~>np @ (en:vp~->vp~>vp @ VP @ VP) 
 fix_term(
 	((WH_TLP,s:_~>Ty~>Ty) @ (((CC_TLP,_) @ (C1,Ty1), _) @ (C2,Ty2), _), _),
 	((WH_TLP,Ty1~>Ty~>Ty) @ (((CC_TLP,Ty1~>Ty1~>Ty1) @ (C1,Ty1), Ty1~>Ty1) @ (C2,Ty2), Ty1), Ty~>Ty)
@@ -647,7 +666,7 @@ fix_term(
 	( NOT @ (EB_TLP, np:_), np:_ ),
 	NOT_EB
 ) :-
-	is_tlp(EB_TLP),
+	tlp_lemma_in_list(NOT, ['not']), %previously it was: is_tlp(EB_TLP),
 	EB = (EB_TLP, np:_),
 	once(clean(EB, EB1)),
 	( EB \= EB1 ->
