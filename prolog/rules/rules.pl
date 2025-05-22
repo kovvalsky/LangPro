@@ -247,7 +247,7 @@ r(push_mod,  impl:non,  ([], [], _), _Lexicon, _, % why not equivalent?
 			  ; memberchk(Ty1, [s:_, np:_~>s:_, np:_~>np:_~>s:_])
 			  ) ->
 				append(M, [(TTexp,Ty1~>Ty1)], M1)
-			  ;	TF = true,
+			  ;	TF = true, %!!! why not include this anyway, a node with empty modifier
 				M1 = []
 			).
 
@@ -450,24 +450,27 @@ r(mods_be,  impl:non,  _, [['be']], _KB, % this rule is not used! I guess mods_n
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 r(tr_conj_and,	equi:non,  ([], [], _), [['and']], _,
-		br([nd( [], ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
-				Args, true )],
+		br([nd( M, ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
+				Args, true )], 
+				%!!! adding M should be carefully checked with dist rules
+				% M is relevant when adverb is s->s and needs to be applied to vp conjuncts SICK_FR-5003 
 		  Sig)
 		===>
-		br([nd(	[], TT1, Args, true ),
-			nd( [], TT2, Args, true )],
+		br([nd(	M, TT1, Args, true ),
+			nd( M, TT2, Args, true )],
 		  Sig) )
 :-
 			cat_eq(Ty1, Ty2),
 			cat_eq(Ty1, Ty).
 
 r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], _,
-		br([nd( [], ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
+		br([nd( M, ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
+				%!!! adding M should be carefully checked with dist rules
 		  Sig)
 		===>
-		[	br([nd([], TT1, Args, false )], Sig),
-		 	br([nd([], TT2, Args, false )], Sig)
+		[	br([nd(M, TT1, Args, false )], Sig),
+		 	br([nd(M, TT2, Args, false )], Sig)
 		] )
 :-
 			cat_eq(Ty1, Ty2),
@@ -475,36 +478,39 @@ r(fl_conj_and, 	equi:non,  ([], [], _), [['and']], _,
 
 
 r(tr_conj_who,	equi:non,  ([], [], _), [['who']], _,
-		br([nd( [], ( ( (tlp(_,'who',_,_,_), (np:_~>s:_)~>n:_~>n:_) @ TT1, _ ) @ TT2, _ ),
+		br([nd( M, ( ( (tlp(_,'who',_,_,_), (np:_~>s:_)~>n:_~>n:_) @ TT1, _ ) @ TT2, _ ),
 				Args, true )],
+				%!!! adding M should be carefully checked with dist rules
 		  Sig)
 		===>
-		br([nd(	[], TT1, Args, true ),
-			nd( [], TT2, Args, true )],
+		br([nd(	M, TT1, Args, true ),
+			nd( M, TT2, Args, true )],
 		  Sig) )
 :-
 		true.
 
 
 r(fl_conj_who, 	equi:non,  ([], [], _), [['who']], _,
-		br([nd( [], ( ( (tlp(_,'who',_,_,_), (np:_~>s:_)~>n:_~>n:_) @ TT1, _ ) @ TT2, _ ),
+		br([nd( M, ( ( (tlp(_,'who',_,_,_), (np:_~>s:_)~>n:_~>n:_) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
+				%!!! adding M should be carefully checked with dist rules
 		  Sig)
 		===>
-		[	br([nd( [], TT1, Args, false )], Sig),
-		 	br([nd( [], TT2, Args, false )], Sig)
+		[	br([nd( M, TT1, Args, false )], Sig),
+		 	br([nd( M, TT2, Args, false )], Sig)
 		] )
 :-
 		true.
 
 
 r(fl_disj_or,	equi:non, ([], [], _), [['or']], _,
-		br([nd( [], ( ( (tlp(_,'or',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
+		br([nd( M, ( ( (tlp(_,'or',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, false )],
+				%!!! adding M should be carefully checked with dist rules
 		  Sig)
 		===>
-		br([nd( [], TT1, Args, false ),
-			nd( [], TT2, Args, false )],
+		br([nd( M, TT1, Args, false ),
+			nd( M, TT2, Args, false )],
 		  Sig) )
 :-
 			cat_eq(Ty1, Ty2),
@@ -512,12 +518,13 @@ r(fl_disj_or,	equi:non, ([], [], _), [['or']], _,
 
 
 r(tr_disj_or,	equi:non, ([], [], _), [['or']], _,
-		br([nd( [], ( ( (tlp(_,'or',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
+		br([nd( M, ( ( (tlp(_,'or',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
 				Args, true )],
+				%!!! adding M should be carefully checked with dist rules
 		  Sig)
 		===>
-		[	br([nd( [], TT1, Args, true )], Sig),
-		 	br([nd( [], TT2, Args, true )], Sig)
+		[	br([nd( M, TT1, Args, true )], Sig),
+		 	br([nd( M, TT2, Args, true )], Sig)
 		] )
 :-
 			cat_eq(Ty1, Ty2),
