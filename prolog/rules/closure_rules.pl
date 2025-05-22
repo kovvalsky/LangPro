@@ -73,8 +73,8 @@ r(vp_pp_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]]
 			isa(VP1, VP2, KB_xp).
 
 
-% doen@op => opdoen sicknl-2911, beklimmen => klimmen@op sicknl-4006/11
-% snijder@door => doorsnijden sicknl-4650
+% doen@op => opdoen SICK_NL-2911, beklimmen => klimmen@op SICK_NL-4006/11
+% snijder@door => doorsnijden SICK_NL-4650
 r(vp_pr_vs_vp, 	closure, _, [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], KB_xp,
 		br([nd( M1, ( (tlp(_,VP1,POS1,_,_),_) @ (tlp(_,PR,'IN',_,_),pr), Type1 ),   Args1,   TF1 ),
 			nd( M2, ( tlp(_,VP2,POS2,_,_), Type2 ),   Args2,   TF2 )
@@ -364,7 +364,7 @@ r(cl_group_of, 		closure, _,  [['of','group'], ['of','body'], ['of','piece'], ['
 % C1 did C2, Dance(C2) -> Danced(C1), which problems?
 % puting seasoning vs seasoning SICK-5340?? accomodate this too
 % make this as a normal rule!
-% NL:doen, replacing with do is not safe as plaatsen<doen sicknl-3250
+% NL:doen, replacing with do is not safe as plaatsen<doen SICK_NL-3250
 r(cl_do_vp, 	closure, _, [['do'], ['doen']], KB_xp,
 		br([nd( M1, (tlp(_,Do,_,_,_), np:_~>np:_~>s:_), 	[C2, C1], 	TF1 ),
 		    nd( _, (tlp(_,Dance1,_NN,_,_), n:_),				[C2],		TF2 ),

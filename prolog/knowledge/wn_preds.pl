@@ -21,7 +21,7 @@
 % Extract semantic relations for KB from WordNet
 kb_from_wn(Lex, KB) :-
 	%!!! filtering should be made more robust.
-	% sick_nl-3953's 'motor rijder' doesn't match 'motorrijder' in WODWN 
+	% SICK_NL-3953's 'motor rijder' doesn't match 'motorrijder' in WODWN 
 	findall(Lem_Num,
 		( member(Lem_Pos, Lex), lemPos_in_WordNet(Lem_Pos, Lem_Num) ),
 		Lem_Nums),

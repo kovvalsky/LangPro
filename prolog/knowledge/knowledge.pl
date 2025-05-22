@@ -322,8 +322,8 @@ word_synonyms(W1, W2, KB-XP) :-
 	isa(W2, W1, KB-XP), % more efficient
 	!.
 
-% doen@op <=> opdoen sicknl-2911
-% klimmen@op <=> beklimmen sicknl-4006/11
+% doen@op <=> opdoen SICK_NL-2911
+% klimmen@op <=> beklimmen SICK_NL-4006/11
 positional_isa(Pre_V2, V1-PR, KB-XP) :-
 	member(P, [PR, 'be', 'ver']),
 	atom_concat(P, V2, Pre_V2),
