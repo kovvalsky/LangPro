@@ -6,7 +6,7 @@
 	[
 		output_XML/3,
 		write_parsed_problem_as_xml/3,
-		print_XML/2,
+		write_xml_proof_tree/3,
 		tree_structure/1,
 		xml_probs_llfs/1,
 		xml_probs_llfs/2,
@@ -119,10 +119,10 @@ output_XML(Tree, Problem_Id, XMLFile) :-
 	).
 
 
-print_XML(Tree, Problem_Id) :-
+write_xml_proof_tree(S, Tree, Problem_Id) :-
 	retract(tree_structure(_)),
 	asserta(tree_structure(Tree)),
-	current_output(S),
+	% current_output(S),
 	%write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
 	%write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/tableau.xsl"?>\n'),
 	%write(S, '<!DOCTYPE tableau SYSTEM "xsl_dtd/tableau.dtd">\n'),
@@ -275,8 +275,11 @@ write_source_element(_S, []) :-
 	!.
 
 write_source_element(S, RuleApp) :-
+	% there are four formats of RuleApp
 	( RuleApp =.. [RuleId, Ids];
-	  RuleApp =.. [RuleId, Ids, Olds]
+	  RuleApp =.. [RuleId, Olds, Ids], maplist(integer,Ids);
+	  RuleApp =.. [RuleId, Ids, _NewArgs], maplist(integer,Ids);
+	  RuleApp =.. [RuleId, Olds, Ids, _NewArgs]
 	), !,
 	term_to_atom(RuleApp, RuleAppAtom),
 	atomic_list_concat(['<source rule="', RuleId, '" ruleApp="', RuleAppAtom, '" >\n'], SourceBegTag),
