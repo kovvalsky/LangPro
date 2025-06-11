@@ -335,7 +335,7 @@ entail(Align, Id, Answer, Provers_Answer, XP, Closed, FinalStatus) :-
 	% by default with empty initial KB
 	entail(Align, [], Id, Answer, Provers_Answer, XP, Closed, FinalStatus).
 %/*
-% solves problems - doesnt knows the answer beforehand
+% solves problems - doesn't know the answer beforehand
 entail(Align, IKB, Id, _Answer, Pred, XP, Cl, Status) :-
 	% start tracing a particular problem
 	( debMode(gtraceProb(Id)) -> gtrace, true; true ),
