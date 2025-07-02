@@ -94,11 +94,15 @@ r(empty_mod,  equi:non,  ([], [], _), [['do'], ['will'], ['be'], ['become'], ['t
 				Args, TF )],
 		  Sig)
 		===>
-		br([nd( M, TT1, Args, TF)],
+		br([nd( M, TT, Args, TF)],
 		  Sig) )
 :-
-		cat_eq(Type1, Type2),
-		final_value_of_type(Type1, s:_),
+		( cat_eq(Type1, Type2),
+		  final_value_of_type(Type1, s:_),
+		  TT = TT1
+		; Type1 = n:_~>n:_, Type2 = np:_~>s:_, % introduced due to FR
+		  set_type_for_tt(TT1, Type2, TT)
+		),
 		( memberchk(Pos, ['NIL'])
 		; memberchk(Aux, ['do', 'will', 'be', 'become', 'to', 'that', 'have', 'there'])
 		), !.

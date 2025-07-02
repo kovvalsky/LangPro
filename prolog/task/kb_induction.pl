@@ -76,7 +76,8 @@ tde_sick_part(Tccg, Tsen, Config) :-
 
 %------------------------------------
 load_ccg_sen_probs(Parts, _, PIDAs) :-
-	debMode(lang('nl')), !,
+	debMode(lang(Lang)),
+	memberchk(Lang, ['nl', 'fr']), !,
 	retractall( debMode(parts(_)) ),
 	assertz( debMode(parts(Parts)) ),
 	all_prIDs_Ans(PIDAs).
