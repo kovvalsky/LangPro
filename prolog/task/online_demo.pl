@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- use_module('../xml/xml_output', [write_parsed_problem_as_xml/3, write_xml_proof_tree/3]).
-:- use_module('../json/json_output', [write_parsed_problem_as_json/3, write_json_proof_tree/3]).
+:- use_module('../json/json_output', [parsed_problem_to_dict/3]).
 :- use_module('../utils/user_preds', [print_prob/1]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../rules/rule_hierarchy', [set_rule_eff_order/0]).
@@ -39,11 +39,12 @@ online_demo(ID, Format) :-
 		summarize_align_closed_status(Al_Cl_yes, Al_St_yes, Al_Tr_yes, Cl_yes, St_yes, Tr_yes, YES, Tree_yes),
 		summarize_align_closed_status(Al_Cl_no, Al_St_no, Al_Tr_no, Cl_no, St_no, Tr_no, NO, Tree_no),
 		( memberchk([Al,'closed'|_], [YES,NO]) ->
-			memberchk(Al-Align, ['al'-'align', 'na'-'no_align']),
+			memberchk(Al-Align, ['al'-'align', 'na'-'no_align'])
 		; 	Align = 'no_align'
 		)
 	; YES = 'yes_NA', NO = 'no_NA', Align = 'no_align'
-	).
+	),
+	write_problem_proof(Format, YES, NO, Align, Tree_yes, Tree_no, ID).
 
 % sumarizes the results with aligned and non-aligned terms
 summarize_align_closed_status(Al_Cl, Al_St, Al_Tr, Cl, St, Tr, Ans, Tree) :-
@@ -64,11 +65,28 @@ write_problem_proof('xml', YES, NO, Align, Tree_yes, Tree_no, ID) :-
 		write_xml_proof_tree(S, Tree_no, ID),
 		atomic_list_concat(['yes' | YES], '_', Yes_File),
 		atomic_list_concat([ 'no' | NO],  '_', No_File),
-		format('~w, ~w~n', [Yes_File, No_File]),		
+		format('~w, ~w~n', [Yes_File, No_File])
 	; write(S, '\n<tableau>no tableau</tableau>\n<tableau>no tableau</tableau>\n'),
-		 	format('~w, ~w~n', [YES, NO])
+		format('~w, ~w~n', [YES, NO])
 	),
 	close(S).
+
+% {prob_id:ID, prob:ProbDict, aligned_llfs:Align, 
+%  proofs:{entailment:{info:Yes, proof:Tree_yes}, contradiction:{info:No, proof:Tree_no}}}
+write_problem_proof('json', YES, NO, Align, Tree_yes, Tree_no, ID) :-
+	current_output(S),
+	parsed_problem_to_dict(Align, ID, ProbDict),
+	( YES \== 'yes_NA' ->
+		maplist(term_to_json, 	[YES, NO, Tree_yes, Tree_no], 
+								[YES_J, NO_J, Tree_yes_J, Tree_no_J]), 
+		ProbProofDict = ProbDict.put([proofs=_{
+			entailment:j{info:YES_J, proof:Tree_yes_J},
+			contradiction:j{info:NO_J, proof:Tree_no_J}
+			}])
+	; ProbProofDict = ProbDict
+	),
+	json_write(S, ProbProofDict),
+	close(S).	
 
 
 print_problem(ID) :-
