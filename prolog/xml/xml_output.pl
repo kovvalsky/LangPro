@@ -348,7 +348,7 @@ write_parsed_problem_as_xml(S, Align, ProbID) :-
 	maplist(once_gen_quant_tt, CCGTerms_corr, _LLFs),
 	problem_to_ttTerms(Align, ProbID, PremLLFs, HypLLF, Al_PremLLFs, Al_HypLLF, _KB),
 	% test
-	( Align = align ->
+	( Align == 'align' ->
 		append(Al_PremLLFs, Al_HypLLF, FinLLFs)
 	; 	append(PremLLFs, HypLLF, FinLLFs)
 	),
