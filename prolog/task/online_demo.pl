@@ -44,7 +44,7 @@ online_demo(ID, Format) :-
 		)
 	; YES = 'yes_NA', NO = 'no_NA', Align = 'no_align'
 	),
-	write_problem_proof(Format, YES, NO, Align, Tree_yes, Tree_no, ID).
+	write_problem_proof(Format, YES, NO, Align, Tree_yes, Tree_no, KB, ID).
 
 % sumarizes the results with aligned and non-aligned terms
 summarize_align_closed_status(Al_Cl, Al_St, Al_Tr, Cl, St, Tr, Ans, Tree) :-
@@ -57,33 +57,36 @@ summarize_align_closed_status(Al_Cl, Al_St, Al_Tr, Cl, St, Tr, Ans, Tree) :-
 		Tree = Tr
 	).
 
-write_problem_proof('xml', YES, NO, Align, Tree_yes, Tree_no, ID) :-
+write_problem_proof('xml', YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
 	current_output(S),
+	format(S, 'KB: ~w~n', [KB]),
 	write_parsed_problem_as_xml(S, Align, ID),
 	( YES \== 'yes_NA' ->
 		write_xml_proof_tree(S, Tree_yes, ID),
 		write_xml_proof_tree(S, Tree_no, ID),
 		atomic_list_concat(['yes' | YES], '_', Yes_File),
 		atomic_list_concat([ 'no' | NO],  '_', No_File),
-		format('~w, ~w~n', [Yes_File, No_File])
+		format(S, '~w, ~w~n', [Yes_File, No_File])
 	; write(S, '\n<tableau>no tableau</tableau>\n<tableau>no tableau</tableau>\n'),
-		format('~w, ~w~n', [YES, NO])
+		format(S, '~w, ~w~n', [YES, NO])
 	),
 	close(S).
 
 % {prob_id:ID, prob:ProbDict, aligned_llfs:Align, 
 %  proofs:{entailment:{info:Yes, proof:Tree_yes}, contradiction:{info:No, proof:Tree_no}}}
-write_problem_proof(json(Width,Step,Tab), YES, NO, Align, Tree_yes, Tree_no, ID) :-
+write_problem_proof(json(Width,Step,Tab), YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
 	current_output(S),
 	parsed_problem_to_dict(Align, ID, ProbDict),
+	term_to_json(KB, KB_J),
+	ProbDict1 = ProbDict.put([kb=KB_J]),
 	( YES \== 'yes_NA' ->
 		maplist(term_to_json, 	[YES, NO, Tree_yes, Tree_no], 
 								[YES_J, NO_J, Tree_yes_J, Tree_no_J]), 
-		ProbProofDict = ProbDict.put([proofs=_{
+		ProbProofDict = ProbDict1.put([proofs=_{
 			entailment:j{info:YES_J, proof:Tree_yes_J},
 			contradiction:j{info:NO_J, proof:Tree_no_J}
 			}])
-	; ProbProofDict = ProbDict
+	; ProbProofDict = ProbDict1
 	),
 	json_write(S, ProbProofDict, [width(Width), step(Step), tab(Tab)]),
 	nl(S), close(S).
