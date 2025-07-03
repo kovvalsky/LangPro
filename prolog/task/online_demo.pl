@@ -73,7 +73,7 @@ write_problem_proof('xml', YES, NO, Align, Tree_yes, Tree_no, ID) :-
 
 % {prob_id:ID, prob:ProbDict, aligned_llfs:Align, 
 %  proofs:{entailment:{info:Yes, proof:Tree_yes}, contradiction:{info:No, proof:Tree_no}}}
-write_problem_proof('json', YES, NO, Align, Tree_yes, Tree_no, ID) :-
+write_problem_proof(json(Width,Step,Tab), YES, NO, Align, Tree_yes, Tree_no, ID) :-
 	current_output(S),
 	parsed_problem_to_dict(Align, ID, ProbDict),
 	( YES \== 'yes_NA' ->
@@ -85,8 +85,8 @@ write_problem_proof('json', YES, NO, Align, Tree_yes, Tree_no, ID) :-
 			}])
 	; ProbProofDict = ProbDict
 	),
-	json_write(S, ProbProofDict),
-	close(S).	
+	json_write(S, ProbProofDict, [width(Width), step(Step), tab(Tab)]),
+	nl(S), close(S).
 
 
 print_problem(ID) :-
