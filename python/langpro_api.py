@@ -1,3 +1,11 @@
+"""
+langpro_api.py
+
+Defines Classes and functions for reading and processing
+LangPro output such as CCG trees, CCG terms, LLFs, 
+Tableau proofs, and knowledge relations.
+"""
+
 import json
 from typing import Any, List, Dict
 import nltk
@@ -7,6 +15,7 @@ from nltk import Tree
 ##############################################################
 # Classes
 ##############################################################
+
 INFIX_F = {':', '~>', '@', ',', '/', '\\'}
 TYPECAT_F = {'/', '\\', ':', '~>'}
 
@@ -25,7 +34,7 @@ class Atom(PrologTerm):
         self.value = value
 
     def __str__(self) -> str:
-        return f"'{self.value}'"
+        return f"{self.value}"
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Atom) and self.value == other.value
@@ -85,6 +94,9 @@ class Compound(PrologTerm):
             self.args == other.args
         )
 
+    def __len__(self) -> int:
+        return len(str(self))
+
 class TypeCat(Compound):
     def __init__(self, f: str, args: List[Any]):
         if f not in TYPECAT_F:
@@ -103,19 +115,9 @@ class Terminal(Compound):
             raise ValueError(f"Terminal Compound uses a wrong functor: {f}")
         super().__init__(f, args)
 
-
-
 ##############################################################
 # Reading jSON data
 ##############################################################
-
-# A mapping from the 'type' string in JSON to the corresponding Python class
-PROLOG_TYPE_MAP = {
-    "atom": Atom,
-    "var": Var,
-    "integer": Integer,
-    "float": Float,
-}
 
 COMPOUND_TYPE_MAP = {"tlp": TLP, "t": Terminal, **{key: TypeCat for key in TYPECAT_F}}
 
@@ -185,38 +187,28 @@ def from_json(data: Any, v=0) -> Any:
     # Else: A primitive value (already handled inside dicts/lists)
     else:
         raise ValueError(f"Unsupported type: {type(data)}(value={data})")
-    
 
 ##############################################################
 # Reading certain Prolog tree objects as NLTK Tree
 ##############################################################
 
-def make_tree(tree):
-    """Convert syntactic and proof trees into NLTK Tree objects"""
+def ccg_tree_to_tree(tree):
+    """process the ccg rules based on the arity of the combinatory rules"""
     inseperables = TYPECAT_F | {'t', 'tlp'}
     unary_combinators = {'lx', 'lex', 'tr'}
     binary_combinators = {'fa', 'ba', 'fc', 'bc', 'fxc', 'bxc', 'conj', 
                           'lp', 'rp', 'ltc', 'rtc', 'gbxc', 'gfxc'}
-
-    def ccg_combinatory_rule(subtree):
-        """process the ccg rules based on the arity of the combinatory rules"""
-        root = f"{subtree.f}({subtree.args[0]})"
-        if subtree.f in unary_combinators:
-            children = [make_tree(subtree.args[-1])]
-        elif subtree.f in binary_combinators:
-            children = [make_tree(ch) for ch in subtree.args[-2:]]
-        return Tree(root, children)
-
-    # process compounds
-    if isinstance(tree, Compound):
-        # ccg subtree
-        if any([ isinstance(arg, Terminal) or isinstance(arg, TLP) for arg in tree.args ]):
-            return ccg_combinatory_rule(tree)
-        # tree/term nodes or types/categories
-        if tree.f in inseperables:
-            return Tree(tree, [])
-        # rest recursively 
-        return Tree(tree.f, [make_tree(arg) for arg in tree.args])
-    # process atoms and vars
-    if isinstance(tree, Atom) or isinstance(tree, Var):
-        return Tree(tree.value, [])
+   
+    # attach the resulted category to the rule name
+    root = f"{tree.f}({tree.args[0]})"
+    # process combinatory rules
+    if tree.f in unary_combinators:
+        children = [ccg_tree_to_tree(tree.args[-1])]
+    elif tree.f in binary_combinators:
+        children = [ccg_tree_to_tree(ch) for ch in tree.args[-2:]]
+    # process leaves
+    elif isinstance(tree, Terminal):
+        return tree
+    else:
+        raise ValueError(f"Unknown combinatory rule: {tree.f}")
+    return Tree(root, children)
