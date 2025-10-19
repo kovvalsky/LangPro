@@ -72,7 +72,7 @@ write_problem_proof('xml', YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
 	),
 	close(S).
 
-% {prob_id:ID, prob:ProbDict, aligned_llfs:Align, 
+% {prob_id:ID, prob:ListProbDict, aligned_llfs:Align, 
 %  proofs:{entailment:{info:Yes, proof:Tree_yes}, contradiction:{info:No, proof:Tree_no}}}
 write_problem_proof(json(Width,Step,Tab), YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
 	current_output(S),
