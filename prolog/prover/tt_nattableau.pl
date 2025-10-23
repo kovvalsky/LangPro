@@ -10,7 +10,6 @@
 
 :- use_module('../xml/xml_output', [output_XML/3]).
 % swipl -q --goal=main --toplevel=halt --stand_alone=true --foreign=save -o langpro -c llf2.pl
-:- use_module('../printer/gui_tree', [displayTree/3]).
 :- use_module('../rules/rule_hierarchy', [sub_rule/2, rule_eff_order/1]).
 :- use_module('../lambda/lambda_tt', [op(605, xfy, ~>)]).
 :- use_module('../lambda/type_hierarchy', [sub_type/2]).
@@ -50,28 +49,6 @@ reason(KB_XP, T_TermList, F_TermList, Status) :-
 	%length(BrList, BrNumber), write('# Branches: '), write(BrNumber),
 	%closed(BrList).
 	BrList = [].
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Takes list of TTterms with True and a list of
-% TTterms with sign False, generates tableau tree
-% and branch list, and checks the input on closure
-% with GUI
-greason(KB_XP, T_TermList, F_TermList, Info) :- % remove problem ID from arg list
-	( debMode('proof_tree') -> true; assertz(debMode('proof_tree')) ),
-	Info = [Problem_Id, Mode, Align],
-	generateTableau(KB_XP, T_TermList, F_TermList, BrList, Tree, Status), !,
-	( theUsedrules_in_tree(Tree, [H|T]) -> report([Problem_Id, ': ', [H|T]]); true ),
-	%length(BrList, BrNumber), write('# Branches: '), write(BrNumber),
-	report(['Tableau for "', Mode, '" checking is generated with ', Status, ' ruleapps']),
-	%stats_from_tree(Tree, s(Br_Num, Len, Max_Id)),
-	%report(['NumOfBranches: ', Br_Num, '; NumOfRuleApp: ', Len, '; NumOfNodes: ', Max_Id]),
-	atomic_list_concat(['tableau', Problem_Id, Mode, Align], '-', FileName),
-	( debMode('xml'); debMode('html') -> output_XML(Tree, Problem_Id, FileName); true ),
-	displayTree(Tree, 12, Problem_Id),
-	!,
-	BrList = [].
-	%gclosed(BrList, Tree, _). % what about the last argument?
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
