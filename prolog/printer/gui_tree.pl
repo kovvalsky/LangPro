@@ -8,7 +8,6 @@
 		displayTree/3
 	]).
 
-:- use_module(library(pce)).
 :- use_module('../latex/latex', [drawInLatex/1, tree_structure/1]).
 :- use_module('../utils/user_preds', [
 	remove_adjacent_duplicates/2, all_pairs_from_set/2, writeln_list/1,
