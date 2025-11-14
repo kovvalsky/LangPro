@@ -316,13 +316,14 @@ class TreeNode(str):
             raise ValueError(f"Error parsing trnd args: {nd['args']}") from e
         
         # Create the string representation
-        c_mods = ", ".join([mod.compact() for mod in mod_list])
-        c_args = ", ".join([arg.compact() for arg in arg_list])
+        # skip modifier and argument lists if they are empty
+        c_mods = f"\n[{', '.join([mod.compact() for mod in mod_list])}]" if mod_list else ""
+        c_args = f"\n[{', '.join([arg.compact() for arg in arg_list])}]" if arg_list else ""
         c_head = head.compact()
-        c_rule_app = f"\n{rule_app}" if rule_app else ""
+        c_rule_app = f"{rule_app}" if rule_app else ""
         
         # TODO: improve formatting
-        str_repr = f"{node_id}{c_rule_app}\n[{c_mods}]\n{c_head}\n[{c_args}]\n{sign}" 
+        str_repr = f"{node_id}:{c_rule_app}{c_mods}\n{c_head}{c_args}\n{sign}" 
         str_repr = str_repr.replace(') @ (', ')(').replace(' @ ', ' ').replace('. ', '.')
         # str_repr = "⯁"
         
@@ -354,7 +355,7 @@ class RuleApp(Compound):
     """Rule application info in tableau proof tree nodes"""
     def __init__(self, rule_app: dict):
         assert 'functor' in rule_app, f"Rule app has no functor: {rule_app}"
-        print(">>> rule_app = ", rule_app)
+        # print(">>> rule_app = ", rule_app)
         f, args = rule_app['functor'], rule_app["args"]
         super().__init__(f, args)
         self.rule = f
