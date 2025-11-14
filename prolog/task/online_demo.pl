@@ -26,10 +26,14 @@ online_demo(ID) :-
 	online_demo(ID, 'xml').
 
 online_demo(ID, Format) :-
+	online_demo(ID, [], Format).
+
+online_demo(ID, IKB, Format) :-
 	%report(['Entering online_demo/1\n']),
 	%entail(1, _Answer, Provers_Answer, Closed, FinalStatus),
 	%print_problem(ID),
-	problem_to_ttTerms('align', ID, Prems, Hypos, Align_Prems, Align_Hypos, KB),
+	problem_to_ttTerms('align', ID, Prems, Hypos, Align_Prems, Align_Hypos, OKB),
+	append(IKB, OKB, KB), % merge initial and obtained KBs
 	set_rule_eff_order,
 	check_problem(KB-_, Align_Prems, Align_Hypos, 'yes', _, Al_Cl_yes, Al_St_yes, _, Al_Tr_yes),
 	( Al_St_yes \== 'Defected' ->
@@ -46,7 +50,7 @@ online_demo(ID, Format) :-
 	),
 	write_problem_proof(Format, YES, NO, Align, Tree_yes, Tree_no, KB, ID).
 
-% sumarizes the results with aligned and non-aligned terms
+% summarizes the results with aligned and non-aligned terms
 summarize_align_closed_status(Al_Cl, Al_St, Al_Tr, Cl, St, Tr, Ans, Tree) :-
 	( Al_Cl == 'closed' ->
 		Al_St = (Al_St_Ter, Al_St_Num), 
