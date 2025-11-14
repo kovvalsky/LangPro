@@ -174,7 +174,7 @@ class Compound(PrologTerm):
         return len(str(self))
 
 # ------------------------------------------------------------
-# Lingusitic/semantic framework/theory-specific classes
+# Linguistic/semantic framework/theory-specific classes
 
 class AtomCaTy(CaTy):
     """Atomic Category/Types"""
@@ -297,32 +297,32 @@ class TLP(Compound):
 class TreeNode(str):
     """Node in tableau proof tree"""
     def __new__(cls, trnd: dict):
-        # return "⯁"
-        if 'functor' not in trnd:
-            raise ValueError(f"Invalid term: {term}")
-        f, args = trnd['functor'], trnd["args"]
+        # a couple of checks
+        try:
+            f, (nd, node_id, rule_app, _) = trnd["functor"], trnd["args"]
+            mod_list, head, arg_list, sign = nd["args"]
+        except Exception as e:
+            raise ValueError(f"Invalid tree node structure: {trnd}") from e        
         if f != 'trnd':
             raise ValueError(f"'trnd' functor is expected, found {f}")
         # process trnd args
-        assert len(args) == 4, f"{f} should have 4 args but has {len(args)}"
-        nd, node_id, rule_app, _ = args
-        assert 'functor' in nd and len(nd['args']) == 4, \
-            f"nd node ({nd['functor']}) should have 4 args but has {len(nd['args'])}"
-        mod_list, head, arg_list, sign = nd["args"]
-        sign = True if sign == "true" else False
+        sign = sign == "true"
+        rule_app = RuleApp(rule_app) if rule_app else None
         try:
-            mod_list = map(parse_term, mod_list)
-            arg_list = map(parse_term, arg_list)
+            mod_list = list(map(parse_term, mod_list))
+            arg_list = list(map(parse_term, arg_list))
             head = parse_term(head)
         except Exception as e:
-            raise ValueError(f"Error parsing trnd args: {args}") from e
+            raise ValueError(f"Error parsing trnd args: {nd['args']}") from e
         
         # Create the string representation
         c_mods = ", ".join([mod.compact() for mod in mod_list])
         c_args = ", ".join([arg.compact() for arg in arg_list])
         c_head = head.compact()
+        c_rule_app = f"\n{rule_app}" if rule_app else ""
+        
         # TODO: improve formatting
-        str_repr = f"{node_id}\n[{c_mods}]\n{c_head}\n[{c_args}]\n{sign}" 
+        str_repr = f"{node_id}{c_rule_app}\n[{c_mods}]\n{c_head}\n[{c_args}]\n{sign}" 
         str_repr = str_repr.replace(') @ (', ')(').replace(' @ ', ' ').replace('. ', '.')
         # str_repr = "⯁"
         
@@ -331,7 +331,7 @@ class TreeNode(str):
         
         # Store additional attributes
         instance.id = node_id
-        instance.rule = rule_app
+        # instance.rule_app = RuleApp(rule_app) if rule_app else None
         instance.mod = mod_list
         instance.head = head
         instance.arg = arg_list
@@ -349,6 +349,41 @@ class TreeNode(str):
 
     # def __len__(self) -> int:
     #     return len(str(self))
+
+class RuleApp(Compound):
+    """Rule application info in tableau proof tree nodes"""
+    def __init__(self, rule_app: dict):
+        assert 'functor' in rule_app, f"Rule app has no functor: {rule_app}"
+        print(">>> rule_app = ", rule_app)
+        f, args = rule_app['functor'], rule_app["args"]
+        super().__init__(f, args)
+        self.rule = f
+        # define ids and new/old constants
+        if len(args) == 1:
+            self.ids = args[0]
+            self.new = self.old = None
+        elif len(args) == 2:
+            if isinstance(args[0][0], dict): # first is a list of terms
+                old, self.ids = args
+                self.new = None
+                self.old = [ TT(i).compact() for i in old ]
+            elif isinstance(args[1], list): # second is a list of terms
+                self.ids, new = args
+                self.old = None
+                self.new = [ TT(i).compact() for i in new ]
+            else:
+                raise ValueError(f"Invalid rule app: {args}")
+        else:
+            raise ValueError(f"Invalid rule app (with 3+ args): {args}")
+        
+    def __str__(self) -> str:
+        new = "" if self.new is None else f"{self.new}, "
+        old = "" if self.old is None else f", {self.old}"
+        return f"{self.rule}({new}{self.ids}{old})".replace(" ", "")
+    
+    def __repr__(self) -> str:
+        return f"RuleApp({self.rule}, {self.ids}, new={self.new}, old={self.old})"
+
 
 ##############################################################
 # Reading JSON data
@@ -538,38 +573,17 @@ def parse_proof_tree(dict_tree: dict):
     if isinstance(children, list):
         parsed_children = [ parse_proof_tree(child) for child in children ]
     elif isinstance(children, str):
-        parsed_children = [children]
+        parsed_children = [children] # corresponds to the Model leaf
     elif isinstance(children, dict):
-        parsed_children = [ f"{children['functor']}"] #TODO process closure rule info
+        #for closure rule
+        if children['functor'] == 'closer':
+            ids, rule = children['args'][0]
+            parsed_children = [ f"Closed\n{rule}({ids})" ]
+        else:
+            ValueError(f"Unknown proof child type: {children}")
     else:
         raise ValueError(f"Unknown proof child type: {children}")
     return Tree(TreeNode(parent), parsed_children)
-
-# TODO: replace with TreeNode class?
-def parse_trnd(trnd: dict):
-    """parses a trnd node of proof tree"""
-    # return "⯁"
-    if 'functor' not in trnd:
-        raise ValueError(f"Invalid term: {term}")
-    f, args = trnd['functor'], trnd["args"]
-    if f != 'trnd':
-        raise ValueError(f"'trnd' functor is expected, found {f}")
-    # process trnd args
-    assert len(args) == 4, f"{f} should have 4 args but has {len(args)}"
-    nd, node_id, rule_app, _ = args
-    assert 'functor' in nd and len(nd['args']) == 4, \
-        f"nd node ({nd['functor']}) should have 4 args but has {len(nd['args'])}"
-    mod_list, head, arg_list, sign = nd["args"]
-    sign = True if sign == "true" else False
-    try:
-        mod_list = map(parse_term, mod_list)
-        arg_list = map(parse_term, arg_list)
-        head = parse_term(head)
-    except Exception as e:
-        raise ValueError(f"Error parsing trnd args: {args}") from e
-    return TreeNode(node_id, rule_app, mod_list, head, arg_list, sign)
-
-
 
 
 # TODO: This is only used for CCG trees for now. adapt it to terms or remove?
