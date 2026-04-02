@@ -515,22 +515,27 @@ def TT2Tree(t: TT|AppTT|AbsTT|Var) -> Any:
     The root is the type, and the term is its child.
     """
     if isinstance(t, TT):
+        pretty_type = remove_outer_parens(str(t.type))
         if isinstance(t.term, AppTT):
             func = "@\n" 
         elif isinstance(t.term, AbsTT):
             func = "λ\n"
+        elif isinstance(t.term, TLP):
+            return TreeLeaf("t", [t.type] + t.term.args)
+        elif isinstance(t.term, TT):
+            func = "lx\n"
+            return Tree(f"{func}{pretty_type}", [TT2Tree(t.term)])
         else:
             func = ""
-        pretty_type = remove_outer_parens(str(t.type))
         return Tree(f"{func}{pretty_type}", TT2Tree(t.term))
     if isinstance(t, AppTT):
         return [TT2Tree(t.fun), TT2Tree(t.arg)]
     if isinstance(t, AbsTT):
         return [TT2Tree(t.var), TT2Tree(t.body)]
-    if isinstance(t, TLP):
-        # parts = str(t)[1:-1].rsplit(',', 3)
-        # return [parts[0] + '\n' + ','.join(parts[1:])]
-        return [str(t)[1:-1]]
+    # if isinstance(t, TLP):
+    #     # parts = str(t)[1:-1].rsplit(',', 3)
+    #     # return [parts[0] + '\n' + ','.join(parts[1:])]
+    #     return [str(t)[1:-1]]
     if isinstance(t, Var):
         return [str(t)]
     
@@ -593,7 +598,7 @@ def tree_to_line(tree, op=False):
        This is useful to represent LLFs as a single line in proof trees
     """
     if isinstance(tree, str):
-        n_cnt = tree.count("\n") # tyoe tok lemma pos ... tuple
+        n_cnt = tree.count("\n") # type tok lemma pos ... tuple
         if n_cnt > 4:
             lemma = tree.split("\n")[2]
             return lemma
