@@ -16,6 +16,7 @@ import json
 import nltk
 from nltk.tokenize import word_tokenize
 import spacy
+import fileinput
 
 
 #################################
@@ -23,10 +24,10 @@ def parse_arguments():
     '''Read arguments from a command line'''
     parser = argparse.ArgumentParser(description='Extract sentences per line for parsing')
     parser.add_argument(
-    'file', metavar='PATH',
-        help='File containing NLI data')
+    '--files', nargs="+", metavar='PATH(S)', required=True,
+        help='Files containing NLI data')
     parser.add_argument(
-    'output', metavar='PATH prefix',
+    '--output', metavar='PATH prefix',
         help='File for writing output')
     parser.add_argument(
     '--fmt', required=True, choices=['spl', 'sen.pl'],
@@ -67,7 +68,7 @@ def sick_semeval2nli(file_stream, out, fmt, tok='raw', v=0):
     i = 1
     for p in file_stream:
         # ignore the non-problem lines, i.e. not starting with ID
-        if not re.match('\d+\t', p):
+        if not re.match(r'\d+\t', p):
             continue
         # parse the problem
         (pid, pre, hyp, sco, lab) = p.strip().split('\t')
@@ -137,17 +138,17 @@ def snlijson2nli(file_stream, out, fmt, tok='native', v=0):
     '''
     nli_dict = defaultdict(dict)
     i = 1
-    possible_labels = ['entailment', 'contradiction', 'neutral']
+    # possible_labels = ['entailment', 'contradiction', 'neutral']
     for json_prob in file_stream:
         p = json.loads(json_prob)
-        if p['gold_label'] in possible_labels:
-            nli_dict[i] = {'pid':p['pairID'],
-                           'p':p['sentence1'], 'h':p['sentence2'],
-                           'g':p['gold_label'],
-                           'p_btree': p['sentence1_binary_parse'],
-                           'h_btree': p['sentence2_binary_parse']
-                          }
-            i += 1
+        # if p['gold_label'] in possible_labels:
+        nli_dict[i] = {'pid':p['pairID'],
+                        'p':p['sentence1'], 'h':p['sentence2'],
+                        'g':p['gold_label'],
+                        'p_btree': p['sentence1_binary_parse'],
+                        'h_btree': p['sentence2_binary_parse']
+                        }
+        i += 1
     report("{} problems read".format(len(nli_dict)), 0, v)
     write_nli_dict(nli_dict, out, fmt, tok=tok, v=v)
 
@@ -191,8 +192,9 @@ if __name__ == '__main__':
     # read docs from the file
     dataset2nli = globals()[args.corpus + '2nli']
     # get tokenizer
-    with open(args.file, 'r', encoding='UTF-8') as f:
-        dataset2nli(f, args.output, args.fmt, tok=args.tokenize, v=args.v)
+    # open files and treat as a single stream
+    with fileinput.input(args.files, openhook=fileinput.hook_encoded("UTF-8")) as F:
+        dataset2nli(F, args.output, args.fmt, tok=args.tokenize, v=args.v)
     # Some stats
     #print_docs(docs)
     # print in files inside a directory
