@@ -47,8 +47,20 @@ class CCGCat(ABC):
     pass
 
 class CaTy(ABC):
-    """Base of functional types and categories"""
-    pass
+    """Base of types and categories"""
+
+    @staticmethod
+    def parse(caty: str | dict):
+        """parses types and categories"""
+        # atomic type or cat (without features)
+        if isinstance(caty, str):
+            return AtomCaTy(caty)
+        f, args = caty['functor'], caty["args"]
+        # atomic type or cat with a feature
+        if f == ":" and len(args) == 2:
+            return AtomCaTy(f"{args[0]}:{args[1]}")
+        # compound/functional type or category
+        return CompCaTy(f, [ CaTy.parse(arg) for arg in args])
 
 class TreeLike(ABC):
     """Base of tree-like structures such as LLFs, CCG derivations, proofs"""
@@ -165,7 +177,7 @@ class Compound(PrologTerm):
             self.f == other.f and
             self.args == other.args
         )
-    
+
     # def split(self, sep=None, maxsplit=-1):
     #     """Split the string representation"""
     #     return str(self).split(sep, maxsplit)
@@ -186,43 +198,57 @@ class AtomCaTy(CaTy):
             self.main, self.feat = atom, None
 
     def __str__(self) -> str:
-        return self.main + (f":{self.feat}" \
-             if not(self.feat == "_" or self.feat is None or self.feat[0].isupper()) else "")    
-    
-    def __repr__(self) -> str:
-        return f"AtomCaTy({self.main}" + \
-            (f":{self.feat}" if self.feat is not None else "") + ")"
+        if self.feat == "_" or self.feat is None or self.feat[0].isupper():
+            return self.main
+        return self.main + f":{self.feat}"
 
+    def __repr__(self) -> str:
+        if self.feat is None:
+            return f"AtomCaTy({self.main})"
+        return f"AtomCaTy({self.main}:{self.feat})"
 
 class CompCaTy(CaTy):
     """Compound Category/Types"""
-    def __init__(self, f: str, args: List[Any]):
+    def __init__(self, f: str, args: List[CaTy]):
         if f not in CATY_F:
             raise ValueError(f"CompCaTy uses a wrong functor: {f}")
         if len(args) != 2:
             raise ValueError(f"CompCaTy expects two args: {args}")
         self.f = f
-        self.arg = args[0] # already parsed by parse_caty
-        self.fun = args[1]
+        if f in CAT_F: # dealing with categories
+            self.fun, self.arg = args[0], args[1]
+        else: # dealing with types
+            self.arg, self.fun = args[0], args[1]
 
     def __str__(self) -> str:
-        return f"({self.arg}-{self.fun})"    
-    
+        # for categories suppress the final outer parentheses
+        if self.f in CAT_F:
+            fp1, fp2 = "()" if isinstance(self.fun, CompCaTy) else ("", "")
+            ap1, ap2 = "()" if isinstance(self.arg, CompCaTy) else ("", "")
+            return f"{fp1}{self.fun}{fp2}{self.f}{ap1}{self.arg}{ap2}"
+        # assuming left associativity in types and saving parentheses
+        if isinstance(self.arg, AtomCaTy):
+            return f"{self.arg}-{self.fun}"
+        else:
+            return f"({self.arg})-{self.fun}"
+
     def __repr__(self) -> str:
-        return f"CompCaTy({repr(self.arg)}{self.f}{repr(self.fun)})"
+        if self.f in CAT_F:
+            return f"CompCaTy({repr(self.fun)}{self.f}{repr(self.arg)})"
+        return f"CompCaTy({repr(self.arg)}-{repr(self.fun)})"
 
 
-class TreeLeaf(Compound):
-    """Tree leaf in CCG derivation-like structures"""
-    def __init__(self, f: str, args: List[Any]):
-        if f not in {'t'}:
-            raise ValueError(f"Terminal Compound uses a wrong functor: {f}")
-        super().__init__(f, args)
-        self.value = super().__str__()
+# class TreeLeaf(Compound):
+#     """Tree leaf in CCG derivation-like structures"""
+#     def __init__(self, f: str, args: List[Any]):
+#         if f not in {'t'}:
+#             raise ValueError(f"Terminal Compound uses a wrong functor: {f}")
+#         super().__init__(f, args)
+#         self.value = super().__str__()
 
-    # different representation to better fit to a tree leaf
-    def __str__(self) -> str:
-        return '\n'.join(str(a) for a in self.args)
+#     # different representation to better fit to a tree leaf
+#     def __str__(self) -> str:
+#         return '\n'.join(str(a) for a in self.args)
 
 class TT(Compound):
     """Term-Type a format where a term is always paired with its type"""
@@ -232,7 +258,7 @@ class TT(Compound):
         assert f == ',', f"TT should have ',' functor but has {f}"
         super().__init__(f, args)
         term, ty = args
-        self.type = parse_caty(ty)
+        self.type = CaTy.parse(ty)
         if isinstance(term, str):
             self.term = Var(term)
         else:
@@ -243,17 +269,17 @@ class TT(Compound):
 
     def __str__(self) -> str:
         return f"({self.term} : {remove_outer_parens(str(self.type))})"
-    
+
     def compact(self) -> str:
         return remove_outer_parens(compact_tt(self))
-    
+
     def tree(self):
         return TT2Tree(self)
-    
-    def pretty_printer(self): 
+
+    def pretty_printer(self):
         return TreePrettyPrinter(self.tree())
 
-    def pretty_print(self): 
+    def pretty_print(self):
         return self.tree().pretty_print()
 
 class AppTT(Compound):
@@ -276,7 +302,7 @@ class AbsTT(Compound):
 
     def __repr__(self) -> str:
         return f"AbsTT({repr(self.var)}, {repr(self.body)})"
-    
+
     def __str__(self) -> str:
         return f"λ{self.var}. {self.body}"
 
@@ -284,15 +310,17 @@ class TLP(Compound):
     """lexical constant is lambda terms that are a tuple of strings (token, lemma, pos tag)"""
     def __init__(self, f: str, args: List[Any]):
         super().__init__(f, args)
+        # at least three arguments required
+        assert len(args) >= 3, f"TLP should have at least 3 args: {len(args)}"
         self.tok, self.lem, self.pos = args[0], args[1], args[2]
 
     # different representation to better fit to a tree leaf
     def __repr__(self) -> str:
         return f"TLP({','.join(repr(a) for a in self.args)})"
-    
+
     def __str__(self) -> str:
         return f"[{','.join(str(a) for a in self.args)}]"
-    
+
 
 class TreeNode(str):
     """Node in tableau proof tree"""
@@ -302,7 +330,7 @@ class TreeNode(str):
             f, (nd, node_id, rule_app, _) = trnd["functor"], trnd["args"]
             mod_list, head, arg_list, sign = nd["args"]
         except Exception as e:
-            raise ValueError(f"Invalid tree node structure: {trnd}") from e        
+            raise ValueError(f"Invalid tree node structure: {trnd}") from e
         if f != 'trnd':
             raise ValueError(f"'trnd' functor is expected, found {f}")
         # process trnd args
@@ -314,22 +342,25 @@ class TreeNode(str):
             head = parse_term(head)
         except Exception as e:
             raise ValueError(f"Error parsing trnd args: {nd['args']}") from e
-        
+
         # Create the string representation
         # skip modifier and argument lists if they are empty
-        c_mods = f"\n[{', '.join([mod.compact() for mod in mod_list])}]" if mod_list else ""
-        c_args = f"\n[{', '.join([arg.compact() for arg in arg_list])}]" if arg_list else ""
+        c_mods = f"\n[{', '.join([mod.compact() for mod in mod_list])}]" \
+            if mod_list else ""
+        c_args = f"\n[{', '.join([arg.compact() for arg in arg_list])}]" \
+            if arg_list else ""
         c_head = head.compact()
         c_rule_app = f"{rule_app}" if rule_app else ""
-        
+
         # TODO: improve formatting
-        str_repr = f"{node_id}:{c_rule_app}{c_mods}\n{c_head}{c_args}\n{sign}" 
+        str_repr = f"{node_id}:{c_rule_app}{c_mods}\n{c_head}{c_args}\n{sign}"
+        # remove redundant spaces and @ application symbol for compactness
         str_repr = str_repr.replace(') @ (', ')(').replace(' @ ', ' ').replace('. ', '.')
         # str_repr = "⯁"
-        
+
         # Create the str instance with this representation
         instance = super().__new__(cls, str_repr)
-        
+
         # Store additional attributes
         instance.id = node_id
         # instance.rule_app = RuleApp(rule_app) if rule_app else None
@@ -343,7 +374,7 @@ class TreeNode(str):
     # def __str__(self) -> str:
     #     return "⯁"
     #     return f"NodeID: {self.node_id}, Rule: {self.rule_app}, Sign: {self.sign}"
-    
+
     # def __repr__(self) -> str:
     #     return "⯁"
     #     return f"TreeNode({self.node_id}, {self.rule_app}, {list(self.mod_list)}, {self.head}, {list(self.arg_list)}, {self.sign})"
@@ -376,12 +407,13 @@ class RuleApp(Compound):
                 raise ValueError(f"Invalid rule app: {args}")
         else:
             raise ValueError(f"Invalid rule app (with 3+ args): {args}")
-        
+
     def __str__(self) -> str:
-        new = "" if self.new is None else f"{self.new}, "
-        old = "" if self.old is None else f", {self.old}"
+        # when converting a list of constant cX strings to string, remove quotes
+        new = "" if self.new is None else f"{self.new}, ".replace("'", "")
+        old = "" if self.old is None else f", {self.old}".replace("'", "")
         return f"{self.rule}({new}{self.ids}{old})".replace(" ", "")
-    
+
     def __repr__(self) -> str:
         return f"RuleApp({self.rule}, {self.ids}, new={self.new}, old={self.old})"
 
@@ -390,7 +422,7 @@ class RuleApp(Compound):
 # Reading JSON data
 ##############################################################
 
-COMPOUND_F_TYPE_MAP = {'tlp': TLP, 't': TreeLeaf, ':': AtomCaTy,
+COMPOUND_F_TYPE_MAP = {'tlp': TLP, ':': AtomCaTy,
                        '~>': CompCaTy, '/': CompCaTy, '\\': CompCaTy}
 
 def parse_langpro_json(json_output: Any, v=0) -> Any:
@@ -425,26 +457,6 @@ def parse_langpro_json(json_output: Any, v=0) -> Any:
 # Reading certain Prolog objects
 ##############################################################
 
-def parse_t_leaf(tleaf):
-    """parses terminal nodes of CCG derivations"""
-    f, args = tleaf['functor'], tleaf["args"]
-    if f != 't':
-        raise ValueError(f"'t' functor is expected, found {f} from {tleaf}")
-    # process ccg category, while rest are token, lemma, pos, chunking, ner info
-    c = parse_caty(args[0])
-    return TreeLeaf(f, [c] + args[1:])
-
-def parse_caty(caty: str | dict):
-    """parses types and categories"""
-    # atomic type or cat (without features)
-    if isinstance(caty, str):
-        return AtomCaTy(caty)
-    f, args = caty['functor'], caty["args"]
-    # atomic type or cat with a feature
-    if f == ":" and len(args) == 2:
-        return AtomCaTy(f"{args[0]}:{args[1]}")
-    return CompCaTy(f, [ parse_caty(arg) for arg in args])
-
 def parse_kb(kb: list):
     """parses KB, which is a list of rleations over a pair of words"""
     return [ Compound(r['functor'], r['args']) for r in kb ]
@@ -465,18 +477,18 @@ def parse_ccg_tree(tree: dict):
     unary_combinators = {'lx', 'lex', 'tr'}
     binary_combinators = {'fa', 'ba', 'fc', 'bc', 'fxc', 'bxc', 'conj',
                           'lp', 'rp', 'ltc', 'rtc', 'gbxc', 'gfxc'}
-    # attach the resulted category to the rule name
-    root = f"{f}({parse_caty(args[0])})" # combinator + TypeCat
+    # process leaves
+    if f == 't':
+        return Tree(str(CaTy.parse(args[0])), [TLP(f, args[1:])])
     # process combinatory rules
     if f in unary_combinators:
         children = [parse_ccg_tree(args[-1])]
     elif f in binary_combinators:
         children = [parse_ccg_tree(ch) for ch in args[-2:]]
-    # process leaves
-    elif f == 't':
-        return parse_t_leaf(tree)
     else:
-        raise ValueError(f"Unknown combinatory rule: {f}")
+        raise ValueError(f"Unknown combinatory rule: {f}")\
+    # attach the resulted category to the rule name
+    root = f"{f}[{CaTy.parse(args[0])}]" # combinator[TypeCat]
     return Tree(root, children)
 
 
@@ -509,36 +521,29 @@ def parse_term(term: dict):
     raise ValueError(f"Unknown case: {term}")
 
 
-def TT2Tree(t: TT|AppTT|AbsTT|Var) -> Any:
+def TT2Tree(t: TT) -> Tree:
     """
     Structure a TT as an NLTK Tree.
     The root is the type, and the term is its child.
     """
     if isinstance(t, TT):
+        # make type string
         pretty_type = remove_outer_parens(str(t.type))
+        # terminal cases: lexical term or var
+        if isinstance(t.term, TLP) or isinstance(t.term, Var):
+            return Tree(pretty_type, [t.term])
+        # unary case: used only for ccg_term
+        if isinstance(t.term, TT):
+            return Tree(f"lx[{pretty_type}]", [TT2Tree(t.term)])
+        # application of two TTs
         if isinstance(t.term, AppTT):
-            func = "@\n" 
+            return Tree(f"@[{pretty_type}]",
+                        [TT2Tree(t.term.fun), TT2Tree(t.term.arg)])
         elif isinstance(t.term, AbsTT):
-            func = "λ\n"
-        elif isinstance(t.term, TLP):
-            return TreeLeaf("t", [t.type] + t.term.args)
-        elif isinstance(t.term, TT):
-            func = "lx\n"
-            return Tree(f"{func}{pretty_type}", [TT2Tree(t.term)])
-        else:
-            func = ""
-        return Tree(f"{func}{pretty_type}", TT2Tree(t.term))
-    if isinstance(t, AppTT):
-        return [TT2Tree(t.fun), TT2Tree(t.arg)]
-    if isinstance(t, AbsTT):
-        return [TT2Tree(t.var), TT2Tree(t.body)]
-    # if isinstance(t, TLP):
-    #     # parts = str(t)[1:-1].rsplit(',', 3)
-    #     # return [parts[0] + '\n' + ','.join(parts[1:])]
-    #     return [str(t)[1:-1]]
-    if isinstance(t, Var):
-        return [str(t)]
-    
+            return Tree(f"λ[{pretty_type}]",
+                        [TT2Tree(t.term.var), TT2Tree(t.term.body)])
+    raise ValueError(f"Unknown term type in TT2Tree: {type(t)} with value {t}")
+
 def compact_tt(t: TT|AppTT|AbsTT|Var) -> str:
     """Represent TT as a single line compact string."""
     if isinstance(t, Var):
@@ -562,8 +567,8 @@ def parse_info_proof(proof: dict):
     # get actual proof dict
     p = proof["proof"] if "proof" in proof else proof
     proof_tree = parse_proof_tree(p)
-    return proof_tree                               
-                
+    return proof_tree
+
 def parse_proof_tree(dict_tree: dict):
     """Recursively parse proof tree"""
     # check that it is a tree
@@ -605,21 +610,17 @@ def tree_to_line(tree, op=False):
         elif n_cnt == 1: # type-var pair
             return  tree.split("\n")[-1]
         return tree
-    if isinstance(tree, TreeLeaf):
-        return tree.value # TODO: make more compact?
+    if isinstance(tree, TLP):
+        return str(tree) # TODO: make more compact?
     if isinstance(tree, Tree) and "abst" in tree.label():
         var, body = tree
         return f"(\\{tree_to_line(var)}. {tree_to_line(body)})"
-    # if isinstance(tree, TreeLeaf):
-        # return tree.value # TODO: make more compact?
-    # else:
-    #     print(f">>> {type(tree)}: {tree}")
     # otherwise recurse
     if op:
         return f"({' '.join(tree_to_line(child, op=True) for child in tree)})"
     else:
         return f"{' '.join(tree_to_line(child, op=True) for child in tree)}"
-    
+
 
 def remove_outer_parens(s):
     if s.startswith('(') and s.endswith(')'):
