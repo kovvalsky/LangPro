@@ -1,0 +1,2725 @@
+{
+  "aligned_llfs": "true",
+  "kb": [
+    {
+      "args": [
+        "dog",
+        "animal"
+      ],
+      "functor": "isa_wn"
+    }
+  ],
+  "prob": [
+    {
+      "role": "p",
+      "sen": "All animals sleep",
+      "sen_id": 1,
+      "tree": {
+        "ccg_term": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "sleep",
+                        "sleep",
+                        "VBP",
+                        "O",
+                        "O"
+                      ],
+                      "functor": "tlp"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "_"
+                          ],
+                          "functor": ":"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "All",
+                                "all",
+                                "DT",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    "n",
+                                    "_"
+                                  ],
+                                  "functor": ":"
+                                },
+                                {
+                                  "args": [
+                                    "np",
+                                    "nb"
+                                  ],
+                                  "functor": ":"
+                                }
+                              ],
+                              "functor": "~>"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "animals",
+                                "animal",
+                                "NNS",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                "n",
+                                "_"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        }
+                      ],
+                      "functor": "@"
+                    },
+                    {
+                      "args": [
+                        "np",
+                        "nb"
+                      ],
+                      "functor": ":"
+                    }
+                  ],
+                  "functor": ","
+                }
+              ],
+              "functor": "@"
+            },
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            }
+          ],
+          "functor": ","
+        },
+        "ccg_tree": {
+          "args": [
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "np",
+                    "nb"
+                  ],
+                  "functor": ":"
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "nb"
+                          ],
+                          "functor": ":"
+                        },
+                        "n"
+                      ],
+                      "functor": "/"
+                    },
+                    "All",
+                    "All",
+                    "DT",
+                    "O",
+                    "O"
+                  ],
+                  "functor": "t"
+                },
+                {
+                  "args": [
+                    "n",
+                    "animals",
+                    "animal",
+                    "NNS",
+                    "O",
+                    "O"
+                  ],
+                  "functor": "t"
+                }
+              ],
+              "functor": "fa"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "s",
+                        "dcl"
+                      ],
+                      "functor": ":"
+                    },
+                    "np"
+                  ],
+                  "functor": "\\"
+                },
+                "sleep",
+                "sleep",
+                "VBP",
+                "O",
+                "O"
+              ],
+              "functor": "t"
+            }
+          ],
+          "functor": "ba"
+        },
+        "corr_term": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "sleep",
+                        "sleep",
+                        "VBP",
+                        "O",
+                        "O"
+                      ],
+                      "functor": "tlp"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "_"
+                          ],
+                          "functor": ":"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "All",
+                                "every",
+                                "DT",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    "n",
+                                    "_"
+                                  ],
+                                  "functor": ":"
+                                },
+                                {
+                                  "args": [
+                                    "np",
+                                    "nb"
+                                  ],
+                                  "functor": ":"
+                                }
+                              ],
+                              "functor": "~>"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "animal",
+                                "animal",
+                                "NN",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                "n",
+                                "_"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        }
+                      ],
+                      "functor": "@"
+                    },
+                    {
+                      "args": [
+                        "np",
+                        "nb"
+                      ],
+                      "functor": ":"
+                    }
+                  ],
+                  "functor": ","
+                }
+              ],
+              "functor": "@"
+            },
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            }
+          ],
+          "functor": ","
+        },
+        "llf": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "every",
+                                "every",
+                                "DT",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    "n",
+                                    "_"
+                                  ],
+                                  "functor": ":"
+                                },
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            "np",
+                                            "nb"
+                                          ],
+                                          "functor": ":"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    },
+                                    {
+                                      "args": [
+                                        "s",
+                                        "dcl"
+                                      ],
+                                      "functor": ":"
+                                    }
+                                  ],
+                                  "functor": "~>"
+                                }
+                              ],
+                              "functor": "~>"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "animal",
+                                "animal",
+                                "NN",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                "n",
+                                "_"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        }
+                      ],
+                      "functor": "@"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "np",
+                                "nb"
+                              ],
+                              "functor": ":"
+                            },
+                            {
+                              "args": [
+                                "s",
+                                "dcl"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": "~>"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "sleep",
+                        "sleep",
+                        "VBZ",
+                        "O",
+                        "O"
+                      ],
+                      "functor": "tlp"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "_"
+                          ],
+                          "functor": ":"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                }
+              ],
+              "functor": "@"
+            },
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            }
+          ],
+          "functor": ","
+        }
+      }
+    },
+    {
+      "role": "h",
+      "sen": "Every dog sleeps",
+      "sen_id": 2,
+      "tree": {
+        "ccg_term": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "sleeps",
+                        "sleep",
+                        "VBZ",
+                        "O",
+                        "O"
+                      ],
+                      "functor": "tlp"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "_"
+                          ],
+                          "functor": ":"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "Every",
+                                "every",
+                                "DT",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    "n",
+                                    "_"
+                                  ],
+                                  "functor": ":"
+                                },
+                                {
+                                  "args": [
+                                    "np",
+                                    "nb"
+                                  ],
+                                  "functor": ":"
+                                }
+                              ],
+                              "functor": "~>"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "dog",
+                                "dog",
+                                "NN",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                "n",
+                                "_"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        }
+                      ],
+                      "functor": "@"
+                    },
+                    {
+                      "args": [
+                        "np",
+                        "nb"
+                      ],
+                      "functor": ":"
+                    }
+                  ],
+                  "functor": ","
+                }
+              ],
+              "functor": "@"
+            },
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            }
+          ],
+          "functor": ","
+        },
+        "ccg_tree": {
+          "args": [
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "np",
+                    "nb"
+                  ],
+                  "functor": ":"
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "nb"
+                          ],
+                          "functor": ":"
+                        },
+                        "n"
+                      ],
+                      "functor": "/"
+                    },
+                    "Every",
+                    "Every",
+                    "DT",
+                    "O",
+                    "O"
+                  ],
+                  "functor": "t"
+                },
+                {
+                  "args": [
+                    "n",
+                    "dog",
+                    "dog",
+                    "NN",
+                    "O",
+                    "O"
+                  ],
+                  "functor": "t"
+                }
+              ],
+              "functor": "fa"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "s",
+                        "dcl"
+                      ],
+                      "functor": ":"
+                    },
+                    "np"
+                  ],
+                  "functor": "\\"
+                },
+                "sleeps",
+                "sleep",
+                "VBZ",
+                "O",
+                "O"
+              ],
+              "functor": "t"
+            }
+          ],
+          "functor": "ba"
+        },
+        "corr_term": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "sleeps",
+                        "sleep",
+                        "VBZ",
+                        "O",
+                        "O"
+                      ],
+                      "functor": "tlp"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "_"
+                          ],
+                          "functor": ":"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "Every",
+                                "every",
+                                "DT",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    "n",
+                                    "_"
+                                  ],
+                                  "functor": ":"
+                                },
+                                {
+                                  "args": [
+                                    "np",
+                                    "nb"
+                                  ],
+                                  "functor": ":"
+                                }
+                              ],
+                              "functor": "~>"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "dog",
+                                "dog",
+                                "NN",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                "n",
+                                "_"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        }
+                      ],
+                      "functor": "@"
+                    },
+                    {
+                      "args": [
+                        "np",
+                        "nb"
+                      ],
+                      "functor": ":"
+                    }
+                  ],
+                  "functor": ","
+                }
+              ],
+              "functor": "@"
+            },
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            }
+          ],
+          "functor": ","
+        },
+        "llf": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "every",
+                                "every",
+                                "DT",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    "n",
+                                    "_"
+                                  ],
+                                  "functor": ":"
+                                },
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            "np",
+                                            "nb"
+                                          ],
+                                          "functor": ":"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    },
+                                    {
+                                      "args": [
+                                        "s",
+                                        "dcl"
+                                      ],
+                                      "functor": ":"
+                                    }
+                                  ],
+                                  "functor": "~>"
+                                }
+                              ],
+                              "functor": "~>"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "dog",
+                                "dog",
+                                "NN",
+                                "O",
+                                "O"
+                              ],
+                              "functor": "tlp"
+                            },
+                            {
+                              "args": [
+                                "n",
+                                "_"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        }
+                      ],
+                      "functor": "@"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                "np",
+                                "nb"
+                              ],
+                              "functor": ":"
+                            },
+                            {
+                              "args": [
+                                "s",
+                                "dcl"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": "~>"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        "sleep",
+                        "sleep",
+                        "VBZ",
+                        "O",
+                        "O"
+                      ],
+                      "functor": "tlp"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "np",
+                            "_"
+                          ],
+                          "functor": ":"
+                        },
+                        {
+                          "args": [
+                            "s",
+                            "dcl"
+                          ],
+                          "functor": ":"
+                        }
+                      ],
+                      "functor": "~>"
+                    }
+                  ],
+                  "functor": ","
+                }
+              ],
+              "functor": "@"
+            },
+            {
+              "args": [
+                "s",
+                "dcl"
+              ],
+              "functor": ":"
+            }
+          ],
+          "functor": ","
+        }
+      }
+    }
+  ],
+  "prob_id": 1,
+  "proofs": {
+    "contradiction": {
+      "info": [
+        "na",
+        "open",
+        "Ter1"
+      ],
+      "proof": {
+        "args": [
+          {
+            "args": [
+              {
+                "args": [
+                  [],
+                  {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "args": [
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          "every",
+                                          "every",
+                                          "DT",
+                                          "O",
+                                          "O"
+                                        ],
+                                        "functor": "tlp"
+                                      },
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "n",
+                                              "A"
+                                            ],
+                                            "functor": ":"
+                                          },
+                                          {
+                                            "args": [
+                                              {
+                                                "args": [
+                                                  {
+                                                    "args": [
+                                                      "np",
+                                                      "nb"
+                                                    ],
+                                                    "functor": ":"
+                                                  },
+                                                  {
+                                                    "args": [
+                                                      "s",
+                                                      "dcl"
+                                                    ],
+                                                    "functor": ":"
+                                                  }
+                                                ],
+                                                "functor": "~>"
+                                              },
+                                              {
+                                                "args": [
+                                                  "s",
+                                                  "dcl"
+                                                ],
+                                                "functor": ":"
+                                              }
+                                            ],
+                                            "functor": "~>"
+                                          }
+                                        ],
+                                        "functor": "~>"
+                                      }
+                                    ],
+                                    "functor": ","
+                                  },
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          "animal",
+                                          "animal",
+                                          "NN",
+                                          "O",
+                                          "O"
+                                        ],
+                                        "functor": "tlp"
+                                      },
+                                      {
+                                        "args": [
+                                          "n",
+                                          "B"
+                                        ],
+                                        "functor": ":"
+                                      }
+                                    ],
+                                    "functor": ","
+                                  }
+                                ],
+                                "functor": "@"
+                              },
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          "np",
+                                          "nb"
+                                        ],
+                                        "functor": ":"
+                                      },
+                                      {
+                                        "args": [
+                                          "s",
+                                          "dcl"
+                                        ],
+                                        "functor": ":"
+                                      }
+                                    ],
+                                    "functor": "~>"
+                                  },
+                                  {
+                                    "args": [
+                                      "s",
+                                      "dcl"
+                                    ],
+                                    "functor": ":"
+                                  }
+                                ],
+                                "functor": "~>"
+                              }
+                            ],
+                            "functor": ","
+                          },
+                          {
+                            "args": [
+                              {
+                                "args": [
+                                  "sleep",
+                                  "sleep",
+                                  "VBZ",
+                                  "O",
+                                  "O"
+                                ],
+                                "functor": "tlp"
+                              },
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      "np",
+                                      "C"
+                                    ],
+                                    "functor": ":"
+                                  },
+                                  {
+                                    "args": [
+                                      "s",
+                                      "dcl"
+                                    ],
+                                    "functor": ":"
+                                  }
+                                ],
+                                "functor": "~>"
+                              }
+                            ],
+                            "functor": ","
+                          }
+                        ],
+                        "functor": "@"
+                      },
+                      {
+                        "args": [
+                          "s",
+                          "dcl"
+                        ],
+                        "functor": ":"
+                      }
+                    ],
+                    "functor": ","
+                  },
+                  [],
+                  "true"
+                ],
+                "functor": "nd"
+              },
+              1,
+              [],
+              "_"
+            ],
+            "functor": "trnd"
+          },
+          [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        [],
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                "every",
+                                                "every",
+                                                "DT",
+                                                "O",
+                                                "O"
+                                              ],
+                                              "functor": "tlp"
+                                            },
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "n",
+                                                    "A"
+                                                  ],
+                                                  "functor": ":"
+                                                },
+                                                {
+                                                  "args": [
+                                                    {
+                                                      "args": [
+                                                        {
+                                                          "args": [
+                                                            "np",
+                                                            "nb"
+                                                          ],
+                                                          "functor": ":"
+                                                        },
+                                                        {
+                                                          "args": [
+                                                            "s",
+                                                            "dcl"
+                                                          ],
+                                                          "functor": ":"
+                                                        }
+                                                      ],
+                                                      "functor": "~>"
+                                                    },
+                                                    {
+                                                      "args": [
+                                                        "s",
+                                                        "dcl"
+                                                      ],
+                                                      "functor": ":"
+                                                    }
+                                                  ],
+                                                  "functor": "~>"
+                                                }
+                                              ],
+                                              "functor": "~>"
+                                            }
+                                          ],
+                                          "functor": ","
+                                        },
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                "dog",
+                                                "dog",
+                                                "NN",
+                                                "O",
+                                                "O"
+                                              ],
+                                              "functor": "tlp"
+                                            },
+                                            {
+                                              "args": [
+                                                "n",
+                                                "B"
+                                              ],
+                                              "functor": ":"
+                                            }
+                                          ],
+                                          "functor": ","
+                                        }
+                                      ],
+                                      "functor": "@"
+                                    },
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                "np",
+                                                "nb"
+                                              ],
+                                              "functor": ":"
+                                            },
+                                            {
+                                              "args": [
+                                                "s",
+                                                "dcl"
+                                              ],
+                                              "functor": ":"
+                                            }
+                                          ],
+                                          "functor": "~>"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    }
+                                  ],
+                                  "functor": ","
+                                },
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        "sleep",
+                                        "sleep",
+                                        "VBZ",
+                                        "O",
+                                        "O"
+                                      ],
+                                      "functor": "tlp"
+                                    },
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            "np",
+                                            "C"
+                                          ],
+                                          "functor": ":"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    }
+                                  ],
+                                  "functor": ","
+                                }
+                              ],
+                              "functor": "@"
+                            },
+                            {
+                              "args": [
+                                "s",
+                                "dcl"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        [],
+                        "true"
+                      ],
+                      "functor": "nd"
+                    },
+                    2,
+                    [],
+                    "_"
+                  ],
+                  "functor": "trnd"
+                },
+                [
+                  {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "args": [
+                              [],
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "every",
+                                              "every",
+                                              "DT",
+                                              "O",
+                                              "O"
+                                            ],
+                                            "functor": "tlp"
+                                          },
+                                          {
+                                            "args": [
+                                              {
+                                                "args": [
+                                                  "n",
+                                                  "A"
+                                                ],
+                                                "functor": ":"
+                                              },
+                                              {
+                                                "args": [
+                                                  {
+                                                    "args": [
+                                                      {
+                                                        "args": [
+                                                          "np",
+                                                          "nb"
+                                                        ],
+                                                        "functor": ":"
+                                                      },
+                                                      {
+                                                        "args": [
+                                                          "s",
+                                                          "dcl"
+                                                        ],
+                                                        "functor": ":"
+                                                      }
+                                                    ],
+                                                    "functor": "~>"
+                                                  },
+                                                  {
+                                                    "args": [
+                                                      "s",
+                                                      "dcl"
+                                                    ],
+                                                    "functor": ":"
+                                                  }
+                                                ],
+                                                "functor": "~>"
+                                              }
+                                            ],
+                                            "functor": "~>"
+                                          }
+                                        ],
+                                        "functor": ","
+                                      },
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "dog",
+                                              "dog",
+                                              "NN",
+                                              "O",
+                                              "O"
+                                            ],
+                                            "functor": "tlp"
+                                          },
+                                          {
+                                            "args": [
+                                              "n",
+                                              "B"
+                                            ],
+                                            "functor": ":"
+                                          }
+                                        ],
+                                        "functor": ","
+                                      }
+                                    ],
+                                    "functor": "@"
+                                  },
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "np",
+                                              "nb"
+                                            ],
+                                            "functor": ":"
+                                          },
+                                          {
+                                            "args": [
+                                              "s",
+                                              "dcl"
+                                            ],
+                                            "functor": ":"
+                                          }
+                                        ],
+                                        "functor": "~>"
+                                      },
+                                      {
+                                        "args": [
+                                          "s",
+                                          "dcl"
+                                        ],
+                                        "functor": ":"
+                                      }
+                                    ],
+                                    "functor": "~>"
+                                  }
+                                ],
+                                "functor": ","
+                              },
+                              [
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        "sleep",
+                                        "sleep",
+                                        "VBZ",
+                                        "O",
+                                        "O"
+                                      ],
+                                      "functor": "tlp"
+                                    },
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            "np",
+                                            "C"
+                                          ],
+                                          "functor": ":"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    }
+                                  ],
+                                  "functor": ","
+                                }
+                              ],
+                              "true"
+                            ],
+                            "functor": "nd"
+                          },
+                          3,
+                          {
+                            "args": [
+                              [
+                                2,
+                                1
+                              ]
+                            ],
+                            "functor": "same_args_xx"
+                          },
+                          "_"
+                        ],
+                        "functor": "trnd"
+                      },
+                      [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    [],
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "every",
+                                                    "every",
+                                                    "DT",
+                                                    "O",
+                                                    "O"
+                                                  ],
+                                                  "functor": "tlp"
+                                                },
+                                                {
+                                                  "args": [
+                                                    {
+                                                      "args": [
+                                                        "n",
+                                                        "A"
+                                                      ],
+                                                      "functor": ":"
+                                                    },
+                                                    {
+                                                      "args": [
+                                                        {
+                                                          "args": [
+                                                            {
+                                                              "args": [
+                                                                "np",
+                                                                "nb"
+                                                              ],
+                                                              "functor": ":"
+                                                            },
+                                                            {
+                                                              "args": [
+                                                                "s",
+                                                                "dcl"
+                                                              ],
+                                                              "functor": ":"
+                                                            }
+                                                          ],
+                                                          "functor": "~>"
+                                                        },
+                                                        {
+                                                          "args": [
+                                                            "s",
+                                                            "dcl"
+                                                          ],
+                                                          "functor": ":"
+                                                        }
+                                                      ],
+                                                      "functor": "~>"
+                                                    }
+                                                  ],
+                                                  "functor": "~>"
+                                                }
+                                              ],
+                                              "functor": ","
+                                            },
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "animal",
+                                                    "animal",
+                                                    "NN",
+                                                    "O",
+                                                    "O"
+                                                  ],
+                                                  "functor": "tlp"
+                                                },
+                                                {
+                                                  "args": [
+                                                    "n",
+                                                    "B"
+                                                  ],
+                                                  "functor": ":"
+                                                }
+                                              ],
+                                              "functor": ","
+                                            }
+                                          ],
+                                          "functor": "@"
+                                        },
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "np",
+                                                    "nb"
+                                                  ],
+                                                  "functor": ":"
+                                                },
+                                                {
+                                                  "args": [
+                                                    "s",
+                                                    "dcl"
+                                                  ],
+                                                  "functor": ":"
+                                                }
+                                              ],
+                                              "functor": "~>"
+                                            },
+                                            {
+                                              "args": [
+                                                "s",
+                                                "dcl"
+                                              ],
+                                              "functor": ":"
+                                            }
+                                          ],
+                                          "functor": "~>"
+                                        }
+                                      ],
+                                      "functor": ","
+                                    },
+                                    [
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "sleep",
+                                              "sleep",
+                                              "VBZ",
+                                              "O",
+                                              "O"
+                                            ],
+                                            "functor": "tlp"
+                                          },
+                                          {
+                                            "args": [
+                                              {
+                                                "args": [
+                                                  "np",
+                                                  "C"
+                                                ],
+                                                "functor": ":"
+                                              },
+                                              {
+                                                "args": [
+                                                  "s",
+                                                  "dcl"
+                                                ],
+                                                "functor": ":"
+                                              }
+                                            ],
+                                            "functor": "~>"
+                                          }
+                                        ],
+                                        "functor": ","
+                                      }
+                                    ],
+                                    "true"
+                                  ],
+                                  "functor": "nd"
+                                },
+                                4,
+                                {
+                                  "args": [
+                                    [
+                                      2,
+                                      1
+                                    ]
+                                  ],
+                                  "functor": "same_args_xx"
+                                },
+                                "_"
+                              ],
+                              "functor": "trnd"
+                            },
+                            "Model"
+                          ],
+                          "functor": "tree"
+                        }
+                      ]
+                    ],
+                    "functor": "tree"
+                  }
+                ]
+              ],
+              "functor": "tree"
+            }
+          ]
+        ],
+        "functor": "tree"
+      }
+    },
+    "entailment": {
+      "info": [
+        "al",
+        "closed",
+        "Ter",
+        3
+      ],
+      "proof": {
+        "args": [
+          {
+            "args": [
+              {
+                "args": [
+                  [],
+                  {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "args": [
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          "every",
+                                          "every",
+                                          "DT",
+                                          "O",
+                                          "O"
+                                        ],
+                                        "functor": "tlp"
+                                      },
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "n",
+                                              "A"
+                                            ],
+                                            "functor": ":"
+                                          },
+                                          {
+                                            "args": [
+                                              {
+                                                "args": [
+                                                  {
+                                                    "args": [
+                                                      "np",
+                                                      "nb"
+                                                    ],
+                                                    "functor": ":"
+                                                  },
+                                                  {
+                                                    "args": [
+                                                      "s",
+                                                      "dcl"
+                                                    ],
+                                                    "functor": ":"
+                                                  }
+                                                ],
+                                                "functor": "~>"
+                                              },
+                                              {
+                                                "args": [
+                                                  "s",
+                                                  "dcl"
+                                                ],
+                                                "functor": ":"
+                                              }
+                                            ],
+                                            "functor": "~>"
+                                          }
+                                        ],
+                                        "functor": "~>"
+                                      }
+                                    ],
+                                    "functor": ","
+                                  },
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          "animal",
+                                          "animal",
+                                          "NN",
+                                          "O",
+                                          "O"
+                                        ],
+                                        "functor": "tlp"
+                                      },
+                                      {
+                                        "args": [
+                                          "n",
+                                          "B"
+                                        ],
+                                        "functor": ":"
+                                      }
+                                    ],
+                                    "functor": ","
+                                  }
+                                ],
+                                "functor": "@"
+                              },
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          "np",
+                                          "nb"
+                                        ],
+                                        "functor": ":"
+                                      },
+                                      {
+                                        "args": [
+                                          "s",
+                                          "dcl"
+                                        ],
+                                        "functor": ":"
+                                      }
+                                    ],
+                                    "functor": "~>"
+                                  },
+                                  {
+                                    "args": [
+                                      "s",
+                                      "dcl"
+                                    ],
+                                    "functor": ":"
+                                  }
+                                ],
+                                "functor": "~>"
+                              }
+                            ],
+                            "functor": ","
+                          },
+                          {
+                            "args": [
+                              {
+                                "args": [
+                                  "sleep",
+                                  "sleep",
+                                  "VBZ",
+                                  "O",
+                                  "O"
+                                ],
+                                "functor": "tlp"
+                              },
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      "np",
+                                      "C"
+                                    ],
+                                    "functor": ":"
+                                  },
+                                  {
+                                    "args": [
+                                      "s",
+                                      "dcl"
+                                    ],
+                                    "functor": ":"
+                                  }
+                                ],
+                                "functor": "~>"
+                              }
+                            ],
+                            "functor": ","
+                          }
+                        ],
+                        "functor": "@"
+                      },
+                      {
+                        "args": [
+                          "s",
+                          "dcl"
+                        ],
+                        "functor": ":"
+                      }
+                    ],
+                    "functor": ","
+                  },
+                  [],
+                  "true"
+                ],
+                "functor": "nd"
+              },
+              1,
+              [],
+              "_"
+            ],
+            "functor": "trnd"
+          },
+          [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        [],
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                "every",
+                                                "every",
+                                                "DT",
+                                                "O",
+                                                "O"
+                                              ],
+                                              "functor": "tlp"
+                                            },
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "n",
+                                                    "A"
+                                                  ],
+                                                  "functor": ":"
+                                                },
+                                                {
+                                                  "args": [
+                                                    {
+                                                      "args": [
+                                                        {
+                                                          "args": [
+                                                            "np",
+                                                            "nb"
+                                                          ],
+                                                          "functor": ":"
+                                                        },
+                                                        {
+                                                          "args": [
+                                                            "s",
+                                                            "dcl"
+                                                          ],
+                                                          "functor": ":"
+                                                        }
+                                                      ],
+                                                      "functor": "~>"
+                                                    },
+                                                    {
+                                                      "args": [
+                                                        "s",
+                                                        "dcl"
+                                                      ],
+                                                      "functor": ":"
+                                                    }
+                                                  ],
+                                                  "functor": "~>"
+                                                }
+                                              ],
+                                              "functor": "~>"
+                                            }
+                                          ],
+                                          "functor": ","
+                                        },
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                "dog",
+                                                "dog",
+                                                "NN",
+                                                "O",
+                                                "O"
+                                              ],
+                                              "functor": "tlp"
+                                            },
+                                            {
+                                              "args": [
+                                                "n",
+                                                "B"
+                                              ],
+                                              "functor": ":"
+                                            }
+                                          ],
+                                          "functor": ","
+                                        }
+                                      ],
+                                      "functor": "@"
+                                    },
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                "np",
+                                                "nb"
+                                              ],
+                                              "functor": ":"
+                                            },
+                                            {
+                                              "args": [
+                                                "s",
+                                                "dcl"
+                                              ],
+                                              "functor": ":"
+                                            }
+                                          ],
+                                          "functor": "~>"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    }
+                                  ],
+                                  "functor": ","
+                                },
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        "sleep",
+                                        "sleep",
+                                        "VBZ",
+                                        "O",
+                                        "O"
+                                      ],
+                                      "functor": "tlp"
+                                    },
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            "np",
+                                            "C"
+                                          ],
+                                          "functor": ":"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    }
+                                  ],
+                                  "functor": ","
+                                }
+                              ],
+                              "functor": "@"
+                            },
+                            {
+                              "args": [
+                                "s",
+                                "dcl"
+                              ],
+                              "functor": ":"
+                            }
+                          ],
+                          "functor": ","
+                        },
+                        [],
+                        "false"
+                      ],
+                      "functor": "nd"
+                    },
+                    2,
+                    [],
+                    "_"
+                  ],
+                  "functor": "trnd"
+                },
+                [
+                  {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "args": [
+                              [],
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "every",
+                                              "every",
+                                              "DT",
+                                              "O",
+                                              "O"
+                                            ],
+                                            "functor": "tlp"
+                                          },
+                                          {
+                                            "args": [
+                                              {
+                                                "args": [
+                                                  "n",
+                                                  "A"
+                                                ],
+                                                "functor": ":"
+                                              },
+                                              {
+                                                "args": [
+                                                  {
+                                                    "args": [
+                                                      {
+                                                        "args": [
+                                                          "np",
+                                                          "nb"
+                                                        ],
+                                                        "functor": ":"
+                                                      },
+                                                      {
+                                                        "args": [
+                                                          "s",
+                                                          "dcl"
+                                                        ],
+                                                        "functor": ":"
+                                                      }
+                                                    ],
+                                                    "functor": "~>"
+                                                  },
+                                                  {
+                                                    "args": [
+                                                      "s",
+                                                      "dcl"
+                                                    ],
+                                                    "functor": ":"
+                                                  }
+                                                ],
+                                                "functor": "~>"
+                                              }
+                                            ],
+                                            "functor": "~>"
+                                          }
+                                        ],
+                                        "functor": ","
+                                      },
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "animal",
+                                              "animal",
+                                              "NN",
+                                              "O",
+                                              "O"
+                                            ],
+                                            "functor": "tlp"
+                                          },
+                                          {
+                                            "args": [
+                                              "n",
+                                              "B"
+                                            ],
+                                            "functor": ":"
+                                          }
+                                        ],
+                                        "functor": ","
+                                      }
+                                    ],
+                                    "functor": "@"
+                                  },
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "np",
+                                              "nb"
+                                            ],
+                                            "functor": ":"
+                                          },
+                                          {
+                                            "args": [
+                                              "s",
+                                              "dcl"
+                                            ],
+                                            "functor": ":"
+                                          }
+                                        ],
+                                        "functor": "~>"
+                                      },
+                                      {
+                                        "args": [
+                                          "s",
+                                          "dcl"
+                                        ],
+                                        "functor": ":"
+                                      }
+                                    ],
+                                    "functor": "~>"
+                                  }
+                                ],
+                                "functor": ","
+                              },
+                              [
+                                {
+                                  "args": [
+                                    {
+                                      "args": [
+                                        "sleep",
+                                        "sleep",
+                                        "VBZ",
+                                        "O",
+                                        "O"
+                                      ],
+                                      "functor": "tlp"
+                                    },
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            "np",
+                                            "C"
+                                          ],
+                                          "functor": ":"
+                                        },
+                                        {
+                                          "args": [
+                                            "s",
+                                            "dcl"
+                                          ],
+                                          "functor": ":"
+                                        }
+                                      ],
+                                      "functor": "~>"
+                                    }
+                                  ],
+                                  "functor": ","
+                                }
+                              ],
+                              "true"
+                            ],
+                            "functor": "nd"
+                          },
+                          3,
+                          {
+                            "args": [
+                              [
+                                1,
+                                2
+                              ]
+                            ],
+                            "functor": "same_args_tf"
+                          },
+                          "_"
+                        ],
+                        "functor": "trnd"
+                      },
+                      [
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                {
+                                  "args": [
+                                    [],
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "every",
+                                                    "every",
+                                                    "DT",
+                                                    "O",
+                                                    "O"
+                                                  ],
+                                                  "functor": "tlp"
+                                                },
+                                                {
+                                                  "args": [
+                                                    {
+                                                      "args": [
+                                                        "n",
+                                                        "A"
+                                                      ],
+                                                      "functor": ":"
+                                                    },
+                                                    {
+                                                      "args": [
+                                                        {
+                                                          "args": [
+                                                            {
+                                                              "args": [
+                                                                "np",
+                                                                "nb"
+                                                              ],
+                                                              "functor": ":"
+                                                            },
+                                                            {
+                                                              "args": [
+                                                                "s",
+                                                                "dcl"
+                                                              ],
+                                                              "functor": ":"
+                                                            }
+                                                          ],
+                                                          "functor": "~>"
+                                                        },
+                                                        {
+                                                          "args": [
+                                                            "s",
+                                                            "dcl"
+                                                          ],
+                                                          "functor": ":"
+                                                        }
+                                                      ],
+                                                      "functor": "~>"
+                                                    }
+                                                  ],
+                                                  "functor": "~>"
+                                                }
+                                              ],
+                                              "functor": ","
+                                            },
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "dog",
+                                                    "dog",
+                                                    "NN",
+                                                    "O",
+                                                    "O"
+                                                  ],
+                                                  "functor": "tlp"
+                                                },
+                                                {
+                                                  "args": [
+                                                    "n",
+                                                    "B"
+                                                  ],
+                                                  "functor": ":"
+                                                }
+                                              ],
+                                              "functor": ","
+                                            }
+                                          ],
+                                          "functor": "@"
+                                        },
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                {
+                                                  "args": [
+                                                    "np",
+                                                    "nb"
+                                                  ],
+                                                  "functor": ":"
+                                                },
+                                                {
+                                                  "args": [
+                                                    "s",
+                                                    "dcl"
+                                                  ],
+                                                  "functor": ":"
+                                                }
+                                              ],
+                                              "functor": "~>"
+                                            },
+                                            {
+                                              "args": [
+                                                "s",
+                                                "dcl"
+                                              ],
+                                              "functor": ":"
+                                            }
+                                          ],
+                                          "functor": "~>"
+                                        }
+                                      ],
+                                      "functor": ","
+                                    },
+                                    [
+                                      {
+                                        "args": [
+                                          {
+                                            "args": [
+                                              "sleep",
+                                              "sleep",
+                                              "VBZ",
+                                              "O",
+                                              "O"
+                                            ],
+                                            "functor": "tlp"
+                                          },
+                                          {
+                                            "args": [
+                                              {
+                                                "args": [
+                                                  "np",
+                                                  "C"
+                                                ],
+                                                "functor": ":"
+                                              },
+                                              {
+                                                "args": [
+                                                  "s",
+                                                  "dcl"
+                                                ],
+                                                "functor": ":"
+                                              }
+                                            ],
+                                            "functor": "~>"
+                                          }
+                                        ],
+                                        "functor": ","
+                                      }
+                                    ],
+                                    "false"
+                                  ],
+                                  "functor": "nd"
+                                },
+                                4,
+                                {
+                                  "args": [
+                                    [
+                                      1,
+                                      2
+                                    ]
+                                  ],
+                                  "functor": "same_args_tf"
+                                },
+                                "_"
+                              ],
+                              "functor": "trnd"
+                            },
+                            [
+                              {
+                                "args": [
+                                  {
+                                    "args": [
+                                      {
+                                        "args": [
+                                          [],
+                                          {
+                                            "args": [
+                                              {
+                                                "args": [
+                                                  "animal",
+                                                  "animal",
+                                                  "NN",
+                                                  "O",
+                                                  "O"
+                                                ],
+                                                "functor": "tlp"
+                                              },
+                                              {
+                                                "args": [
+                                                  "n",
+                                                  "B"
+                                                ],
+                                                "functor": ":"
+                                              }
+                                            ],
+                                            "functor": ","
+                                          },
+                                          [
+                                            {
+                                              "args": [
+                                                "c1",
+                                                "e"
+                                              ],
+                                              "functor": ","
+                                            }
+                                          ],
+                                          "false"
+                                        ],
+                                        "functor": "nd"
+                                      },
+                                      5,
+                                      {
+                                        "args": [
+                                          [
+                                            3,
+                                            4
+                                          ],
+                                          [
+                                            {
+                                              "args": [
+                                                "c1",
+                                                "e"
+                                              ],
+                                              "functor": ","
+                                            }
+                                          ]
+                                        ],
+                                        "functor": "dw_mon_fun"
+                                      },
+                                      "_"
+                                    ],
+                                    "functor": "trnd"
+                                  },
+                                  [
+                                    {
+                                      "args": [
+                                        {
+                                          "args": [
+                                            {
+                                              "args": [
+                                                [],
+                                                {
+                                                  "args": [
+                                                    {
+                                                      "args": [
+                                                        "dog",
+                                                        "dog",
+                                                        "NN",
+                                                        "O",
+                                                        "O"
+                                                      ],
+                                                      "functor": "tlp"
+                                                    },
+                                                    {
+                                                      "args": [
+                                                        "n",
+                                                        "B"
+                                                      ],
+                                                      "functor": ":"
+                                                    }
+                                                  ],
+                                                  "functor": ","
+                                                },
+                                                [
+                                                  {
+                                                    "args": [
+                                                      "c1",
+                                                      "e"
+                                                    ],
+                                                    "functor": ","
+                                                  }
+                                                ],
+                                                "true"
+                                              ],
+                                              "functor": "nd"
+                                            },
+                                            6,
+                                            {
+                                              "args": [
+                                                [
+                                                  3,
+                                                  4
+                                                ],
+                                                [
+                                                  {
+                                                    "args": [
+                                                      "c1",
+                                                      "e"
+                                                    ],
+                                                    "functor": ","
+                                                  }
+                                                ]
+                                              ],
+                                              "functor": "dw_mon_fun"
+                                            },
+                                            "_"
+                                          ],
+                                          "functor": "trnd"
+                                        },
+                                        {
+                                          "args": [
+                                            [
+                                              [
+                                                5,
+                                                6
+                                              ],
+                                              "cl_subsumption"
+                                            ]
+                                          ],
+                                          "functor": "closer"
+                                        }
+                                      ],
+                                      "functor": "tree"
+                                    }
+                                  ]
+                                ],
+                                "functor": "tree"
+                              }
+                            ]
+                          ],
+                          "functor": "tree"
+                        }
+                      ]
+                    ],
+                    "functor": "tree"
+                  }
+                ]
+              ],
+              "functor": "tree"
+            }
+          ]
+        ],
+        "functor": "tree"
+      }
+    }
+  }
+}
