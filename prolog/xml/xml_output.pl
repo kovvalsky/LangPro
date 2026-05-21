@@ -530,7 +530,9 @@ ccgTree_to_xml(S, Tree) :-
 		cat_to_xml(Cat, AtCat),
 		atomic_list_concat(['<cat>',AtCat,'</cat>\n<rule>cnj</rule>\n</binary>\n'], Atom),
 		write(S, Atom)
-	; report(["Error: unexpected clause while converting CCGtree into XML"]).
+	; Tree =.. [Func | _] -> % rest
+		report_error("Unexpected term with func ~w in ccgTree_to_xml/2", [Func])
+	; report_error("Unexpected term in ccgTree_to_xml/2: ~w", [Tree]).
 
 
 
