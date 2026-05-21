@@ -38,11 +38,15 @@ def xml_to_prolog(input_path: str, output: TextIO, verbosity: int = 0) -> None:
         # Find root span
         root_span_id = att(ccg_el, 'root')
         root_span = spans[root_span_id]
-
-        term = build_term(root_span, spans, 2, verbosity=verbosity)
-        sid = prob_id * 2 - (1 if sent_id  == "s0" else 0)
-        output.write(f"% problem id = {prob_id}{'p' if sent_id  == 's0' else 'h'}\n")
-        output.write(f"ccg({sid},\n {term}).\n\n")
+        try:
+            term = build_term(root_span, spans, 2, verbosity=verbosity)
+            sid = prob_id * 2 - (1 if sent_id  == "s0" else 0)
+            output.write(f"% problem id = {prob_id}{'p' if sent_id  == 's0' else 'h'}\n")
+            output.write(f"ccg({sid},\n {term}).\n\n")
+        except Exception as e:
+            if verbosity >= 1:
+                print(f"Error in build_term for {sent_id} of prob {prob_id} in '{input_path}':\n{e}",
+                      file=sys.stderr)
 
 
 def build_term(span: ET.Element, spans: dict,
@@ -64,6 +68,7 @@ def build_term(span: ET.Element, spans: dict,
                   }
 
     rule = att(span, 'rule')
+    rule = "lx" if rule == "lex" else rule  # treat lex as lx for better prolog output
     if rule not in rule_arity:
         raise ValueError(f"Unknown rule '{rule}' in span with id {att(span, 'id')}")
     cat = normalize_cat(att(span, 'category'))
@@ -278,11 +283,7 @@ def main(input, ccg_out, prob_out, v=0):
         for jigg_path, _ in paired_jigg_conllu_files:
             if v >= 2:
                 print(f"Processing: {jigg_path}", file=sys.stderr)
-            try:
-                xml_to_prolog(jigg_path, output, verbosity=v)
-            except Exception as e:
-                if v >= 1:
-                    print(f"Error processing '{jigg_path}': {e}", file=sys.stderr)
+            xml_to_prolog(jigg_path, output, verbosity=v)
 
     if ccg_out:
         with open(ccg_out, 'w') as f:
