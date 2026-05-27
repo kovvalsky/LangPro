@@ -539,9 +539,12 @@ def TT2Tree(t: TT) -> Tree:
         if isinstance(t.term, AppTT):
             return Tree(f"@[{pretty_type}]",
                         [TT2Tree(t.term.fun), TT2Tree(t.term.arg)])
-        elif isinstance(t.term, AbsTT):
+        if isinstance(t.term, AbsTT):
+            # prepend λ to lambda variables for better visualization
+            lvar_str = f"λ{t.term.var.term}"
+            lvar_type = remove_outer_parens(str(t.term.var.type))
             return Tree(f"λ[{pretty_type}]",
-                        [TT2Tree(t.term.var), TT2Tree(t.term.body)])
+                        [Tree(lvar_type, [lvar_str]), TT2Tree(t.term.body)])
     raise ValueError(f"Unknown term type in TT2Tree: {type(t)} with value {t}")
 
 def compact_tt(t: TT|AppTT|AbsTT|Var) -> str:

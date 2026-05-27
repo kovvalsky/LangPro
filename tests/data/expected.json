@@ -6,10 +6,25 @@
                     "John runs",
                 "repr_ccg_tree":
                     "Tree('ba[s:dcl]', [Tree('lx[np]', [Tree('n', [TLP('John','John','NNP','O','I-PER')])]), Tree('s:dcl\\\\np', [TLP('runs','run','VBZ','O','O')])])",
+
+                "compact_ccg_term":
+                    "run @ john",
+                "str_ccg_term":
+                    "(([runs,run,VBZ,O,O] : np-s:dcl) @ (([John,john,NNP,O,I-PER] : n) : np) : s:dcl)",
                 "repr_ccg_term":
                     "TT(AppTT(TT(TLP('runs','run','VBZ','O','O'), CompCaTy(AtomCaTy(np:_)-AtomCaTy(s:dcl))), TT(TT(TLP('John','john','NNP','O','I-PER'), AtomCaTy(n:_)), AtomCaTy(np:_))), AtomCaTy(s:dcl))",
+
+                "compact_corr_term":
+                    "run @ john",
+                "str_corr_term":
+                    "(([runs,run,VBZ,O,O] : np-s:dcl) @ ([John,john,NNP,O,I-PER] : np) : s:dcl)",
                 "repr_corr_term":
                     "TT(AppTT(TT(TLP('runs','run','VBZ','O','O'), CompCaTy(AtomCaTy(np:_)-AtomCaTy(s:dcl))), TT(TLP('John','john','NNP','O','I-PER'), AtomCaTy(np:_))), AtomCaTy(s:dcl))",
+
+                "compact_llf":
+                    "run @ john",
+                "str_llf":
+                    "(([run,run,VBZ,O,O] : np-s:dcl) @ ([john,john,NNP,O,I-PER] : e) : s:dcl)",
                 "repr_llf":
                     "TT(AppTT(TT(TLP('run','run','VBZ','O','O'), CompCaTy(AtomCaTy(np:_)-AtomCaTy(s:dcl))), TT(TLP('john','john','NNP','O','I-PER'), AtomCaTy(e))), AtomCaTy(s:dcl))"
             }
@@ -19,10 +34,25 @@
                 "John moves",
             "repr_ccg_tree":
                 "Tree('ba[s:dcl]', [Tree('lx[np]', [Tree('n', [TLP('John','John','NNP','O','I-PER')])]), Tree('s:dcl\\\\np', [TLP('moves','move','NNS','O','O')])])",
+
+            "compact_ccg_term":
+                "move @ john",
+            "str_ccg_term":
+                "(([moves,move,NNS,O,O] : np-s:dcl) @ (([John,john,NNP,O,I-PER] : n) : np) : s:dcl)",
             "repr_ccg_term":
                 "TT(AppTT(TT(TLP('moves','move','NNS','O','O'), CompCaTy(AtomCaTy(np:_)-AtomCaTy(s:dcl))), TT(TT(TLP('John','john','NNP','O','I-PER'), AtomCaTy(n:_)), AtomCaTy(np:_))), AtomCaTy(s:dcl))",
+
+            "compact_corr_term":
+                "move @ john",
+            "str_corr_term":
+                "(([move,move,NN,O,O] : np-s:dcl) @ ([John,john,NNP,O,I-PER] : np) : s:dcl)",
             "repr_corr_term":
                 "TT(AppTT(TT(TLP('move','move','NN','O','O'), CompCaTy(AtomCaTy(np:_)-AtomCaTy(s:dcl))), TT(TLP('John','john','NNP','O','I-PER'), AtomCaTy(np:_))), AtomCaTy(s:dcl))",
+
+            "compact_llf":
+                "move @ john",
+            "str_llf":
+                "(([move,move,NN,O,O] : np-s:dcl) @ ([john,john,NNP,O,I-PER] : e) : s:dcl)",
             "repr_llf":
                 "TT(AppTT(TT(TLP('move','move','NN','O','O'), CompCaTy(AtomCaTy(np:_)-AtomCaTy(s:dcl))), TT(TLP('john','john','NNP','O','I-PER'), AtomCaTy(e))), AtomCaTy(s:dcl))"
         },

@@ -52,6 +52,8 @@ SENT_FOR_TESTS = [
       (2, "h"),
 ]
 
+TERM_TYPES = ["ccg_term", "corr_term", "llf"]
+
 # read the content of nli_prob{0,1,2}.json files, which serves as input to tests
 NLI_PROB_LP_JSON = {}
 for i in range(3):
@@ -100,8 +102,6 @@ def get_by_path(data: dict, path: list):
 
 ####################################################
 ###################### TESTS #######################
-
-
 # 7 tests
 @pytest.mark.parametrize("prob_id, ph_k", SENT_FOR_TESTS)
 def test_parse_ccg_tree(prob_id, ph_k):
@@ -116,22 +116,49 @@ def test_parse_ccg_tree(prob_id, ph_k):
     assert repr(ccg_tree) == expected_repr
 
 
+###################### terms #######################
+@pytest.fixture(scope="module",
+    params=[
+        (prob_id, ph_k, type_of_term)
+        for type_of_term in TERM_TYPES
+        for prob_id, ph_k in SENT_FOR_TESTS
+    ],
+    ids=lambda p: f"{p[0]}-{p[1]}-{p[2]}"
+)
+def parsed_term(request):
+    """ a fixture that parses the term for each sentence and term type
+    """
+    prob_id, ph_k, term_type = request.param
+    ph, k = parse_ph_k(ph_k)
+    json_sen, expected_sen = get_json_expected_and_sen(prob_id, ph, k)
+    term = parse_term(json_sen["tree"][term_type])
+    return term, expected_sen, term_type
+
+
 # 21 tests
-@pytest.mark.parametrize("prob_id, ph_k, term_type",
-    [ (prob_id, ph_k, type_of_term)
-      for type_of_term in ["ccg_term", "corr_term", "llf"]
-        for prob_id, ph_k in SENT_FOR_TESTS ]
-    )
-def test_parse_term(prob_id, ph_k, term_type):
+def test_repr_of_parse_term(parsed_term):
     """ tests parse_term
         Input: ccg_term/corr_term/llf are in prolog json format
         Expected: repr string of the expected output TT term object.
     """
-    ph, k = parse_ph_k(ph_k)
-    json_sen, expected_sen = get_json_expected_and_sen(prob_id, ph, k)
-    term = parse_term(json_sen["tree"][term_type])
-    expected_repr = expected_sen[f"repr_{term_type}"]
-    assert repr(term) == expected_repr
+    term, expected_sen, term_type = parsed_term
+    assert repr(term) == expected_sen[f"repr_{term_type}"]
+
+def test_compact_of_parse_term(parsed_term):
+    """ tests the compact method of TT objects
+    """
+    term, expected_sen, term_type = parsed_term
+    if f"compact_{term_type}" not in expected_sen:
+        pytest.skip("no compact fixture for this term")
+    assert term.compact() == expected_sen[f"compact_{term_type}"]
+
+def test_str_of_parse_term(parsed_term):
+    """ tests the __str__ method of TT objects
+    """
+    term, expected_sen, term_type = parsed_term
+    if f"str_{term_type}" not in expected_sen:
+        pytest.skip("no str fixture for this term")
+    assert str(term) == expected_sen[f"str_{term_type}"]
 
 
 # 10 tests
