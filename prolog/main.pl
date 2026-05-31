@@ -37,14 +37,25 @@ debMode( ral(400) ).
 %debMode( effCr(['nonProd', 'nonBr', 'equi', 'nonCons']) ). % old one, not effcient
 debMode( effCr(['equi', 'nonBr', 'nonProd', 'nonCons']) ). % one of four effcient ones
 
-
+% set the parameters that are generally best
 reset_debMode :-
 	retractall( debMode(_) ),
 	assertz( debMode('nil') ),
+	% by default set the efficiency critarion from Abzianidze (2016) p. 161
 	assertz( debMode(effCr(['equi', 'nonBr', 'nonProd', 'nonCons'])) ),
 	set_rule_eff_order,
-	assertz( debMode(parts(['trial'])) ),
-	assertz( debMode(ral(400)) ).
+	assertz( debMode(parts(['trial'])) ), % TODO: opt for all data by default
+	assertz( debMode(ral(400)) ),
+	% additional wordnet relations: antonymy, similarity, derivation
+	assertz( debMode(wn_ant) ),
+	assertz( debMode(wn_sim) ),
+	assertz( debMode(wn_der) ),
+	% check the sentences on consistency, i.e., if the are contradictory in themselves
+	assertz( debMode(constchk) ),
+	% treat adjectives as intersective by default
+	assertz( debMode(allInt) ),
+	% for term alignment, align all non-downward terms, e.g., "some woman"
+	assertz( debMode(aall) ).
 
 set_debMode([H | Rest]) :-
 	( H = ral(_) ->
@@ -74,7 +85,7 @@ set_debMode([H | Rest]) :-
 	; H = parts(_) ->
 		retractall( debMode(parts(_)) ),
 		assertz( debMode(H) )
-	; assertz( debMode(H) )
+	; assertz( debMode(H) ) % assert anything to help introducing new debModes
 	),
 	set_debMode(Rest).
 
