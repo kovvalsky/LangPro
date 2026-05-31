@@ -157,21 +157,33 @@ solve_entailment( Align, (Id, Answer), (Id, Ans, Provers_Ans, Closed, Status) ) 
 parallel_solve_entailment(Align, ProblemIds_Answers, Results) :-
 	parallel_solve_entailment(Align, [], ProblemIds_Answers, Results).
 
-parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
-	debMode(parallel(Cores)),
-	partition_list_into_N_even_lists(ProblemIds_Answers, Cores, JobList),
-	length(JobList, JobNumber),
-	% report Job partition
-	report(['Number of jobs: ', JobNumber]),
-	maplist(length, JobList, ListJobLength),
-	atomic_list_concat(ListJobLength, ', ', JobMessage),
-	report(['Length of jobs: ', JobMessage]),
-	% Run concurrent solver for all jobs at the same time and collect all the results in the end
-	concurrent_maplist(solve_accu_job(Align, KB), JobList, ResultList),
-	partition_list_into_N_even_lists(Results, _, ResultList).
 
-solve_accu_job(Align, KB, ProblemIds_Answers, Results) :-
-	maplist(solve_entailment(Align, KB), ProblemIds_Answers, Results).
+parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
+	% temporarily set cpu_count to the number of cores to run concurrent_maplist
+	% and then set it back to the real number of cores
+	debMode(parallel(Cores)),
+	current_prolog_flag(cpu_count, RealCoreNum),
+	set_prolog_flag(cpu_count, Cores),
+	concurrent_maplist(
+		solve_entailment(Align, KB), ProblemIds_Answers, Results
+	),
+	set_prolog_flag(cpu_count, RealCoreNum), !.
+
+% parallel_solve_entailment(Align, KB, ProblemIds_Answers, Results) :-
+% 	debMode(parallel(Cores)),
+% 	partition_list_into_N_even_lists(ProblemIds_Answers, Cores, JobList),
+% 	length(JobList, JobNumber),
+% 	% report Job partition
+% 	report(['Number of jobs: ', JobNumber]),
+% 	maplist(length, JobList, ListJobLength),
+% 	atomic_list_concat(ListJobLength, ', ', JobMessage),
+% 	report(['Length of jobs: ', JobMessage]),
+% 	% Run concurrent solver for all jobs at the same time and collect all the results in the end
+% 	concurrent_maplist(solve_accu_job(Align, KB), JobList, ResultList),
+% 	partition_list_into_N_even_lists(Results, _, ResultList).
+
+% solve_accu_job(Align, KB, ProblemIds_Answers, Results) :-
+% 	maplist(solve_entailment(Align, KB), ProblemIds_Answers, Results).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Returns List of TTterms corresponding to
@@ -552,15 +564,15 @@ sen_id_to_base_ttterm(SID, TTterm) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Add new induced relations to KB while filtering with relevant lexicon 
+% Add new induced relations to KB while filtering with relevant lexicon
 add_ind_kb(LexPos, KB0, KB) :-
-	maplist([(L,_), L]>>true, LexPos, Lex0), 
+	maplist([(L,_), L]>>true, LexPos, Lex0),
 	list_to_ord_set(Lex0, Lex),
-    findall(Rel, ( ind_rel(Rel), 
+    findall(Rel, ( ind_rel(Rel),
 				 rel_to_lex(Rel, Rel_Lex),
 				 ord_subset(Rel_Lex, Lex)
 			), New_Rels),
-	ord_union(KB0, New_Rels, KB). 
+	ord_union(KB0, New_Rels, KB).
 
 rel_to_lex(Rel, Lexicon) :-
 	Rel =.. [_, Phrase1, Phrase2],
