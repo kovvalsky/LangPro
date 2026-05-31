@@ -288,10 +288,13 @@ isa(A, B, _KB-XP) :-
 isa(A, B, _KB_XP) :-  % variant, not matching
 	A =@= B, !.
 
-isa(A, B, _KB_XP) :-
-	( ( debMode('no_kb') -> false; is_(A, B) )
-	; ( debMode('no_qk') -> false; isq_(A, B) )
-	), !.
+isa(A, B, _KB-XP) :-
+	( \+debMode('no_kb'),
+	  is_(A, B)
+	; \+debMode('no_qk'),
+	  isq_(A, B)
+	),
+	ul_append(XP, [isa(A, B)]), !.
 
 % KB without assertions
 isa(W1, W2, KB-XP) :- % CHECK
@@ -302,6 +305,7 @@ isa(W1, W2, KB-XP) :- % CHECK
 		ul_append(XP, [sim(W1, W2)])
 	), !.
 
+% TOCHECK
 isa(W1, W2, KB_-XP) :-
 	is_uList(KB_),
 	memberchk(isa_wn(W1, W2), KB_),
