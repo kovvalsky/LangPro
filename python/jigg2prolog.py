@@ -247,6 +247,16 @@ def parse_args():
         help='Write NLI problems to prolog FILE'
     )
     parser.add_argument(
+        '-j', '--jigg-regex', default=r'jigg\.xml$',
+        metavar='FILE',
+        help='Regex to match jigg XML files (default: "jigg\\.xml$")'
+    )
+    parser.add_argument(
+        '-c', '--conllu-regex', default=r'conllu$',
+        metavar='FILE',
+        help='Regex to match CoNLL-U files (default: "conllu$")'
+    )
+    parser.add_argument(
         '-v', '--verbosity',
         type=int,
         choices=[0, 1, 2, 3],
@@ -257,14 +267,15 @@ def parse_args():
     return parser.parse_args()
 
 
-def main(input, ccg_out, prob_out, v=0):
+def main(input, ccg_out, prob_out,
+         jigg_regex='jigg\.xml$', conllu_regex='conllu$', v=0):
     """ Main function to convert CCG XML files to Prolog format" ccg.pl and sen.pl.
         It collects paired jigg XML and CoNLL-U files for each problem,
         converts them to cgg and nli problems and writes them in
         prolog files ccg_out and prob_out, respectively.
     """
     # collect paired jigg XML and CoNLL-U files for each problem
-    paired_jigg_conllu_files = collect_files(input, fn_regex=["jigg.xml", "conllu"], v=v)
+    paired_jigg_conllu_files = collect_files(input, fn_regex=[jigg_regex, conllu_regex], v=v)
 
     if not paired_jigg_conllu_files:
         print(f"No matching files found in '{input}'.", file=sys.stderr)
@@ -295,4 +306,6 @@ def main(input, ccg_out, prob_out, v=0):
 
 if __name__ == '__main__':
     args = parse_args()
-    main(args.input, args.ccg_out, args.prob_out, v=args.verbosity)
+    main(args.input, args.ccg_out, args.prob_out,
+         jigg_regex=args.jigg_regex, conllu_regex=args.conllu_regex,
+         v=args.verbosity)
