@@ -4,7 +4,7 @@
     ]).
 
 :- ensure_loaded([
-	% 'task/online_demo',
+	'task/online_demo',
 	'printer/extract',
 	'task/sent_sim',
 	'task/sentence_semantics',
