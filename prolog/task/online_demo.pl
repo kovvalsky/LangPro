@@ -32,6 +32,7 @@ online_demo(ID, IKB, Format) :-
 	%report(['Entering online_demo/1\n']),
 	%entail(1, _Answer, Provers_Answer, Closed, FinalStatus),
 	%print_problem(ID),
+	( debMode('proof_tree') -> true; assertz(debMode('proof_tree')) ), % for building trees
 	problem_to_ttTerms('align', ID, Prems, Hypos, Align_Prems, Align_Hypos, OKB),
 	append(IKB, OKB, KB), % merge initial and obtained KBs
 	set_rule_eff_order,
@@ -48,12 +49,12 @@ online_demo(ID, IKB, Format) :-
 		)
 	; YES = 'yes_NA', NO = 'no_NA', Align = 'no_align'
 	),
-	write_problem_proof(Format, YES, NO, Align, Tree_yes, Tree_no, KB, ID).
+	write_problem_parse_and_proof(Format, YES, NO, Align, Tree_yes, Tree_no, KB, ID).
 
 % summarizes the results with aligned and non-aligned terms
 summarize_align_closed_status(Al_Cl, Al_St, Al_Tr, Cl, St, Tr, Ans, Tree) :-
 	( Al_Cl == 'closed' ->
-		Al_St = (Al_St_Ter, Al_St_Num), 
+		Al_St = (Al_St_Ter, Al_St_Num),
 		Ans = ['al', Al_Cl, Al_St_Ter, Al_St_Num],
 		Tree = Al_Tr
 	; ( St = (Ter1, N1) -> atomic_list_concat([Ter1,N1], St0); St0 = St ),
@@ -61,31 +62,52 @@ summarize_align_closed_status(Al_Cl, Al_St, Al_Tr, Cl, St, Tr, Ans, Tree) :-
 		Tree = Tr
 	).
 
-write_problem_proof('xml', YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
-	current_output(S),
-	format(S, 'KB: ~w~n', [KB]),
-	write_parsed_problem_as_xml(S, Align, ID),
-	( YES \== 'yes_NA' ->
-		write_xml_proof_tree(S, Tree_yes, ID),
-		write_xml_proof_tree(S, Tree_no, ID),
-		atomic_list_concat(['yes' | YES], '_', Yes_File),
-		atomic_list_concat([ 'no' | NO],  '_', No_File),
-		format(S, '~w, ~w~n', [Yes_File, No_File])
-	; write(S, '\n<tableau>no tableau</tableau>\n<tableau>no tableau</tableau>\n'),
-		format(S, '~w, ~w~n', [YES, NO])
-	),
-	close(S).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Writes the problem related parses and proofs in the specified format (xml or json)
 
-% {prob_id:ID, prob:ListProbDict, aligned_llfs:Align, 
+% write parses and proofs in xml format to the current output
+write_problem_parse_and_proof('xml', YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
+	current_output(S),
+	write_problem_parse_and_proof_to_stream(S, YES, NO, Align, Tree_yes, Tree_no, KB, ID).
+
+% write parses and proofs in xml format to the xml file, which is created or overwritten
+write_problem_parse_and_proof(XMLFile, YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
+    atom(XMLFile),
+	file_name_extension(_, 'xml', XMLFile), !,
+	% if XMLFile is a pattern with a problem ID
+    ( sub_atom(XMLFile, _, _, _, '~w')
+    ->  format(atom(ExpandedFile), XMLFile, [ID])
+    ;   ExpandedFile = XMLFile
+    ),
+	atomic_list_concat(['xml/', ExpandedFile], FullFileName),
+    setup_call_cleanup(
+        open(FullFileName, write, S, [encoding(utf8)]),
+		(
+			% write the XML header and XSL & DTD references
+			write(S, '<?xml version="1.0" encoding="UTF-8"?>\n'),
+			write(S, '<?xml-stylesheet type="text/xsl" href="xsl_dtd/combined.xsl"?>\n'),
+			write_problem_parse_and_proof_to_stream(S, YES, NO, Align, Tree_yes, Tree_no, KB, ID)
+		),
+        close(S)
+    ),
+	( debMode('html') ->
+		file_name_extension(BaseName, 'xml', ExpandedFile),
+		atomic_list_concat(['xsltproc --maxparserdepth 1000000 --maxdepth 1000000 ', FullFileName, ' -o ', 'xml/', BaseName, '.html'], ShellCommand),
+		%shell('xsltproc xml/tableau.xml -o xml/tableau.html').
+		shell(ShellCommand)
+	;  true
+	).
+
+% {prob_id:ID, prob:ListProbDict, aligned_llfs:Align,
 %  proofs:{entailment:{info:Yes, proof:Tree_yes}, contradiction:{info:No, proof:Tree_no}}}
-write_problem_proof(json(Width,Step,Tab), YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
+write_problem_parse_and_proof(json(Width,Step,Tab), YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
 	current_output(S),
 	parsed_problem_to_dict(Align, ID, ProbDict),
 	term_to_json(KB, KB_J),
 	ProbDict1 = ProbDict.put([kb=KB_J]),
 	( YES \== 'yes_NA' ->
-		maplist(term_to_json, 	[YES, NO, Tree_yes, Tree_no], 
-								[YES_J, NO_J, Tree_yes_J, Tree_no_J]), 
+		maplist(term_to_json, 	[YES, NO, Tree_yes, Tree_no],
+								[YES_J, NO_J, Tree_yes_J, Tree_no_J]),
 		ProbProofDict = ProbDict1.put([proofs=_{
 			entailment:j{info:YES_J, proof:Tree_yes_J},
 			contradiction:j{info:NO_J, proof:Tree_no_J}
@@ -94,6 +116,33 @@ write_problem_proof(json(Width,Step,Tab), YES, NO, Align, Tree_yes, Tree_no, KB,
 	),
 	json_write(S, ProbProofDict, [width(Width), step(Step), tab(Tab)]),
 	nl(S), close(S).
+
+
+% auxiliary predicate for writing the proof in xml format to a stream
+write_problem_parse_and_proof_to_stream(S, YES, NO, Align, Tree_yes, Tree_no, KB, ID) :-
+	write(S, '\n<combined>\n'),
+	% <parsed_problem id="ID">...</parsed_problem>
+	write_parsed_problem_as_xml(S, Align, ID),
+	% write the KB
+	format(S, '<kb>~w</kb>~n', [KB]),
+	% write tableau trees if there are any, otherwise write no tableau
+	write(S, '\n<proof>\n'),
+	atomic_list_concat(['yes' | YES], '_', Yes_File),
+	format(S, '\n<tableau_label>~w</tableau_label>~n', [Yes_File]),
+	( YES \== 'yes_NA'
+	->  % entailment tableau <tableau>...</tableau>
+		write_xml_proof_tree(S, Tree_yes, ID)
+	; 	write(S, '\n<tableau>no tableau</tableau>\n')
+	),
+	atomic_list_concat(['no' | NO], '_', No_File),
+	format(S, '\n<tableau_label>~w</tableau_label>~n', [No_File]),
+	( NO \== 'no_NA'
+	->  % contradiction tableau <tableau>...</tableau>
+		write_xml_proof_tree(S, Tree_no, ID)
+	; 	write(S, '\n<tableau>no tableau</tableau>\n')
+	),
+	write(S, '\n</proof>\n</combined>').
+
 
 
 print_problem(ID) :-
