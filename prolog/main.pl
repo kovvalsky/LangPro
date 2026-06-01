@@ -19,9 +19,8 @@
 	]).
 
 
-
 :- multifile ccg/2, id/2, ind_rel/1.
-:- discontiguous ccg/2, id/2.
+% :- discontiguous ccg/2, id/2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initially debMode/1 was for bebugging
@@ -31,11 +30,6 @@
 :- discontiguous debMode/1.
 
 %:- use_module(library(theme/dark)).
-
-debMode( 'nil' ).
-debMode( ral(400) ).
-%debMode( effCr(['nonProd', 'nonBr', 'equi', 'nonCons']) ). % old one, not effcient
-debMode( effCr(['equi', 'nonBr', 'nonProd', 'nonCons']) ). % one of four effcient ones
 
 % set the parameters that are generally best
 reset_debMode :-
@@ -109,6 +103,10 @@ add_to_stream(DataType, Data) :-
 			add_branches_to_stream(S, Data, Ext)
 		)
 	), _).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% set the default parameters at startup
+:- reset_debMode.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 				List of Parameters
