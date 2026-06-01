@@ -16,7 +16,7 @@
 	]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../lambda/type_hierarchy', [
-	cat_eq/2, final_value_of_type/2, sub_type/2, set_final_value_of_type/3
+	cat_eq/2, final_value_of_type/2, sub_type/2, is_nps_s/1, set_final_value_of_type/3
 	]).
 :- use_module('../utils/user_preds',
 	[choose/3, const_ttTerm/1, no_isa_rel_const_ttTerms/3, tt_mon/2, tt_mon_up/1, neg/2]
@@ -45,7 +45,7 @@
 rule_priority([
 	%cl_subcat, cl_ant,
 	pull_arg, beta_red, type_drop,
-	tr_conj_and, fl_conj_and, tr_conj_who, fl_conj_who, fl_disj_or, tr_disj_or, 
+	tr_conj_and, fl_conj_and, tr_conj_who, fl_conj_who, fl_disj_or, tr_disj_or,
 	neg_not, mod_neg_not, fl_if, tr_if,
 	there_trans, det_dist,
 	empty_mod, ho_verb,
@@ -242,9 +242,9 @@ r(push_mod,  impl:non,  ([], [], _), _Lexicon, _, % why not equivalent?
 			%TF = true, % for mode(no_mod_set)
 			cat_eq(Ty1, Ty),  %cat_eq(Ty2, Ty),
 			%TTexp \= tlp(_,'not',_,_,_),
-			\+( ( TTexp = (tlp(_,Con,_,_,_),_) @ _,  
+			\+( ( TTexp = (tlp(_,Con,_,_,_),_) @ _,
 			      member(Con, [if, and, or, who]) )
-			  ; ( add_heads((TTexp,Ty1~>Ty1), (_,_,H_TT)), 
+			  ; ( add_heads((TTexp,Ty1~>Ty1), (_,_,H_TT)),
 			      H_TT = tlp(_,'not',_,_,_) ) % head TTs have cat instead of tok
 			), % excludes 'not' for cases
 			( ( adjuncted_ttTerm(TT) % is this necessary constraint?
@@ -455,9 +455,9 @@ r(mods_be,  impl:non,  _, [['be']], _KB, % this rule is not used! I guess mods_n
 
 r(tr_conj_and,	equi:non,  ([], [], _), [['and']], _,
 		br([nd( M, ( ( (tlp(_,'and',_,_,_), Ty1~>Ty2~>Ty) @ TT1, _ ) @ TT2, _ ),
-				Args, true )], 
+				Args, true )],
 				%!!! adding M should be carefully checked with dist rules
-				% M is relevant when adverb is s->s and needs to be applied to vp conjuncts SICK_FR-5003 
+				% M is relevant when adverb is s->s and needs to be applied to vp conjuncts SICK_FR-5003
 		  Sig)
 		===>
 		br([nd(	M, TT1, Args, true ),
@@ -687,7 +687,7 @@ r(same_args_tf,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % non-symetric
 :-
 			match_ttTerms(A, B, KB_xp),
 			% extra constraint limits to structurally similar nodes
-			match_list_ttTerms(M1, M2, KB_xp), 
+			match_list_ttTerms(M1, M2, KB_xp),
 			Y = A,
 			A = (_, Type1),
 			B = (_, Type2),
@@ -707,7 +707,7 @@ r(same_args_xx,  impl:non,  ([], [], _), _Lexicon, KB_xp,  % symetric
 			G \= H,
 			match_ttTerms(A, B, KB_xp),
 			% extra constraint limits to structurally similar nodes
-			match_list_ttTerms(M1, M2, KB_xp), 
+			match_list_ttTerms(M1, M2, KB_xp),
 			Y = A,
 			A = (_, Type1),
 			B = (_, Type2),
@@ -1355,6 +1355,7 @@ r(v_pr_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			set_type_for_tt(VP, TyVP, VP1),
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
+% PR @ Verb [NP..] => (PR @ NP) @ Verb [..]
 % sick-8091 accidentally
 r(pr_v_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
 		br([nd( M, ( (tlp(Tk,Over,_POS,F1,F2), (np:_~>_)~>np:_~>_) @ VP, TyS ),  [C, D | Rest], TF )],
@@ -1369,15 +1370,16 @@ r(pr_v_v_pp, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [po
 			Prep = ( tlp(Tk,Over,'IN',F1,F2), np:_~>TyVP~>TyVP ).
 
 % sick-3561, 4117
-% PR @ V [C] => V @ PR [C]
+% PR @ V [...] => V @ PR [...]
 r(pr_v_v_pr, 	impl:non, ([], [], _), [[pos('RP')], [pos('IN')], [pos('TO')], [pos('RB')]], _,
-		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), (np:_~>s:_)~>np:_~>s:_) @ VP, TyVP),  [C], TF )],
+		br([nd( M, ( (tlp(Tk,Over,POS,F1,F2), VpTy~>VpTy) @ VP, TyVP),  Args, TF )],
 			Sig)
 		===>
-		br([nd( M, (VP1 @ (tlp(Tk,Over,POS,F1,F2), pr), TyVP),  [C], TF )],
+		br([nd( M, (VP1 @ (tlp(Tk,Over,POS,F1,F2), pr), TyVP),  Args, TF )],
 			Sig) )
 :-
 			memberchk(POS, ['RP','IN','TO','RB']),
+			is_nps_s(VpTy),
 			set_type_for_tt(VP, pr~>TyVP, VP1).
 
 % sick-3702
