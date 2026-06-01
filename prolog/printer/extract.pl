@@ -17,7 +17,7 @@
 :- use_module('../llf/ttterm_to_term', [ttTerm_to_prettyTerm/2, type_to_prettyType/2]).
 :- use_module('../lambda/lambda_tt', [op(605, yfx, @), op(605, xfy, ~>)]).
 
-:- discontiguous ccg/2.
+% :- discontiguous ccg/2.
 :- multifile ccg/2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

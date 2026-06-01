@@ -8,7 +8,7 @@
 %    Defining operators and loading files
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- use_module('../xml/xml_output', [output_XML/3]).
+% :- use_module('../xml/xml_output', [output_XML/3]).
 % swipl -q --goal=main --toplevel=halt --stand_alone=true --foreign=save -o langpro -c llf2.pl
 :- use_module('../rules/rule_hierarchy', [sub_rule/2, rule_eff_order/1]).
 :- use_module('../lambda/lambda_tt', [op(605, xfy, ~>)]).
@@ -173,7 +173,7 @@ expand(InitBrList, NewBrList, Tree, Cl_IDs, KB_XP, Count, Rules, RuleAppNum, Ste
 	( Mode == 'comp' -> rotate_list(InitBrList, BrList); BrList = InitBrList ),
 	Count = [const_id(Eid1, Eid, Cid1, Cid), node_id(Nid1, Nid)],
 	Count1 = [const_id(Eid1, Eid2, Cid1, Cid2), node_id(Nid1, Nid2)],
-	dirExpand(BrList, TempBrList, Tree, Cl_IDs, KB_XP, Count1, Rules, NewRules, RAppNum), 
+	dirExpand(BrList, TempBrList, Tree, Cl_IDs, KB_XP, Count1, Rules, NewRules, RAppNum),
 	!,
 	Count2 = [const_id(Eid2, Eid, Cid2, Cid), node_id(Nid2, Nid)],
 	NewRuleAppNum is RuleAppNum + RAppNum,

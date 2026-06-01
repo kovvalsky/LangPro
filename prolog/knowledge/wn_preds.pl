@@ -12,7 +12,7 @@
 :- dynamic debMode/1.
 
 :- multifile ant/4, der/4, hyp/2, ins/2, s/6, sim/2.
-:- discontiguous ant/4, der/4, hyp/2, ins/2, s/6, sim/2.
+% :- discontiguous ant/4, der/4, hyp/2, ins/2, s/6, sim/2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extracting relations from WordNet
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,7 +21,7 @@
 % Extract semantic relations for KB from WordNet
 kb_from_wn(Lex, KB) :-
 	%!!! filtering should be made more robust.
-	% SICK_NL-3953's 'motor rijder' doesn't match 'motorrijder' in WODWN 
+	% SICK_NL-3953's 'motor rijder' doesn't match 'motorrijder' in WODWN
 	findall(Lem_Num,
 		( member(Lem_Pos, Lex), lemPos_in_WordNet(Lem_Pos, Lem_Num) ),
 		Lem_Nums),
@@ -103,8 +103,8 @@ pos_to_cat_num(POS, Num) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Takes a pair and checks what relation holds on them
 represents_wn_rel( (Lem1,Num1)-(Lem2,Num2), Fact ) :-
-	substitute_in_atom(Lem1, '_', ' ', L1), % remove later?
-	substitute_in_atom(Lem2, '_', ' ', L2), % remove later?
+	substitute_in_atom(Lem1, '_', ' ', L1), % TODO: still relevant, remove?
+	substitute_in_atom(Lem2, '_', ' ', L2), % TODO: still relevant, remove?
 	( Num1 = Num2, word_hyp(L1, L2, Num1) ->
 	  	Fact = isa_wn(L1, L2)
 	; debMode('wn_ant'), Num1 = Num2, word_ant(L1, L2, Num1) ->
