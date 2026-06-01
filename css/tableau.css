@@ -22,17 +22,17 @@
 /*We will use ::before and ::after to draw the connectors*/
 .tree::before{
 	content: '';
-	position: absolute; top: 0;  
+	position: absolute; top: 0;
 	border-top: 2px solid #ccc;
 	width: 50%; height: 15px; right: 50%;
 }
 .tree::after{
     content: '';
-    position: absolute; top: 0; 
+    position: absolute; top: 0;
     border-top: 2px solid #ccc;
 	width: 50%; height: 15px; left: 50%;
 }
-/*We need to remove left-right connectors from elements without 
+/*We need to remove left-right connectors from elements without
 any siblings*/
 .tree:only-of-type::after, .tree:only-of-type::before {
     display:none;
@@ -41,7 +41,7 @@ any siblings*/
 /*Remove space from the top of single children*/
 .tree:only-child{ padding-top: 0;}
 
-/*Remove left connector from first child and 
+/*Remove left connector from first child and
 right connector from last child*/
 .tree:first-child::before, .tree:last-child::after{
 	border: 0 none;
@@ -83,7 +83,7 @@ right connector from last child*/
 }
 .node_id {
     font-family:"Courier New", Courier, monospace; color: white;
-    padding-left: 2px; background-color: #aaa; 
+    padding-left: 2px; background-color: #aaa;
     border-radius: 3px 0px 0px 3px;
 }
 .modList, .argList, .llf {
@@ -107,8 +107,8 @@ right connector from last child*/
 
 /************* Open branch and Closure ********************/
 .open_branch > i.fa.fa-unlock{
-   color: rgb(190,15,20); 
-   font-size: 200%; 
+   color: rgb(190,15,20);
+   font-size: 200%;
    padding-left: 4px; display: block;
 }
 
@@ -119,12 +119,12 @@ div.open_branch {
 
 .closure > i.fa.fa-times-circle{
    color: rgb(190,15,20);
-   font-size: 170%; 
+   font-size: 170%;
    padding-left: 4px;
 }
 .closer{
-  font-size:80%; 
-  color: #aaa; 
+  font-size:80%;
+  color: #aaa;
   font-weight: bold;
   border: 1px solid #aaa;
   padding: 0px 3px 3px 3px;
@@ -159,7 +159,30 @@ div.open_branch {
 	padding: 3px;
 }
 
+/******** KB formatting ************/
+.kb {
+    margin: 10px auto;
+    padding: 10px 20px;
+    /* width: fit-content; */
 
+    text-align: center;
+    font-weight: bold;
 
+    background-color: #afa3fd;
+    /* border: 1px solid #9fd3ff; */
+    /* border-radius: 8px; */
+}
 
+/******** Tableau title ************/
+.tableau_label {
+    margin: 5px auto;
+    padding: 10px 20px;
+    /* width: fit-content; */
+
+    text-align: center;
+    font-weight: bold;
+
+    background-color: #0f4130;
+    color: white;
+}
 
