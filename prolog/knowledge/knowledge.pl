@@ -188,6 +188,7 @@ is_('run', 'sprint'). %sick-8532
 is_('look', 'stare'). %sick-3750, noise problem
 is_('bikini', 'swimming suite'). %sick-8986
 
+% should be already in WN synset
 %is_(climb, climb_up). %sick-4006, 4011
 %is_(climb_up, climb). %sick-4006, 4011
 
