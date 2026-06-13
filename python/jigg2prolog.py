@@ -176,7 +176,7 @@ def conllu_to_prolog(input_path: str, output: TextIO, v: int = 0) -> None:
     prob_id = int(re.match(r'.+?(\d+)\.', input_path.split('/')[-1]).group(1))
     with open(input_path, 'r') as f:
         content = f.read().strip()
-        label = re.search(r'# entailment_label = ([A-Z]+)', content).group(1).lower()
+        label = re.search(r'# entailment_label = ([A-Za-z]+)', content.lower()).group(1).lower()
         label = label_mapping[label]
         premise, hypothesis = [ s.strip().replace("'", "\\'")
                                for s in re.findall(r'# text = ([^\n]+)', content) ]
@@ -203,6 +203,9 @@ def collect_files(input_path: str, fn_regex: list, v: int = 0) -> list[str]:
             file_list = []
             # For each regex, find matching files in the current directory
             for regex in fn_regex:
+                if regex is None:
+                    continue  # skip if no regex provided for this type of file
+                    # for example, skipping conllu files if conllu_regex is None
                 for fn in sorted(filenames):
                     if re.search(regex, fn):
                         full_path = os.path.join(dirpath, fn)
@@ -284,7 +287,13 @@ def main(input, ccg_out, prob_out,
     # Write NLI problems extracted from CoNLL-U files to prob_out in sen.pl format
     with open(prob_out, 'w') as f:
         for _, conllu_path in paired_jigg_conllu_files:
-            conllu_to_prolog(conllu_path, f, v=v)
+            try:
+                conllu_to_prolog(conllu_path, f, v=v)
+            except Exception as e:
+                if v >= 1:
+                    print(f"Error processing CoNLL-U file '{conllu_path}':\n{e}",
+                          file=sys.stderr)
+                raise e
 
     def process(output: TextIO):
         """ Process each jigg XML file and write Prolog CCG terms to the output stream.
