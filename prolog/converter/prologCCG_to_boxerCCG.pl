@@ -29,11 +29,18 @@ prolog_to_boxer_id(FileName, IDs) :-
 	write(S, ':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n:- multifile ccg/2, id/2.\n:- discontiguous ccg/2, id/2.\n\n'),
 	maplist(print_boxerCCG(S), BoxerCCGs).
 
+% for no file writing
+prolog_to_boxer_stdout :-
+	findall(ccg(Id, Pccg), ccg(Id, Pccg), PrologCCGs),
+	maplist(prologCCG_to_boxerCCG, PrologCCGs, BoxerCCGs),
+	current_output(S),
+	%write(S, ':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n:- multifile ccg/2, id/2.\n:- discontiguous ccg/2, id/2.\n\n'), % for serverside easyCCG commnted
+	maplist(print_boxerCCG(S), BoxerCCGs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Convert Prolog CCG to Boxer CCG
 prologCCG_to_boxerCCG(ccg(ID, Pccg), ccg(ID, Bccg)) :-
-	writeln(ID),
+	% writeln(ID),
 	pccg_bccg(ID, Pccg, Bccg),
 	!.
 
