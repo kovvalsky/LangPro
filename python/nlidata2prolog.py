@@ -115,7 +115,7 @@ def nli_prolog(nli_dict, out, cen_labs=True):
                'contradiction': 'no',
                'neutral': 'unknown'
               }
-    has_numeric_ids = all(is_numeric_id(v) for v in nli_dict.values())
+    has_numeric_ids = all(is_numeric_id(v['pid']) for v in nli_dict.values())
     with open(out, 'w') as f:
         for i, d in sorted(nli_dict.items()):
             kw = {'p': d['p'].replace("'", r"\'"),
