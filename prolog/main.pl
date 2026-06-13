@@ -47,7 +47,7 @@ reset_debMode :-
 	% check the sentences on consistency, i.e., if the are contradictory in themselves
 	assertz( debMode(constchk) ),
 	% treat adjectives as intersective by default
-	assertz( debMode(allInt) ), #TODO, allow flag that uncheck this
+	assertz( debMode(allInt) ), %TODO, allow flag that uncheck this
 	% for term alignment, align all non-downward terms, e.g., "some woman"
 	assertz( debMode(aall) ).
 
