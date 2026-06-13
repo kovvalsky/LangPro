@@ -17,6 +17,7 @@
 
 
 :- use_module('../utils/user_preds', [listInt_to_id_ccgs/2, nth1_projection/3]).
+:- use_module('../utils/generic_preds', [alternative_id/2]).
 :- use_module('../printer/reporting', [report/1]).
 :- use_module('../llf/recognize_MWE', [clean_ccgTerm_once/2]).
 :- use_module('../llf/ccg_term', [
@@ -338,7 +339,12 @@ write_old_consts(_, []).
 
 
 write_parsed_problem_as_xml(S, Align, ProbID) :-
-	findall( X, sen_id(X, ProbID, _, _, _), IDs),
+	findall( X, sen_id(X, ProbID, _, _, _), IDs_1),
+	( 	IDs_1 == [] % flexibility for using atom numeric IDs as atoms or integers
+	->	alternative_id(ProbID, AltProbID),
+		findall( X, sen_id(X, AltProbID, _, _, _), IDs)
+	; 	IDs = IDs_1
+	),
 	format(S, '<parsed_problem probID="~w">\n', [ProbID]),
 	%free_vars_to_indexed_atoms('x', TTterms, PrettyTTterms),
 	findall(ccg(X, CCG), (member(X, IDs), ccg(X, CCG)), CCG_IDs),

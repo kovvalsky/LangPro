@@ -4,6 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module('generic_preds',
 	[
+		alternative_id/2,
 		format_list/3,
 		format_list_list/3,
 		format_list_list/4,
@@ -116,3 +117,16 @@ rotate_list([H|Rest], Rotate2, N) :-
 	append(Rest, [H], Rotate1),
 	N1 is N + 1,
 	rotate_list(Rotate1, Rotate2, N1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Give alternative format of the ID
+% if ID is an integer, AltID is its atom form;
+% if ID is an atom integer, AltID is the integer form;
+% otherwise, AltID is the same as ID
+alternative_id(ID, AltID) :-
+	( integer(ID) ->
+		term_to_atom(ID, AltID)
+	; atom(ID), atom_number(ID, AltID) ->
+		true
+	; AltID = ID
+	).
