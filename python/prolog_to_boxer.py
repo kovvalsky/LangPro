@@ -16,7 +16,7 @@ for tr in trees:
     # replace [features] by :features
     tr = re.sub(r'\[([a-zA-Z]+)\]', r':\1', tr)
     # o 'clock -> '\clock
-    tr = re.sub(r", *''", r",'\\\\'", tr)
+    tr = re.sub(r", *''", r",'\\'", tr)
     # 'CAT'). -> lowercase(CAT)).
     tr = re.sub(r"'([" + cat_sym + r"]+)'([).,]+)\n",
                  lambda m: m.group(1).lower() + m.group(2) + "\n", tr)
@@ -24,5 +24,6 @@ for tr in trees:
     tr = re.sub(r"lex\('([" + cat_sym + r"]+)'",
                  lambda m: "lx(" + m.group(1).lower(), tr)
     tr = tr.replace(':x', ':_')
-    tr = re.sub(r"''s'", r"'\\\\'s'", tr)
+    tr = re.sub(r"''s'", r"'\\'s'", tr)
+    tr = re.sub(r"'n't'", r"'n\\'t'", tr)
     sys.stdout.write(tr)
