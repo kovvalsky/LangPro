@@ -43,18 +43,18 @@ def detect_prediction_format(line):
     '''
     pat = {}
     # 211	Two dogs are playing by a tree	Two dogs are playing by a plant	4.6	ENTAILMENT
-    pat['sick_semeval'] = '(\d+)\s+.+(NEUTRAL|CONTRADICTION|ENTAILMENT)$'
+    pat['sick_semeval'] = r'(\d+)\s+.+(NEUTRAL|CONTRADICTION|ENTAILMENT)$'
     # 67: ENTAILMENT
-    pat['default'] = '(\d+)\s+(NEUTRAL|CONTRADICTION|ENTAILMENT)$'
+    pat['default'] = r'(\d+)\s+(NEUTRAL|CONTRADICTION|ENTAILMENT)$'
     # 56: [unknown], unknown,    open, Ter,70
-    pat['langpro'] = '\s*(\d+):\s*\[\w+\],?\s*(\w+),?\s*'
+    pat['langpro'] = r'\s*(\d+):\s*\[\w+\],?\s*(\w+),?\s*'
     # 630: [contradiction]   contradiction (bliksem)
-    pat['amrfol'] = '\s*(\d+):\s*\[\w+\]\s*(\w+)\s*[()a-zA-Z,0-9 ]+\s*$'
+    pat['amrfol'] = r'\s*(\d+):\s*\[\w+\]\s*(\w+)\s*[()a-zA-Z,0-9 ]+\s*$'
     # sen_id(177, 281, 'p', 'TEST', 'unknown', 'Een jongen staat in het water').
-    pat['sen.pl'] = "sen_id\(\d+,\s*(\d+),.+'(yes|no|unknown)',"
+    pat['sen.pl'] = r"sen_id\(\d+,\s*(\d+),.+'(yes|no|unknown)',"
     # 17	1	1 # neural network baselines
     # where 0 is *contradiction*, 1 is *neutral* and 2 is *entailment*
-    pat['nn_baselines'] = "(\d+)\t(\d)\t"
+    pat['nn_baselines'] = r"(\d+)\t(\d)\t"
     # check which pattern matches
     for k, v in pat.items():
         if re.match(v, line):
