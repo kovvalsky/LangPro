@@ -115,6 +115,7 @@ def nli_prolog(nli_dict, out, cen_labs=True):
                'contradiction': 'no',
                'neutral': 'unknown'
               }
+    has_numeric_ids = all(is_numeric_id(v) for v in nli_dict.values())
     with open(out, 'w') as f:
         for i, d in sorted(nli_dict.items()):
             kw = {'p': d['p'].replace("'", r"\'"),
@@ -124,9 +125,10 @@ def nli_prolog(nli_dict, out, cen_labs=True):
                   'g':d['g'] if cen_labs else cen2ynu[d['g']],
                   'pid': d['pid'].replace("'", r"\'"),
                  }
+            kw['pid'] = kw['pid'] if has_numeric_ids else f"'{kw['pid']}'"
             f.write("% problem id = {pid}\n"
-                    "sen_id({p_id}, '{pid}', 'p', '{g}', '{p}').\n"
-                    "sen_id({h_id}, '{pid}', 'h', '{g}', '{h}').\n".format(**kw))
+                    "sen_id({p_id}, {pid}, 'p', '{g}', '{p}').\n"
+                    "sen_id({h_id}, {pid}, 'h', '{g}', '{h}').\n".format(**kw))
             count += 2
     return count
 
@@ -183,6 +185,18 @@ def write_sen_spl(tokenized_sen_list, splfile):
     with open(splfile, 'w') as f:
         for tok_sen in tokenized_sen_list:
             f.write(' '.join(tok_sen) + '\n')
+
+#################################
+def is_numeric_id(id):
+    ''' Check if the problem id is a numeric integer.
+        returns true for 211 and '211'
+    '''
+    if isinstance(id, int) and id >= 0:
+        return True
+    elif isinstance(id, str):
+        return id.isdigit()
+    else:
+        return False
 
 ################################################################################
 ###################################### MAIN ####################################
