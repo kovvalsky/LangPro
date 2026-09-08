@@ -5,7 +5,7 @@
 %	]).
 :- op(601, xfx, (/)).
 :- op(601, xfx, (\)).
-
+:- discontiguous ccg/2.
 
 % command
 % swipl -s prologCCG_to_boxerCCG.pl -s ../EasyCCG/SICK_train_eccg -g "prolog_to_boxer('ccg_sen/SICK_train_eccg.pl')" -t halt
