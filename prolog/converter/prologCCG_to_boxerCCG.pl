@@ -1,10 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+:- use_module(library(solution_sequences)).
 %:- use_module('../llf/ccg_term', [
 %	ccgTree_to_ccgTerm/2, dirCat_to_undirCat/2,
 %	op(601, xfx, (/)), op(601, xfx, (\))
 %	]).
 :- op(601, xfx, (/)).
 :- op(601, xfx, (\)).
+:- dynamic ccg/2.
 :- discontiguous ccg/2.
 
 % command
@@ -14,18 +16,33 @@
 
 prolog_to_boxer(FileName) :-
 	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
-	%findall(ccg(Id, Pccg), (ccg(Id, Pccg), member(Id,[431,432,433,434])), PrologCCGs),
+	% findall(ccg(Id, Pccg), (ccg(Id, Pccg), member(Id,[431,432,433,434])), PrologCCGs),
 	findall(ccg(Id, Pccg), ccg(Id, Pccg), PrologCCGs),
 	maplist(prologCCG_to_boxerCCG, PrologCCGs, BoxerCCGs),
 	write(S, ':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n:- multifile ccg/2, id/2.\n:- discontiguous ccg/2, id/2.\n\n'),
 	maplist(print_boxerCCG(S), BoxerCCGs).
+
+% recursive version for large files
+prolog_to_boxer_rec(FileName) :-
+	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
+	write(S, ':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n:- multifile ccg/2, id/2.\n:- discontiguous ccg/2, id/2.\n\n'),
+	forall(	
+		call_nth(ccg(Id, Pccg), N),
+		(	prologCCG_to_boxerCCG(ccg(Id, Pccg), BoxerCCG),
+			print_boxerCCG(S, BoxerCCG),
+			( 0 is N mod 1000
+			-> 	format(user_error, '\rProcessed ~D', [N]),
+        		flush_output(user_error)
+			; true
+			)
+		)
+	).
 
 prolog_to_boxer_id(FileName, IDs) :-
 	open(FileName, write, S, [encoding(utf8), close_on_abort(true)]),
 	%findall(ccg(Id, Pccg), (ccg(Id, Pccg), member(Id,[431,432,433,434])), PrologCCGs),
 	findall(ccg(X, Pccg), (member(X, IDs), ccg(X, Pccg)), PrologCCGs),
 	maplist(prologCCG_to_boxerCCG, PrologCCGs, BoxerCCGs),
-	%set_output(S),
 	write(S, ':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n:- multifile ccg/2, id/2.\n:- discontiguous ccg/2, id/2.\n\n'),
 	maplist(print_boxerCCG(S), BoxerCCGs).
 
@@ -34,7 +51,7 @@ prolog_to_boxer_stdout :-
 	findall(ccg(Id, Pccg), ccg(Id, Pccg), PrologCCGs),
 	maplist(prologCCG_to_boxerCCG, PrologCCGs, BoxerCCGs),
 	current_output(S),
-	%write(S, ':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n:- multifile ccg/2, id/2.\n:- discontiguous ccg/2, id/2.\n\n'), % for serverside easyCCG commnted
+	%write(S, ':- op(601, xfx, (/)).\n:- op(601, xfx, (\\)).\n:- multifile ccg/2, id/2.\n:- discontiguous ccg/2, id/2.\n\n'), % for server-side easyCCG
 	maplist(print_boxerCCG(S), BoxerCCGs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
